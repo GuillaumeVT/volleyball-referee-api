@@ -1,0 +1,5 @@
+spring.profiles: integration
+spring.data.mongodb.uri: mongodb://vbr_integ_user:vbr@localhost:27017/vbr_integ
+---
+spring.profiles: production
+spring.data.mongodb.uri: mongodb://vbr_user:vbr@localhost:27017/vbr
