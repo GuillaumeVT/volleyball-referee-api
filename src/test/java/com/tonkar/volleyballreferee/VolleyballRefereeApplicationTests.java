@@ -30,7 +30,7 @@ public class VolleyballRefereeApplicationTests {
 	@LocalServerPort
 	private int port;
 
-	TestRestTemplate restTemplate = new TestRestTemplate();
+	private TestRestTemplate restTemplate = new TestRestTemplate();
 
 	@Test
 	public void testFromHttpToRepository() {
@@ -109,6 +109,13 @@ public class VolleyballRefereeApplicationTests {
 		assertEquals(2, searchResponse.getBody().length);
 		assertEquals(1516200804146L, searchResponse.getBody()[0].getDate());
 		assertEquals(1516200806997L, searchResponse.getBody()[1].getDate());
+
+		searchResponse = restTemplate.getForEntity(urlOf("/api/search/game/date/17-1-2018"), GameDescription[].class);
+		assertEquals(4, searchResponse.getBody().length);
+		searchResponse = restTemplate.getForEntity(urlOf("/api/search/game/date/25-1-2018"), GameDescription[].class);
+		assertEquals(0, searchResponse.getBody().length);
+		searchResponse = restTemplate.getForEntity(urlOf("/api/search/game/date/32-1-2018"), GameDescription[].class);
+		assertEquals(0, searchResponse.getBody().length);
 
 		// Delete
 

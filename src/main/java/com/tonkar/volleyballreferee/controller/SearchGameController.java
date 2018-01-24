@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 @RestController
@@ -30,12 +32,34 @@ public class SearchGameController {
 
             if (gameDescriptions.isEmpty()) {
                 logger.info(String.format("No game with token %s", token));
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(gameDescriptions, HttpStatus.NOT_FOUND);
             } else {
                 return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
             }
         } else {
             logger.info(String.format("Request list games rejected because token %s is too short", token));
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/date/{date}")
+    public ResponseEntity<List<GameDescription>> searchGamesByDate(@PathVariable("date") String date) {
+        logger.info(String.format("Request list games with date %s", date));
+
+        long fromDate = parseDate(date);
+
+        if (fromDate > 0L) {
+            long toDate = fromDate + 86400000L;
+            List<GameDescription> gameDescriptions = gameService.listGameDescriptionsBetween(fromDate, toDate);
+
+            if (gameDescriptions.isEmpty()) {
+                logger.info(String.format("No game on date %s", date));
+                return new ResponseEntity<>(gameDescriptions, HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
+            }
+        } else {
+            logger.info(String.format("Request list games rejected because date %s has wrong format", date));
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -48,10 +72,23 @@ public class SearchGameController {
 
         if (gameDescriptions.isEmpty()) {
             logger.info("No live game");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(gameDescriptions, HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
         }
+    }
+
+    private long parseDate(String date) {
+        long dateMillis = 0L;
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+
+        try {
+            dateMillis = formatter.parse(date).getTime();
+        } catch (ParseException e) {
+            logger.error(e.getMessage(), e);
+        }
+
+        return dateMillis;
     }
 
 }

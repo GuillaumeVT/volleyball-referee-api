@@ -13,6 +13,8 @@ public interface GameService {
 
     List<GameDescription> listGameDescriptions(String token);
 
+    List<GameDescription> listGameDescriptionsBetween(long fromDate, long toDate);
+
     List<GameDescription> listLiveGameDescriptions();
 
     GameStatistics getGameStatistics();

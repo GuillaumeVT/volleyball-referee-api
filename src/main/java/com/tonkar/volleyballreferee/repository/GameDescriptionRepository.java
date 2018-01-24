@@ -15,6 +15,8 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     List<GameDescription> findGameDescriptionsByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLike(String hName, String gName, String league);
 
+    List<GameDescription> findGameDescriptionsByDateBetween(long fromDate, long toDate);
+
     void deleteGameDescriptionByDate(long date);
 
     void deleteGameDescriptionByLiveAndDate(boolean live, long date);

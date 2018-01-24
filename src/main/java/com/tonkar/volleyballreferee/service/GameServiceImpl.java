@@ -35,6 +35,11 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public List<GameDescription> listGameDescriptionsBetween(long fromDate, long toDate) {
+        return gameDescriptionRepository.findGameDescriptionsByDateBetween(fromDate, toDate);
+    }
+
+    @Override
     public List<GameDescription> listLiveGameDescriptions() {
         return gameDescriptionRepository.findGameDescriptionsByLive(true);
     }
@@ -101,7 +106,7 @@ public class GameServiceImpl implements GameService {
             gameRepository.save(savedGame);
             logger.info(String.format("Updated set #%d of %s game with date %d (%s vs %s)", setIndex, savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName()));
         } else {
-            logger.error(String.format("Could not update %s game with date %d (%s vs %s) because set #%d does not exist", savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName()), setIndex);
+            logger.error(String.format("Could not update %s game with date %d (%s vs %s) because set #%d does not exist", savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName(), setIndex));
         }
     }
 
