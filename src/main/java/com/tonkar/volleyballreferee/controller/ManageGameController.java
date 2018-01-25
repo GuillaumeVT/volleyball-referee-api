@@ -53,7 +53,7 @@ public class ManageGameController {
         return new ResponseEntity<>(gameService.hasGame(id), HttpStatus.OK);
     }
 
-    @DeleteMapping("live/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteLiveGame(@PathVariable("id") long id) {
         logger.info(String.format("Request delete live game with date %d", id));
 
