@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/VolleyballRefereeBackend.iml" filepath="$PROJECT_DIR$/.idea/modules/VolleyballRefereeBackend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/VolleyballRefereeBackend_main.iml" filepath="$PROJECT_DIR$/.idea/modules/VolleyballRefereeBackend_main.iml" group="VolleyballRefereeBackend" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/VolleyballRefereeBackend_test.iml" filepath="$PROJECT_DIR$/.idea/modules/VolleyballRefereeBackend_test.iml" group="VolleyballRefereeBackend" />
+    </modules>
+  </component>
+</project>

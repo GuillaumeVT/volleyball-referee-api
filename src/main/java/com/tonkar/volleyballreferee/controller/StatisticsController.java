@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin("*")
 public class StatisticsController {
 
-    private static final Logger logger = LoggerFactory.getLogger(StatisticsController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsController.class);
 
     @Autowired
     private GameService gameService;
 
     @GetMapping("/game")
     public ResponseEntity<GameStatistics> getGameStatistics() {
-        logger.info("Request get game statistics");
+        LOGGER.debug("Request get game statistics");
         return new ResponseEntity<>(gameService.getGameStatistics(), HttpStatus.OK);
     }
 

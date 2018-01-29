@@ -1,0 +1,8 @@
+[Unit]
+Description=Mongo DB
+
+[Service]
+ExecStart=/opt/run_api.sh
+
+[Install]
+WantedBy=multi-user.target

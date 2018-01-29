@@ -18,33 +18,33 @@ import java.util.List;
 @CrossOrigin("*")
 public class SearchGameController {
 
-    private static final Logger logger = LoggerFactory.getLogger(SearchGameController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SearchGameController.class);
 
     @Autowired
     private GameService gameService;
 
     @GetMapping("/{token}")
     public ResponseEntity<List<GameDescription>> searchGames(@PathVariable("token") String token) {
-        logger.info(String.format("Request list games with token %s", token));
+        LOGGER.debug(String.format("Request list games with token %s", token));
 
         if (token.length() > 2) {
             List<GameDescription> gameDescriptions = gameService.listGameDescriptions(token);
 
             if (gameDescriptions.isEmpty()) {
-                logger.info(String.format("No game with token %s", token));
+                LOGGER.debug(String.format("No game with token %s", token));
                 return new ResponseEntity<>(gameDescriptions, HttpStatus.NOT_FOUND);
             } else {
                 return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
             }
         } else {
-            logger.info(String.format("Request list games rejected because token %s is too short", token));
+            LOGGER.debug(String.format("Request list games rejected because token %s is too short", token));
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/date/{date}")
     public ResponseEntity<List<GameDescription>> searchGamesByDate(@PathVariable("date") String date) {
-        logger.info(String.format("Request list games with date %s", date));
+        LOGGER.debug(String.format("Request list games with date %s", date));
 
         long fromDate = parseDate(date);
 
@@ -53,25 +53,25 @@ public class SearchGameController {
             List<GameDescription> gameDescriptions = gameService.listGameDescriptionsBetween(fromDate, toDate);
 
             if (gameDescriptions.isEmpty()) {
-                logger.info(String.format("No game on date %s", date));
+                LOGGER.debug(String.format("No game on date %s", date));
                 return new ResponseEntity<>(gameDescriptions, HttpStatus.NOT_FOUND);
             } else {
                 return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
             }
         } else {
-            logger.info(String.format("Request list games rejected because date %s has wrong format", date));
+            LOGGER.debug(String.format("Request list games rejected because date %s has wrong format", date));
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/live")
     public ResponseEntity<List<GameDescription>> searchLiveGames() {
-        logger.info("Request list live games");
+        LOGGER.debug("Request list live games");
 
         List<GameDescription> gameDescriptions = gameService.listLiveGameDescriptions();
 
         if (gameDescriptions.isEmpty()) {
-            logger.info("No live game");
+            LOGGER.debug("No live game");
             return new ResponseEntity<>(gameDescriptions, HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
@@ -85,7 +85,7 @@ public class SearchGameController {
         try {
             dateMillis = formatter.parse(date).getTime();
         } catch (ParseException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
 
         return dateMillis;

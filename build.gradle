@@ -24,12 +24,13 @@ repositories {
 
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter')
-    compile("org.springframework.boot:spring-boot-starter-web") {
+    compile 'org.springframework.boot:spring-boot-starter'
+    compile 'org.springframework.boot:spring-boot-starter-logging'
+    compile('org.springframework.boot:spring-boot-starter-web') {
         exclude module: "spring-boot-starter-tomcat"
     }
-    compile("org.springframework.boot:spring-boot-starter-undertow")
-    compile("org.springframework.boot:spring-boot-starter-data-mongodb")
+    compile 'org.springframework.boot:spring-boot-starter-undertow'
+    compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
     compile 'com.itextpdf:itextpdf:5.5.10'
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

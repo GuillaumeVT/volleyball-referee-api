@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 public class GameServiceImpl implements GameService {
 
-    private static final Logger logger = LoggerFactory.getLogger(GameServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameServiceImpl.class);
 
     @Autowired
     private GameRepository gameRepository;
@@ -74,7 +74,7 @@ public class GameServiceImpl implements GameService {
         gameDescriptionRepository.insert(gameDescription);
         gameRepository.insert(game);
 
-        logger.info(String.format("Created %s game with date %d (%s vs %s)", game.getKind(), game.getDate(), game.gethTeam().getName(), game.getgTeam().getName()));
+        LOGGER.debug(String.format("Created %s game with date %d (%s vs %s)", game.getKind(), game.getDate(), game.gethTeam().getName(), game.getgTeam().getName()));
     }
 
     @Override
@@ -94,7 +94,7 @@ public class GameServiceImpl implements GameService {
         savedGame.setSets(game.getSets());
         gameRepository.save(savedGame);
 
-        logger.info(String.format("Updated %s game with date %d (%s vs %s)", game.getKind(), date, game.gethTeam().getName(), game.getgTeam().getName()));
+        LOGGER.debug(String.format("Updated %s game with date %d (%s vs %s)", game.getKind(), date, game.gethTeam().getName(), game.getgTeam().getName()));
     }
 
     @Override
@@ -104,9 +104,9 @@ public class GameServiceImpl implements GameService {
         if (setIndex < savedGame.getSets().size()) {
             savedGame.getSets().set(setIndex, set);
             gameRepository.save(savedGame);
-            logger.info(String.format("Updated set #%d of %s game with date %d (%s vs %s)", setIndex, savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName()));
+            LOGGER.debug(String.format("Updated set #%d of %s game with date %d (%s vs %s)", setIndex, savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName()));
         } else {
-            logger.error(String.format("Could not update %s game with date %d (%s vs %s) because set #%d does not exist", savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName(), setIndex));
+            LOGGER.error(String.format("Could not update %s game with date %d (%s vs %s) because set #%d does not exist", savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName(), setIndex));
         }
     }
 
@@ -127,10 +127,10 @@ public class GameServiceImpl implements GameService {
         long time2DaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
 
         long count = gameDescriptionRepository.deleteGameDescriptionsByDateLessThan(time2DaysAgo);
-        logger.info(String.format("Deleted %d game descriptions older than date %d", count, time2DaysAgo));
+        LOGGER.debug(String.format("Deleted %d game descriptions older than date %d", count, time2DaysAgo));
 
         count = gameRepository.deleteGamesByDateLessThan(time2DaysAgo);
-        logger.info(String.format("Deleted %d games older than date %d", count, time2DaysAgo));
+        LOGGER.debug(String.format("Deleted %d games older than date %d", count, time2DaysAgo));
     }
 
     @Override
@@ -138,10 +138,10 @@ public class GameServiceImpl implements GameService {
         long time2DaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
 
         long count = gameDescriptionRepository.deleteGameDescriptionsByLiveAndDateLessThan(true, time2DaysAgo);
-        logger.info(String.format("Deleted %d live game descriptions older than date %d", count, time2DaysAgo));
+        LOGGER.debug(String.format("Deleted %d live game descriptions older than date %d", count, time2DaysAgo));
 
         count = gameRepository.deleteGamesByLiveAndDateLessThan(true, time2DaysAgo);
-        logger.info(String.format("Deleted %d live games older than date %d", count, time2DaysAgo));
+        LOGGER.debug(String.format("Deleted %d live games older than date %d", count, time2DaysAgo));
     }
 
 }

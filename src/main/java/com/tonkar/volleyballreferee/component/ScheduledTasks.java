@@ -10,20 +10,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScheduledTasks {
 
-    private static final Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScheduledTasks.class);
 
     @Autowired
     private GameService gameService;
 
     @Scheduled(cron = "0 0 4 * * *")
     public void deleteOldLiveGames() {
-        logger.info("Deleting every live game older than 1 day");
+        LOGGER.info("Deleting every live game older than 1 day");
         gameService.deleteOldLiveGames(1);
     }
 
     @Scheduled(cron = "0 30 4 1 * *")
     public void deleteOldGames() {
-        logger.info("Deleting every game older than 1 year");
+        LOGGER.info("Deleting every game older than 1 year");
         gameService.deleteOldGames(365);
     }
 

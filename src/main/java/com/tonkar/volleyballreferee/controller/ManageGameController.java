@@ -17,14 +17,14 @@ import javax.validation.Valid;
 @CrossOrigin("*")
 public class ManageGameController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ManageGameController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ManageGameController.class);
 
     @Autowired
     private GameService gameService;
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateGame(@PathVariable("id") long id, @Valid @RequestBody Game game) {
-        logger.info(String.format("Request update %s game with date %d (%s vs %s)", game.getKind(), id, game.gethTeam().getName(), game.getgTeam().getName()));
+        LOGGER.debug(String.format("Request update %s game with date %d (%s vs %s)", game.getKind(), id, game.gethTeam().getName(), game.getgTeam().getName()));
 
         if (gameService.hasGame(id)) {
             gameService.updateGame(id, game);
@@ -37,30 +37,32 @@ public class ManageGameController {
 
     @PutMapping("/{id}/set/{index}")
     public ResponseEntity<?> updateSet(@PathVariable("id") long id, @PathVariable("index") int index, @Valid @RequestBody Set set) {
-        logger.info(String.format("Request update set index %d for game with date %d", index, id));
+        LOGGER.debug(String.format("Request update set index %d for game with date %d", index, id));
 
         if (gameService.hasGame(id)) {
             gameService.updateSet(id, index, set);
             return new ResponseEntity<>(id, HttpStatus.OK);
         } else {
+            LOGGER.error(String.format("No game with date %d", id));
             return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
         }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> gameExists(@PathVariable("id") long id) {
-        logger.info(String.format("Request game exists with date %d", id));
+        LOGGER.debug(String.format("Request game exists with date %d", id));
         return new ResponseEntity<>(gameService.hasGame(id), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteLiveGame(@PathVariable("id") long id) {
-        logger.info(String.format("Request delete live game with date %d", id));
+        LOGGER.debug(String.format("Request delete live game with date %d", id));
 
         if (gameService.hasGame(id)) {
             gameService.deleteLiveGame(id);
             return new ResponseEntity<>(id, HttpStatus.OK);
         } else {
+            LOGGER.error(String.format("No game with date %d", id));
             return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
         }
     }

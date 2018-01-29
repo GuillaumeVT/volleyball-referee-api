@@ -22,19 +22,19 @@ import java.io.IOException;
 @CrossOrigin("*")
 public class ViewGameController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ViewGameController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ViewGameController.class);
 
     @Autowired
     private GameService gameService;
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getGame(@PathVariable("id") long id) {
-        logger.info(String.format("Request get game with date %d", id));
+        LOGGER.debug(String.format("Request get game with date %d", id));
 
         Game game = gameService.getGame(id);
 
         if (game == null) {
-            logger.error(String.format("No game with date %d", id));
+            LOGGER.error(String.format("No game with date %d", id));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(game, HttpStatus.OK);
@@ -43,12 +43,12 @@ public class ViewGameController {
 
     @GetMapping("/pdf/{id}")
     public ResponseEntity<?> getGameAsPdf(@PathVariable("id") long id) {
-        logger.info(String.format("Request get game pdf with date %d", id));
+        LOGGER.debug(String.format("Request get game pdf with date %d", id));
 
         Game game = gameService.getGame(id);
 
         if (game == null) {
-            logger.error(String.format("No game with date %d", id));
+            LOGGER.error(String.format("No game with date %d", id));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             try {
@@ -60,7 +60,7 @@ public class ViewGameController {
                         .contentLength(pdfGame.getData().length)
                         .body(resource);
             } catch (IOException | DocumentException e) {
-                logger.error(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }

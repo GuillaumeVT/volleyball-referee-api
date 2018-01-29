@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+    <logger name="com.tonkar.volleyballreferee.service.GameServiceImpl" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+    <logger name="com.tonkar.volleyballreferee.controller.ManageGameController" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+    <logger name="com.tonkar.volleyballreferee.controller.SearchGameController" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+    <logger name="com.tonkar.volleyballreferee.controller.StatisticsController" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+    <logger name="com.tonkar.volleyballreferee.controller.ViewGameController" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+</configuration>
