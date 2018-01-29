@@ -8,8 +8,6 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.tonkar.volleyballreferee.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.*;
@@ -25,8 +23,7 @@ public class PdfGameWriter {
     static {
         FontFactory.register("/fonts/Roboto-Regular.ttf", "Roboto");
     }
-    private static       Font   sDefaultFont = FontFactory.getFont("Roboto", BaseFont.IDENTITY_H, true, 10);
-    private static final Logger LOGGER       = LoggerFactory.getLogger(PdfGameWriter.class);
+    private static Font sDefaultFont = FontFactory.getFont("Roboto", BaseFont.IDENTITY_H, true, 10);
 
     private Game     mGame;
     private Document mDocument;
@@ -163,7 +160,6 @@ public class PdfGameWriter {
         table.setWidthPercentage(100);
         table.setSpacingAfter(10.f);
 
-        LOGGER.error(mGame.gethTeam().getName() + " " + mGame.getgTeam().getName());
         PdfPCell homeTeamNameCell = new PdfPCell(new Phrase(mGame.gethTeam().getName(), mHomeTeamFont));
         homeTeamNameCell.setBackgroundColor(mHomeTeamColor);
         homeTeamNameCell.setHorizontalAlignment(Element.ALIGN_CENTER);
