@@ -68,7 +68,7 @@ public class VolleyballRefereeApplicationTests {
 		assertEquals(HttpStatus.OK, updateResponse.getStatusCode());
 
 
-		// Exist
+		// Is Synched
 
 		ResponseEntity<Boolean> existResponse = restTemplate.getForEntity(urlOf("/api/manage/game/123"), Boolean.class);
 		assertEquals(false, existResponse.getBody());
@@ -77,13 +77,13 @@ public class VolleyballRefereeApplicationTests {
 		assertEquals(true, existResponse.getBody());
 
 		existResponse = restTemplate.getForEntity(urlOf("/api/manage/game/1516200802314"), Boolean.class);
-		assertEquals(true, existResponse.getBody());
+		assertEquals(false, existResponse.getBody());
 
 		existResponse = restTemplate.getForEntity(urlOf("/api/manage/game/1516200804146"), Boolean.class);
 		assertEquals(true, existResponse.getBody());
 
 		existResponse = restTemplate.getForEntity(urlOf("/api/manage/game/1516200806997"), Boolean.class);
-		assertEquals(true, existResponse.getBody());
+		assertEquals(false, existResponse.getBody());
 
 		// Stats
 

@@ -30,6 +30,11 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public boolean hasGameSynched(long date) {
+        return gameDescriptionRepository.existsByDateAndLive(date, false);
+    }
+
+    @Override
     public List<GameDescription> listGameDescriptions(String token) {
         return gameDescriptionRepository.findGameDescriptionsByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLike(token, token, token);
     }

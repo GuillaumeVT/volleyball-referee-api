@@ -11,6 +11,8 @@ public interface GameService {
 
     boolean hasGame(long date);
 
+    boolean hasGameSynched(long date);
+
     List<GameDescription> listGameDescriptions(String token);
 
     List<GameDescription> listGameDescriptionsBetween(long fromDate, long toDate);

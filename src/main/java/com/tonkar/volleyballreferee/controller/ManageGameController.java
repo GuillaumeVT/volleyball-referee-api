@@ -49,9 +49,9 @@ public class ManageGameController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> gameExists(@PathVariable("id") long id) {
+    public ResponseEntity<?> gameIsSynched(@PathVariable("id") long id) {
         LOGGER.debug(String.format("Request game exists with date %d", id));
-        return new ResponseEntity<>(gameService.hasGame(id), HttpStatus.OK);
+        return new ResponseEntity<>(gameService.hasGameSynched(id), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

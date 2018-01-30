@@ -9,6 +9,8 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     boolean existsByDate(long date);
 
+    boolean existsByDateAndLive(long date, boolean live);
+
     GameDescription findGameDescriptionByDate(long date);
 
     List<GameDescription> findGameDescriptionsByLive(boolean live);
