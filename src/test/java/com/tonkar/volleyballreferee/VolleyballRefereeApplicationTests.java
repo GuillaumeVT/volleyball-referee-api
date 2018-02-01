@@ -5,6 +5,7 @@ import com.tonkar.volleyballreferee.model.GameDescription;
 import com.tonkar.volleyballreferee.model.GameStatistics;
 import com.tonkar.volleyballreferee.model.Team;
 import com.tonkar.volleyballreferee.service.GameService;
+import com.tonkar.volleyballreferee.service.MessageService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class VolleyballRefereeApplicationTests {
 
 	@Autowired
 	private GameService gameService;
+
+	@Autowired
+	private MessageService messageService;
 
 	@LocalServerPort
 	private int port;
@@ -179,6 +183,29 @@ public class VolleyballRefereeApplicationTests {
 		gameStatistics = gameService.getGameStatistics();
 		assertEquals(0, gameStatistics.getGamesCount());
 		assertEquals(0, gameStatistics.getLiveGamesCount());
+	}
+
+	@Test
+	public void testMessages() {
+		ResponseEntity<Boolean> hasMessageResponse = restTemplate.getForEntity(urlOf("/api/message/has"), Boolean.class);
+		assertEquals(false, hasMessageResponse.getBody());
+
+		String expected = "This is a test message";
+		messageService.addMessage(expected);
+
+		hasMessageResponse = restTemplate.getForEntity(urlOf("/api/message/has"), Boolean.class);
+		assertEquals(true, hasMessageResponse.getBody());
+
+		ResponseEntity<String> messageResponse = restTemplate.getForEntity(urlOf("/api/message"), String.class);
+		assertEquals(expected, messageResponse.getBody());
+
+		messageService.removeMessage();
+
+		hasMessageResponse = restTemplate.getForEntity(urlOf("/api/message/has"), Boolean.class);
+		assertEquals(false, hasMessageResponse.getBody());
+
+		messageResponse = restTemplate.getForEntity(urlOf("/api/message"), String.class);
+		assertEquals(null, messageResponse.getBody());
 	}
 
 	private String urlOf(String apiUrl) {
