@@ -32,10 +32,8 @@ public class SearchGameController {
 
             if (gameDescriptions.isEmpty()) {
                 LOGGER.debug(String.format("No game with token %s", token));
-                return new ResponseEntity<>(gameDescriptions, HttpStatus.NOT_FOUND);
-            } else {
-                return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
             }
+            return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
         } else {
             LOGGER.debug(String.format("Request list games rejected because token %s is too short", token));
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -54,10 +52,8 @@ public class SearchGameController {
 
             if (gameDescriptions.isEmpty()) {
                 LOGGER.debug(String.format("No game on date %s", date));
-                return new ResponseEntity<>(gameDescriptions, HttpStatus.NOT_FOUND);
-            } else {
-                return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
             }
+            return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
         } else {
             LOGGER.debug(String.format("Request list games rejected because date %s has wrong format", date));
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -72,10 +68,8 @@ public class SearchGameController {
 
         if (gameDescriptions.isEmpty()) {
             LOGGER.debug("No live game");
-            return new ResponseEntity<>(gameDescriptions, HttpStatus.NOT_FOUND);
-        } else {
-            return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
         }
+        return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
     }
 
     private long parseDate(String date) {

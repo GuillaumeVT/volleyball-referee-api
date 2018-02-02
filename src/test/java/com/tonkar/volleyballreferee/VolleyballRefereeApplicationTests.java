@@ -98,7 +98,7 @@ public class VolleyballRefereeApplicationTests {
 		// Search
 
 		ResponseEntity<GameDescription[]> searchResponse = restTemplate.getForEntity(urlOf("/api/search/game/dummy"), GameDescription[].class);
-		assertEquals(HttpStatus.NOT_FOUND, searchResponse.getStatusCode());
+		assertEquals(0, searchResponse.getBody().length);
 
 		searchResponse = restTemplate.getForEntity(urlOf("/api/search/game/bra"), GameDescription[].class);
 		assertEquals(1, searchResponse.getBody().length);
