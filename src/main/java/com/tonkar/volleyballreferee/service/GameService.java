@@ -37,4 +37,6 @@ public interface GameService {
 
     void deleteOldLiveGames(int daysAgo);
 
+    void deleteTestGames(int setDurationMinutesUnder);
+
 }

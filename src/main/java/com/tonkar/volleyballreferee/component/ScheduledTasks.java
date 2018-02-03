@@ -15,12 +15,21 @@ public class ScheduledTasks {
     @Autowired
     private GameService gameService;
 
+    // Every day at 4am
     @Scheduled(cron = "0 0 4 * * *")
     public void deleteOldLiveGames() {
         LOGGER.info("Deleting every live game older than 1 day");
         gameService.deleteOldLiveGames(1);
     }
 
+    // Every day at 4:15am
+    @Scheduled(cron = "0 15 4 * * *")
+    public void deleteTestGames() {
+        LOGGER.info("Deleting every test game with a set duration under 5 minutes");
+        gameService.deleteTestGames(5);
+    }
+
+    // Every monday at 4:30am
     @Scheduled(cron = "0 30 4 1 * *")
     public void deleteOldGames() {
         LOGGER.info("Deleting every game older than 1 year");

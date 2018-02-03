@@ -149,4 +149,16 @@ public class GameServiceImpl implements GameService {
         LOGGER.debug(String.format("Deleted %d live games older than date %d", count, time2DaysAgo));
     }
 
+    @Override
+    public void deleteTestGames(int setDurationMinutesUnder) {
+        long setDurationMillisUnder = setDurationMinutesUnder * 60000L;
+
+        List<Game> games = gameRepository.findGamesByLiveAndSets_DurationLessThan(false, setDurationMillisUnder);
+
+        for (Game game : games) {
+            deleteGame(game.getDate());
+            LOGGER.debug(String.format("Deleted game at date %d with set shorter than %d minutes", game.getDate(), setDurationMinutesUnder));
+        }
+    }
+
 }

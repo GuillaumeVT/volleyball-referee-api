@@ -16,4 +16,6 @@ public interface GameRepository extends MongoRepository<Game,String> {
     long deleteGamesByDateLessThan(long date);
 
     long deleteGamesByLiveAndDateLessThan(boolean live, long date);
+
+    List<Game> findGamesByLiveAndSets_DurationLessThan(boolean live, long setDurationMillisUnder);
 }
