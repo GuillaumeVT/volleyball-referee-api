@@ -85,21 +85,26 @@ public class GameServiceImpl implements GameService {
     @Override
     public void updateGame(long date, Game game) {
         GameDescription savedGameDescription = gameDescriptionRepository.findGameDescriptionByDate(date);
-        savedGameDescription.setLive(game.isLive());
-        savedGameDescription.sethSets(game.gethSets());
-        savedGameDescription.setgSets(game.getgSets());
-        gameDescriptionRepository.save(savedGameDescription);
-
         Game savedGame = gameRepository.findGameByDate(date);
-        savedGame.setLive(game.isLive());
-        savedGame.sethTeam(game.gethTeam());
-        savedGame.setgTeam(game.getgTeam());
-        savedGame.sethSets(game.gethSets());
-        savedGame.setgSets(game.getgSets());
-        savedGame.setSets(game.getSets());
-        gameRepository.save(savedGame);
 
-        LOGGER.debug(String.format("Updated %s game with date %d (%s vs %s)", game.getKind(), date, game.gethTeam().getName(), game.getgTeam().getName()));
+        if (savedGameDescription == null || savedGame == null) {
+            LOGGER.error(String.format("Could not update %s game with date %d (%s vs %s) because either game or description was not found", savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName()));
+        } else {
+            savedGameDescription.setLive(game.isLive());
+            savedGameDescription.sethSets(game.gethSets());
+            savedGameDescription.setgSets(game.getgSets());
+            gameDescriptionRepository.save(savedGameDescription);
+
+            savedGame.setLive(game.isLive());
+            savedGame.sethTeam(game.gethTeam());
+            savedGame.setgTeam(game.getgTeam());
+            savedGame.sethSets(game.gethSets());
+            savedGame.setgSets(game.getgSets());
+            savedGame.setSets(game.getSets());
+            gameRepository.save(savedGame);
+
+            LOGGER.debug(String.format("Updated %s game with date %d (%s vs %s)", game.getKind(), date, game.gethTeam().getName(), game.getgTeam().getName()));
+        }
     }
 
     @Override
@@ -156,8 +161,16 @@ public class GameServiceImpl implements GameService {
         List<Game> games = gameRepository.findGamesByLiveAndSets_DurationLessThan(false, setDurationMillisUnder);
 
         for (Game game : games) {
-            deleteGame(game.getDate());
-            LOGGER.debug(String.format("Deleted game at date %d with set shorter than %d minutes", game.getDate(), setDurationMinutesUnder));
+            boolean delete = true;
+
+            for (Set set : game.getSets()) {
+                delete = delete && (set.getDuration() < setDurationMillisUnder);
+            }
+
+            if (delete) {
+                deleteGame(game.getDate());
+                LOGGER.debug(String.format("Deleted game at date %d with set shorter than %d minutes", game.getDate(), setDurationMinutesUnder));
+            }
         }
     }
 

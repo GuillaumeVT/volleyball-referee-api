@@ -34,7 +34,7 @@ public class ViewGameController {
         Game game = gameService.getGame(id);
 
         if (game == null) {
-            LOGGER.error(String.format("No game with date %d", id));
+            LOGGER.error(String.format("No game with date %d for viewing", id));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(game, HttpStatus.OK);
@@ -43,12 +43,12 @@ public class ViewGameController {
 
     @GetMapping("/pdf/{id}")
     public ResponseEntity<?> getGameAsPdf(@PathVariable("id") long id) {
-        LOGGER.debug(String.format("Request get game pdf with date %d", id));
+        LOGGER.debug(String.format("Request download pdf with date %d", id));
 
         Game game = gameService.getGame(id);
 
         if (game == null) {
-            LOGGER.error(String.format("No game with date %d", id));
+            LOGGER.error(String.format("No game with date %d for downloading pdf", id));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             try {

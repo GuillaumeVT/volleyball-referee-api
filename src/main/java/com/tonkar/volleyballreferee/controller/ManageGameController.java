@@ -43,7 +43,7 @@ public class ManageGameController {
             gameService.updateSet(id, index, set);
             return new ResponseEntity<>(id, HttpStatus.OK);
         } else {
-            LOGGER.error(String.format("No game with date %d", id));
+            LOGGER.error(String.format("No game with date %d when updating set %d", id, index));
             return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
         }
     }
@@ -62,7 +62,7 @@ public class ManageGameController {
             gameService.deleteLiveGame(id);
             return new ResponseEntity<>(id, HttpStatus.OK);
         } else {
-            LOGGER.error(String.format("No game with date %d", id));
+            LOGGER.error(String.format("No game with date %d when deleting", id));
             return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
         }
     }
