@@ -21,12 +21,19 @@ import java.util.TimeZone;
 public class PdfGameWriter {
 
     static {
-        FontFactory.register("/fonts/Roboto-Regular.ttf", "Roboto");
+        FontFactory.register("/fonts/NotoSans-Regular.ttf", "Noto");
+        FontFactory.register("/fonts/NotoSansCJKjp-Regular.otf", "Noto-Jp");
+        FontFactory.register("/fonts/NotoSansCJKkr-Regular.otf", "Noto-Kr");
+        FontFactory.register("/fonts/NotoSansCJKsc-Regular.otf", "Noto-Sc");
+        FontFactory.register("/fonts/NotoSansDevanagari-Regular.ttf", "Noto-Deva");
+        FontFactory.register("/fonts/NotoSansJavanese-Regular.ttf", "Noto-Java");
+        FontFactory.register("/fonts/NotoSansTagalog-Regular.ttf", "Noto-Taga");
+        FontFactory.register("/fonts/NotoSansThai-Regular.ttf", "Noto-Thai");
     }
-    private static Font sDefaultFont = FontFactory.getFont("Roboto", BaseFont.IDENTITY_H, true, 10);
 
     private Game     mGame;
     private Document mDocument;
+    private Font     mDefaultFont;
     private Font     mHomeTeamFont;
     private Font     mHomeCaptainFont;
     private Font     mGuestTeamFont;
@@ -72,6 +79,7 @@ public class PdfGameWriter {
     private PdfGameWriter(Game game, Document document) {
         mGame = game;
         mDocument = document;
+        mDefaultFont = FontFactory.getFont("Noto", BaseFont.IDENTITY_H, true, 10);
     }
 
     private void init() {
@@ -85,18 +93,21 @@ public class PdfGameWriter {
             guestTeamColor = Color.lightGray;
         }
 
-        mHomeTeamFont = FontFactory.getFont("Roboto", BaseFont.IDENTITY_H, true, sDefaultFont.getSize(), sDefaultFont.getStyle(), new BaseColor(getTextColor(homeTeamColor)));
-        mHomeCaptainFont = FontFactory.getFont("Roboto", BaseFont.IDENTITY_H, true, sDefaultFont.getSize(), Font.UNDERLINE, new BaseColor(getTextColor(homeTeamColor)));
+        BaseColor homeTeamColorText = new BaseColor(getTextColor(homeTeamColor));
+        BaseColor guestTeamColorText = new BaseColor(getTextColor(guestTeamColor));
+
+        mHomeTeamFont = FontFactory.getFont("Noto", BaseFont.IDENTITY_H, true, mDefaultFont.getSize(), mDefaultFont.getStyle(), homeTeamColorText);
+        mHomeCaptainFont = FontFactory.getFont("Noto", BaseFont.IDENTITY_H, true, mDefaultFont.getSize(), Font.UNDERLINE, homeTeamColorText);
         mHomeTeamColor = new BaseColor(homeTeamColor.getRGB());
 
-        mHomeLiberoFont = FontFactory.getFont("Roboto", BaseFont.IDENTITY_H, true, sDefaultFont.getSize(), sDefaultFont.getStyle(), new BaseColor(getTextColor(Color.decode(mGame.gethTeam().getLiberoColor()))));
+        mHomeLiberoFont = FontFactory.getFont("Noto", BaseFont.IDENTITY_H, true, mDefaultFont.getSize(), mDefaultFont.getStyle(), new BaseColor(getTextColor(Color.decode(mGame.gethTeam().getLiberoColor()))));
         mHomeLiberoColor = new BaseColor(Color.decode(mGame.gethTeam().getLiberoColor()).getRGB());
 
-        mGuestTeamFont = FontFactory.getFont("Roboto", BaseFont.IDENTITY_H, true, sDefaultFont.getSize(), sDefaultFont.getStyle(), new BaseColor(getTextColor(guestTeamColor)));
-        mGuestCaptainFont = FontFactory.getFont("Roboto", BaseFont.IDENTITY_H, true, sDefaultFont.getSize(), Font.UNDERLINE, new BaseColor(getTextColor(guestTeamColor)));
+        mGuestTeamFont = FontFactory.getFont("Noto", BaseFont.IDENTITY_H, true, mDefaultFont.getSize(), mDefaultFont.getStyle(), guestTeamColorText);
+        mGuestCaptainFont = FontFactory.getFont("Noto", BaseFont.IDENTITY_H, true, mDefaultFont.getSize(), Font.UNDERLINE, guestTeamColorText);
         mGuestTeamColor = new BaseColor(guestTeamColor.getRGB());
 
-        mGuestLiberoFont = FontFactory.getFont("Roboto", BaseFont.IDENTITY_H, true, sDefaultFont.getSize(), sDefaultFont.getStyle(), new BaseColor(getTextColor(Color.decode(mGame.getgTeam().getLiberoColor()))));
+        mGuestLiberoFont = FontFactory.getFont("Noto", BaseFont.IDENTITY_H, true, mDefaultFont.getSize(), mDefaultFont.getStyle(), new BaseColor(getTextColor(Color.decode(mGame.getgTeam().getLiberoColor()))));
         mGuestLiberoColor = new BaseColor(Color.decode(mGame.getgTeam().getLiberoColor()).getRGB());
     }
 
@@ -136,7 +147,8 @@ public class PdfGameWriter {
         dateAndLeagueTable.setWidthPercentage(100);
         dateAndLeagueTable.setSpacingBefore(5.f);
 
-        PdfPCell leagueCell = new PdfPCell(new Phrase(mGame.getLeague(), sDefaultFont));
+        Font leagueFont = FontFactory.getFont(getFontname(mGame.getLeague()), BaseFont.IDENTITY_H, true, mDefaultFont.getSize(), mDefaultFont.getStyle(), mDefaultFont.getColor());
+        PdfPCell leagueCell = new PdfPCell(new Phrase(mGame.getLeague(), leagueFont));
         leagueCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         leagueCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         dateAndLeagueTable.addCell(leagueCell);
@@ -144,7 +156,7 @@ public class PdfGameWriter {
         DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault());
         formatter.setTimeZone(TimeZone.getDefault());
 
-        PdfPCell dateCell = new PdfPCell(new Phrase(formatter.format(new Date(mGame.getDate())), sDefaultFont));
+        PdfPCell dateCell = new PdfPCell(new Phrase(formatter.format(new Date(mGame.getDate())), mDefaultFont));
         dateCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         dateCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         dateAndLeagueTable.addCell(dateCell);
@@ -160,19 +172,20 @@ public class PdfGameWriter {
         table.setWidthPercentage(100);
         table.setSpacingAfter(10.f);
 
-        PdfPCell homeTeamNameCell = new PdfPCell(new Phrase(mGame.gethTeam().getName(), mHomeTeamFont));
+        Font homeTeamNameFont = FontFactory.getFont(getFontname(mGame.gethTeam().getName()), BaseFont.IDENTITY_H, true, mHomeTeamFont.getSize(), mHomeTeamFont.getStyle(), mHomeTeamFont.getColor());
+        PdfPCell homeTeamNameCell = new PdfPCell(new Phrase(mGame.gethTeam().getName(), homeTeamNameFont));
         homeTeamNameCell.setBackgroundColor(mHomeTeamColor);
         homeTeamNameCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         homeTeamNameCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(homeTeamNameCell);
 
-        PdfPCell homeTeamSetsCell = new PdfPCell(new Phrase(String.valueOf(mGame.gethSets()), sDefaultFont));
+        PdfPCell homeTeamSetsCell = new PdfPCell(new Phrase(String.valueOf(mGame.gethSets()), mDefaultFont));
         homeTeamSetsCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         homeTeamSetsCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(homeTeamSetsCell);
 
         for (int setIndex = 0; setIndex < mGame.getSets().size(); setIndex++) {
-            PdfPCell cell = new PdfPCell(new Phrase(String.valueOf(mGame.getSets().get(setIndex).gethPoints()), sDefaultFont));
+            PdfPCell cell = new PdfPCell(new Phrase(String.valueOf(mGame.getSets().get(setIndex).gethPoints()), mDefaultFont));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             table.addCell(cell);
@@ -188,19 +201,20 @@ public class PdfGameWriter {
             table.addCell(cell);
         }
 
-        PdfPCell guestTeamNameCell = new PdfPCell(new Phrase(mGame.getgTeam().getName(), mGuestTeamFont));
+        Font guestTeamNameFont = FontFactory.getFont(getFontname(mGame.getgTeam().getName()), BaseFont.IDENTITY_H, true, mGuestTeamFont.getSize(), mGuestTeamFont.getStyle(), mGuestTeamFont.getColor());
+        PdfPCell guestTeamNameCell = new PdfPCell(new Phrase(mGame.getgTeam().getName(), guestTeamNameFont));
         guestTeamNameCell.setBackgroundColor(mGuestTeamColor);
         guestTeamNameCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         guestTeamNameCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(guestTeamNameCell);
 
-        PdfPCell guestTeamSetsCell = new PdfPCell(new Phrase(String.valueOf(mGame.getgSets()), sDefaultFont));
+        PdfPCell guestTeamSetsCell = new PdfPCell(new Phrase(String.valueOf(mGame.getgSets()), mDefaultFont));
         guestTeamSetsCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         guestTeamSetsCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(guestTeamSetsCell);
 
         for (int setIndex = 0; setIndex < mGame.getSets().size(); setIndex++) {
-            PdfPCell cell = new PdfPCell(new Phrase(String.valueOf(mGame.getSets().get(setIndex).getgPoints()), sDefaultFont));
+            PdfPCell cell = new PdfPCell(new Phrase(String.valueOf(mGame.getSets().get(setIndex).getgPoints()), mDefaultFont));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             table.addCell(cell);
@@ -224,7 +238,7 @@ public class PdfGameWriter {
             table.setWidthPercentage(100);
             table.setSpacingAfter(10.f);
 
-            PdfPCell titleCell = new PdfPCell(new Phrase("Players", sDefaultFont));
+            PdfPCell titleCell = new PdfPCell(new Phrase("Players", mDefaultFont));
             titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
             titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             titleCell.setRowspan(2);
@@ -259,7 +273,7 @@ public class PdfGameWriter {
         int startIndex = team.getPlayers().size() + team.getLiberos().size();
 
         for (int index = startIndex; (index % numColumns != 0); index++) {
-            PdfPCell cell = new PdfPCell(new Phrase(" ", sDefaultFont));
+            PdfPCell cell = new PdfPCell(new Phrase(" ", mDefaultFont));
             cell.setBorder(Rectangle.NO_BORDER);
             table.addCell(cell);
         }
@@ -314,18 +328,18 @@ public class PdfGameWriter {
         indexCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(indexCell);
 
-        PdfPCell hScoreCell = new PdfPCell(new Phrase(String.valueOf(set.gethPoints()), sDefaultFont));
+        PdfPCell hScoreCell = new PdfPCell(new Phrase(String.valueOf(set.gethPoints()), mDefaultFont));
 
         hScoreCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         hScoreCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(hScoreCell);
 
-        PdfPCell hScore1Cell = new PdfPCell(new Phrase(String.valueOf(hScore1), sDefaultFont));
+        PdfPCell hScore1Cell = new PdfPCell(new Phrase(String.valueOf(hScore1), mDefaultFont));
         hScore1Cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         hScore1Cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(hScore1Cell);
 
-        PdfPCell hScore2Cell = new PdfPCell(new Phrase(String.valueOf(hScore2), sDefaultFont));
+        PdfPCell hScore2Cell = new PdfPCell(new Phrase(String.valueOf(hScore2), mDefaultFont));
         hScore2Cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         hScore2Cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(hScore2Cell);
@@ -336,22 +350,22 @@ public class PdfGameWriter {
         table.addCell(emptyCell);
 
         int duration = (int) Math.ceil(set.getDuration() / 60000.0);
-        PdfPCell durationCell = new PdfPCell(new Phrase(String.format(Locale.getDefault(), "%d min", duration), sDefaultFont));
+        PdfPCell durationCell = new PdfPCell(new Phrase(String.format(Locale.getDefault(), "%d min", duration), mDefaultFont));
         durationCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         durationCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(durationCell);
 
-        PdfPCell gScoreCell = new PdfPCell(new Phrase(String.valueOf(set.getgPoints()), sDefaultFont));
+        PdfPCell gScoreCell = new PdfPCell(new Phrase(String.valueOf(set.getgPoints()), mDefaultFont));
         gScoreCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         gScoreCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(gScoreCell);
 
-        PdfPCell gScore1Cell = new PdfPCell(new Phrase(String.valueOf(gScore1), sDefaultFont));
+        PdfPCell gScore1Cell = new PdfPCell(new Phrase(String.valueOf(gScore1), mDefaultFont));
         gScore1Cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         gScore1Cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(gScore1Cell);
 
-        PdfPCell gScore2Cell = new PdfPCell(new Phrase(String.valueOf(gScore2), sDefaultFont));
+        PdfPCell gScore2Cell = new PdfPCell(new Phrase(String.valueOf(gScore2), mDefaultFont));
         gScore2Cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         gScore2Cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(gScore2Cell);
@@ -365,7 +379,7 @@ public class PdfGameWriter {
             PdfPTable table = new PdfPTable(columnWidths);
             table.setWidthPercentage(100);
 
-            PdfPCell titleCell = new PdfPCell(new Phrase("Starting line-up", sDefaultFont));
+            PdfPCell titleCell = new PdfPCell(new Phrase("Starting line-up", mDefaultFont));
             titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
             titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             titleCell.setColspan(2);
@@ -406,17 +420,17 @@ public class PdfGameWriter {
         PdfPTable table = new PdfPTable(3);
         table.setWidthPercentage(100);
 
-        PdfPCell pos4TitleCell = new PdfPCell(new Phrase("IV", sDefaultFont));
+        PdfPCell pos4TitleCell = new PdfPCell(new Phrase("IV", mDefaultFont));
         pos4TitleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         pos4TitleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(pos4TitleCell);
 
-        PdfPCell pos3TitleCell = new PdfPCell(new Phrase("III", sDefaultFont));
+        PdfPCell pos3TitleCell = new PdfPCell(new Phrase("III", mDefaultFont));
         pos3TitleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         pos3TitleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(pos3TitleCell);
 
-        PdfPCell pos2TitleCell = new PdfPCell(new Phrase("II", sDefaultFont));
+        PdfPCell pos2TitleCell = new PdfPCell(new Phrase("II", mDefaultFont));
         pos2TitleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         pos2TitleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(pos2TitleCell);
@@ -430,17 +444,17 @@ public class PdfGameWriter {
         PdfPCell pos2Cell = createPlayerCell(teamType, getPlayerNumberAtPositionInStartingLineup(startingLineup, 2), false);
         table.addCell(pos2Cell);
 
-        PdfPCell pos5TitleCell = new PdfPCell(new Phrase("V", sDefaultFont));
+        PdfPCell pos5TitleCell = new PdfPCell(new Phrase("V", mDefaultFont));
         pos5TitleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         pos5TitleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(pos5TitleCell);
 
-        PdfPCell pos6TitleCell = new PdfPCell(new Phrase("VI", sDefaultFont));
+        PdfPCell pos6TitleCell = new PdfPCell(new Phrase("VI", mDefaultFont));
         pos6TitleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         pos6TitleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(pos6TitleCell);
 
-        PdfPCell pos1TitleCell = new PdfPCell(new Phrase("I", sDefaultFont));
+        PdfPCell pos1TitleCell = new PdfPCell(new Phrase("I", mDefaultFont));
         pos1TitleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         pos1TitleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(pos1TitleCell);
@@ -463,7 +477,7 @@ public class PdfGameWriter {
             PdfPTable table = new PdfPTable(columnWidths);
             table.setWidthPercentage(100);
 
-            PdfPCell titleCell = new PdfPCell(new Phrase("Substitutions", sDefaultFont));
+            PdfPCell titleCell = new PdfPCell(new Phrase("Substitutions", mDefaultFont));
             titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
             titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             titleCell.setRowspan(2);
@@ -513,7 +527,7 @@ public class PdfGameWriter {
 
         table.addCell(createPlayerCell(teamType, substitution.getpIn(), false));
 
-        PdfPCell arrowCell = new PdfPCell(new Phrase("=>", sDefaultFont));
+        PdfPCell arrowCell = new PdfPCell(new Phrase("=>", mDefaultFont));
         arrowCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         arrowCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(arrowCell);
@@ -527,7 +541,7 @@ public class PdfGameWriter {
             score = substitution.getgPoints() + "-" + substitution.gethPoints();
         }
 
-        PdfPCell scoreCell = new PdfPCell(new Phrase(score, sDefaultFont));
+        PdfPCell scoreCell = new PdfPCell(new Phrase(score, mDefaultFont));
         scoreCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         scoreCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(scoreCell);
@@ -541,7 +555,7 @@ public class PdfGameWriter {
             PdfPTable table = new PdfPTable(columnWidths);
             table.setWidthPercentage(100);
 
-            PdfPCell titleCell = new PdfPCell(new Phrase("Timeouts", sDefaultFont));
+            PdfPCell titleCell = new PdfPCell(new Phrase("Timeouts", mDefaultFont));
             titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
             titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
             table.addCell(titleCell);
@@ -594,7 +608,7 @@ public class PdfGameWriter {
         PdfPTable titleTable = new PdfPTable(1);
         titleTable.setWidthPercentage(100);
 
-        PdfPCell titleCell = new PdfPCell(new Phrase("Points", sDefaultFont));
+        PdfPCell titleCell = new PdfPCell(new Phrase("Points", mDefaultFont));
         titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         titleTable.addCell(titleCell);
@@ -627,7 +641,7 @@ public class PdfGameWriter {
         int startIndex = ladder.size();
 
         for (int index = startIndex; (index % numColumns != 0); index++) {
-            PdfPCell cell = new PdfPCell(new Phrase(" ", sDefaultFont));
+            PdfPCell cell = new PdfPCell(new Phrase(" ", mDefaultFont));
             cell.setBorder(Rectangle.NO_BORDER);
             table.addCell(cell);
         }
@@ -736,13 +750,13 @@ public class PdfGameWriter {
         indexCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(indexCell);
 
-        PdfPCell hScoreCell = new PdfPCell(new Phrase(String.valueOf(set.gethPoints()), sDefaultFont));
+        PdfPCell hScoreCell = new PdfPCell(new Phrase(String.valueOf(set.gethPoints()), mDefaultFont));
 
         hScoreCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         hScoreCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(hScoreCell);
 
-        PdfPCell hScore1Cell = new PdfPCell(new Phrase(String.valueOf(hScore1), sDefaultFont));
+        PdfPCell hScore1Cell = new PdfPCell(new Phrase(String.valueOf(hScore1), mDefaultFont));
         hScore1Cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         hScore1Cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(hScore1Cell);
@@ -753,21 +767,58 @@ public class PdfGameWriter {
         table.addCell(emptyCell);
 
         int duration = (int) Math.ceil(set.getDuration() / 60000.0);
-        PdfPCell durationCell = new PdfPCell(new Phrase(String.format(Locale.getDefault(), "%d min", duration), sDefaultFont));
+        PdfPCell durationCell = new PdfPCell(new Phrase(String.format(Locale.getDefault(), "%d min", duration), mDefaultFont));
         durationCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         durationCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(durationCell);
 
-        PdfPCell gScoreCell = new PdfPCell(new Phrase(String.valueOf(set.getgPoints()), sDefaultFont));
+        PdfPCell gScoreCell = new PdfPCell(new Phrase(String.valueOf(set.getgPoints()), mDefaultFont));
         gScoreCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         gScoreCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(gScoreCell);
 
-        PdfPCell gScore1Cell = new PdfPCell(new Phrase(String.valueOf(gScore1), sDefaultFont));
+        PdfPCell gScore1Cell = new PdfPCell(new Phrase(String.valueOf(gScore1), mDefaultFont));
         gScore1Cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         gScore1Cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         table.addCell(gScore1Cell);
 
         mDocument.add(table);
+    }
+
+    private String getFontname(String text) {
+        String fontname = "Noto";
+
+        if (!text.isEmpty()) {
+            int codePoint = Character.codePointAt(text, 0);
+
+            switch (Character.UnicodeScript.of(codePoint)) {
+                case HAN:
+                    fontname = "Noto-Sc";
+                    break;
+                case THAI:
+                    fontname = "Noto-Thai";
+                    break;
+                case KATAKANA:
+                case HIRAGANA:
+                    fontname = "Noto-Jp";
+                    break;
+                case TAGALOG:
+                    fontname = "Noto-Taga";
+                    break;
+                case JAVANESE:
+                    fontname = "Noto-Java";
+                    break;
+                case DEVANAGARI:
+                    fontname = "Noto-Deva";
+                    break;
+                case HANGUL:
+                    fontname = "Noto-Kr";
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return fontname;
     }
 }
