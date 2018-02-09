@@ -10,29 +10,33 @@ import java.util.List;
 public class Game {
 
     @Id
-    private String    id;
+    private String            id;
     @NotNull
-    private String    kind;
+    private String            kind;
     @NotNull
-    private long      date;
+    private long              date;
     @NotNull
-    private String    gender;
+    private String            gender;
     @NotNull
-    private String    usage;
+    private String            usage;
     @NotNull
-    private boolean   live;
+    private boolean           live;
     @NotNull
-    private String    league;
+    private String            league;
     @NotNull
-    private Team      hTeam;
+    private Team              hTeam;
     @NotNull
-    private Team      gTeam;
+    private Team              gTeam;
     @NotNull
-    private int       hSets;
+    private int               hSets;
     @NotNull
-    private int       gSets;
+    private int               gSets;
     @NotNull
-    private List<Set> sets;
+    private List<Set>         sets;
+    @NotNull
+    private List<PenaltyCard> hCards;
+    @NotNull
+    private List<PenaltyCard> gCards;
 
     public Game() {}
 
@@ -130,5 +134,21 @@ public class Game {
 
     public void setSets(List<Set> sets) {
         this.sets = sets;
+    }
+
+    public List<PenaltyCard> gethCards() {
+        return hCards;
+    }
+
+    public void sethCards(List<PenaltyCard> hCards) {
+        this.hCards = hCards;
+    }
+
+    public List<PenaltyCard> getgCards() {
+        return gCards;
+    }
+
+    public void setgCards(List<PenaltyCard> gCards) {
+        this.gCards = gCards;
     }
 }
