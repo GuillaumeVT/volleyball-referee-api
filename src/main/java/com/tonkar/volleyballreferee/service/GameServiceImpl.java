@@ -101,6 +101,8 @@ public class GameServiceImpl implements GameService {
             savedGame.sethSets(game.gethSets());
             savedGame.setgSets(game.getgSets());
             savedGame.setSets(game.getSets());
+            savedGame.sethCards(game.gethCards());
+            savedGame.setgCards(game.getgCards());
             gameRepository.save(savedGame);
 
             LOGGER.debug(String.format("Updated %s game with date %d (%s vs %s)", game.getKind(), date, game.gethTeam().getName(), game.getgTeam().getName()));
