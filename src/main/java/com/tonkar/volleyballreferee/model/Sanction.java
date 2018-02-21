@@ -1,6 +1,6 @@
 package com.tonkar.volleyballreferee.model;
 
-public class PenaltyCard {
+public class Sanction {
 
     private String card;
     private int    num;
@@ -8,7 +8,7 @@ public class PenaltyCard {
     private int    hPoints;
     private int    gPoints;
 
-    public PenaltyCard() {}
+    public Sanction() {}
 
     public String getCard() {
         return card;
