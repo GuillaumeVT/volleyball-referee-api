@@ -434,7 +434,7 @@ public class PdfGameWriter {
     }
 
     private int getPlayerNumberAtPositionInStartingLineup(List<Player> startingLineup, int position) {
-        int number = 0;
+        int number = -1;
 
         for (Player player: startingLineup) {
             if (player.getPos() == position) {
