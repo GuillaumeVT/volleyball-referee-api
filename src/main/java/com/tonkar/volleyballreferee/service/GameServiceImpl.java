@@ -36,7 +36,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<GameDescription> listGameDescriptions(String token) {
-        return gameDescriptionRepository.findGameDescriptionsByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLike(token, token, token);
+        return gameDescriptionRepository.findGameDescriptionsByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLike(token, token, token, token);
     }
 
     @Override
@@ -70,6 +70,7 @@ public class GameServiceImpl implements GameService {
         gameDescription.setGender(game.getGender());
         gameDescription.setUsage(game.getUsage());
         gameDescription.setLive(game.isLive());
+        gameDescription.setReferee(game.getReferee());
         gameDescription.setLeague(game.getLeague());
         gameDescription.sethName(game.gethTeam().getName());
         gameDescription.setgName(game.getgTeam().getName());
@@ -91,11 +92,13 @@ public class GameServiceImpl implements GameService {
             LOGGER.error(String.format("Could not update %s game with date %d (%s vs %s) because either game or description was not found", savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName()));
         } else {
             savedGameDescription.setLive(game.isLive());
+            savedGameDescription.setReferee(game.getReferee());
             savedGameDescription.sethSets(game.gethSets());
             savedGameDescription.setgSets(game.getgSets());
             gameDescriptionRepository.save(savedGameDescription);
 
             savedGame.setLive(game.isLive());
+            savedGame.setReferee(game.getReferee());
             savedGame.sethTeam(game.gethTeam());
             savedGame.setgTeam(game.getgTeam());
             savedGame.sethSets(game.gethSets());

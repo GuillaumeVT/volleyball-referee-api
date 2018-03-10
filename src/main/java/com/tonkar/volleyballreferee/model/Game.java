@@ -22,6 +22,8 @@ public class Game {
     @NotNull
     private boolean        live;
     @NotNull
+    private String         referee;
+    @NotNull
     private String         league;
     @NotNull
     private Team           hTeam;
@@ -86,6 +88,14 @@ public class Game {
 
     public void setLive(boolean live) {
         this.live = live;
+    }
+
+    public String getReferee() {
+        return referee;
+    }
+
+    public void setReferee(String referee) {
+        this.referee = referee;
     }
 
     public String getLeague() {

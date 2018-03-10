@@ -13,6 +13,7 @@ public class GameDescription {
     private String  gender;
     private String  usage;
     private boolean live;
+    private String  referee;
     private String  league;
     private String  hName;
     private String  gName;
@@ -67,6 +68,14 @@ public class GameDescription {
 
     public void setLive(boolean live) {
         this.live = live;
+    }
+
+    public String getReferee() {
+        return referee;
+    }
+
+    public void setReferee(String referee) {
+        this.referee = referee;
     }
 
     public String getLeague() {
