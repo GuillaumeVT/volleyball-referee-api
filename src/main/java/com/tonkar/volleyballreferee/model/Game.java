@@ -3,6 +3,8 @@ package com.tonkar.volleyballreferee.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -11,13 +13,13 @@ public class Game {
 
     @Id
     private String         id;
-    @NotNull
+    @NotEmpty
     private String         kind;
     @NotNull
     private long           date;
-    @NotNull
+    @NotEmpty
     private String         gender;
-    @NotNull
+    @NotEmpty
     private String         usage;
     @NotNull
     private boolean        live;
@@ -25,14 +27,17 @@ public class Game {
     private String         referee;
     @NotNull
     private String         league;
+    @Valid
     @NotNull
     private Team           hTeam;
+    @Valid
     @NotNull
     private Team           gTeam;
     @NotNull
     private int            hSets;
     @NotNull
     private int            gSets;
+    @Valid
     @NotNull
     private List<Set>      sets;
     @NotNull

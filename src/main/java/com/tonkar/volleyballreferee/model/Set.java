@@ -1,5 +1,6 @@
 package com.tonkar.volleyballreferee.model;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class Set {
     private int                gTimeouts;
     @NotNull
     private List<String>       ladder;
-    @NotNull
+    @NotEmpty
     private String             serving;
     private List<Player>       hCurrentPlayers;
     private List<Player>       gCurrentPlayers;

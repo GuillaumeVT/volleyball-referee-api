@@ -28,7 +28,7 @@ public class ViewGameController {
     private GameService gameService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getGame(@PathVariable("id") long id) {
+    public ResponseEntity<Game> getGame(@PathVariable("id") long id) {
         LOGGER.debug(String.format("Request get game with date %d", id));
 
         Game game = gameService.getGame(id);

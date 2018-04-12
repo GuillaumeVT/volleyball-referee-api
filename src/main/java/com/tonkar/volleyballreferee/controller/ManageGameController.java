@@ -23,7 +23,7 @@ public class ManageGameController {
     private GameService gameService;
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateGame(@PathVariable("id") long id, @Valid @RequestBody Game game) {
+    public ResponseEntity<Long> updateGame(@PathVariable("id") long id, @Valid @RequestBody Game game) {
         LOGGER.debug(String.format("Request update %s game with date %d (%s vs %s)", game.getKind(), id, game.gethTeam().getName(), game.getgTeam().getName()));
 
         if (gameService.hasGame(id)) {
@@ -36,7 +36,7 @@ public class ManageGameController {
     }
 
     @PutMapping("/{id}/set/{index}")
-    public ResponseEntity<?> updateSet(@PathVariable("id") long id, @PathVariable("index") int index, @Valid @RequestBody Set set) {
+    public ResponseEntity<Long> updateSet(@PathVariable("id") long id, @PathVariable("index") int index, @Valid @RequestBody Set set) {
         LOGGER.debug(String.format("Request update set index %d for game with date %d", index, id));
 
         if (gameService.hasGame(id)) {
@@ -49,7 +49,7 @@ public class ManageGameController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> gameIsSynched(@PathVariable("id") long id) {
+    public ResponseEntity<Boolean> gameIsSynched(@PathVariable("id") long id) {
         LOGGER.debug(String.format("Request game exists with date %d", id));
         return new ResponseEntity<>(gameService.hasGameSynched(id), HttpStatus.OK);
     }
