@@ -281,14 +281,6 @@ public class VolleyballRefereeApplicationTests {
 		return game;
 	}
 
-	@Test
-	public void testUser() {
-		User user = userService.getUser(UserId.VBR_USER_ID);
-
-		assertEquals("01022018", user.getUserId().getSocialId());
-		assertEquals("VBR", user.getUserId().getProvider());
-	}
-
 	private String rules = "{\"userId\":{\"socialId\":\"01022018\",\"provider\":\"VBR\"},\"name\":\"Test Rules\",\"date\":1523199473000,\"setsPerGame\":5,\"pointsPerSet\":25,\"tieBreakInLastSet\":true,\"twoPointsDifference\":true,\"sanctions\":true,\"teamTimeouts\":true,\"teamTimeoutsPerSet\":2,\"teamTimeoutDuration\":30,\"technicalTimeouts\":true,\"technicalTimeoutDuration\":60,\"gameIntervals\":true,\"gameIntervalDuration\":180,\"teamSubstitutionsPerSet\":6,\"changeSidesEvery7Points\":false,\"customConsecutiveServesPerPlayer\": 9999}";
 
 	@Test

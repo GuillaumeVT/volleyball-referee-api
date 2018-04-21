@@ -3,22 +3,44 @@ package com.tonkar.volleyballreferee.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 @Document(collection="gameDescriptions")
 public class GameDescription {
 
     @Id
-    private String  id;
-    private String  kind;
-    private long    date;
-    private String  gender;
-    private String  usage;
-    private boolean live;
-    private String  referee;
-    private String  league;
-    private String  hName;
-    private String  gName;
-    private int     hSets;
-    private int     gSets;
+    private String id;
+    @Valid
+    @NotNull
+    private UserId userId;
+    @NotEmpty
+    private String kind;
+    @NotNull
+    private long   date;
+    @NotNull
+    private long   schedule;
+    @NotEmpty
+    private String gender;
+    @NotEmpty
+    private String usage;
+    @NotEmpty
+    private String status;
+    @NotNull
+    private String referee;
+    @NotNull
+    private String league;
+    @NotEmpty
+    private String hName;
+    @NotEmpty
+    private String gName;
+    @NotNull
+    private int    hSets;
+    @NotNull
+    private int    gSets;
+    @NotEmpty
+    private String rules;
 
     public GameDescription() {}
 
@@ -28,6 +50,14 @@ public class GameDescription {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public UserId getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UserId userId) {
+        this.userId = userId;
     }
 
     public String getKind() {
@@ -46,6 +76,14 @@ public class GameDescription {
         this.date = date;
     }
 
+    public long getSchedule() {
+        return schedule;
+    }
+
+    public void setSchedule(long schedule) {
+        this.schedule = schedule;
+    }
+
     public String getGender() {
         return gender;
     }
@@ -62,12 +100,12 @@ public class GameDescription {
         this.usage = usage;
     }
 
-    public boolean isLive() {
-        return live;
+    public String getStatus() {
+        return status;
     }
 
-    public void setLive(boolean live) {
-        this.live = live;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getReferee() {
@@ -116,5 +154,13 @@ public class GameDescription {
 
     public void setgSets(int gSets) {
         this.gSets = gSets;
+    }
+
+    public String getRules() {
+        return rules;
+    }
+
+    public void setRules(String rules) {
+        this.rules = rules;
     }
 }

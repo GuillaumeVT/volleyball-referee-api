@@ -1,7 +1,6 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.model.Rules;
-import com.tonkar.volleyballreferee.model.User;
 import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.UserService;
 import org.slf4j.Logger;
@@ -26,8 +25,8 @@ public class UserRulesController {
 
     @RequestMapping(value = "", params = { "socialId", "provider" }, method = RequestMethod.GET)
     public ResponseEntity<List<Rules>> getRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
-        User user = userService.getUser(new UserId(socialId, provider));
-        List<Rules> rules = userService.getUserRules(user);
+        UserId userId = new UserId(socialId, provider);
+        List<Rules> rules = userService.getUserRules(userId);
         return new ResponseEntity<>(rules, HttpStatus.OK);
     }
 
@@ -40,11 +39,11 @@ public class UserRulesController {
     @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.GET)
     public ResponseEntity<Rules> getRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
         name = ControllerUtils.decodeUrlParameters(name);
-        User user = userService.getUser(new UserId(socialId, provider));
-        Rules rules = userService.getUserRules(user, name);
+        UserId userId = new UserId(socialId, provider);
+        Rules rules = userService.getUserRules(userId, name);
 
         if (rules == null) {
-            LOGGER.error(String.format("No rules %s found for user %s", name, user.getUserId().getSocialId()));
+            LOGGER.error(String.format("No rules %s found for user %s", name, userId));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(rules, HttpStatus.OK);
@@ -53,33 +52,31 @@ public class UserRulesController {
 
     @RequestMapping(value = "/count", params = { "socialId", "provider" }, method = RequestMethod.GET)
     public ResponseEntity<Long> getNumberOfRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
-        User user = userService.getUser(new UserId(socialId, provider));
-        long numberOfRules = userService.getNumberOfUserRules(user);
+        UserId userId = new UserId(socialId, provider);
+        long numberOfRules = userService.getNumberOfUserRules(userId);
         return new ResponseEntity<>(numberOfRules, HttpStatus.OK);
     }
 
     @PostMapping("")
     public ResponseEntity<Rules> createRules(@Valid @RequestBody Rules rules) {
-        User user = userService.getUser(rules.getUserId());
-        boolean result = userService.createUserRules(user, rules);
+        boolean result = userService.createUserRules(rules);
 
         if (result) {
             return new ResponseEntity<>(rules, HttpStatus.CREATED);
         } else {
-            LOGGER.error(String.format("Rules %s already exist for user %s", rules.getName(), user.getUserId()));
+            LOGGER.error(String.format("Rules %s already exist for user %s", rules.getName(), rules.getUserId()));
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
         }
     }
 
     @PutMapping("")
     public ResponseEntity<Rules> updateRules(@Valid @RequestBody Rules rules) {
-        User user = userService.getUser(rules.getUserId());
-        boolean result = userService.updateUserRules(user, rules);
+        boolean result = userService.updateUserRules(rules);
 
         if (result) {
             return new ResponseEntity<>(rules, HttpStatus.OK);
         } else {
-            LOGGER.error(String.format("Failed to update rules %s for user %s", rules.getName(), user.getUserId()));
+            LOGGER.error(String.format("Failed to update rules %s for user %s", rules.getName(), rules.getUserId()));
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
         }
     }
@@ -87,13 +84,13 @@ public class UserRulesController {
     @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
         name = ControllerUtils.decodeUrlParameters(name);
-        User user = userService.getUser(new UserId(socialId, provider));
-        boolean result = userService.deleteUserRules(user, name);
+        UserId userId = new UserId(socialId, provider);
+        boolean result = userService.deleteUserRules(userId, name);
 
         if (result) {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
-            LOGGER.error(String.format("Failed to delete rules %s for user %s", name, user.getUserId()));
+            LOGGER.error(String.format("Failed to delete rules %s for user %s", name, userId));
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
         }
     }

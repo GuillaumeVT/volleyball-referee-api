@@ -9,27 +9,38 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     boolean existsByDate(long date);
 
-    boolean existsByDateAndLive(long date, boolean live);
+    boolean existsByDateAndStatus(long date, String status);
+
+    boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(String socialId, String provider, String status, String rulesName);
+
+    boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndTeam(String socialId, String provider, String status, String teamName);
 
     GameDescription findGameDescriptionByDate(long date);
 
-    List<GameDescription> findGameDescriptionsByLive(boolean live);
+    List<GameDescription> findGameDescriptionsByStatus(String status);
 
     List<GameDescription> findGameDescriptionsByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLike(String hName, String gName, String league, String referee);
 
     List<GameDescription> findGameDescriptionsByDateBetween(long fromDate, long toDate);
 
-    void deleteGameDescriptionByDate(long date);
+    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
 
-    void deleteGameDescriptionByLiveAndDate(boolean live, long date);
+    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(String socialId, String provider, String status, String rulesName);
 
-    long deleteGameDescriptionsByDateLessThan(long date);
+    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndTeam(String socialId, String provider, String status, String teamName);
 
-    long deleteGameDescriptionsByLiveAndDateLessThan(boolean live, long date);
+    void deleteGameDescriptionByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+
+    void deleteGameDescriptionByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(long date, String socialId, String provider, String status);
+
+    long deleteGameDescriptionsByDateLessThanAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+
+    long deleteGameDescriptionsByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(long date, String socialId, String provider, String status);
 
     long count();
 
-    long countByLive(boolean live);
+    long countByStatus(String status);
 
+    long countByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
 
 }

@@ -13,16 +13,21 @@ public class Game {
 
     @Id
     private String         id;
+    @Valid
+    @NotNull
+    private UserId         userId;
     @NotEmpty
     private String         kind;
     @NotNull
     private long           date;
+    @NotNull
+    private long           schedule;
     @NotEmpty
     private String         gender;
     @NotEmpty
     private String         usage;
-    @NotNull
-    private boolean        live;
+    @NotEmpty
+    private String         status;
     @NotNull
     private String         referee;
     @NotNull
@@ -44,6 +49,9 @@ public class Game {
     private List<Sanction> hCards;
     @NotNull
     private List<Sanction> gCards;
+    @Valid
+    @NotNull
+    private Rules          rules;
 
     public Game() {}
 
@@ -53,6 +61,14 @@ public class Game {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public UserId getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UserId userId) {
+        this.userId = userId;
     }
 
     public String getKind() {
@@ -71,6 +87,14 @@ public class Game {
         this.date = date;
     }
 
+    public long getSchedule() {
+        return schedule;
+    }
+
+    public void setSchedule(long schedule) {
+        this.schedule = schedule;
+    }
+
     public String getGender() {
         return gender;
     }
@@ -87,12 +111,12 @@ public class Game {
         this.usage = usage;
     }
 
-    public boolean isLive() {
-        return live;
+    public String getStatus() {
+        return status;
     }
 
-    public void setLive(boolean live) {
-        this.live = live;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getReferee() {
@@ -165,5 +189,13 @@ public class Game {
 
     public void setgCards(List<Sanction> gCards) {
         this.gCards = gCards;
+    }
+
+    public Rules getRules() {
+        return rules;
+    }
+
+    public void setRules(Rules rules) {
+        this.rules = rules;
     }
 }

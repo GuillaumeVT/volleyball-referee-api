@@ -1,39 +1,46 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.model.Rules;
-import com.tonkar.volleyballreferee.model.Team;
-import com.tonkar.volleyballreferee.model.User;
-import com.tonkar.volleyballreferee.model.UserId;
+import com.tonkar.volleyballreferee.model.*;
 
 import java.util.List;
 
 public interface UserService {
 
-    User getUser(UserId userId);
-
-    List<Rules> getUserRules(User user);
+    List<Rules> getUserRules(UserId userId);
 
     List<Rules> getDefaultRules();
 
-    Rules getUserRules(User user, String name);
+    Rules getUserRules(UserId userId, String name);
 
-    long getNumberOfUserRules(User user);
+    long getNumberOfUserRules(UserId userId);
 
-    boolean createUserRules(User user, Rules rules);
+    boolean createUserRules(Rules rules);
 
-    boolean updateUserRules(User user, Rules rules);
+    boolean updateUserRules(Rules rules);
 
-    boolean deleteUserRules(User user, String name);
+    boolean deleteUserRules(UserId userId, String name);
 
-    List<Team> getUserTeams(User user);
+    List<Team> getUserTeams(UserId userId);
 
-    Team getUserTeam(User user, String name);
+    Team getUserTeam(UserId userId, String name);
 
-    long getNumberOfUserTeams(User user);
+    long getNumberOfUserTeams(UserId userId);
 
-    boolean createUserTeam(User user, Team team);
+    boolean createUserTeam(Team team);
 
-    boolean updateUserTeam(User user, Team team);
+    boolean updateUserTeam(Team team);
 
-    boolean deleteUserTeam(User user, String name);
+    boolean deleteUserTeam(UserId userId, String name);
+
+    List<GameDescription> getUserGames(UserId userId);
+
+    Game getUserGame(UserId userId, long date);
+
+    long getNumberOfUserGames(UserId userId);
+
+    boolean createUserGame(GameDescription gameDescription);
+
+    boolean updateUserGame(GameDescription gameDescription);
+
+    boolean deleteUserGame(UserId userId, long date);
 }

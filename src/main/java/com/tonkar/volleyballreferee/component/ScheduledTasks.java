@@ -34,6 +34,8 @@ public class ScheduledTasks {
     public void deleteOldGames() {
         LOGGER.info("Deleting every game older than 1 year");
         gameService.deleteOldGames(365);
+        LOGGER.info("Deleting every code older than 1 year");
+        gameService.deleteOldCodes(365);
     }
 
     // Every day at 4pm
