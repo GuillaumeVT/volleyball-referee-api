@@ -13,7 +13,9 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(String socialId, String provider, String status, String rulesName);
 
-    boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndTeam(String socialId, String provider, String status, String teamName);
+    boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndHName(String socialId, String provider, String status, String teamName);
+
+    boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndGName(String socialId, String provider, String status, String teamName);
 
     GameDescription findGameDescriptionByDate(long date);
 
@@ -27,7 +29,9 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(String socialId, String provider, String status, String rulesName);
 
-    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndTeam(String socialId, String provider, String status, String teamName);
+    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndHName(String socialId, String provider, String status, String teamName);
+
+    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndGName(String socialId, String provider, String status, String teamName);
 
     void deleteGameDescriptionByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
 

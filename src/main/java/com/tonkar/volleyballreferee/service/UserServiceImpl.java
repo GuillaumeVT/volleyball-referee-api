@@ -172,6 +172,7 @@ public class UserServiceImpl implements UserService {
             LOGGER.error(String.format("Could not update team %s for user %s because it does not exist", team.getName(), team.getUserId()));
             updated = false;
         } else {
+            savedTeam.setKind(team.getKind());
             savedTeam.setDate(team.getDate());
             savedTeam.setColor(team.getColor());
             savedTeam.setLiberoColor(team.getLiberoColor());
@@ -241,6 +242,10 @@ public class UserServiceImpl implements UserService {
                 LOGGER.error(String.format("Could not create game with date %d (%s vs %s) for user %s because at least one input was not found",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
                 created = false;
+            } else if (gameDescription.getKind().equals(hTeam.getKind()) || gameDescription.getKind().equals(gTeam.getKind())) {
+                LOGGER.error(String.format("Could not create game with date %d (%s vs %s) for user %s because the game kind doesn't match with the team kinds",
+                        gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
+                created = false;
             } else {
                 Game game = new Game();
                 game.setUserId(userId);
@@ -298,6 +303,10 @@ public class UserServiceImpl implements UserService {
 
             if (hTeam == null || gTeam == null || rules == null) {
                 LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because at least one input was not found",
+                        gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
+                updated = false;
+            } else if (gameDescription.getKind().equals(hTeam.getKind()) || gameDescription.getKind().equals(gTeam.getKind())) {
+                LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because the game kind doesn't match with the team kinds",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
                 updated = false;
             } else {

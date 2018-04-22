@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -81,6 +83,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public void createGame(Game game) {
         GameDescription gameDescription = new GameDescription();
+        gameDescription.setUserId(game.getUserId());
         gameDescription.setKind(game.getKind());
         gameDescription.setDate(game.getDate());
         gameDescription.setSchedule(game.getSchedule());
@@ -245,14 +248,22 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public boolean hasGameUsingTeam(String teamName, UserId userId) {
-        return gameDescriptionRepository.existsByUserId_SocialIdAndUserId_ProviderAndStatusAndTeam(
+        return gameDescriptionRepository.existsByUserId_SocialIdAndUserId_ProviderAndStatusAndHName(
+                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName)
+                || gameDescriptionRepository.existsByUserId_SocialIdAndUserId_ProviderAndStatusAndGName(
                 userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName);
     }
 
     @Override
     public List<GameDescription> listGameDescriptionsUsingTeam(String teamName, UserId userId) {
-        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndTeam(
-                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName);
+        List<GameDescription> games = new ArrayList<>();
+
+        games.addAll(gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndHName(
+                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName));
+        games.addAll(gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndGName(
+                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName));
+
+        return games;
     }
 
 }

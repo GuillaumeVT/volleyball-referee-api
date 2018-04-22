@@ -18,6 +18,8 @@ public class Team {
     private UserId        userId;
     @NotEmpty
     private String        name;
+    @NotEmpty
+    private String        kind;
     @NotNull
     private long          date;
     @NotEmpty
@@ -57,6 +59,14 @@ public class Team {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getKind() {
+        return kind;
+    }
+
+    public void setKind(String kind) {
+        this.kind = kind;
     }
 
     public long getDate() {
