@@ -37,6 +37,10 @@ public class ViewGameController {
             LOGGER.error(String.format("No game with date %d for viewing", id));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
+            game.setUserId(null);
+            game.gethTeam().setUserId(null);
+            game.getgTeam().setUserId(null);
+            game.getRules().setUserId(null);
             return new ResponseEntity<>(game, HttpStatus.OK);
         }
     }

@@ -29,6 +29,7 @@ public class SearchGameController {
 
         if (token.length() > 2) {
             List<GameDescription> gameDescriptions = gameService.listGameDescriptions(token);
+            hideUserId(gameDescriptions);
 
             if (gameDescriptions.isEmpty()) {
                 LOGGER.debug(String.format("No game with token %s", token));
@@ -49,6 +50,7 @@ public class SearchGameController {
         if (fromDate > 0L) {
             long toDate = fromDate + 86400000L;
             List<GameDescription> gameDescriptions = gameService.listGameDescriptionsBetween(fromDate, toDate);
+            hideUserId(gameDescriptions);
 
             if (gameDescriptions.isEmpty()) {
                 LOGGER.debug(String.format("No game on date %s", date));
@@ -65,6 +67,7 @@ public class SearchGameController {
         LOGGER.debug("Request list live games");
 
         List<GameDescription> gameDescriptions = gameService.listLiveGameDescriptions();
+        hideUserId(gameDescriptions);
 
         if (gameDescriptions.isEmpty()) {
             LOGGER.debug("No live game");
@@ -83,6 +86,12 @@ public class SearchGameController {
         }
 
         return dateMillis;
+    }
+
+    private void hideUserId(List<GameDescription> gameDescriptions) {
+        for (GameDescription gameDescription : gameDescriptions) {
+            gameDescription.setUserId(null);
+        }
     }
 
 }
