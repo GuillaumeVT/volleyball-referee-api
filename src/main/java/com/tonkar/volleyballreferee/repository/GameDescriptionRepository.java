@@ -11,6 +11,8 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     boolean existsByDateAndStatus(long date, String status);
 
+    boolean existsByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+
     boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(String socialId, String provider, String status, String rulesName);
 
     boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndHName(String socialId, String provider, String status, String teamName);
@@ -18,6 +20,8 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
     boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndGName(String socialId, String provider, String status, String teamName);
 
     GameDescription findGameDescriptionByDate(long date);
+
+    GameDescription findGameDescriptionByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
 
     List<GameDescription> findGameDescriptionsByStatus(String status);
 

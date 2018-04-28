@@ -12,6 +12,8 @@ public interface UserService {
 
     Rules getUserRules(UserId userId, String name);
 
+    Rules getRules(UserId userId, String name);
+
     long getNumberOfUserRules(UserId userId);
 
     boolean createUserRules(Rules rules);
@@ -21,6 +23,8 @@ public interface UserService {
     boolean deleteUserRules(UserId userId, String name);
 
     List<Team> getUserTeams(UserId userId);
+
+    List<Team> getUserTeams(UserId userId, String kind);
 
     Team getUserTeam(UserId userId, String name);
 
@@ -34,7 +38,7 @@ public interface UserService {
 
     List<GameDescription> getUserGames(UserId userId);
 
-    Game getUserGame(UserId userId, long date);
+    GameDescription getUserGame(UserId userId, long date);
 
     long getNumberOfUserGames(UserId userId);
 
@@ -43,4 +47,6 @@ public interface UserService {
     boolean updateUserGame(GameDescription gameDescription);
 
     boolean deleteUserGame(UserId userId, long date);
+
+    int getUserGameCode(UserId userId, long date);
 }

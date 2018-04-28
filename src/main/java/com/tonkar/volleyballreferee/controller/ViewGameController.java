@@ -66,4 +66,18 @@ public class ViewGameController {
         }
     }
 
+    @GetMapping("/code/{code}")
+    public ResponseEntity<Game> getGameFromCode(@PathVariable("code") int code) {
+        LOGGER.debug(String.format("Request get game with code %d", code));
+
+        Game game = gameService.getGameFromCode(code);
+
+        if (game == null) {
+            LOGGER.error(String.format("No game with code %d", code));
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(game, HttpStatus.OK);
+        }
+    }
+
 }

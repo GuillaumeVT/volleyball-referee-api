@@ -1,6 +1,5 @@
 package com.tonkar.volleyballreferee.controller;
 
-import com.tonkar.volleyballreferee.model.Game;
 import com.tonkar.volleyballreferee.model.GameDescription;
 import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.UserService;
@@ -32,15 +31,28 @@ public class UserGameController {
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "id" }, method = RequestMethod.GET)
-    public ResponseEntity<Game> getGame(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("id") long id) {
+    public ResponseEntity<GameDescription> getGame(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("id") long id) {
         UserId userId = new UserId(socialId, provider);
-        Game game = userService.getUserGame(userId, id);
+        GameDescription game = userService.getUserGame(userId, id);
 
         if (game == null) {
             LOGGER.error(String.format("No game %d found for user %s", id, userId));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(game, HttpStatus.OK);
+        }
+    }
+
+    @RequestMapping(value = "/code", params = { "socialId", "provider", "id" }, method = RequestMethod.GET)
+    public ResponseEntity<Integer> getGameCode(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("id") long id) {
+        UserId userId = new UserId(socialId, provider);
+        int code = userService.getUserGameCode(userId, id);
+
+        if (code == -1) {
+            LOGGER.error(String.format("No game %d found for code for user %s", id, userId));
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(code, HttpStatus.OK);
         }
     }
 
@@ -58,7 +70,7 @@ public class UserGameController {
         if (result) {
             return new ResponseEntity<>(game, HttpStatus.CREATED);
         } else {
-            LOGGER.error(String.format("Game with date %d (%s vs %s) already exists for user %s",
+            LOGGER.error(String.format("Game with date %d (%s vs %s) not created for user %s",
                     game.getDate(), game.gethName(), game.getgName(), game.getUserId()));
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
         }

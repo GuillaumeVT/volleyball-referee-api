@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -66,7 +65,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public Game getGame(int code) {
+    public Game getGameFromCode(int code) {
         final Code fullCode = codeRepository.findCodeByCode(code);
 
         final Game game;

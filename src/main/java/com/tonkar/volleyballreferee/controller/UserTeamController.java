@@ -30,6 +30,13 @@ public class UserTeamController {
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "", params = { "socialId", "provider", "kind" }, method = RequestMethod.GET)
+    public ResponseEntity<List<Team>> getTeams(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind) {
+        UserId userId = new UserId(socialId, provider);
+        List<Team> teams = userService.getUserTeams(userId, kind);
+        return new ResponseEntity<>(teams, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.GET)
     public ResponseEntity<Team> getTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
         name = ControllerUtils.decodeUrlParameters(name);

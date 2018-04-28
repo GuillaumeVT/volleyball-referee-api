@@ -126,6 +126,11 @@ public class VolleyballRefereeApplicationTests {
 		searchResponse = restTemplate.getForEntity(urlOf("/api/search/game/date/32-1-2018"), GameDescription[].class);
 		assertEquals(0, searchResponse.getBody().length);
 
+		// View
+
+        ResponseEntity<Game> viewResponse = restTemplate.getForEntity(urlOf("/api/view/game/1516200793797"), Game.class);
+        assertEquals("BRAZIL", viewResponse.getBody().gethTeam().getName());
+
 		// Delete
 
 		gameService.deleteGame(1516200793797L, UserId.VBR_USER_ID);
@@ -284,7 +289,9 @@ public class VolleyballRefereeApplicationTests {
 		return game;
 	}
 
-	private String rules = "{\"userId\":{\"socialId\":\"01022018\",\"provider\":\"VBR\"},\"name\":\"Test Rules\",\"date\":1523199473000,\"setsPerGame\":5,\"pointsPerSet\":25,\"tieBreakInLastSet\":true,\"twoPointsDifference\":true,\"sanctions\":true,\"teamTimeouts\":true,\"teamTimeoutsPerSet\":2,\"teamTimeoutDuration\":30,\"technicalTimeouts\":true,\"technicalTimeoutDuration\":60,\"gameIntervals\":true,\"gameIntervalDuration\":180,\"teamSubstitutionsPerSet\":6,\"changeSidesEvery7Points\":false,\"customConsecutiveServesPerPlayer\": 9999}";
+	private UserId testUser = new UserId("01022018", "google");
+
+	private String rules = "{\"userId\":{\"socialId\":\"01022018\",\"provider\":\"google\"},\"name\":\"Test Rules\",\"date\":1523199473000,\"setsPerGame\":5,\"pointsPerSet\":25,\"tieBreakInLastSet\":true,\"twoPointsDifference\":true,\"sanctions\":true,\"teamTimeouts\":true,\"teamTimeoutsPerSet\":2,\"teamTimeoutDuration\":30,\"technicalTimeouts\":true,\"technicalTimeoutDuration\":60,\"gameIntervals\":true,\"gameIntervalDuration\":180,\"teamSubstitutionsPerSet\":6,\"changeSidesEvery7Points\":false,\"customConsecutiveServesPerPlayer\": 9999}";
 
 	@Test
 	public void testUserRules() {
@@ -303,8 +310,8 @@ public class VolleyballRefereeApplicationTests {
 		assertEquals("Test Rules", updateResponse.getBody().getName());
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-                .queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-                .queryParam("provider", UserId.VBR_USER_ID.getProvider());
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider());
         ResponseEntity<Rules[]> rulesListResponse = restTemplate.getForEntity(builder.toUriString(), Rules[].class);
         assertEquals(1, rulesListResponse.getBody().length);
         assertEquals("Test Rules", rulesListResponse.getBody()[0].getName());
@@ -313,34 +320,34 @@ public class VolleyballRefereeApplicationTests {
         assertEquals(3, rulesListResponse.getBody().length);
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-                .queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-                .queryParam("provider", UserId.VBR_USER_ID.getProvider())
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
                 .queryParam("name", "Test Rules");
         ResponseEntity<Rules> rulesResponse = restTemplate.getForEntity(builder.toUriString(), Rules.class);
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-                .queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-                .queryParam("provider", UserId.VBR_USER_ID.getProvider())
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
                 .queryParam("name", "Unknown Rules");
         rulesResponse = restTemplate.getForEntity(builder.toUriString(), Rules.class);
         assertEquals(HttpStatus.NOT_FOUND, rulesResponse.getStatusCode());
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules/count"))
-				.queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-				.queryParam("provider", UserId.VBR_USER_ID.getProvider());
+				.queryParam("socialId", testUser.getSocialId())
+				.queryParam("provider", testUser.getProvider());
 		ResponseEntity<Long> rulesCountResponse = restTemplate.getForEntity(builder.toUriString(), Long.class);
 		assertEquals(1L, rulesCountResponse.getBody().longValue());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-                .queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-                .queryParam("provider", UserId.VBR_USER_ID.getProvider())
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
                 .queryParam("name", "Test Rules");;
         restTemplate.delete(builder.toUriString());
 	}
 
-	private String team1 = "{\"userId\":{\"socialId\":\"01022018\",\"provider\":\"VBR\"},\"name\":\"BRAZIL\",\"kind\":\"INDOOR\",\"date\":1523199473000,\"color\":\"#f3bc07\",\"liberoColor\":\"#034694\",\"players\":[1,3,4,5,9,10,11,13,16,18,19,20],\"liberos\":[6,8],\"captain\":1,\"gender\":\"GENTS\"}";
-	private String team2 = "{\"userId\":{\"socialId\":\"01022018\",\"provider\":\"VBR\"},\"name\":\"FRANCE\",\"kind\":\"INDOOR\",\"date\":1523199473000,\"color\":\"#034694\",\"liberoColor\":\"#bc0019\",\"players\":[5,6,8,9,10,11,12,14,16,17,18,21],\"liberos\":[2,20],\"captain\":6,\"gender\":\"GENTS\"}";
+	private String team1 = "{\"userId\":{\"socialId\":\"01022018\",\"provider\":\"google\"},\"name\":\"BRAZIL\",\"kind\":\"INDOOR\",\"date\":1523199473000,\"color\":\"#f3bc07\",\"liberoColor\":\"#034694\",\"players\":[1,3,4,5,9,10,11,13,16,18,19,20],\"liberos\":[6,8],\"captain\":1,\"gender\":\"GENTS\"}";
+	private String team2 = "{\"userId\":{\"socialId\":\"01022018\",\"provider\":\"google\"},\"name\":\"FRANCE\",\"kind\":\"INDOOR\",\"date\":1523199473000,\"color\":\"#034694\",\"liberoColor\":\"#bc0019\",\"players\":[5,6,8,9,10,11,12,14,16,17,18,21],\"liberos\":[2,20],\"captain\":6,\"gender\":\"GENTS\"}";
 
 	@Test
     public void testUserTeams() {
@@ -363,43 +370,177 @@ public class VolleyballRefereeApplicationTests {
         assertEquals("BRAZIL", updateResponse.getBody().getName());
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-                .queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-                .queryParam("provider", UserId.VBR_USER_ID.getProvider());
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider());
         ResponseEntity<Team[]> teamListResponse = restTemplate.getForEntity(builder.toUriString(), Team[].class);
         assertEquals(2, teamListResponse.getBody().length);
         assertEquals("BRAZIL", teamListResponse.getBody()[0].getName());
         assertEquals("FRANCE", teamListResponse.getBody()[1].getName());
 
+		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
+				.queryParam("socialId", testUser.getSocialId())
+				.queryParam("provider", testUser.getProvider())
+				.queryParam("kind", "INDOOR");
+		teamListResponse = restTemplate.getForEntity(builder.toUriString(), Team[].class);
+		assertEquals(2, teamListResponse.getBody().length);
+		assertEquals("BRAZIL", teamListResponse.getBody()[0].getName());
+		assertEquals("FRANCE", teamListResponse.getBody()[1].getName());
+
+		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
+				.queryParam("socialId", testUser.getSocialId())
+				.queryParam("provider", testUser.getProvider())
+				.queryParam("kind", "BEACH");
+		teamListResponse = restTemplate.getForEntity(builder.toUriString(), Team[].class);
+		assertEquals(0, teamListResponse.getBody().length);
+
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-                .queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-                .queryParam("provider", UserId.VBR_USER_ID.getProvider())
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
                 .queryParam("name", "BRAZIL");
         ResponseEntity<Team> teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
         assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-                .queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-                .queryParam("provider", UserId.VBR_USER_ID.getProvider())
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
                 .queryParam("name", "ITALY");
         teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
         assertEquals(HttpStatus.NOT_FOUND, teamResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team/count"))
-                .queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-                .queryParam("provider", UserId.VBR_USER_ID.getProvider());
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider());
         ResponseEntity<Long> teamCountResponse = restTemplate.getForEntity(builder.toUriString(), Long.class);
         assertEquals(2L, teamCountResponse.getBody().longValue());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-                .queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-                .queryParam("provider", UserId.VBR_USER_ID.getProvider())
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
                 .queryParam("name", "BRAZIL");
         restTemplate.delete(builder.toUriString());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-                .queryParam("socialId", UserId.VBR_USER_ID.getSocialId())
-                .queryParam("provider", UserId.VBR_USER_ID.getProvider())
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
                 .queryParam("name", "FRANCE");
         restTemplate.delete(builder.toUriString());
+    }
+
+    private String description1 = "{\"userId\":{\"socialId\":\"01022018\",\"provider\":\"google\"},\"kind\":\"INDOOR\",\"date\":1520674661962,\"schedule\":0,\"gender\":\"GENTS\",\"usage\":\"NORMAL\",\"status\":\"SCHEDULED\",\"referee\":\"VBR\",\"league\":\"FIVB Volleyball World League 2017\",\"hName\":\"BRAZIL\",\"gName\":\"FRANCE\",\"hSets\":0,\"gSets\":0,\"rules\":\"Test Rules\"}";
+
+    @Test
+    public void testUserGames() {
+        ResponseEntity<Rules> createRulesResponse = restTemplate.exchange(urlOf("/api/user/rules"), HttpMethod.POST, entityOf(rules), Rules.class);
+        assertEquals(HttpStatus.CREATED, createRulesResponse.getStatusCode());
+
+        ResponseEntity<Team> createTeamResponse = restTemplate.exchange(urlOf("/api/user/team"), HttpMethod.POST, entityOf(team1), Team.class);
+        assertEquals(HttpStatus.CREATED, createTeamResponse.getStatusCode());
+
+        createTeamResponse = restTemplate.exchange(urlOf("/api/user/team"), HttpMethod.POST, entityOf(team2), Team.class);
+        assertEquals(HttpStatus.CREATED, createTeamResponse.getStatusCode());
+
+        ResponseEntity<GameDescription> gameResponse = restTemplate.exchange(urlOf("/api/user/game"), HttpMethod.PUT, entityOf(description1), GameDescription.class);
+        assertEquals(HttpStatus.NOT_MODIFIED, gameResponse.getStatusCode());
+
+        gameResponse = restTemplate.exchange(urlOf("/api/user/game"), HttpMethod.POST, entityOf(description1), GameDescription.class);
+        assertEquals(HttpStatus.CREATED, gameResponse.getStatusCode());
+
+        gameResponse = restTemplate.exchange(urlOf("/api/user/game"), HttpMethod.PUT, entityOf(description1), GameDescription.class);
+        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game/count"))
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider());
+        ResponseEntity<Long> gameCountResponse = restTemplate.getForEntity(builder.toUriString(), Long.class);
+        assertEquals(1L, gameCountResponse.getBody().longValue());
+
+        builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game"))
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
+                .queryParam("id", "1520674661962");
+        gameResponse = restTemplate.getForEntity(builder.toUriString(), GameDescription.class);
+        assertEquals(1520674661962L, gameResponse.getBody().getDate());
+
+        builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game/code"))
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
+                .queryParam("id", "1520674661962");
+        ResponseEntity<Integer> gameCodeResponse = restTemplate.getForEntity(builder.toUriString(), Integer.class);
+
+        int code = gameCodeResponse.getBody();
+
+        ResponseEntity<Game> viewResponse = restTemplate.getForEntity(urlOf("/api/view/game/code/" + code), Game.class);
+        assertEquals("BRAZIL", viewResponse.getBody().gethTeam().getName());
+        assertEquals("FRANCE", viewResponse.getBody().getgTeam().getName());
+
+        // Will fail until they are not used
+
+        builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
+                .queryParam("name", "Test Rules");
+        restTemplate.delete(builder.toUriString());
+
+		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
+				.queryParam("socialId", testUser.getSocialId())
+				.queryParam("provider", testUser.getProvider())
+				.queryParam("name", "Test Rules");
+		ResponseEntity<Rules> rulesResponse = restTemplate.getForEntity(builder.toUriString(), Rules.class);
+		assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
+
+        builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
+                .queryParam("name", "BRAZIL");
+        restTemplate.delete(builder.toUriString());
+
+		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
+				.queryParam("socialId", testUser.getSocialId())
+				.queryParam("provider", testUser.getProvider())
+				.queryParam("name", "BRAZIL");
+		ResponseEntity<Team> teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
+		assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
+
+		// Delete game
+
+        builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game"))
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
+                .queryParam("id", "1520674661962");;
+        restTemplate.delete(builder.toUriString());
+
+        // Now the rules and teams are free
+
+        builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
+                .queryParam("name", "Test Rules");;
+        restTemplate.delete(builder.toUriString());
+
+		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
+				.queryParam("socialId", testUser.getSocialId())
+				.queryParam("provider", testUser.getProvider())
+				.queryParam("name", "Test Rules");
+		rulesResponse = restTemplate.getForEntity(builder.toUriString(), Rules.class);
+		assertEquals(HttpStatus.NOT_FOUND, rulesResponse.getStatusCode());
+
+        builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
+                .queryParam("name", "BRAZIL");
+        restTemplate.delete(builder.toUriString());
+
+        builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
+                .queryParam("socialId", testUser.getSocialId())
+                .queryParam("provider", testUser.getProvider())
+                .queryParam("name", "FRANCE");
+        restTemplate.delete(builder.toUriString());
+
+		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
+				.queryParam("socialId", testUser.getSocialId())
+				.queryParam("provider", testUser.getProvider())
+				.queryParam("name", "BRAZIL");
+		teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
+		assertEquals(HttpStatus.NOT_FOUND, teamResponse.getStatusCode());
     }
 }

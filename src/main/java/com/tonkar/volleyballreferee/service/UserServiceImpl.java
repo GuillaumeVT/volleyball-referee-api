@@ -56,6 +56,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Rules getRules(UserId userId, String name) {
+        Rules rules = getUserRules(userId, name);
+
+        if (rules == null) {
+            for (Rules defaultRules : getDefaultRules()) {
+                if (defaultRules.getName().equals(name)) {
+                    rules = defaultRules;
+                }
+            }
+        }
+
+        return rules;
+    }
+
+    @Override
     public long getNumberOfUserRules(UserId userId) {
         return rulesRepository.countRulesByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
     }
@@ -66,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
         if (getUserRules(rules.getUserId(), rules.getName()) == null) {
             rulesRepository.insert(rules);
-            LOGGER.info(String.format("Created rules %s for user %s", rules.getName(), rules.getUserId()));
+            LOGGER.debug(String.format("Created rules %s for user %s", rules.getName(), rules.getUserId()));
             created = true;
         } else {
             LOGGER.error(String.format("Could not create rules %s for user %s because they already exist", rules.getName(), rules.getUserId()));
@@ -103,7 +118,7 @@ public class UserServiceImpl implements UserService {
             savedRules.setChangeSidesEvery7Points(rules.isChangeSidesEvery7Points());
             savedRules.setCustomConsecutiveServesPerPlayer(rules.getCustomConsecutiveServesPerPlayer());
             rulesRepository.save(savedRules);
-            LOGGER.info(String.format("Updated rules %s for user %s", rules.getName(), rules.getUserId()));
+            LOGGER.debug(String.format("Updated rules %s for user %s", rules.getName(), rules.getUserId()));
 
             for (GameDescription gameDescription : gameService.listGameDescriptionsUsingRules(rules.getName(), rules.getUserId())) {
                 updateUserGame(gameDescription);
@@ -120,11 +135,11 @@ public class UserServiceImpl implements UserService {
         final boolean deleted;
 
         if (gameService.hasGameUsingRules(name, userId)) {
-            LOGGER.info(String.format("Could not delete rules %s for user %s because they are used in a game", name, userId));
+            LOGGER.debug(String.format("Could not delete rules %s for user %s because they are used in a game", name, userId));
             deleted = false;
         } else {
             rulesRepository.deleteRulesByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
-            LOGGER.info(String.format("Deleted rules %s for user %s", name, userId));
+            LOGGER.debug(String.format("Deleted rules %s for user %s", name, userId));
             deleted = true;
         }
 
@@ -134,6 +149,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<Team> getUserTeams(UserId userId) {
         return teamRepository.findTeamsByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+    }
+
+    @Override
+    public List<Team> getUserTeams(UserId userId, String kind) {
+        return teamRepository.findTeamsByUserId_SocialIdAndUserId_ProviderAndKind(userId.getSocialId(), userId.getProvider(), kind);
     }
 
     @Override
@@ -152,7 +172,7 @@ public class UserServiceImpl implements UserService {
 
         if (getUserTeam(team.getUserId(), team.getName()) == null) {
             teamRepository.insert(team);
-            LOGGER.info(String.format("Created team %s for user %s", team.getName(), team.getUserId()));
+            LOGGER.debug(String.format("Created team %s for user %s", team.getName(), team.getUserId()));
             created = true;
         } else {
             LOGGER.error(String.format("Could not create team %s for user %s because it already exists", team.getName(), team.getUserId()));
@@ -181,7 +201,7 @@ public class UserServiceImpl implements UserService {
             savedTeam.setCaptain(team.getCaptain());
             savedTeam.setGender(team.getGender());
             teamRepository.save(savedTeam);
-            LOGGER.info(String.format("Updated team %s for user %s", team.getName(), team.getUserId()));
+            LOGGER.debug(String.format("Updated team %s for user %s", team.getName(), team.getUserId()));
 
             for (GameDescription gameDescription : gameService.listGameDescriptionsUsingTeam(team.getName(), team.getUserId())) {
                 updateUserGame(gameDescription);
@@ -198,11 +218,11 @@ public class UserServiceImpl implements UserService {
         final boolean deleted;
 
         if (gameService.hasGameUsingTeam(name, userId)) {
-            LOGGER.info(String.format("Could not delete team %s for user %s because it is used in a game", name, userId));
+            LOGGER.debug(String.format("Could not delete team %s for user %s because it is used in a game", name, userId));
             deleted = false;
         } else {
             teamRepository.deleteTeamByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
-            LOGGER.info(String.format("Deleted team %s for user %s", name, userId));
+            LOGGER.debug(String.format("Deleted team %s for user %s", name, userId));
             deleted = true;
         }
 
@@ -215,8 +235,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Game getUserGame(UserId userId, long date) {
-        return gameRepository.findGameByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
+    public GameDescription getUserGame(UserId userId, long date) {
+        return gameDescriptionRepository.findGameDescriptionByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
     }
 
     @Override
@@ -236,13 +256,13 @@ public class UserServiceImpl implements UserService {
 
             Team hTeam = getUserTeam(userId, gameDescription.gethName());
             Team gTeam = getUserTeam(userId, gameDescription.getgName());
-            Rules rules = getUserRules(userId, gameDescription.getRules());
+            Rules rules = getRules(userId, gameDescription.getRules());
 
             if (hTeam == null || gTeam == null || rules == null || code.getCode() < 0) {
                 LOGGER.error(String.format("Could not create game with date %d (%s vs %s) for user %s because at least one input was not found",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
                 created = false;
-            } else if (gameDescription.getKind().equals(hTeam.getKind()) || gameDescription.getKind().equals(gTeam.getKind())) {
+            } else if (!gameDescription.getKind().equals(hTeam.getKind()) || !gameDescription.getKind().equals(gTeam.getKind())) {
                 LOGGER.error(String.format("Could not create game with date %d (%s vs %s) for user %s because the game kind doesn't match with the team kinds",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
                 created = false;
@@ -268,7 +288,7 @@ public class UserServiceImpl implements UserService {
 
                 gameService.createGame(game);
                 codeRepository.insert(code);
-                LOGGER.info(String.format("Created game with date %d (%s vs %s) for user %s",
+                LOGGER.debug(String.format("Created game with date %d (%s vs %s) for user %s",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
                 created = true;
             }
@@ -286,7 +306,7 @@ public class UserServiceImpl implements UserService {
         final boolean updated;
 
         final UserId userId = gameDescription.getUserId();
-        final Game game = getUserGame(userId, gameDescription.getDate());
+        final Game game = gameRepository.findGameByDateAndUserId_SocialIdAndUserId_Provider(gameDescription.getDate(), userId.getSocialId(), userId.getProvider());
 
         if (game == null) {
             LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because it does not exist",
@@ -299,13 +319,13 @@ public class UserServiceImpl implements UserService {
         } else {
             Team hTeam = getUserTeam(userId, gameDescription.gethName());
             Team gTeam = getUserTeam(userId, gameDescription.getgName());
-            Rules rules = getUserRules(userId, gameDescription.getRules());
+            Rules rules = getRules(userId, gameDescription.getRules());
 
             if (hTeam == null || gTeam == null || rules == null) {
                 LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because at least one input was not found",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
                 updated = false;
-            } else if (gameDescription.getKind().equals(hTeam.getKind()) || gameDescription.getKind().equals(gTeam.getKind())) {
+            } else if (!gameDescription.getKind().equals(hTeam.getKind()) || !gameDescription.getKind().equals(gTeam.getKind())) {
                 LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because the game kind doesn't match with the team kinds",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
                 updated = false;
@@ -327,7 +347,7 @@ public class UserServiceImpl implements UserService {
                 game.setgCards(new ArrayList<>());
 
                 gameService.updateGame(game.getDate(), game);
-                LOGGER.info(String.format("Updated game with date %d (%s vs %s) for user %s",
+                LOGGER.debug(String.format("Updated game with date %d (%s vs %s) for user %s",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
                 updated = true;
             }
@@ -340,8 +360,21 @@ public class UserServiceImpl implements UserService {
     public boolean deleteUserGame(UserId userId, long date) {
         codeRepository.deleteCodeByDate(date);
         gameService.deleteGame(date, userId);
-        LOGGER.info(String.format("Deleted game with date %d for user %s", date, userId));
+        LOGGER.debug(String.format("Deleted game with date %d for user %s", date, userId));
         return true;
+    }
+
+    @Override
+    public int getUserGameCode(UserId userId, long date) {
+        final int code;
+
+        if (gameDescriptionRepository.existsByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider())) {
+            code = codeRepository.findCodeByDate(date).getCode();
+        } else {
+            code = -1;
+        }
+
+        return code;
     }
 
     private int allocateUniqueCode() {

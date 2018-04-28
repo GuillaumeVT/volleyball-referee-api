@@ -20,7 +20,7 @@ public interface GameService {
 
     Game getGame(long date);
 
-    Game getGame(int code);
+    Game getGameFromCode(int code);
 
     void createGame(Game game);
 

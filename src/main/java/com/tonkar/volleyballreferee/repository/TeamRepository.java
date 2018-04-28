@@ -11,6 +11,8 @@ public interface TeamRepository extends MongoRepository<Team,String> {
 
     List<Team> findTeamsByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
 
+    List<Team> findTeamsByUserId_SocialIdAndUserId_ProviderAndKind(String socialId, String provider, String kind);
+
     void deleteTeamByNameAndUserId_SocialIdAndUserId_Provider(String name, String socialId, String provider);
 
     long countTeamsByUserId_SocialIdAndUserId_Provider(String socialId, String provider);

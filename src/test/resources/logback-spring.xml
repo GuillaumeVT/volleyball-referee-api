@@ -28,4 +28,7 @@
     <logger name="com.tonkar.volleyballreferee.controller.UserTeamController" level="DEBUG">
         <appender-ref ref="CONSOLE" />
     </logger>
+    <logger name="com.tonkar.volleyballreferee.controller.UserGameController" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
 </configuration>
