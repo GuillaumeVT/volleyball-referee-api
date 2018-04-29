@@ -30,6 +30,20 @@ public class UserGameController {
         return new ResponseEntity<>(games, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "", params = { "socialId", "provider", "kind", "league" }, method = RequestMethod.GET)
+    public ResponseEntity<List<GameDescription>> getGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("provider") String league) {
+        UserId userId = new UserId(socialId, provider);
+        List<GameDescription> games = userService.getUserGames(userId, kind, league);
+        return new ResponseEntity<>(games, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "", params = { "socialId", "provider", "kind", "league", "team" }, method = RequestMethod.GET)
+    public ResponseEntity<List<GameDescription>> getGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("provider") String league, @RequestParam("team") String team) {
+        UserId userId = new UserId(socialId, provider);
+        List<GameDescription> games = userService.getUserGames(userId, kind, league, team);
+        return new ResponseEntity<>(games, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "", params = { "socialId", "provider", "id" }, method = RequestMethod.GET)
     public ResponseEntity<GameDescription> getGame(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("id") long id) {
         UserId userId = new UserId(socialId, provider);

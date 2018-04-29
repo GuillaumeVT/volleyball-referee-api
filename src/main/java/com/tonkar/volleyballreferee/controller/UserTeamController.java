@@ -37,11 +37,18 @@ public class UserTeamController {
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.GET)
-    public ResponseEntity<Team> getTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
+    @RequestMapping(value = "", params = { "socialId", "provider", "kind", "league" }, method = RequestMethod.GET)
+    public ResponseEntity<List<Team>> getTeams(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("league") String league) {
+        UserId userId = new UserId(socialId, provider);
+        List<Team> teams = userService.getUserTeams(userId, kind, league);
+        return new ResponseEntity<>(teams, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "", params = { "socialId", "provider", "name", "gender" }, method = RequestMethod.GET)
+    public ResponseEntity<Team> getTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name, @RequestParam("gender") String gender) {
         name = ControllerUtils.decodeUrlParameters(name);
         UserId userId = new UserId(socialId, provider);
-        Team team = userService.getUserTeam(userId, name);
+        Team team = userService.getUserTeam(userId, name, gender);
 
         if (team == null) {
             LOGGER.error(String.format("No team %s found for user %s", name, userId));
@@ -82,11 +89,11 @@ public class UserTeamController {
         }
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
+    @RequestMapping(value = "", params = { "socialId", "provider", "name", "gender" }, method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name, @RequestParam("gender") String gender) {
         name = ControllerUtils.decodeUrlParameters(name);
         UserId userId = new UserId(socialId, provider);
-        boolean result = userService.deleteUserTeam(userId, name);
+        boolean result = userService.deleteUserTeam(userId, name, gender);
 
         if (result) {
             return new ResponseEntity<>(HttpStatus.OK);

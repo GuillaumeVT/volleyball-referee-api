@@ -26,6 +26,8 @@ public class Rules {
     @NotNull
     private boolean tieBreakInLastSet;
     @NotNull
+    private int     pointsInTieBreak;
+    @NotNull
     private boolean twoPointsDifference;
     @NotNull
     private boolean sanctions;
@@ -52,7 +54,7 @@ public class Rules {
 
     public Rules() {}
 
-    public Rules(UserId userId, String name, long date, int setsPerGame, int pointsPerSet, boolean tieBreakInLastSet, boolean twoPointsDifference, boolean sanctions,
+    public Rules(UserId userId, String name, long date, int setsPerGame, int pointsPerSet, boolean tieBreakInLastSet, int pointsInTieBreak, boolean twoPointsDifference, boolean sanctions,
                  boolean teamTimeouts, int teamTimeoutsPerSet, int teamTimeoutDuration,
                  boolean technicalTimeouts, int technicalTimeoutDuration, boolean gameIntervals, int gameIntervalDuration,
                  int teamSubstitutionsPerSet, boolean changeSidesEvery7Points, int customConsecutiveServesPerPlayer) {
@@ -60,6 +62,7 @@ public class Rules {
         this.setsPerGame = setsPerGame;
         this.pointsPerSet = pointsPerSet;
         this.tieBreakInLastSet = tieBreakInLastSet;
+        this.pointsInTieBreak = pointsInTieBreak;
         this.twoPointsDifference = twoPointsDifference;
         this.sanctions = sanctions;
         this.teamTimeouts = teamTimeouts;
@@ -75,13 +78,13 @@ public class Rules {
     }
 
     public static final Rules OFFICIAL_INDOOR_RULES    = new Rules(UserId.VBR_USER_ID, "FIVB indoor 6x6 rules", 0L,
-            5, 25, true, true, true, true, 2, 30,
+            5, 25, true, 15, true, true, true, 2, 30,
             true, 60, true, 180, 6, false, 9999);
     public static final Rules OFFICIAL_BEACH_RULES     = new Rules(UserId.VBR_USER_ID, "FIVB beach rules", 0L,
-            3, 21, true, true, true, true, 1, 30,
+            3, 21, true, 15, true, true, true, 1, 30,
             true, 30, true, 60, 0, true, 9999);
     public static final Rules DEFAULT_INDOOR_4X4_RULES = new Rules(UserId.VBR_USER_ID, "Default 4x4 rules", 0L,
-            5, 25, true, true, true, true, 2, 30,
+            5, 25, true, 15, true, true, true, 2, 30,
             true, 60, true, 180, 4, false, 9999);
 
     public String getId() {
@@ -138,6 +141,14 @@ public class Rules {
 
     public void setTieBreakInLastSet(boolean tieBreakInLastSet) {
         this.tieBreakInLastSet = tieBreakInLastSet;
+    }
+
+    public int getPointsInTieBreak() {
+        return pointsInTieBreak;
+    }
+
+    public void setPointsInTieBreak(int pointsInTieBreak) {
+        this.pointsInTieBreak = pointsInTieBreak;
     }
 
     public boolean isTwoPointsDifference() {

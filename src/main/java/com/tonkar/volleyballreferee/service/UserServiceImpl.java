@@ -29,6 +29,9 @@ public class UserServiceImpl implements UserService {
     private GameDescriptionRepository gameDescriptionRepository;
 
     @Autowired
+    private LeagueRepository leagueRepository;
+
+    @Autowired
     private CodeRepository codeRepository;
 
     @Autowired
@@ -105,6 +108,7 @@ public class UserServiceImpl implements UserService {
             savedRules.setSetsPerGame(rules.getSetsPerGame());
             savedRules.setPointsPerSet(rules.getPointsPerSet());
             savedRules.setTieBreakInLastSet(rules.isTieBreakInLastSet());
+            savedRules.setPointsInTieBreak(rules.getPointsInTieBreak());
             savedRules.setTwoPointsDifference(rules.isTwoPointsDifference());
             savedRules.setSanctions(rules.isSanctions());
             savedRules.setTeamTimeouts(rules.isTeamTimeouts());
@@ -157,8 +161,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Team getUserTeam(UserId userId, String name) {
-        return teamRepository.findTeamByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
+    public List<Team> getUserTeams(UserId userId, String kind, String leagueName) {
+        List<Team> allTeamsOfKind = getUserTeams(userId, kind);
+        List<GameDescription> leagueGames = getUserGames(userId, kind, leagueName);
+
+        List<Team> teams = new ArrayList<>();
+
+        for (Team team : allTeamsOfKind) {
+            boolean found = false;
+            int index = 0;
+
+            while (!found && index < leagueGames.size()) {
+                GameDescription game = leagueGames.get(index);
+
+                if (team.getName().equals(game.gethName()) || team.getName().equals(game.getgName())) {
+                    teams.add(team);
+                    found = true;
+                }
+
+                index++;
+            }
+        }
+
+        return teams;
+    }
+
+    @Override
+    public Team getUserTeam(UserId userId, String name, String gender) {
+        return teamRepository.findTeamByNameAndUserId_SocialIdAndUserId_ProviderAndGender(name, userId.getSocialId(), userId.getProvider(), gender);
     }
 
     @Override
@@ -170,7 +200,7 @@ public class UserServiceImpl implements UserService {
     public boolean createUserTeam(Team team) {
         final boolean created;
 
-        if (getUserTeam(team.getUserId(), team.getName()) == null) {
+        if (getUserTeam(team.getUserId(), team.getName(), team.getGender()) == null) {
             teamRepository.insert(team);
             LOGGER.debug(String.format("Created team %s for user %s", team.getName(), team.getUserId()));
             created = true;
@@ -186,7 +216,7 @@ public class UserServiceImpl implements UserService {
     public boolean updateUserTeam(Team team) {
         final boolean updated;
 
-        Team savedTeam = getUserTeam(team.getUserId(), team.getName());
+        Team savedTeam = getUserTeam(team.getUserId(), team.getName(), team.getGender());
 
         if (savedTeam == null) {
             LOGGER.error(String.format("Could not update team %s for user %s because it does not exist", team.getName(), team.getUserId()));
@@ -214,14 +244,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean deleteUserTeam(UserId userId, String name) {
+    public boolean deleteUserTeam(UserId userId, String name, String gender) {
         final boolean deleted;
 
         if (gameService.hasGameUsingTeam(name, userId)) {
             LOGGER.debug(String.format("Could not delete team %s for user %s because it is used in a game", name, userId));
             deleted = false;
         } else {
-            teamRepository.deleteTeamByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
+            teamRepository.deleteTeamByNameAndUserId_SocialIdAndUserId_ProviderAndGender(name, userId.getSocialId(), userId.getProvider(), gender);
             LOGGER.debug(String.format("Deleted team %s for user %s", name, userId));
             deleted = true;
         }
@@ -232,6 +262,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<GameDescription> getUserGames(UserId userId) {
         return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+    }
+
+    @Override
+    public List<GameDescription> getUserGames(UserId userId, String kind, String leagueName) {
+        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndKindAndLeague(userId.getSocialId(), userId.getProvider(), kind, leagueName);
+    }
+
+    @Override
+    public List<GameDescription> getUserGames(UserId userId, String kind, String leagueName, String teamName) {
+        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndKindAndLeagueAndTeamName(userId.getSocialId(), userId.getProvider(), kind, leagueName, teamName);
     }
 
     @Override
@@ -254,8 +294,8 @@ public class UserServiceImpl implements UserService {
             code.setDate(gameDescription.getDate());
             code.setCode(allocateUniqueCode());
 
-            Team hTeam = getUserTeam(userId, gameDescription.gethName());
-            Team gTeam = getUserTeam(userId, gameDescription.getgName());
+            Team hTeam = getUserTeam(userId, gameDescription.gethName(), gameDescription.getGender());
+            Team gTeam = getUserTeam(userId, gameDescription.getgName(), gameDescription.getGender());
             Rules rules = getRules(userId, gameDescription.getRules());
 
             if (hTeam == null || gTeam == null || rules == null || code.getCode() < 0) {
@@ -317,8 +357,8 @@ public class UserServiceImpl implements UserService {
                     gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId, game.getStatus()));
             updated = false;
         } else {
-            Team hTeam = getUserTeam(userId, gameDescription.gethName());
-            Team gTeam = getUserTeam(userId, gameDescription.getgName());
+            Team hTeam = getUserTeam(userId, gameDescription.gethName(), gameDescription.getGender());
+            Team gTeam = getUserTeam(userId, gameDescription.getgName(), gameDescription.getGender());
             Rules rules = getRules(userId, gameDescription.getRules());
 
             if (hTeam == null || gTeam == null || rules == null) {
@@ -375,6 +415,70 @@ public class UserServiceImpl implements UserService {
         }
 
         return code;
+    }
+
+    @Override
+    public List<League> getUserLeagues(UserId userId) {
+        return leagueRepository.findLeaguesByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+    }
+
+    @Override
+    public List<League> getUserLeagues(UserId userId, String kind) {
+        return leagueRepository.findLeaguesByUserId_SocialIdAndUserId_ProviderAndKind(userId.getSocialId(), userId.getProvider(), kind);
+    }
+
+    @Override
+    public League getUserLeague(UserId userId, String name) {
+        return leagueRepository.findLeagueByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
+    }
+
+    @Override
+    public long getNumberOfUserLeagues(UserId userId) {
+        return leagueRepository.countLeaguesByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+    }
+
+    @Override
+    public boolean createUserLeague(League league) {
+        final boolean created;
+
+        if (getUserLeague(league.getUserId(), league.getName()) == null) {
+            leagueRepository.insert(league);
+            LOGGER.debug(String.format("Created league %s for user %s", league.getName(), league.getUserId()));
+            created = true;
+        } else {
+            LOGGER.error(String.format("Could not create league %s for user %s because it already exists", league.getName(), league.getUserId()));
+            created = false;
+        }
+
+        return created;
+    }
+
+    @Override
+    public boolean updateUserLeague(League league) {
+        final boolean updated;
+
+        League savedLeague = getUserLeague(league.getUserId(), league.getName());
+
+        if (savedLeague == null) {
+            LOGGER.error(String.format("Could not update league %s for user %s because it does not exist", league.getName(), league.getUserId()));
+            updated = false;
+        } else {
+            savedLeague.setKind(league.getKind());
+            savedLeague.setDate(league.getDate());
+            leagueRepository.save(savedLeague);
+            LOGGER.debug(String.format("Updated league %s for user %s", league.getName(), league.getUserId()));
+
+            updated = true;
+        }
+
+        return updated;
+    }
+
+    @Override
+    public boolean deleteUserLeague(UserId userId, String name) {
+        leagueRepository.deleteLeagueByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
+        LOGGER.debug(String.format("Deleted league %s for user %s", name, userId));
+        return true;
     }
 
     private int allocateUniqueCode() {

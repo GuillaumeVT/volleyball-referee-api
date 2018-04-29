@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -255,14 +254,8 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<GameDescription> listGameDescriptionsUsingTeam(String teamName, UserId userId) {
-        List<GameDescription> games = new ArrayList<>();
-
-        games.addAll(gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndHName(
-                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName));
-        games.addAll(gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndGName(
-                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName));
-
-        return games;
+        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndTeamName(
+                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName);
     }
 
 }

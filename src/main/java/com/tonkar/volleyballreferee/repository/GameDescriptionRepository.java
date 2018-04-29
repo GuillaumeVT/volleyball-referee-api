@@ -2,6 +2,7 @@ package com.tonkar.volleyballreferee.repository;
 
 import com.tonkar.volleyballreferee.model.GameDescription;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import java.util.List;
 
@@ -25,17 +26,21 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     List<GameDescription> findGameDescriptionsByStatus(String status);
 
-    List<GameDescription> findGameDescriptionsByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLike(String hName, String gName, String league, String referee);
+    List<GameDescription> findGameDescriptionsByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLike(String hName, String gName, String leagueName, String refereeName);
 
     List<GameDescription> findGameDescriptionsByDateBetween(long fromDate, long toDate);
 
     List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
 
+    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndKindAndLeague(String socialId, String provider, String kind, String leagueName);
+
     List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(String socialId, String provider, String status, String rulesName);
 
-    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndHName(String socialId, String provider, String status, String teamName);
+    @Query("{ '$and': [ { 'userId.socialId': ?0 }, { 'userId.provider': ?1 }, { 'status': ?2 }, { '$or': [ { 'hName': ?3 }, { 'gName': ?3 } ] } ] }")
+    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndTeamName(String socialId, String provider, String status, String teamName);
 
-    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndGName(String socialId, String provider, String status, String teamName);
+    @Query("{ '$and': [ { 'userId.socialId': ?0 }, { 'userId.provider': ?1 }, { 'kind': ?2 }, { 'league': ?3 }, { '$or': [ { 'hName': ?4 }, { 'gName': ?4 } ] } ] }")
+    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndKindAndLeagueAndTeamName(String socialId, String provider, String kind, String leagueName, String teamName);
 
     void deleteGameDescriptionByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
 
