@@ -270,8 +270,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<GameDescription> getUserGames(UserId userId, String kind, String leagueName, String teamName) {
-        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndKindAndLeagueAndTeamName(userId.getSocialId(), userId.getProvider(), kind, leagueName, teamName);
+    public List<GameDescription> getUserGames(UserId userId, String kind, String leagueName, String teamName, String teamGender) {
+        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndKindAndLeagueAndTeamNameAndGender(userId.getSocialId(), userId.getProvider(), kind, leagueName, teamName, teamGender);
     }
 
     @Override
@@ -428,8 +428,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public League getUserLeague(UserId userId, String name) {
-        return leagueRepository.findLeagueByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
+    public League getUserLeague(UserId userId, long date) {
+        return leagueRepository.findLeagueByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
     }
 
     @Override
@@ -441,7 +441,7 @@ public class UserServiceImpl implements UserService {
     public boolean createUserLeague(League league) {
         final boolean created;
 
-        if (getUserLeague(league.getUserId(), league.getName()) == null) {
+        if (getUserLeague(league.getUserId(), league.getDate()) == null) {
             leagueRepository.insert(league);
             LOGGER.debug(String.format("Created league %s for user %s", league.getName(), league.getUserId()));
             created = true;
@@ -457,7 +457,7 @@ public class UserServiceImpl implements UserService {
     public boolean updateUserLeague(League league) {
         final boolean updated;
 
-        League savedLeague = getUserLeague(league.getUserId(), league.getName());
+        League savedLeague = getUserLeague(league.getUserId(), league.getDate());
 
         if (savedLeague == null) {
             LOGGER.error(String.format("Could not update league %s for user %s because it does not exist", league.getName(), league.getUserId()));
@@ -475,9 +475,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean deleteUserLeague(UserId userId, String name) {
-        leagueRepository.deleteLeagueByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
-        LOGGER.debug(String.format("Deleted league %s for user %s", name, userId));
+    public boolean deleteUserLeague(UserId userId, long date) {
+        leagueRepository.deleteLeagueByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
+        LOGGER.debug(String.format("Deleted league with date %d for user %s", date, userId));
         return true;
     }
 

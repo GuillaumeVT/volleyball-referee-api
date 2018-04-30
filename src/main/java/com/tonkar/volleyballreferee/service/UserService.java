@@ -42,7 +42,7 @@ public interface UserService {
 
     List<GameDescription> getUserGames(UserId userId, String kind, String leagueName);
 
-    List<GameDescription> getUserGames(UserId userId, String kind, String leagueName, String teamName);
+    List<GameDescription> getUserGames(UserId userId, String kind, String leagueName, String teamName, String teamGender);
 
     GameDescription getUserGame(UserId userId, long date);
 
@@ -60,7 +60,7 @@ public interface UserService {
 
     List<League> getUserLeagues(UserId userId, String kind);
 
-    League getUserLeague(UserId userId, String name);
+    League getUserLeague(UserId userId, long date);
 
     long getNumberOfUserLeagues(UserId userId);
 
@@ -68,5 +68,5 @@ public interface UserService {
 
     boolean updateUserLeague(League league);
 
-    boolean deleteUserLeague(UserId userId, String name);
+    boolean deleteUserLeague(UserId userId, long date);
 }

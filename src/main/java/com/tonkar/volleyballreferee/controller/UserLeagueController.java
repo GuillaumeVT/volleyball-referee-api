@@ -37,14 +37,13 @@ public class UserLeagueController {
         return new ResponseEntity<>(leagues, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.GET)
-    public ResponseEntity<League> getLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
-        name = ControllerUtils.decodeUrlParameters(name);
+    @RequestMapping(value = "", params = { "socialId", "provider", "date" }, method = RequestMethod.GET)
+    public ResponseEntity<League> getLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("date") long date) {
         UserId userId = new UserId(socialId, provider);
-        League league = userService.getUserLeague(userId, name);
+        League league = userService.getUserLeague(userId, date);
 
         if (league == null) {
-            LOGGER.error(String.format("No league %s found for user %s", name, userId));
+            LOGGER.error(String.format("No league with date %d found for user %s", date, userId));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(league, HttpStatus.OK);
@@ -82,16 +81,15 @@ public class UserLeagueController {
         }
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
-        name = ControllerUtils.decodeUrlParameters(name);
+    @RequestMapping(value = "", params = { "socialId", "provider", "date" }, method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("date") long date) {
         UserId userId = new UserId(socialId, provider);
-        boolean result = userService.deleteUserLeague(userId, name);
+        boolean result = userService.deleteUserLeague(userId, date);
 
         if (result) {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
-            LOGGER.error(String.format("Failed to delete league %s for user %s", name, userId));
+            LOGGER.error(String.format("Failed to delete league with date %d for user %s", date, userId));
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
         }
     }

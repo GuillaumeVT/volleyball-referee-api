@@ -39,8 +39,8 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
     @Query("{ '$and': [ { 'userId.socialId': ?0 }, { 'userId.provider': ?1 }, { 'status': ?2 }, { '$or': [ { 'hName': ?3 }, { 'gName': ?3 } ] } ] }")
     List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndTeamName(String socialId, String provider, String status, String teamName);
 
-    @Query("{ '$and': [ { 'userId.socialId': ?0 }, { 'userId.provider': ?1 }, { 'kind': ?2 }, { 'league': ?3 }, { '$or': [ { 'hName': ?4 }, { 'gName': ?4 } ] } ] }")
-    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndKindAndLeagueAndTeamName(String socialId, String provider, String kind, String leagueName, String teamName);
+    @Query("{ '$and': [ { 'userId.socialId': ?0 }, { 'userId.provider': ?1 }, { 'kind': ?2 }, { 'league': ?3 }, { '$or': [ { 'hName': ?4 }, { 'gName': ?4 } ] }, { 'gender': ?5 } ] }")
+    List<GameDescription> findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndKindAndLeagueAndTeamNameAndGender(String socialId, String provider, String kind, String leagueName, String teamName, String teamGender);
 
     void deleteGameDescriptionByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
 

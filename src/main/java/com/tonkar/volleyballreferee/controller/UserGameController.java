@@ -31,16 +31,17 @@ public class UserGameController {
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "kind", "league" }, method = RequestMethod.GET)
-    public ResponseEntity<List<GameDescription>> getGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("provider") String league) {
+    public ResponseEntity<List<GameDescription>> getGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("league") String league) {
         UserId userId = new UserId(socialId, provider);
         List<GameDescription> games = userService.getUserGames(userId, kind, league);
         return new ResponseEntity<>(games, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "kind", "league", "team" }, method = RequestMethod.GET)
-    public ResponseEntity<List<GameDescription>> getGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("provider") String league, @RequestParam("team") String team) {
+    @RequestMapping(value = "", params = { "socialId", "provider", "kind", "league", "team", "gender" }, method = RequestMethod.GET)
+    public ResponseEntity<List<GameDescription>> getGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind,
+                                                          @RequestParam("league") String league, @RequestParam("team") String team, @RequestParam("gender") String gender) {
         UserId userId = new UserId(socialId, provider);
-        List<GameDescription> games = userService.getUserGames(userId, kind, league, team);
+        List<GameDescription> games = userService.getUserGames(userId, kind, league, team, gender);
         return new ResponseEntity<>(games, HttpStatus.OK);
     }
 
