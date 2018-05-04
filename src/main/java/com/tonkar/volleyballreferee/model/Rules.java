@@ -48,7 +48,11 @@ public class Rules {
     @NotNull
     private int     teamSubstitutionsPerSet;
     @NotNull
-    private boolean changeSidesEvery7Points;
+    private boolean changeSidesBeach;
+    @NotNull
+    private int     changeSidesPeriod;
+    @NotNull
+    private int     changeSidesPeriodTieBreak;
     @NotNull
     private int     customConsecutiveServesPerPlayer;
 
@@ -57,7 +61,9 @@ public class Rules {
     public Rules(UserId userId, String name, long date, int setsPerGame, int pointsPerSet, boolean tieBreakInLastSet, int pointsInTieBreak, boolean twoPointsDifference, boolean sanctions,
                  boolean teamTimeouts, int teamTimeoutsPerSet, int teamTimeoutDuration,
                  boolean technicalTimeouts, int technicalTimeoutDuration, boolean gameIntervals, int gameIntervalDuration,
-                 int teamSubstitutionsPerSet, boolean changeSidesEvery7Points, int customConsecutiveServesPerPlayer) {
+                 int teamSubstitutionsPerSet, boolean changeSidesBeach, int changeSidesPeriod, int changeSidesPeriodTieBreak, int customConsecutiveServesPerPlayer) {
+        this.userId = userId;
+        this.date = date;
         this.name = name;
         this.setsPerGame = setsPerGame;
         this.pointsPerSet = pointsPerSet;
@@ -73,19 +79,24 @@ public class Rules {
         this.gameIntervals = gameIntervals;
         this.gameIntervalDuration = gameIntervalDuration;
         this.teamSubstitutionsPerSet = teamSubstitutionsPerSet;
-        this.changeSidesEvery7Points = changeSidesEvery7Points;
+        this.changeSidesBeach = changeSidesBeach;
+        this.changeSidesPeriod = changeSidesPeriod;
+        this.changeSidesPeriodTieBreak = changeSidesPeriodTieBreak;
         this.customConsecutiveServesPerPlayer = customConsecutiveServesPerPlayer;
     }
 
     public static final Rules OFFICIAL_INDOOR_RULES    = new Rules(UserId.VBR_USER_ID, "FIVB indoor 6x6 rules", 0L,
             5, 25, true, 15, true, true, true, 2, 30,
-            true, 60, true, 180, 6, false, 9999);
+            true, 60, true, 180,
+            6, false, 0, 0, 9999);
     public static final Rules OFFICIAL_BEACH_RULES     = new Rules(UserId.VBR_USER_ID, "FIVB beach rules", 0L,
             3, 21, true, 15, true, true, true, 1, 30,
-            true, 30, true, 60, 0, true, 9999);
+            true, 30, true, 60,
+            0, true, 7, 5, 9999);
     public static final Rules DEFAULT_INDOOR_4X4_RULES = new Rules(UserId.VBR_USER_ID, "Default 4x4 rules", 0L,
             5, 25, true, 15, true, true, true, 2, 30,
-            true, 60, true, 180, 4, false, 9999);
+            true, 60, true, 180,
+            4, false, 0, 0, 9999);
 
     public String getId() {
         return id;
@@ -231,12 +242,28 @@ public class Rules {
         this.teamSubstitutionsPerSet = teamSubstitutionsPerSet;
     }
 
-    public boolean isChangeSidesEvery7Points() {
-        return changeSidesEvery7Points;
+    public boolean isChangeSidesBeach() {
+        return changeSidesBeach;
     }
 
-    public void setChangeSidesEvery7Points(boolean changeSidesEvery7Points) {
-        this.changeSidesEvery7Points = changeSidesEvery7Points;
+    public void setChangeSidesBeach(boolean changeSidesBeach) {
+        this.changeSidesBeach = changeSidesBeach;
+    }
+
+    public int getChangeSidesPeriod() {
+        return changeSidesPeriod;
+    }
+
+    public void setChangeSidesPeriod(int changeSidesPeriod) {
+        this.changeSidesPeriod = changeSidesPeriod;
+    }
+
+    public int getChangeSidesPeriodTieBreak() {
+        return changeSidesPeriodTieBreak;
+    }
+
+    public void setChangeSidesPeriodTieBreak(int changeSidesPeriodTieBreak) {
+        this.changeSidesPeriodTieBreak = changeSidesPeriodTieBreak;
     }
 
     public int getCustomConsecutiveServesPerPlayer() {

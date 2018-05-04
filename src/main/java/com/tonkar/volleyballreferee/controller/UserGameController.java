@@ -78,6 +78,13 @@ public class UserGameController {
         return new ResponseEntity<>(numberOfUserGames, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/count", params = { "socialId", "provider", "kind", "league" }, method = RequestMethod.GET)
+    public ResponseEntity<Long> getNumberOfGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("league") String league) {
+        UserId userId = new UserId(socialId, provider);
+        long numberOfUserGames = userService.getNumberOfUserGames(userId, kind, league);
+        return new ResponseEntity<>(numberOfUserGames, HttpStatus.OK);
+    }
+
     @PostMapping("")
     public ResponseEntity<GameDescription> createGame(@Valid @RequestBody GameDescription game) {
         boolean result = userService.createUserGame(game);

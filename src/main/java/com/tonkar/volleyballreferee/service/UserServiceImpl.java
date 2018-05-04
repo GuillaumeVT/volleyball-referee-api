@@ -119,7 +119,9 @@ public class UserServiceImpl implements UserService {
             savedRules.setGameIntervals(rules.isGameIntervals());
             savedRules.setGameIntervalDuration(rules.getGameIntervalDuration());
             savedRules.setTeamSubstitutionsPerSet(rules.getTeamSubstitutionsPerSet());
-            savedRules.setChangeSidesEvery7Points(rules.isChangeSidesEvery7Points());
+            savedRules.setChangeSidesBeach(rules.isChangeSidesBeach());
+            savedRules.setChangeSidesPeriod(rules.getChangeSidesPeriod());
+            savedRules.setChangeSidesPeriodTieBreak(rules.getChangeSidesPeriodTieBreak());
             savedRules.setCustomConsecutiveServesPerPlayer(rules.getCustomConsecutiveServesPerPlayer());
             rulesRepository.save(savedRules);
             LOGGER.debug(String.format("Updated rules %s for user %s", rules.getName(), rules.getUserId()));
@@ -285,6 +287,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public long getNumberOfUserGames(UserId userId, String kind, String leagueName) {
+        return gameDescriptionRepository.countByUserId_SocialIdAndUserId_ProviderAndKindAndLeague(userId.getSocialId(), userId.getProvider(), kind, leagueName);
+    }
+
+    @Override
     public boolean createUserGame(GameDescription gameDescription) {
         final boolean created;
         final UserId userId = gameDescription.getUserId();
@@ -433,6 +440,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public League getUserLeague(UserId userId, String name) {
+        return leagueRepository.findLeagueByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
+    }
+
+    @Override
     public long getNumberOfUserLeagues(UserId userId) {
         return leagueRepository.countLeaguesByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
     }
@@ -441,7 +453,7 @@ public class UserServiceImpl implements UserService {
     public boolean createUserLeague(League league) {
         final boolean created;
 
-        if (getUserLeague(league.getUserId(), league.getDate()) == null) {
+        if (getUserLeague(league.getUserId(), league.getName()) == null) {
             leagueRepository.insert(league);
             LOGGER.debug(String.format("Created league %s for user %s", league.getName(), league.getUserId()));
             created = true;

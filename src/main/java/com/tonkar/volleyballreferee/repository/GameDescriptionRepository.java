@@ -56,4 +56,5 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     long countByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
 
+    long countByUserId_SocialIdAndUserId_ProviderAndKindAndLeague(String socialId, String provider, String kind, String leagueName);
 }

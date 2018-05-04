@@ -48,6 +48,8 @@ public interface UserService {
 
     long getNumberOfUserGames(UserId userId);
 
+    long getNumberOfUserGames(UserId userId, String kind, String leagueName);
+
     boolean createUserGame(GameDescription gameDescription);
 
     boolean updateUserGame(GameDescription gameDescription);
@@ -61,6 +63,8 @@ public interface UserService {
     List<League> getUserLeagues(UserId userId, String kind);
 
     League getUserLeague(UserId userId, long date);
+
+    League getUserLeague(UserId userId, String name);
 
     long getNumberOfUserLeagues(UserId userId);
 
