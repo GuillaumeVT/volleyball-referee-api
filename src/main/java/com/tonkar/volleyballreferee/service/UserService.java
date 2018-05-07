@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface UserService {
 
-    List<Rules> getUserRules(UserId userId);
+    List<Rules> listUserRules(UserId userId);
 
-    List<Rules> getDefaultRules();
+    List<Rules> listDefaultRules();
 
     Rules getUserRules(UserId userId, String name);
 
@@ -22,11 +22,11 @@ public interface UserService {
 
     boolean deleteUserRules(UserId userId, String name);
 
-    List<Team> getUserTeams(UserId userId);
+    List<Team> listUserTeams(UserId userId);
 
-    List<Team> getUserTeams(UserId userId, String kind);
+    List<Team> listUserTeamsOfKind(UserId userId, String kind);
 
-    List<Team> getUserTeams(UserId userId, String kind, String leagueName);
+    List<Team> listUserTeamsOfKindInLeague(long date);
 
     Team getUserTeam(UserId userId, String name, String gender);
 
@@ -38,11 +38,19 @@ public interface UserService {
 
     boolean deleteUserTeam(UserId userId, String name, String gender);
 
-    List<GameDescription> getUserGames(UserId userId);
+    List<GameDescription> listUserGames(UserId userId);
 
-    List<GameDescription> getUserGames(UserId userId, String kind, String leagueName);
+    List<GameDescription> listUserGamesInLeague(UserId userId, String kind, String leagueName);
 
-    List<GameDescription> getUserGames(UserId userId, String kind, String leagueName, String teamName, String teamGender);
+    List<GameDescription> listUserGamesInLeague(long leagueDate);
+
+    List<GameDescription> listUserGamesOfTeamInLeague(long leagueDate, String teamName, String teamGender);
+
+    List<GameDescription> listLiveUserGamesInLeague(long leagueDate);
+
+    List<GameDescription> listLast10UserGamesInLeague(long leagueDate);
+
+    List<GameDescription> listNext10UserGamesInLeague(long leagueDate);
 
     GameDescription getUserGame(UserId userId, long date);
 
@@ -58,9 +66,11 @@ public interface UserService {
 
     int getUserGameCode(UserId userId, long date);
 
-    List<League> getUserLeagues(UserId userId);
+    List<League> listUserLeagues(UserId userId);
 
-    List<League> getUserLeagues(UserId userId, String kind);
+    List<League> listUserLeaguesOfKind(UserId userId, String kind);
+
+    League getUserLeague(long date);
 
     League getUserLeague(UserId userId, long date);
 
@@ -69,8 +79,6 @@ public interface UserService {
     long getNumberOfUserLeagues(UserId userId);
 
     boolean createUserLeague(League league);
-
-    boolean updateUserLeague(League league);
 
     boolean deleteUserLeague(UserId userId, long date);
 }

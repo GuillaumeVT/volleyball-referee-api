@@ -2,6 +2,7 @@ package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.model.GameDescription;
 import com.tonkar.volleyballreferee.service.GameService;
+import com.tonkar.volleyballreferee.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class SearchGameController {
 
     @Autowired
     private GameService gameService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/{token}")
     public ResponseEntity<List<GameDescription>> searchGames(@PathVariable("token") String token) {
@@ -72,6 +76,41 @@ public class SearchGameController {
         if (gameDescriptions.isEmpty()) {
             LOGGER.debug("No live game");
         }
+        return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
+    }
+
+    @GetMapping("/league/{id}")
+    public ResponseEntity<List<GameDescription>> searchGamesInLeague(@PathVariable("id") long id) {
+        List<GameDescription> gameDescriptions = userService.listUserGamesInLeague(id);
+        hideUserId(gameDescriptions);
+        return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/league/{id}", params = { "team", "gender" }, method = RequestMethod.GET)
+    public ResponseEntity<List<GameDescription>> searchGamesOfTeamInLeague(@PathVariable("id") long id, @RequestParam("team") String team, @RequestParam("gender") String gender) {
+        List<GameDescription> gameDescriptions = userService.listUserGamesOfTeamInLeague(id, team, gender);
+        hideUserId(gameDescriptions);
+        return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
+    }
+
+    @GetMapping("/league/{id}/live")
+    public ResponseEntity<List<GameDescription>> searchLiveGamesInLeague(@PathVariable("id") long id) {
+        List<GameDescription> gameDescriptions = userService.listLiveUserGamesInLeague(id);
+        hideUserId(gameDescriptions);
+        return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
+    }
+
+    @GetMapping("/league/{id}/last10")
+    public ResponseEntity<List<GameDescription>> searchLast10GamesInLeague(@PathVariable("id") long id) {
+        List<GameDescription> gameDescriptions = userService.listLast10UserGamesInLeague(id);
+        hideUserId(gameDescriptions);
+        return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
+    }
+
+    @GetMapping("/league/{id}/next10")
+    public ResponseEntity<List<GameDescription>> searchNext10GamesInLeague(@PathVariable("id") long id) {
+        List<GameDescription> gameDescriptions = userService.listNext10UserGamesInLeague(id);
+        hideUserId(gameDescriptions);
         return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);
     }
 

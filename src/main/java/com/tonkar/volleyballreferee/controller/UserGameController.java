@@ -24,29 +24,21 @@ public class UserGameController {
     private UserService userService;
 
     @RequestMapping(value = "", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<List<GameDescription>> getGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
+    public ResponseEntity<List<GameDescription>> listUserGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
         UserId userId = new UserId(socialId, provider);
-        List<GameDescription> games = userService.getUserGames(userId);
+        List<GameDescription> games = userService.listUserGames(userId);
         return new ResponseEntity<>(games, HttpStatus.OK);
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "kind", "league" }, method = RequestMethod.GET)
-    public ResponseEntity<List<GameDescription>> getGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("league") String league) {
+    public ResponseEntity<List<GameDescription>> listUserGamesInLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("league") String league) {
         UserId userId = new UserId(socialId, provider);
-        List<GameDescription> games = userService.getUserGames(userId, kind, league);
-        return new ResponseEntity<>(games, HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "", params = { "socialId", "provider", "kind", "league", "team", "gender" }, method = RequestMethod.GET)
-    public ResponseEntity<List<GameDescription>> getGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind,
-                                                          @RequestParam("league") String league, @RequestParam("team") String team, @RequestParam("gender") String gender) {
-        UserId userId = new UserId(socialId, provider);
-        List<GameDescription> games = userService.getUserGames(userId, kind, league, team, gender);
+        List<GameDescription> games = userService.listUserGamesInLeague(userId, kind, league);
         return new ResponseEntity<>(games, HttpStatus.OK);
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "id" }, method = RequestMethod.GET)
-    public ResponseEntity<GameDescription> getGame(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("id") long id) {
+    public ResponseEntity<GameDescription> getUserGame(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("id") long id) {
         UserId userId = new UserId(socialId, provider);
         GameDescription game = userService.getUserGame(userId, id);
 
@@ -59,7 +51,7 @@ public class UserGameController {
     }
 
     @RequestMapping(value = "/code", params = { "socialId", "provider", "id" }, method = RequestMethod.GET)
-    public ResponseEntity<Integer> getGameCode(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("id") long id) {
+    public ResponseEntity<Integer> getUserGameCode(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("id") long id) {
         UserId userId = new UserId(socialId, provider);
         int code = userService.getUserGameCode(userId, id);
 
@@ -72,21 +64,21 @@ public class UserGameController {
     }
 
     @RequestMapping(value = "/count", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<Long> getNumberOfGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
+    public ResponseEntity<Long> getNumberOfUserGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
         UserId userId = new UserId(socialId, provider);
         long numberOfUserGames = userService.getNumberOfUserGames(userId);
         return new ResponseEntity<>(numberOfUserGames, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/count", params = { "socialId", "provider", "kind", "league" }, method = RequestMethod.GET)
-    public ResponseEntity<Long> getNumberOfGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("league") String league) {
+    public ResponseEntity<Long> getNumberOfUserGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("league") String league) {
         UserId userId = new UserId(socialId, provider);
         long numberOfUserGames = userService.getNumberOfUserGames(userId, kind, league);
         return new ResponseEntity<>(numberOfUserGames, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public ResponseEntity<GameDescription> createGame(@Valid @RequestBody GameDescription game) {
+    public ResponseEntity<GameDescription> createUserGame(@Valid @RequestBody GameDescription game) {
         boolean result = userService.createUserGame(game);
 
         if (result) {
@@ -99,7 +91,7 @@ public class UserGameController {
     }
 
     @PutMapping("")
-    public ResponseEntity<GameDescription> updateGame(@Valid @RequestBody GameDescription game) {
+    public ResponseEntity<GameDescription> updateUserGame(@Valid @RequestBody GameDescription game) {
         boolean result = userService.updateUserGame(game);
 
         if (result) {
@@ -112,7 +104,7 @@ public class UserGameController {
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "id" }, method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("id") long id) {
+    public ResponseEntity<?> deleteUserGame(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("id") long id) {
         UserId userId = new UserId(socialId, provider);
         boolean result = userService.deleteUserGame(userId, id);
 

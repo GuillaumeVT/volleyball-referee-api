@@ -7,17 +7,18 @@ import java.util.List;
 
 public interface GameRepository extends MongoRepository<Game,String> {
 
-    Game findGameByDate(long date);
+    Game findByDate(long date);
 
-    Game findGameByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    Game findByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
 
-    void deleteGameByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(long date, String socialId, String provider, String status);
+    List<Game> findByUserId_SocialIdAndUserId_ProviderAndStatusAndSets_DurationLessThan(String socialId, String provider, String status, long setDurationMillisUnder);
 
-    void deleteGameByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    void deleteByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(long date, String socialId, String provider, String status);
 
-    long deleteGamesByDateLessThanAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    void deleteByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
 
-    long deleteGamesByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(long date, String socialId, String provider, String status);
+    long deleteByDateLessThanAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
 
-    List<Game> findGamesByUserId_SocialIdAndUserId_ProviderAndStatusAndSets_DurationLessThan(String socialId, String provider, String status, long setDurationMillisUnder);
+    long deleteByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(long date, String socialId, String provider, String status);
+
 }

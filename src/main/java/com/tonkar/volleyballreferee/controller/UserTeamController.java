@@ -24,28 +24,29 @@ public class UserTeamController {
     private UserService userService;
 
     @RequestMapping(value = "", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<List<Team>> getTeams(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
+    public ResponseEntity<List<Team>> listUserTeams(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
         UserId userId = new UserId(socialId, provider);
-        List<Team> teams = userService.getUserTeams(userId);
+        List<Team> teams = userService.listUserTeams(userId);
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "kind" }, method = RequestMethod.GET)
-    public ResponseEntity<List<Team>> getTeams(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind) {
+    public ResponseEntity<List<Team>> listUserTeamsOfKind(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind) {
         UserId userId = new UserId(socialId, provider);
-        List<Team> teams = userService.getUserTeams(userId, kind);
+        List<Team> teams = userService.listUserTeamsOfKind(userId, kind);
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "kind", "league" }, method = RequestMethod.GET)
-    public ResponseEntity<List<Team>> getTeams(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("league") String league) {
-        UserId userId = new UserId(socialId, provider);
-        List<Team> teams = userService.getUserTeams(userId, kind, league);
+    @RequestMapping(value = "", params = { "date" }, method = RequestMethod.GET)
+    public ResponseEntity<List<Team>> listUserTeamsOfKindInLeague(@RequestParam("date") long date) {
+        List<Team> teams = userService.listUserTeamsOfKindInLeague(date);
+        // This is called in a public context
+        hideUserId(teams);
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "name", "gender" }, method = RequestMethod.GET)
-    public ResponseEntity<Team> getTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name, @RequestParam("gender") String gender) {
+    public ResponseEntity<Team> getUserTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name, @RequestParam("gender") String gender) {
         name = ControllerUtils.decodeUrlParameters(name);
         UserId userId = new UserId(socialId, provider);
         Team team = userService.getUserTeam(userId, name, gender);
@@ -59,14 +60,14 @@ public class UserTeamController {
     }
 
     @RequestMapping(value = "/count", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<Long> getNumberOfTeams(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
+    public ResponseEntity<Long> getNumberOfUserTeams(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
         UserId userId = new UserId(socialId, provider);
         long numberOfTeams = userService.getNumberOfUserTeams(userId);
         return new ResponseEntity<>(numberOfTeams, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public ResponseEntity<Team> createTeam(@Valid @RequestBody Team team) {
+    public ResponseEntity<Team> createUserTeam(@Valid @RequestBody Team team) {
         boolean result = userService.createUserTeam(team);
 
         if (result) {
@@ -78,7 +79,7 @@ public class UserTeamController {
     }
 
     @PutMapping("")
-    public ResponseEntity<Team> updateTeam(@Valid @RequestBody Team team) {
+    public ResponseEntity<Team> updateUserTeam(@Valid @RequestBody Team team) {
         boolean result = userService.updateUserTeam(team);
 
         if (result) {
@@ -90,7 +91,7 @@ public class UserTeamController {
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "name", "gender" }, method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name, @RequestParam("gender") String gender) {
+    public ResponseEntity<?> deleteUserTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name, @RequestParam("gender") String gender) {
         name = ControllerUtils.decodeUrlParameters(name);
         UserId userId = new UserId(socialId, provider);
         boolean result = userService.deleteUserTeam(userId, name, gender);
@@ -100,6 +101,12 @@ public class UserTeamController {
         } else {
             LOGGER.error(String.format("Failed to delete team %s for user %s", name, userId));
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+        }
+    }
+
+    private void hideUserId(List<Team> teams) {
+        for (Team team : teams) {
+            team.setUserId(null);
         }
     }
 

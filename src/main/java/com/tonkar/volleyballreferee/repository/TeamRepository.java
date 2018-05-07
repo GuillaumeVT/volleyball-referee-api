@@ -7,13 +7,13 @@ import java.util.List;
 
 public interface TeamRepository extends MongoRepository<Team,String> {
 
-    Team findTeamByNameAndUserId_SocialIdAndUserId_ProviderAndGender(String name, String socialId, String provider, String gender);
+    Team findByNameAndUserId_SocialIdAndUserId_ProviderAndGender(String name, String socialId, String provider, String gender);
 
-    List<Team> findTeamsByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
+    List<Team> findByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
 
-    List<Team> findTeamsByUserId_SocialIdAndUserId_ProviderAndKind(String socialId, String provider, String kind);
+    List<Team> findByUserId_SocialIdAndUserId_ProviderAndKind(String socialId, String provider, String kind);
 
-    void deleteTeamByNameAndUserId_SocialIdAndUserId_ProviderAndGender(String name, String socialId, String provider, String gender);
+    void deleteByNameAndUserId_SocialIdAndUserId_ProviderAndGender(String name, String socialId, String provider, String gender);
 
-    long countTeamsByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
+    long countByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
 }

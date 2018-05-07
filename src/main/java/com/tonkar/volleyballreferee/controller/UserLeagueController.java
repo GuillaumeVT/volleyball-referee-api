@@ -24,21 +24,35 @@ public class UserLeagueController {
     private UserService userService;
 
     @RequestMapping(value = "", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<List<League>> getLeagues(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
+    public ResponseEntity<List<League>> listUserLeagues(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
         UserId userId = new UserId(socialId, provider);
-        List<League> leagues = userService.getUserLeagues(userId);
+        List<League> leagues = userService.listUserLeagues(userId);
         return new ResponseEntity<>(leagues, HttpStatus.OK);
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "kind" }, method = RequestMethod.GET)
-    public ResponseEntity<List<League>> getLeagues(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind) {
+    public ResponseEntity<List<League>> listUserLeaguesOfKind(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind) {
         UserId userId = new UserId(socialId, provider);
-        List<League> leagues = userService.getUserLeagues(userId, kind);
+        List<League> leagues = userService.listUserLeaguesOfKind(userId, kind);
         return new ResponseEntity<>(leagues, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "", params = { "date" }, method = RequestMethod.GET)
+    public ResponseEntity<League> getUserLeague(@RequestParam("date") long date) {
+        League league = userService.getUserLeague(date);
+
+        if (league == null) {
+            LOGGER.error(String.format("No league with date %d found", date));
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            // This is called in a public context
+            league.setUserId(null);
+            return new ResponseEntity<>(league, HttpStatus.OK);
+        }
+    }
+
     @RequestMapping(value = "", params = { "socialId", "provider", "date" }, method = RequestMethod.GET)
-    public ResponseEntity<League> getLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("date") long date) {
+    public ResponseEntity<League> getUserLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("date") long date) {
         UserId userId = new UserId(socialId, provider);
         League league = userService.getUserLeague(userId, date);
 
@@ -51,14 +65,14 @@ public class UserLeagueController {
     }
 
     @RequestMapping(value = "/count", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<Long> getNumberOfLeagues(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
+    public ResponseEntity<Long> getNumberOfUserLeagues(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
         UserId userId = new UserId(socialId, provider);
         long numberOfLeagues = userService.getNumberOfUserLeagues(userId);
         return new ResponseEntity<>(numberOfLeagues, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public ResponseEntity<League> createLeague(@Valid @RequestBody League league) {
+    public ResponseEntity<League> createUserLeague(@Valid @RequestBody League league) {
         boolean result = userService.createUserLeague(league);
 
         if (result) {
@@ -69,20 +83,8 @@ public class UserLeagueController {
         }
     }
 
-    @PutMapping("")
-    public ResponseEntity<League> updateLeague(@Valid @RequestBody League league) {
-        boolean result = userService.updateUserLeague(league);
-
-        if (result) {
-            return new ResponseEntity<>(league, HttpStatus.OK);
-        } else {
-            LOGGER.error(String.format("Failed to update league %s for user %s", league.getName(), league.getUserId()));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
-        }
-    }
-
     @RequestMapping(value = "", params = { "socialId", "provider", "date" }, method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("date") long date) {
+    public ResponseEntity<?> deleteUserLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("date") long date) {
         UserId userId = new UserId(socialId, provider);
         boolean result = userService.deleteUserLeague(userId, date);
 

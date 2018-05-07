@@ -40,12 +40,12 @@ public class UserServiceImpl implements UserService {
     private final Random random = new Random();
 
     @Override
-    public List<Rules> getUserRules(UserId userId) {
-        return rulesRepository.findRulesByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+    public List<Rules> listUserRules(UserId userId) {
+        return rulesRepository.findByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
     }
 
     @Override
-    public List<Rules> getDefaultRules() {
+    public List<Rules> listDefaultRules() {
         List<Rules> rules = new ArrayList<>();
         rules.add(Rules.OFFICIAL_INDOOR_RULES);
         rules.add(Rules.OFFICIAL_BEACH_RULES);
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Rules getUserRules(UserId userId, String name) {
-        return rulesRepository.findRulesByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
+        return rulesRepository.findByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
     }
 
     @Override
@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
         Rules rules = getUserRules(userId, name);
 
         if (rules == null) {
-            for (Rules defaultRules : getDefaultRules()) {
+            for (Rules defaultRules : listDefaultRules()) {
                 if (defaultRules.getName().equals(name)) {
                     rules = defaultRules;
                 }
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public long getNumberOfUserRules(UserId userId) {
-        return rulesRepository.countRulesByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+        return rulesRepository.countByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
     }
 
     @Override
@@ -144,7 +144,7 @@ public class UserServiceImpl implements UserService {
             LOGGER.debug(String.format("Could not delete rules %s for user %s because they are used in a game", name, userId));
             deleted = false;
         } else {
-            rulesRepository.deleteRulesByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
+            rulesRepository.deleteByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
             LOGGER.debug(String.format("Deleted rules %s for user %s", name, userId));
             deleted = true;
         }
@@ -153,19 +153,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<Team> getUserTeams(UserId userId) {
-        return teamRepository.findTeamsByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+    public List<Team> listUserTeams(UserId userId) {
+        return teamRepository.findByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
     }
 
     @Override
-    public List<Team> getUserTeams(UserId userId, String kind) {
-        return teamRepository.findTeamsByUserId_SocialIdAndUserId_ProviderAndKind(userId.getSocialId(), userId.getProvider(), kind);
+    public List<Team> listUserTeamsOfKind(UserId userId, String kind) {
+        return teamRepository.findByUserId_SocialIdAndUserId_ProviderAndKind(userId.getSocialId(), userId.getProvider(), kind);
     }
 
     @Override
-    public List<Team> getUserTeams(UserId userId, String kind, String leagueName) {
-        List<Team> allTeamsOfKind = getUserTeams(userId, kind);
-        List<GameDescription> leagueGames = getUserGames(userId, kind, leagueName);
+    public List<Team> listUserTeamsOfKindInLeague(long date) {
+        League league = getUserLeague(date);
+        List<Team> allTeamsOfKind = listUserTeamsOfKind(league.getUserId(), league.getKind());
+        List<GameDescription> leagueGames = listUserGamesInLeague(league.getUserId(), league.getKind(), league.getName());
 
         List<Team> teams = new ArrayList<>();
 
@@ -190,12 +191,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Team getUserTeam(UserId userId, String name, String gender) {
-        return teamRepository.findTeamByNameAndUserId_SocialIdAndUserId_ProviderAndGender(name, userId.getSocialId(), userId.getProvider(), gender);
+        return teamRepository.findByNameAndUserId_SocialIdAndUserId_ProviderAndGender(name, userId.getSocialId(), userId.getProvider(), gender);
     }
 
     @Override
     public long getNumberOfUserTeams(UserId userId) {
-        return teamRepository.countTeamsByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+        return teamRepository.countByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
     }
 
     @Override
@@ -253,7 +254,7 @@ public class UserServiceImpl implements UserService {
             LOGGER.debug(String.format("Could not delete team %s for user %s because it is used in a game", name, userId));
             deleted = false;
         } else {
-            teamRepository.deleteTeamByNameAndUserId_SocialIdAndUserId_ProviderAndGender(name, userId.getSocialId(), userId.getProvider(), gender);
+            teamRepository.deleteByNameAndUserId_SocialIdAndUserId_ProviderAndGender(name, userId.getSocialId(), userId.getProvider(), gender);
             LOGGER.debug(String.format("Deleted team %s for user %s", name, userId));
             deleted = true;
         }
@@ -262,23 +263,76 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<GameDescription> getUserGames(UserId userId) {
-        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+    public List<GameDescription> listUserGames(UserId userId) {
+        return gameDescriptionRepository.findByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
     }
 
     @Override
-    public List<GameDescription> getUserGames(UserId userId, String kind, String leagueName) {
-        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndKindAndLeague(userId.getSocialId(), userId.getProvider(), kind, leagueName);
+    public List<GameDescription> listUserGamesInLeague(UserId userId, String kind, String leagueName) {
+        return gameDescriptionRepository.findByUserId_SocialIdAndUserId_ProviderAndKindAndLeague(userId.getSocialId(), userId.getProvider(), kind, leagueName);
     }
 
     @Override
-    public List<GameDescription> getUserGames(UserId userId, String kind, String leagueName, String teamName, String teamGender) {
-        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndKindAndLeagueAndTeamNameAndGender(userId.getSocialId(), userId.getProvider(), kind, leagueName, teamName, teamGender);
+    public List<GameDescription> listUserGamesInLeague(long leagueDate) {
+        League league = leagueRepository.findByDate(leagueDate);
+
+        if (league == null) {
+            return new ArrayList<>();
+        } else {
+            return gameDescriptionRepository.findByUserId_SocialIdAndUserId_ProviderAndKindAndLeague(league.getUserId().getSocialId(), league.getUserId().getProvider(), league.getKind(), league.getName());
+        }
+    }
+
+    @Override
+    public List<GameDescription> listUserGamesOfTeamInLeague(long leagueDate, String teamName, String teamGender) {
+        League league = leagueRepository.findByDate(leagueDate);
+
+        if (league == null) {
+            return new ArrayList<>();
+        } else {
+            return gameDescriptionRepository.findByUserId_SocialIdAndUserId_ProviderAndKindAndLeagueAndTeamNameAndGender(league.getUserId().getSocialId(), league.getUserId().getProvider(), league.getKind(), league.getName(), teamName, teamGender);
+        }
+    }
+
+    @Override
+    public List<GameDescription> listLiveUserGamesInLeague(long leagueDate) {
+        League league = leagueRepository.findByDate(leagueDate);
+
+        if (league == null) {
+            return new ArrayList<>();
+        } else {
+            return gameDescriptionRepository.findByAndUserId_SocialIdAndUserId_ProviderAndKindAndStatusAndLeague(
+                    league.getUserId().getSocialId(), league.getUserId().getProvider(), league.getKind(), GameStatus.LIVE.toString(), league.getName());
+        }
+    }
+
+    @Override
+    public List<GameDescription> listLast10UserGamesInLeague(long leagueDate) {
+        League league = leagueRepository.findByDate(leagueDate);
+
+        if (league == null) {
+            return new ArrayList<>();
+        } else {
+            return gameDescriptionRepository.findTop10ByUserId_SocialIdAndUserId_ProviderAndKindAndStatusAndLeagueOrderByScheduleDesc(
+                    league.getUserId().getSocialId(), league.getUserId().getProvider(), league.getKind(), GameStatus.COMPLETED.toString(), league.getName());
+        }
+    }
+
+    @Override
+    public List<GameDescription> listNext10UserGamesInLeague(long leagueDate) {
+        League league = leagueRepository.findByDate(leagueDate);
+
+        if (league == null) {
+            return new ArrayList<>();
+        } else {
+            return gameDescriptionRepository.findTop10ByUserId_SocialIdAndUserId_ProviderAndKindAndStatusAndLeagueOrderByScheduleAsc(
+                    league.getUserId().getSocialId(), league.getUserId().getProvider(), league.getKind(), GameStatus.SCHEDULED.toString(), league.getName());
+        }
     }
 
     @Override
     public GameDescription getUserGame(UserId userId, long date) {
-        return gameDescriptionRepository.findGameDescriptionByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
+        return gameDescriptionRepository.findByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
     }
 
     @Override
@@ -353,7 +407,7 @@ public class UserServiceImpl implements UserService {
         final boolean updated;
 
         final UserId userId = gameDescription.getUserId();
-        final Game game = gameRepository.findGameByDateAndUserId_SocialIdAndUserId_Provider(gameDescription.getDate(), userId.getSocialId(), userId.getProvider());
+        final Game game = gameRepository.findByDateAndUserId_SocialIdAndUserId_Provider(gameDescription.getDate(), userId.getSocialId(), userId.getProvider());
 
         if (game == null) {
             LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because it does not exist",
@@ -405,7 +459,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean deleteUserGame(UserId userId, long date) {
-        codeRepository.deleteCodeByDate(date);
+        codeRepository.deleteByDate(date);
         gameService.deleteGame(date, userId);
         LOGGER.debug(String.format("Deleted game with date %d for user %s", date, userId));
         return true;
@@ -416,7 +470,7 @@ public class UserServiceImpl implements UserService {
         final int code;
 
         if (gameDescriptionRepository.existsByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider())) {
-            code = codeRepository.findCodeByDate(date).getCode();
+            code = codeRepository.findByDate(date).getCode();
         } else {
             code = -1;
         }
@@ -425,28 +479,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<League> getUserLeagues(UserId userId) {
-        return leagueRepository.findLeaguesByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+    public List<League> listUserLeagues(UserId userId) {
+        return leagueRepository.findByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
     }
 
     @Override
-    public List<League> getUserLeagues(UserId userId, String kind) {
-        return leagueRepository.findLeaguesByUserId_SocialIdAndUserId_ProviderAndKind(userId.getSocialId(), userId.getProvider(), kind);
+    public List<League> listUserLeaguesOfKind(UserId userId, String kind) {
+        return leagueRepository.findByUserId_SocialIdAndUserId_ProviderAndKind(userId.getSocialId(), userId.getProvider(), kind);
+    }
+
+    @Override
+    public League getUserLeague(long date) {
+        return leagueRepository.findByDate(date);
     }
 
     @Override
     public League getUserLeague(UserId userId, long date) {
-        return leagueRepository.findLeagueByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
+        return leagueRepository.findByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
     }
 
     @Override
     public League getUserLeague(UserId userId, String name) {
-        return leagueRepository.findLeagueByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
+        return leagueRepository.findByNameAndUserId_SocialIdAndUserId_Provider(name, userId.getSocialId(), userId.getProvider());
     }
 
     @Override
     public long getNumberOfUserLeagues(UserId userId) {
-        return leagueRepository.countLeaguesByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
+        return leagueRepository.countByUserId_SocialIdAndUserId_Provider(userId.getSocialId(), userId.getProvider());
     }
 
     @Override
@@ -466,29 +525,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean updateUserLeague(League league) {
-        final boolean updated;
-
-        League savedLeague = getUserLeague(league.getUserId(), league.getDate());
-
-        if (savedLeague == null) {
-            LOGGER.error(String.format("Could not update league %s for user %s because it does not exist", league.getName(), league.getUserId()));
-            updated = false;
-        } else {
-            savedLeague.setKind(league.getKind());
-            savedLeague.setDate(league.getDate());
-            leagueRepository.save(savedLeague);
-            LOGGER.debug(String.format("Updated league %s for user %s", league.getName(), league.getUserId()));
-
-            updated = true;
-        }
-
-        return updated;
-    }
-
-    @Override
     public boolean deleteUserLeague(UserId userId, long date) {
-        leagueRepository.deleteLeagueByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
+        leagueRepository.deleteByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
         LOGGER.debug(String.format("Deleted league with date %d for user %s", date, userId));
         return true;
     }
@@ -499,7 +537,7 @@ public class UserServiceImpl implements UserService {
 
         while (exists) {
             code = random.nextInt(99999999 - 10000000) + 10000000;
-            exists = (codeRepository.findCodeByCode(code) != null);
+            exists = (codeRepository.findByCode(code) != null);
         }
 
         return code;

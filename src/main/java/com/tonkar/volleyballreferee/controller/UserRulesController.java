@@ -24,20 +24,20 @@ public class UserRulesController {
     private UserService userService;
 
     @RequestMapping(value = "", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<List<Rules>> getRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
+    public ResponseEntity<List<Rules>> listUserRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
         UserId userId = new UserId(socialId, provider);
-        List<Rules> rules = userService.getUserRules(userId);
+        List<Rules> rules = userService.listUserRules(userId);
         return new ResponseEntity<>(rules, HttpStatus.OK);
     }
 
     @GetMapping("/default")
-    public ResponseEntity<List<Rules>> getDefaultRules() {
-        List<Rules> rules = userService.getDefaultRules();
+    public ResponseEntity<List<Rules>> listDefaultRules() {
+        List<Rules> rules = userService.listDefaultRules();
         return new ResponseEntity<>(rules, HttpStatus.OK);
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.GET)
-    public ResponseEntity<Rules> getRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
+    public ResponseEntity<Rules> getUserRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
         name = ControllerUtils.decodeUrlParameters(name);
         UserId userId = new UserId(socialId, provider);
         Rules rules = userService.getUserRules(userId, name);
@@ -51,14 +51,14 @@ public class UserRulesController {
     }
 
     @RequestMapping(value = "/count", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<Long> getNumberOfRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
+    public ResponseEntity<Long> getNumberOfUserRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
         UserId userId = new UserId(socialId, provider);
         long numberOfRules = userService.getNumberOfUserRules(userId);
         return new ResponseEntity<>(numberOfRules, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public ResponseEntity<Rules> createRules(@Valid @RequestBody Rules rules) {
+    public ResponseEntity<Rules> createUserRules(@Valid @RequestBody Rules rules) {
         boolean result = userService.createUserRules(rules);
 
         if (result) {
@@ -70,7 +70,7 @@ public class UserRulesController {
     }
 
     @PutMapping("")
-    public ResponseEntity<Rules> updateRules(@Valid @RequestBody Rules rules) {
+    public ResponseEntity<Rules> updateUserRules(@Valid @RequestBody Rules rules) {
         boolean result = userService.updateUserRules(rules);
 
         if (result) {
@@ -82,7 +82,7 @@ public class UserRulesController {
     }
 
     @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
+    public ResponseEntity<?> deleteUserRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
         name = ControllerUtils.decodeUrlParameters(name);
         UserId userId = new UserId(socialId, provider);
         boolean result = userService.deleteUserRules(userId, name);

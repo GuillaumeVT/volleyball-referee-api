@@ -37,17 +37,17 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<GameDescription> listGameDescriptions(String token) {
-        return gameDescriptionRepository.findGameDescriptionsByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLike(token, token, token, token);
+        return gameDescriptionRepository.findByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLike(token, token, token, token);
     }
 
     @Override
     public List<GameDescription> listGameDescriptionsBetween(long fromDate, long toDate) {
-        return gameDescriptionRepository.findGameDescriptionsByDateBetween(fromDate, toDate);
+        return gameDescriptionRepository.findByDateBetween(fromDate, toDate);
     }
 
     @Override
     public List<GameDescription> listLiveGameDescriptions() {
-        return gameDescriptionRepository.findGameDescriptionsByStatus(GameStatus.LIVE.toString());
+        return gameDescriptionRepository.findByStatus(GameStatus.LIVE.toString());
     }
 
     @Override
@@ -60,19 +60,19 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game getGame(long date) {
-        return gameRepository.findGameByDate(date);
+        return gameRepository.findByDate(date);
     }
 
     @Override
     public Game getGameFromCode(int code) {
-        final Code fullCode = codeRepository.findCodeByCode(code);
+        final Code fullCode = codeRepository.findByCode(code);
 
         final Game game;
 
         if (fullCode == null) {
             game = null;
         } else {
-            game = gameRepository.findGameByDate(fullCode.getDate());
+            game = gameRepository.findByDate(fullCode.getDate());
         }
 
         return game;
@@ -104,14 +104,14 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void updateGame(long date, Game game) {
-        GameDescription savedGameDescription = gameDescriptionRepository.findGameDescriptionByDate(date);
-        Game savedGame = gameRepository.findGameByDate(date);
+        GameDescription savedGameDescription = gameDescriptionRepository.findByDate(date);
+        Game savedGame = gameRepository.findByDate(date);
 
         if (savedGameDescription == null || savedGame == null) {
             LOGGER.error(String.format("Could not update %s game with date %d (%s vs %s) because either game or description was not found", savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName()));
         } else {
             if (!game.getStatus().equals(savedGame.getStatus()) && GameStatus.COMPLETED.equals(game.getStatus())) {
-                codeRepository.deleteCodeByDate(game.getDate());
+                codeRepository.deleteByDate(game.getDate());
             }
 
             savedGameDescription.setKind(game.getKind());
@@ -151,7 +151,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void updateSet(long date, int setIndex, Set set) {
-        Game savedGame = gameRepository.findGameByDate(date);
+        Game savedGame = gameRepository.findByDate(date);
 
         if (setIndex < savedGame.getSets().size()) {
             savedGame.getSets().set(setIndex, set);
@@ -164,16 +164,16 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void deleteGame(long date, UserId userId) {
-        gameDescriptionRepository.deleteGameDescriptionByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
-        gameRepository.deleteGameByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
-        codeRepository.deleteCodeByDate(date);
+        gameDescriptionRepository.deleteByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
+        gameRepository.deleteByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
+        codeRepository.deleteByDate(date);
     }
 
     @Override
     public void deleteLiveGame(long date) {
-        gameDescriptionRepository.deleteGameDescriptionByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(
+        gameDescriptionRepository.deleteByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(
                 date, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider(), GameStatus.LIVE.toString());
-        gameRepository.deleteGameByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(
+        gameRepository.deleteByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(
                 date, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider(), GameStatus.LIVE.toString());
     }
 
@@ -181,11 +181,11 @@ public class GameServiceImpl implements GameService {
     public void deleteOldGames(int daysAgo) {
         long dateNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
 
-        long count = gameDescriptionRepository.deleteGameDescriptionsByDateLessThanAndUserId_SocialIdAndUserId_Provider(
+        long count = gameDescriptionRepository.deleteByDateLessThanAndUserId_SocialIdAndUserId_Provider(
                 dateNDaysAgo, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider());
         LOGGER.debug(String.format("Deleted %d game descriptions older than date %d", count, dateNDaysAgo));
 
-        count = gameRepository.deleteGamesByDateLessThanAndUserId_SocialIdAndUserId_Provider(
+        count = gameRepository.deleteByDateLessThanAndUserId_SocialIdAndUserId_Provider(
                 dateNDaysAgo, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider());
         LOGGER.debug(String.format("Deleted %d games older than date %d", count, dateNDaysAgo));
     }
@@ -194,11 +194,11 @@ public class GameServiceImpl implements GameService {
     public void deleteOldLiveGames(int daysAgo) {
         long dateNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
 
-        long count = gameDescriptionRepository.deleteGameDescriptionsByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(
+        long count = gameDescriptionRepository.deleteByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(
                 dateNDaysAgo, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider(), GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d live game descriptions older than date %d", count, dateNDaysAgo));
 
-        count = gameRepository.deleteGamesByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(
+        count = gameRepository.deleteByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(
                 dateNDaysAgo, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider(), GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d live games older than date %d", count, dateNDaysAgo));
     }
@@ -207,7 +207,7 @@ public class GameServiceImpl implements GameService {
     public void deleteOldCodes(int daysAgo) {
         long timeNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
 
-        long count = codeRepository.deleteCodeByDateLessThan(timeNDaysAgo);
+        long count = codeRepository.deleteByDateLessThan(timeNDaysAgo);
         LOGGER.debug(String.format("Deleted %d codes older than date %d", count, timeNDaysAgo));
     }
 
@@ -215,7 +215,7 @@ public class GameServiceImpl implements GameService {
     public void deleteTestGames(int setDurationMinutesUnder) {
         long setDurationMillisUnder = setDurationMinutesUnder * 60000L;
 
-        List<Game> games = gameRepository.findGamesByUserId_SocialIdAndUserId_ProviderAndStatusAndSets_DurationLessThan(
+        List<Game> games = gameRepository.findByUserId_SocialIdAndUserId_ProviderAndStatusAndSets_DurationLessThan(
                 UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider(), GameStatus.COMPLETED.toString(), setDurationMillisUnder);
 
         for (Game game : games) {
@@ -240,7 +240,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<GameDescription> listGameDescriptionsUsingRules(String rulesName, UserId userId) {
-        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(
+        return gameDescriptionRepository.findByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(
                 userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), rulesName);
     }
 
@@ -254,7 +254,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<GameDescription> listGameDescriptionsUsingTeam(String teamName, UserId userId) {
-        return gameDescriptionRepository.findGameDescriptionsByUserId_SocialIdAndUserId_ProviderAndStatusAndTeamName(
+        return gameDescriptionRepository.findByUserId_SocialIdAndUserId_ProviderAndStatusAndTeamName(
                 userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName);
     }
 

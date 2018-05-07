@@ -5,11 +5,11 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface CodeRepository extends MongoRepository<Code,String> {
 
-    Code findCodeByDate(long date);
+    Code findByDate(long date);
 
-    Code findCodeByCode(int code);
+    Code findByCode(int code);
 
-    long deleteCodeByDate(long date);
+    long deleteByDate(long date);
 
-    long deleteCodeByDateLessThan(long date);
+    long deleteByDateLessThan(long date);
 }
