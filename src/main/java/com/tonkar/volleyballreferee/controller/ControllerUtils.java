@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ControllerUtils {
 
-    public static String decodeUrlParameters(String value) {
+    public static String decodeUrlParameter(String value) {
         String newValue;
 
         try {

@@ -32,6 +32,7 @@ public class UserGameController {
 
     @RequestMapping(value = "", params = { "socialId", "provider", "kind", "league" }, method = RequestMethod.GET)
     public ResponseEntity<List<GameDescription>> listUserGamesInLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("league") String league) {
+        league = ControllerUtils.decodeUrlParameter(league);
         UserId userId = new UserId(socialId, provider);
         List<GameDescription> games = userService.listUserGamesInLeague(userId, kind, league);
         return new ResponseEntity<>(games, HttpStatus.OK);
@@ -72,6 +73,7 @@ public class UserGameController {
 
     @RequestMapping(value = "/count", params = { "socialId", "provider", "kind", "league" }, method = RequestMethod.GET)
     public ResponseEntity<Long> getNumberOfUserGames(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind, @RequestParam("league") String league) {
+        league = ControllerUtils.decodeUrlParameter(league);
         UserId userId = new UserId(socialId, provider);
         long numberOfUserGames = userService.getNumberOfUserGames(userId, kind, league);
         return new ResponseEntity<>(numberOfUserGames, HttpStatus.OK);

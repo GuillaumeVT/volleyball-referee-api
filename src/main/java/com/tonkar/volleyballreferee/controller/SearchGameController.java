@@ -88,6 +88,7 @@ public class SearchGameController {
 
     @RequestMapping(value = "/league/{id}", params = { "team", "gender" }, method = RequestMethod.GET)
     public ResponseEntity<List<GameDescription>> searchGamesOfTeamInLeague(@PathVariable("id") long id, @RequestParam("team") String team, @RequestParam("gender") String gender) {
+        team = ControllerUtils.decodeUrlParameter(team);
         List<GameDescription> gameDescriptions = userService.listUserGamesOfTeamInLeague(id, team, gender);
         hideUserId(gameDescriptions);
         return new ResponseEntity<>(gameDescriptions, HttpStatus.OK);

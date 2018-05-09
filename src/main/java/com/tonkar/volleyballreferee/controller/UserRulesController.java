@@ -38,7 +38,7 @@ public class UserRulesController {
 
     @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.GET)
     public ResponseEntity<Rules> getUserRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
-        name = ControllerUtils.decodeUrlParameters(name);
+        name = ControllerUtils.decodeUrlParameter(name);
         UserId userId = new UserId(socialId, provider);
         Rules rules = userService.getUserRules(userId, name);
 
@@ -83,7 +83,7 @@ public class UserRulesController {
 
     @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUserRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
-        name = ControllerUtils.decodeUrlParameters(name);
+        name = ControllerUtils.decodeUrlParameter(name);
         UserId userId = new UserId(socialId, provider);
         boolean result = userService.deleteUserRules(userId, name);
 

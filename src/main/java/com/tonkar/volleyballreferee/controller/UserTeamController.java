@@ -47,7 +47,7 @@ public class UserTeamController {
 
     @RequestMapping(value = "", params = { "socialId", "provider", "name", "gender" }, method = RequestMethod.GET)
     public ResponseEntity<Team> getUserTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name, @RequestParam("gender") String gender) {
-        name = ControllerUtils.decodeUrlParameters(name);
+        name = ControllerUtils.decodeUrlParameter(name);
         UserId userId = new UserId(socialId, provider);
         Team team = userService.getUserTeam(userId, name, gender);
 
@@ -92,7 +92,7 @@ public class UserTeamController {
 
     @RequestMapping(value = "", params = { "socialId", "provider", "name", "gender" }, method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUserTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name, @RequestParam("gender") String gender) {
-        name = ControllerUtils.decodeUrlParameters(name);
+        name = ControllerUtils.decodeUrlParameter(name);
         UserId userId = new UserId(socialId, provider);
         boolean result = userService.deleteUserTeam(userId, name, gender);
 
