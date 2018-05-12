@@ -119,9 +119,9 @@ public class UserServiceImpl implements UserService {
             savedRules.setGameIntervals(rules.isGameIntervals());
             savedRules.setGameIntervalDuration(rules.getGameIntervalDuration());
             savedRules.setTeamSubstitutionsPerSet(rules.getTeamSubstitutionsPerSet());
-            savedRules.setChangeSidesBeach(rules.isChangeSidesBeach());
-            savedRules.setChangeSidesPeriod(rules.getChangeSidesPeriod());
-            savedRules.setChangeSidesPeriodTieBreak(rules.getChangeSidesPeriodTieBreak());
+            savedRules.setBeachCourtSwitches(rules.isBeachCourtSwitches());
+            savedRules.setBeachCourtSwitchFreq(rules.getBeachCourtSwitchFreq());
+            savedRules.setBeachCourtSwitchFreqTieBreak(rules.getBeachCourtSwitchFreqTieBreak());
             savedRules.setCustomConsecutiveServesPerPlayer(rules.getCustomConsecutiveServesPerPlayer());
             rulesRepository.save(savedRules);
             LOGGER.debug(String.format("Updated rules %s for user %s", rules.getName(), rules.getUserId()));

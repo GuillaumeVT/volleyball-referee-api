@@ -48,11 +48,11 @@ public class Rules {
     @NotNull
     private int     teamSubstitutionsPerSet;
     @NotNull
-    private boolean changeSidesBeach;
+    private boolean beachCourtSwitches;
     @NotNull
-    private int     changeSidesPeriod;
+    private int     beachCourtSwitchFreq;
     @NotNull
-    private int     changeSidesPeriodTieBreak;
+    private int     beachCourtSwitchFreqTieBreak;
     @NotNull
     private int     customConsecutiveServesPerPlayer;
 
@@ -61,7 +61,7 @@ public class Rules {
     public Rules(UserId userId, String name, long date, int setsPerGame, int pointsPerSet, boolean tieBreakInLastSet, int pointsInTieBreak, boolean twoPointsDifference, boolean sanctions,
                  boolean teamTimeouts, int teamTimeoutsPerSet, int teamTimeoutDuration,
                  boolean technicalTimeouts, int technicalTimeoutDuration, boolean gameIntervals, int gameIntervalDuration,
-                 int teamSubstitutionsPerSet, boolean changeSidesBeach, int changeSidesPeriod, int changeSidesPeriodTieBreak, int customConsecutiveServesPerPlayer) {
+                 int teamSubstitutionsPerSet, boolean beachCourtSwitches, int beachCourtSwitchFreq, int beachCourtSwitchFreqTieBreak, int customConsecutiveServesPerPlayer) {
         this.userId = userId;
         this.date = date;
         this.name = name;
@@ -79,9 +79,9 @@ public class Rules {
         this.gameIntervals = gameIntervals;
         this.gameIntervalDuration = gameIntervalDuration;
         this.teamSubstitutionsPerSet = teamSubstitutionsPerSet;
-        this.changeSidesBeach = changeSidesBeach;
-        this.changeSidesPeriod = changeSidesPeriod;
-        this.changeSidesPeriodTieBreak = changeSidesPeriodTieBreak;
+        this.beachCourtSwitches = beachCourtSwitches;
+        this.beachCourtSwitchFreq = beachCourtSwitchFreq;
+        this.beachCourtSwitchFreqTieBreak = beachCourtSwitchFreqTieBreak;
         this.customConsecutiveServesPerPlayer = customConsecutiveServesPerPlayer;
     }
 
@@ -242,28 +242,28 @@ public class Rules {
         this.teamSubstitutionsPerSet = teamSubstitutionsPerSet;
     }
 
-    public boolean isChangeSidesBeach() {
-        return changeSidesBeach;
+    public boolean isBeachCourtSwitches() {
+        return beachCourtSwitches;
     }
 
-    public void setChangeSidesBeach(boolean changeSidesBeach) {
-        this.changeSidesBeach = changeSidesBeach;
+    public void setBeachCourtSwitches(boolean beachCourtSwitches) {
+        this.beachCourtSwitches = beachCourtSwitches;
     }
 
-    public int getChangeSidesPeriod() {
-        return changeSidesPeriod;
+    public int getBeachCourtSwitchFreq() {
+        return beachCourtSwitchFreq;
     }
 
-    public void setChangeSidesPeriod(int changeSidesPeriod) {
-        this.changeSidesPeriod = changeSidesPeriod;
+    public void setBeachCourtSwitchFreq(int beachCourtSwitchFreq) {
+        this.beachCourtSwitchFreq = beachCourtSwitchFreq;
     }
 
-    public int getChangeSidesPeriodTieBreak() {
-        return changeSidesPeriodTieBreak;
+    public int getBeachCourtSwitchFreqTieBreak() {
+        return beachCourtSwitchFreqTieBreak;
     }
 
-    public void setChangeSidesPeriodTieBreak(int changeSidesPeriodTieBreak) {
-        this.changeSidesPeriodTieBreak = changeSidesPeriodTieBreak;
+    public void setBeachCourtSwitchFreqTieBreak(int beachCourtSwitchFreqTieBreak) {
+        this.beachCourtSwitchFreqTieBreak = beachCourtSwitchFreqTieBreak;
     }
 
     public int getCustomConsecutiveServesPerPlayer() {
