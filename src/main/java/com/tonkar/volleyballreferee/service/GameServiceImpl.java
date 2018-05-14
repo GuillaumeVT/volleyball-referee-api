@@ -42,7 +42,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<GameDescription> listGameDescriptionsBetween(long fromDate, long toDate) {
-        return gameDescriptionRepository.findByDateBetween(fromDate, toDate);
+        return gameDescriptionRepository.findByScheduleBetween(fromDate, toDate);
     }
 
     @Override
@@ -80,6 +80,10 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void createGame(Game game) {
+        if (game.getSchedule() == 0L) {
+            game.setSchedule(game.getDate());
+        }
+
         GameDescription gameDescription = new GameDescription();
         gameDescription.setUserId(game.getUserId());
         gameDescription.setKind(game.getKind());
@@ -112,6 +116,15 @@ public class GameServiceImpl implements GameService {
         } else {
             if (!game.getStatus().equals(savedGame.getStatus()) && GameStatus.COMPLETED.equals(game.getStatus())) {
                 codeRepository.deleteByDate(game.getDate());
+            }
+
+            UserId ownerUserId = savedGame.getUserId();
+            game.gethTeam().setUserId(ownerUserId);
+            game.getgTeam().setUserId(ownerUserId);
+            game.getRules().setUserId(ownerUserId);
+
+            if (game.getSchedule() == 0L) {
+                game.setSchedule(game.getDate());
             }
 
             savedGameDescription.setKind(game.getKind());
