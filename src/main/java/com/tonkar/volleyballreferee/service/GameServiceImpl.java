@@ -118,7 +118,7 @@ public class GameServiceImpl implements GameService {
                 codeRepository.deleteByDate(game.getDate());
             }
 
-            UserId ownerUserId = savedGame.getUserId();
+            String ownerUserId = savedGame.getUserId();
             game.gethTeam().setUserId(ownerUserId);
             game.getgTeam().setUserId(ownerUserId);
             game.getRules().setUserId(ownerUserId);
