@@ -9,16 +9,16 @@ public interface GameRepository extends MongoRepository<Game,String> {
 
     Game findByDate(long date);
 
-    Game findByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    Game findByDateAndUserId(long date, String userId);
 
-    List<Game> findByUserId_SocialIdAndUserId_ProviderAndStatusAndSets_DurationLessThan(String socialId, String provider, String status, long setDurationMillisUnder);
+    List<Game> findByUserIdAndStatusAndSets_DurationLessThan(String userId, String status, long setDurationMillisUnder);
 
-    void deleteByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(long date, String socialId, String provider, String status);
+    void deleteByDateAndUserIdAndStatus(long date, String userId, String status);
 
-    void deleteByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    void deleteByDateAndUserId(long date, String userId);
 
-    long deleteByDateLessThanAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    long deleteByDateLessThanAndUserId(long date, String userId);
 
-    long deleteByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(long date, String socialId, String provider, String status);
+    long deleteByDateLessThanAndUserIdAndStatus(long date, String userId, String status);
 
 }

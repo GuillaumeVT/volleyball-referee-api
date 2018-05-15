@@ -1,7 +1,6 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.model.Rules;
-import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +22,8 @@ public class UserRulesController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping(value = "", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<List<Rules>> listUserRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
-        UserId userId = new UserId(socialId, provider);
+    @RequestMapping(value = "", params = { "userId" }, method = RequestMethod.GET)
+    public ResponseEntity<List<Rules>> listUserRules(@RequestParam("userId") String userId) {
         List<Rules> rules = userService.listUserRules(userId);
         return new ResponseEntity<>(rules, HttpStatus.OK);
     }
@@ -36,10 +34,9 @@ public class UserRulesController {
         return new ResponseEntity<>(rules, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.GET)
-    public ResponseEntity<Rules> getUserRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
+    @RequestMapping(value = "", params = { "userId", "name" }, method = RequestMethod.GET)
+    public ResponseEntity<Rules> getUserRules(@RequestParam("userId") String userId, @RequestParam("name") String name) {
         name = ControllerUtils.decodeUrlParameter(name);
-        UserId userId = new UserId(socialId, provider);
         Rules rules = userService.getUserRules(userId, name);
 
         if (rules == null) {
@@ -50,9 +47,8 @@ public class UserRulesController {
         }
     }
 
-    @RequestMapping(value = "/count", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<Long> getNumberOfUserRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
-        UserId userId = new UserId(socialId, provider);
+    @RequestMapping(value = "/count", params = { "userId" }, method = RequestMethod.GET)
+    public ResponseEntity<Long> getNumberOfUserRules(@RequestParam("userId") String userId) {
         long numberOfRules = userService.getNumberOfUserRules(userId);
         return new ResponseEntity<>(numberOfRules, HttpStatus.OK);
     }
@@ -81,10 +77,9 @@ public class UserRulesController {
         }
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "name" }, method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteUserRules(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name) {
+    @RequestMapping(value = "", params = { "userId", "name" }, method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteUserRules(@RequestParam("userId") String userId, @RequestParam("name") String name) {
         name = ControllerUtils.decodeUrlParameter(name);
-        UserId userId = new UserId(socialId, provider);
         boolean result = userService.deleteUserRules(userId, name);
 
         if (result) {

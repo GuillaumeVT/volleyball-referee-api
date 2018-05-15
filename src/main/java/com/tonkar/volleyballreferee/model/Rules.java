@@ -14,7 +14,7 @@ public class Rules {
     private String  id;
     @Valid
     @NotNull
-    private UserId  userId;
+    private String  userId;
     @NotEmpty
     private String  name;
     @NotNull
@@ -58,7 +58,7 @@ public class Rules {
 
     public Rules() {}
 
-    public Rules(UserId userId, String name, long date, int setsPerGame, int pointsPerSet, boolean tieBreakInLastSet, int pointsInTieBreak, boolean twoPointsDifference, boolean sanctions,
+    public Rules(String userId, String name, long date, int setsPerGame, int pointsPerSet, boolean tieBreakInLastSet, int pointsInTieBreak, boolean twoPointsDifference, boolean sanctions,
                  boolean teamTimeouts, int teamTimeoutsPerSet, int teamTimeoutDuration,
                  boolean technicalTimeouts, int technicalTimeoutDuration, boolean gameIntervals, int gameIntervalDuration,
                  int teamSubstitutionsPerSet, boolean beachCourtSwitches, int beachCourtSwitchFreq, int beachCourtSwitchFreqTieBreak, int customConsecutiveServesPerPlayer) {
@@ -106,11 +106,11 @@ public class Rules {
         this.id = id;
     }
 
-    public UserId getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(UserId userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 

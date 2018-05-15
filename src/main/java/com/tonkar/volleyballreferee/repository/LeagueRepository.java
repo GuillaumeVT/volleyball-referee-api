@@ -9,16 +9,16 @@ public interface LeagueRepository extends MongoRepository<League,String> {
 
     League findByDate(long date);
 
-    League findByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    League findByDateAndUserId(long date, String userId);
 
-    League findByNameAndUserId_SocialIdAndUserId_Provider(String name, String socialId, String provider);
+    League findByNameAndUserId(String name, String userId);
 
-    List<League> findByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
+    List<League> findByUserId(String userId);
 
-    List<League> findByUserId_SocialIdAndUserId_ProviderAndKind(String socialId, String provider, String kind);
+    List<League> findByUserIdAndKind(String userId, String kind);
 
-    void deleteByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    void deleteByDateAndUserId(long date, String userId);
 
-    long countByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
+    long countByUserId(String userId);
 
 }

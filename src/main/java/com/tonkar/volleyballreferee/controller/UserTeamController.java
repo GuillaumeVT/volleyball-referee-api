@@ -1,7 +1,6 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.model.Team;
-import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,16 +22,14 @@ public class UserTeamController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping(value = "", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<List<Team>> listUserTeams(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
-        UserId userId = new UserId(socialId, provider);
+    @RequestMapping(value = "", params = { "userId" }, method = RequestMethod.GET)
+    public ResponseEntity<List<Team>> listUserTeams(@RequestParam("userId") String userId) {
         List<Team> teams = userService.listUserTeams(userId);
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "kind" }, method = RequestMethod.GET)
-    public ResponseEntity<List<Team>> listUserTeamsOfKind(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind) {
-        UserId userId = new UserId(socialId, provider);
+    @RequestMapping(value = "", params = { "userId", "kind" }, method = RequestMethod.GET)
+    public ResponseEntity<List<Team>> listUserTeamsOfKind(@RequestParam("userId") String userId, @RequestParam("kind") String kind) {
         List<Team> teams = userService.listUserTeamsOfKind(userId, kind);
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
@@ -45,10 +42,9 @@ public class UserTeamController {
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "name", "gender" }, method = RequestMethod.GET)
-    public ResponseEntity<Team> getUserTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name, @RequestParam("gender") String gender) {
+    @RequestMapping(value = "", params = { "userId", "name", "gender" }, method = RequestMethod.GET)
+    public ResponseEntity<Team> getUserTeam(@RequestParam("userId") String userId, @RequestParam("name") String name, @RequestParam("gender") String gender) {
         name = ControllerUtils.decodeUrlParameter(name);
-        UserId userId = new UserId(socialId, provider);
         Team team = userService.getUserTeam(userId, name, gender);
 
         if (team == null) {
@@ -59,9 +55,8 @@ public class UserTeamController {
         }
     }
 
-    @RequestMapping(value = "/count", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<Long> getNumberOfUserTeams(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
-        UserId userId = new UserId(socialId, provider);
+    @RequestMapping(value = "/count", params = { "userId" }, method = RequestMethod.GET)
+    public ResponseEntity<Long> getNumberOfUserTeams(@RequestParam("userId") String userId) {
         long numberOfTeams = userService.getNumberOfUserTeams(userId);
         return new ResponseEntity<>(numberOfTeams, HttpStatus.OK);
     }
@@ -90,10 +85,9 @@ public class UserTeamController {
         }
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "name", "gender" }, method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteUserTeam(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("name") String name, @RequestParam("gender") String gender) {
+    @RequestMapping(value = "", params = { "userId", "name", "gender" }, method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteUserTeam(@RequestParam("userId") String userId, @RequestParam("name") String name, @RequestParam("gender") String gender) {
         name = ControllerUtils.decodeUrlParameter(name);
-        UserId userId = new UserId(socialId, provider);
         boolean result = userService.deleteUserTeam(userId, name, gender);
 
         if (result) {

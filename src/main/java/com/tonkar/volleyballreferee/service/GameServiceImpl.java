@@ -163,30 +163,26 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void deleteGame(long date, UserId userId) {
-        gameDescriptionRepository.deleteByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
-        gameRepository.deleteByDateAndUserId_SocialIdAndUserId_Provider(date, userId.getSocialId(), userId.getProvider());
+    public void deleteGame(long date, String userId) {
+        gameDescriptionRepository.deleteByDateAndUserId(date, userId);
+        gameRepository.deleteByDateAndUserId(date, userId);
         codeRepository.deleteByDate(date);
     }
 
     @Override
     public void deleteLiveGame(long date) {
-        gameDescriptionRepository.deleteByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(
-                date, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider(), GameStatus.LIVE.toString());
-        gameRepository.deleteByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(
-                date, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider(), GameStatus.LIVE.toString());
+        gameDescriptionRepository.deleteByDateAndUserIdAndStatus(date, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
+        gameRepository.deleteByDateAndUserIdAndStatus(date, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
     }
 
     @Override
     public void deleteOldGames(int daysAgo) {
         long dateNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
 
-        long count = gameDescriptionRepository.deleteByDateLessThanAndUserId_SocialIdAndUserId_Provider(
-                dateNDaysAgo, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider());
+        long count = gameDescriptionRepository.deleteByDateLessThanAndUserId(dateNDaysAgo, UserId.VBR_USER_ID);
         LOGGER.debug(String.format("Deleted %d game descriptions older than date %d", count, dateNDaysAgo));
 
-        count = gameRepository.deleteByDateLessThanAndUserId_SocialIdAndUserId_Provider(
-                dateNDaysAgo, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider());
+        count = gameRepository.deleteByDateLessThanAndUserId(dateNDaysAgo, UserId.VBR_USER_ID);
         LOGGER.debug(String.format("Deleted %d games older than date %d", count, dateNDaysAgo));
     }
 
@@ -194,12 +190,10 @@ public class GameServiceImpl implements GameService {
     public void deleteOldLiveGames(int daysAgo) {
         long dateNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
 
-        long count = gameDescriptionRepository.deleteByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(
-                dateNDaysAgo, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider(), GameStatus.LIVE.toString());
+        long count = gameDescriptionRepository.deleteByDateLessThanAndUserIdAndStatus(dateNDaysAgo, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d live game descriptions older than date %d", count, dateNDaysAgo));
 
-        count = gameRepository.deleteByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(
-                dateNDaysAgo, UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider(), GameStatus.LIVE.toString());
+        count = gameRepository.deleteByDateLessThanAndUserIdAndStatus(dateNDaysAgo, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d live games older than date %d", count, dateNDaysAgo));
     }
 
@@ -215,8 +209,7 @@ public class GameServiceImpl implements GameService {
     public void deleteTestGames(int setDurationMinutesUnder) {
         long setDurationMillisUnder = setDurationMinutesUnder * 60000L;
 
-        List<Game> games = gameRepository.findByUserId_SocialIdAndUserId_ProviderAndStatusAndSets_DurationLessThan(
-                UserId.VBR_USER_ID.getSocialId(), UserId.VBR_USER_ID.getProvider(), GameStatus.COMPLETED.toString(), setDurationMillisUnder);
+        List<Game> games = gameRepository.findByUserIdAndStatusAndSets_DurationLessThan(UserId.VBR_USER_ID, GameStatus.COMPLETED.toString(), setDurationMillisUnder);
 
         for (Game game : games) {
             boolean delete = true;
@@ -233,29 +226,29 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public boolean hasGameUsingRules(String rulesName, UserId userId) {
-        return gameDescriptionRepository.existsByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(
-                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), rulesName);
+    public boolean hasGameUsingRules(String rulesName, String userId) {
+        return gameDescriptionRepository.existsByUserIdAndStatusAndRules(
+                userId, GameStatus.SCHEDULED.toString(), rulesName);
     }
 
     @Override
-    public List<GameDescription> listGameDescriptionsUsingRules(String rulesName, UserId userId) {
-        return gameDescriptionRepository.findByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(
-                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), rulesName);
+    public List<GameDescription> listGameDescriptionsUsingRules(String rulesName, String userId) {
+        return gameDescriptionRepository.findByUserIdAndStatusAndRules(
+                userId, GameStatus.SCHEDULED.toString(), rulesName);
     }
 
     @Override
-    public boolean hasGameUsingTeam(String teamName, UserId userId) {
-        return gameDescriptionRepository.existsByUserId_SocialIdAndUserId_ProviderAndStatusAndHName(
-                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName)
-                || gameDescriptionRepository.existsByUserId_SocialIdAndUserId_ProviderAndStatusAndGName(
-                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName);
+    public boolean hasGameUsingTeam(String teamName, String userId) {
+        return gameDescriptionRepository.existsByUserIdAndStatusAndHName(
+                userId, GameStatus.SCHEDULED.toString(), teamName)
+                || gameDescriptionRepository.existsByUserIdAndStatusAndGName(
+                userId, GameStatus.SCHEDULED.toString(), teamName);
     }
 
     @Override
-    public List<GameDescription> listGameDescriptionsUsingTeam(String teamName, UserId userId) {
-        return gameDescriptionRepository.findByUserId_SocialIdAndUserId_ProviderAndStatusAndTeamName(
-                userId.getSocialId(), userId.getProvider(), GameStatus.SCHEDULED.toString(), teamName);
+    public List<GameDescription> listGameDescriptionsUsingTeam(String teamName, String userId) {
+        return gameDescriptionRepository.findByUserIdAndStatusAndTeamName(
+                userId, GameStatus.SCHEDULED.toString(), teamName);
     }
 
 }

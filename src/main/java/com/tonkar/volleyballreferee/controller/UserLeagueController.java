@@ -1,7 +1,6 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.model.League;
-import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,16 +22,14 @@ public class UserLeagueController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping(value = "", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<List<League>> listUserLeagues(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
-        UserId userId = new UserId(socialId, provider);
+    @RequestMapping(value = "", params = { "userId" }, method = RequestMethod.GET)
+    public ResponseEntity<List<League>> listUserLeagues(@RequestParam("userId") String userId) {
         List<League> leagues = userService.listUserLeagues(userId);
         return new ResponseEntity<>(leagues, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "kind" }, method = RequestMethod.GET)
-    public ResponseEntity<List<League>> listUserLeaguesOfKind(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("kind") String kind) {
-        UserId userId = new UserId(socialId, provider);
+    @RequestMapping(value = "", params = { "userId", "kind" }, method = RequestMethod.GET)
+    public ResponseEntity<List<League>> listUserLeaguesOfKind(@RequestParam("userId") String userId, @RequestParam("kind") String kind) {
         List<League> leagues = userService.listUserLeaguesOfKind(userId, kind);
         return new ResponseEntity<>(leagues, HttpStatus.OK);
     }
@@ -51,9 +48,8 @@ public class UserLeagueController {
         }
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "date" }, method = RequestMethod.GET)
-    public ResponseEntity<League> getUserLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("date") long date) {
-        UserId userId = new UserId(socialId, provider);
+    @RequestMapping(value = "", params = { "userId", "date" }, method = RequestMethod.GET)
+    public ResponseEntity<League> getUserLeague(@RequestParam("userId") String userId, @RequestParam("date") long date) {
         League league = userService.getUserLeague(userId, date);
 
         if (league == null) {
@@ -64,9 +60,8 @@ public class UserLeagueController {
         }
     }
 
-    @RequestMapping(value = "/count", params = { "socialId", "provider" }, method = RequestMethod.GET)
-    public ResponseEntity<Long> getNumberOfUserLeagues(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider) {
-        UserId userId = new UserId(socialId, provider);
+    @RequestMapping(value = "/count", params = { "userId" }, method = RequestMethod.GET)
+    public ResponseEntity<Long> getNumberOfUserLeagues(@RequestParam("userId") String userId) {
         long numberOfLeagues = userService.getNumberOfUserLeagues(userId);
         return new ResponseEntity<>(numberOfLeagues, HttpStatus.OK);
     }
@@ -83,9 +78,8 @@ public class UserLeagueController {
         }
     }
 
-    @RequestMapping(value = "", params = { "socialId", "provider", "date" }, method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteUserLeague(@RequestParam("socialId") String socialId, @RequestParam("provider") String provider, @RequestParam("date") long date) {
-        UserId userId = new UserId(socialId, provider);
+    @RequestMapping(value = "", params = { "userId", "date" }, method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteUserLeague(@RequestParam("userId") String userId, @RequestParam("date") long date) {
         boolean result = userService.deleteUserLeague(userId, date);
 
         if (result) {

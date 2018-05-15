@@ -12,17 +12,17 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     boolean existsByDateAndStatus(long date, String status);
 
-    boolean existsByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    boolean existsByDateAndUserId(long date, String userId);
 
-    boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(String socialId, String provider, String status, String rulesName);
+    boolean existsByUserIdAndStatusAndRules(String userId, String status, String rulesName);
 
-    boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndHName(String socialId, String provider, String status, String teamName);
+    boolean existsByUserIdAndStatusAndHName(String userId, String status, String teamName);
 
-    boolean existsByUserId_SocialIdAndUserId_ProviderAndStatusAndGName(String socialId, String provider, String status, String teamName);
+    boolean existsByUserIdAndStatusAndGName(String userId, String status, String teamName);
 
     GameDescription findByDate(long date);
 
-    GameDescription findByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    GameDescription findByDateAndUserId(long date, String userId);
 
     List<GameDescription> findByStatus(String status);
 
@@ -30,37 +30,37 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     List<GameDescription> findByDateBetween(long fromDate, long toDate);
 
-    List<GameDescription> findByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
+    List<GameDescription> findByUserId(String userId);
 
-    List<GameDescription> findByUserId_SocialIdAndUserId_ProviderAndKindAndLeague(String socialId, String provider, String kind, String leagueName);
+    List<GameDescription> findByUserIdAndKindAndLeague(String userId, String kind, String leagueName);
 
-    List<GameDescription> findByUserId_SocialIdAndUserId_ProviderAndStatusAndRules(String socialId, String provider, String status, String rulesName);
+    List<GameDescription> findByUserIdAndStatusAndRules(String userId, String status, String rulesName);
 
-    @Query("{ '$and': [ { 'userId.socialId': ?0 }, { 'userId.provider': ?1 }, { 'status': ?2 }, { '$or': [ { 'hName': ?3 }, { 'gName': ?3 } ] } ] }")
-    List<GameDescription> findByUserId_SocialIdAndUserId_ProviderAndStatusAndTeamName(String socialId, String provider, String status, String teamName);
+    @Query("{ '$and': [ { 'userId': ?0 }, { 'status': ?1 }, { '$or': [ { 'hName': ?2 }, { 'gName': ?2 } ] } ] }")
+    List<GameDescription> findByUserIdAndStatusAndTeamName(String userId, String status, String teamName);
 
-    @Query("{ '$and': [ { 'userId.socialId': ?0 }, { 'userId.provider': ?1 }, { 'kind': ?2 }, { 'league': ?3 }, { '$or': [ { 'hName': ?4 }, { 'gName': ?4 } ] }, { 'gender': ?5 } ] }")
-    List<GameDescription> findByUserId_SocialIdAndUserId_ProviderAndKindAndLeagueAndTeamNameAndGender(String socialId, String provider, String kind, String leagueName, String teamName, String teamGender);
+    @Query("{ '$and': [ { 'userId': ?0 }, { 'kind': ?1 }, { 'league': ?2 }, { '$or': [ { 'hName': ?3 }, { 'gName': ?3 } ] }, { 'gender': ?4 } ] }")
+    List<GameDescription> findByUserIdAndKindAndLeagueAndTeamNameAndGender(String userId, String kind, String leagueName, String teamName, String teamGender);
 
-    List<GameDescription> findTop10ByUserId_SocialIdAndUserId_ProviderAndKindAndStatusAndLeagueOrderByScheduleAsc(String socialId, String provider, String kind, String status, String leagueName);
+    List<GameDescription> findTop10ByUserIdAndKindAndStatusAndLeagueOrderByScheduleAsc(String userId, String kind, String status, String leagueName);
 
-    List<GameDescription> findTop10ByUserId_SocialIdAndUserId_ProviderAndKindAndStatusAndLeagueOrderByScheduleDesc(String socialId, String provider, String kind, String status, String leagueName);
+    List<GameDescription> findTop10ByUserIdAndKindAndStatusAndLeagueOrderByScheduleDesc(String userId, String kind, String status, String leagueName);
 
-    List<GameDescription> findByAndUserId_SocialIdAndUserId_ProviderAndKindAndStatusAndLeague(String socialId, String provider, String kind, String status, String leagueName);
+    List<GameDescription> findByAndUserIdAndKindAndStatusAndLeague(String userId, String kind, String status, String leagueName);
 
-    void deleteByDateAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    void deleteByDateAndUserId(long date, String userId);
 
-    void deleteByDateAndUserId_SocialIdAndUserId_ProviderAndStatus(long date, String socialId, String provider, String status);
+    void deleteByDateAndUserIdAndStatus(long date, String userId, String status);
 
-    long deleteByDateLessThanAndUserId_SocialIdAndUserId_Provider(long date, String socialId, String provider);
+    long deleteByDateLessThanAndUserId(long date, String userId);
 
-    long deleteByDateLessThanAndUserId_SocialIdAndUserId_ProviderAndStatus(long date, String socialId, String provider, String status);
+    long deleteByDateLessThanAndUserIdAndStatus(long date, String userId, String status);
 
     long count();
 
     long countByStatus(String status);
 
-    long countByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
+    long countByUserId(String userId);
 
-    long countByUserId_SocialIdAndUserId_ProviderAndKindAndLeague(String socialId, String provider, String kind, String leagueName);
+    long countByUserIdAndKindAndLeague(String userId, String kind, String leagueName);
 }

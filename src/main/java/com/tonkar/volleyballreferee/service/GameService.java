@@ -28,7 +28,7 @@ public interface GameService {
 
     void updateSet(long date, int setIndex, Set set);
 
-    void deleteGame(long date, UserId userId);
+    void deleteGame(long date, String userId);
 
     void deleteLiveGame(long date);
 
@@ -40,12 +40,12 @@ public interface GameService {
 
     void deleteTestGames(int setDurationMinutesUnder);
 
-    boolean hasGameUsingRules(String rulesName, UserId userId);
+    boolean hasGameUsingRules(String rulesName, String userId);
 
-    List<GameDescription> listGameDescriptionsUsingRules(String rulesName, UserId userId);
+    List<GameDescription> listGameDescriptionsUsingRules(String rulesName, String userId);
 
-    boolean hasGameUsingTeam(String teamName, UserId userId);
+    boolean hasGameUsingTeam(String teamName, String userId);
 
-    List<GameDescription> listGameDescriptionsUsingTeam(String teamName, UserId userId);
+    List<GameDescription> listGameDescriptionsUsingTeam(String teamName, String userId);
 
 }

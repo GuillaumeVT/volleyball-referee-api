@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface RulesRepository extends MongoRepository<Rules,String> {
 
-    Rules findByNameAndUserId_SocialIdAndUserId_Provider(String name, String socialId, String provider);
+    Rules findByNameAndUserId(String name, String userId);
 
-    List<Rules> findByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
+    List<Rules> findByUserId(String userId);
 
-    void deleteByNameAndUserId_SocialIdAndUserId_Provider(String name, String socialId, String provider);
+    void deleteByNameAndUserId(String name, String userId);
 
-    long countByUserId_SocialIdAndUserId_Provider(String socialId, String provider);
+    long countByUserId(String userId);
 }

@@ -14,7 +14,7 @@ public class GameDescription {
     private String id;
     @Valid
     @NotNull
-    private UserId userId;
+    private String userId;
     @NotEmpty
     private String kind;
     @NotNull
@@ -52,11 +52,11 @@ public class GameDescription {
         this.id = id;
     }
 
-    public UserId getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(UserId userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
