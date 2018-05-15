@@ -22,7 +22,7 @@ public class UserGameController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping(value = "", params = { "userId", "provider" }, method = RequestMethod.GET)
+    @RequestMapping(value = "", params = { "userId" }, method = RequestMethod.GET)
     public ResponseEntity<List<GameDescription>> listUserGames(@RequestParam("userId") String userId) {
         List<GameDescription> games = userService.listUserGames(userId);
         return new ResponseEntity<>(games, HttpStatus.OK);
