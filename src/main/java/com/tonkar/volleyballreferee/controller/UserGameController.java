@@ -28,6 +28,12 @@ public class UserGameController {
         return new ResponseEntity<>(games, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/available", params = { "userId" }, method = RequestMethod.GET)
+    public ResponseEntity<List<GameDescription>> listAvailableUserGames(@RequestParam("userId") String userId) {
+        List<GameDescription> games = userService.listAvailableUserGames(userId);
+        return new ResponseEntity<>(games, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "", params = { "userId", "kind", "league" }, method = RequestMethod.GET)
     public ResponseEntity<List<GameDescription>> listUserGamesInLeague(@RequestParam("userId") String userId, @RequestParam("kind") String kind, @RequestParam("league") String league) {
         league = ControllerUtils.decodeUrlParameter(league);

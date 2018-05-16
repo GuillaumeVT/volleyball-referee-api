@@ -40,6 +40,8 @@ public interface UserService {
 
     List<GameDescription> listUserGames(String userId);
 
+    List<GameDescription> listAvailableUserGames(String userId);
+
     List<GameDescription> listUserGamesInLeague(String userId, String kind, String leagueName);
 
     List<GameDescription> listUserGamesInLeague(long leagueDate);
