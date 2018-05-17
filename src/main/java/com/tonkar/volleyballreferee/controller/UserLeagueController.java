@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.model.League;
+import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,16 @@ public class UserLeagueController {
 
     @RequestMapping(value = "", params = { "userId" }, method = RequestMethod.GET)
     public ResponseEntity<List<League>> listUserLeagues(@RequestParam("userId") String userId) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         List<League> leagues = userService.listUserLeagues(userId);
         return new ResponseEntity<>(leagues, HttpStatus.OK);
     }
 
     @RequestMapping(value = "", params = { "userId", "kind" }, method = RequestMethod.GET)
     public ResponseEntity<List<League>> listUserLeaguesOfKind(@RequestParam("userId") String userId, @RequestParam("kind") String kind) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         List<League> leagues = userService.listUserLeaguesOfKind(userId, kind);
         return new ResponseEntity<>(leagues, HttpStatus.OK);
     }
@@ -50,6 +55,8 @@ public class UserLeagueController {
 
     @RequestMapping(value = "", params = { "userId", "date" }, method = RequestMethod.GET)
     public ResponseEntity<League> getUserLeague(@RequestParam("userId") String userId, @RequestParam("date") long date) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         League league = userService.getUserLeague(userId, date);
 
         if (league == null) {
@@ -62,12 +69,16 @@ public class UserLeagueController {
 
     @RequestMapping(value = "/count", params = { "userId" }, method = RequestMethod.GET)
     public ResponseEntity<Long> getNumberOfUserLeagues(@RequestParam("userId") String userId) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         long numberOfLeagues = userService.getNumberOfUserLeagues(userId);
         return new ResponseEntity<>(numberOfLeagues, HttpStatus.OK);
     }
 
     @PostMapping("")
     public ResponseEntity<League> createUserLeague(@Valid @RequestBody League league) {
+        if (UserId.VBR_USER_ID.equals(league.getUserId())) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         boolean result = userService.createUserLeague(league);
 
         if (result) {
@@ -80,6 +91,8 @@ public class UserLeagueController {
 
     @RequestMapping(value = "", params = { "userId", "date" }, method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUserLeague(@RequestParam("userId") String userId, @RequestParam("date") long date) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         boolean result = userService.deleteUserLeague(userId, date);
 
         if (result) {

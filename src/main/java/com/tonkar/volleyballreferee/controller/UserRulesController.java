@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.model.Rules;
+import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ public class UserRulesController {
 
     @RequestMapping(value = "", params = { "userId" }, method = RequestMethod.GET)
     public ResponseEntity<List<Rules>> listUserRules(@RequestParam("userId") String userId) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         List<Rules> rules = userService.listUserRules(userId);
         return new ResponseEntity<>(rules, HttpStatus.OK);
     }
@@ -36,6 +39,8 @@ public class UserRulesController {
 
     @RequestMapping(value = "", params = { "userId", "name" }, method = RequestMethod.GET)
     public ResponseEntity<Rules> getUserRules(@RequestParam("userId") String userId, @RequestParam("name") String name) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         name = ControllerUtils.decodeUrlParameter(name);
         Rules rules = userService.getUserRules(userId, name);
 
@@ -49,12 +54,16 @@ public class UserRulesController {
 
     @RequestMapping(value = "/count", params = { "userId" }, method = RequestMethod.GET)
     public ResponseEntity<Long> getNumberOfUserRules(@RequestParam("userId") String userId) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         long numberOfRules = userService.getNumberOfUserRules(userId);
         return new ResponseEntity<>(numberOfRules, HttpStatus.OK);
     }
 
     @PostMapping("")
     public ResponseEntity<Rules> createUserRules(@Valid @RequestBody Rules rules) {
+        if (UserId.VBR_USER_ID.equals(rules.getUserId())) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         boolean result = userService.createUserRules(rules);
 
         if (result) {
@@ -67,6 +76,8 @@ public class UserRulesController {
 
     @PutMapping("")
     public ResponseEntity<Rules> updateUserRules(@Valid @RequestBody Rules rules) {
+        if (UserId.VBR_USER_ID.equals(rules.getUserId())) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         boolean result = userService.updateUserRules(rules);
 
         if (result) {
@@ -79,6 +90,8 @@ public class UserRulesController {
 
     @RequestMapping(value = "", params = { "userId", "name" }, method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUserRules(@RequestParam("userId") String userId, @RequestParam("name") String name) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         name = ControllerUtils.decodeUrlParameter(name);
         boolean result = userService.deleteUserRules(userId, name);
 

@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.model.Team;
+import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +25,16 @@ public class UserTeamController {
 
     @RequestMapping(value = "", params = { "userId" }, method = RequestMethod.GET)
     public ResponseEntity<List<Team>> listUserTeams(@RequestParam("userId") String userId) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         List<Team> teams = userService.listUserTeams(userId);
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
     @RequestMapping(value = "", params = { "userId", "kind" }, method = RequestMethod.GET)
     public ResponseEntity<List<Team>> listUserTeamsOfKind(@RequestParam("userId") String userId, @RequestParam("kind") String kind) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         List<Team> teams = userService.listUserTeamsOfKind(userId, kind);
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
@@ -44,6 +49,8 @@ public class UserTeamController {
 
     @RequestMapping(value = "", params = { "userId", "name", "gender" }, method = RequestMethod.GET)
     public ResponseEntity<Team> getUserTeam(@RequestParam("userId") String userId, @RequestParam("name") String name, @RequestParam("gender") String gender) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         name = ControllerUtils.decodeUrlParameter(name);
         Team team = userService.getUserTeam(userId, name, gender);
 
@@ -57,12 +64,16 @@ public class UserTeamController {
 
     @RequestMapping(value = "/count", params = { "userId" }, method = RequestMethod.GET)
     public ResponseEntity<Long> getNumberOfUserTeams(@RequestParam("userId") String userId) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         long numberOfTeams = userService.getNumberOfUserTeams(userId);
         return new ResponseEntity<>(numberOfTeams, HttpStatus.OK);
     }
 
     @PostMapping("")
     public ResponseEntity<Team> createUserTeam(@Valid @RequestBody Team team) {
+        if (UserId.VBR_USER_ID.equals(team.getUserId())) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         boolean result = userService.createUserTeam(team);
 
         if (result) {
@@ -75,6 +86,8 @@ public class UserTeamController {
 
     @PutMapping("")
     public ResponseEntity<Team> updateUserTeam(@Valid @RequestBody Team team) {
+        if (UserId.VBR_USER_ID.equals(team.getUserId())) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         boolean result = userService.updateUserTeam(team);
 
         if (result) {
@@ -87,6 +100,8 @@ public class UserTeamController {
 
     @RequestMapping(value = "", params = { "userId", "name", "gender" }, method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteUserTeam(@RequestParam("userId") String userId, @RequestParam("name") String name, @RequestParam("gender") String gender) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
         name = ControllerUtils.decodeUrlParameter(name);
         boolean result = userService.deleteUserTeam(userId, name, gender);
 
