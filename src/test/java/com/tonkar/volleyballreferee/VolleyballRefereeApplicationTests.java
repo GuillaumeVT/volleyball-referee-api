@@ -447,8 +447,8 @@ public class VolleyballRefereeApplicationTests {
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game"))
 				.queryParam("userId", testUser)
                 .queryParam("id", "1520674661962");
-        gameResponse = restTemplate.getForEntity(builder.toUriString(), GameDescription.class);
-        assertEquals(1520674661962L, gameResponse.getBody().getDate());
+		ResponseEntity<Game> fullGameResponse = restTemplate.getForEntity(builder.toUriString(), Game.class);
+        assertEquals(1520674661962L, fullGameResponse.getBody().getDate());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game/code"))
 				.queryParam("userId", testUser)

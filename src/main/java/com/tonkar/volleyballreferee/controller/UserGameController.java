@@ -1,5 +1,6 @@
 package com.tonkar.volleyballreferee.controller;
 
+import com.tonkar.volleyballreferee.model.Game;
 import com.tonkar.volleyballreferee.model.GameDescription;
 import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.UserService;
@@ -49,10 +50,10 @@ public class UserGameController {
     }
 
     @RequestMapping(value = "", params = { "userId", "id" }, method = RequestMethod.GET)
-    public ResponseEntity<GameDescription> getUserGame(@RequestParam("userId") String userId, @RequestParam("id") long id) {
+    public ResponseEntity<Game> getUserGame(@RequestParam("userId") String userId, @RequestParam("id") long id) {
         if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
 
-        GameDescription game = userService.getUserGame(userId, id);
+        Game game = userService.getUserGameFull(userId, id);
 
         if (game == null) {
             LOGGER.error(String.format("No game %d found for user %s", id, userId));

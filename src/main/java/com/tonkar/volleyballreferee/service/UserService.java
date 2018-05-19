@@ -56,6 +56,8 @@ public interface UserService {
 
     GameDescription getUserGame(String userId, long date);
 
+    Game getUserGameFull(String userId, long date);
+
     long getNumberOfUserGames(String userId);
 
     long getNumberOfUserGames(String userId, String kind, String leagueName);

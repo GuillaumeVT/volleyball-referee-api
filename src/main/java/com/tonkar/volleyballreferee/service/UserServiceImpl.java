@@ -341,6 +341,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Game getUserGameFull(String userId, long date) {
+        return gameRepository.findByDateAndUserId(date, userId);
+    }
+
+    @Override
     public long getNumberOfUserGames(String userId) {
         return gameDescriptionRepository.countByUserId(userId);
     }
@@ -412,7 +417,7 @@ public class UserServiceImpl implements UserService {
         final boolean updated;
 
         final String userId = gameDescription.getUserId();
-        final Game game = gameRepository.findByDateAndUserId(gameDescription.getDate(), userId);
+        final Game game = getUserGameFull(userId, gameDescription.getDate());
 
         if (game == null) {
             LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because it does not exist",
