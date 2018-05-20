@@ -17,6 +17,8 @@ public class Set {
     private List<String>       ladder;
     @NotEmpty
     private String             serving;
+    @NotEmpty
+    private String             firstServing;
     private List<Player>       hCurrentPlayers;
     private List<Player>       gCurrentPlayers;
     private List<Player>       hStartingPlayers;
@@ -85,6 +87,14 @@ public class Set {
 
     public void setServing(String serving) {
         this.serving = serving;
+    }
+
+    public String getFirstServing() {
+        return firstServing;
+    }
+
+    public void setFirstServing(String firstServing) {
+        this.firstServing = firstServing;
     }
 
     public List<Player> gethCurrentPlayers() {
