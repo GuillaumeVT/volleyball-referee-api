@@ -19,6 +19,8 @@ public interface GameRepository extends MongoRepository<Game,String> {
 
     long deleteByDateLessThanAndUserId(long date, String userId);
 
+    long deleteByDateLessThanAndStatus(long date, String status);
+
     long deleteByDateLessThanAndUserIdAndStatus(long date, String userId, String status);
 
 }

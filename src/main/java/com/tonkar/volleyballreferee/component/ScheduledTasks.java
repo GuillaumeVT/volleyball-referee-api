@@ -1,5 +1,6 @@
 package com.tonkar.volleyballreferee.component;
 
+import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.GameService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,14 @@ public class ScheduledTasks {
     @Scheduled(cron = "0 0 4 * * *")
     public void deleteOldLiveGames() {
         LOGGER.info("Deleting every live game older than 1 day");
-        gameService.deleteOldLiveGames(1);
+        gameService.deleteOldLiveGames(1, UserId.VBR_USER_ID);
+    }
+
+    // Every day at 4:05am
+    @Scheduled(cron = "0 5 4 * * *")
+    public void deleteVeryOldLiveGames() {
+        LOGGER.info("Deleting every live game older than 30 days");
+        gameService.deleteOldLiveGames(30);
     }
 
     // Every day at 4:15am
@@ -42,7 +50,7 @@ public class ScheduledTasks {
     @Scheduled(cron = "0 0 16 * * *")
     public void deleteOldLiveGames2() {
         LOGGER.info("Deleting every live game older than 1 day");
-        gameService.deleteOldLiveGames(1);
+        gameService.deleteOldLiveGames(1, UserId.VBR_USER_ID);
     }
 
 }

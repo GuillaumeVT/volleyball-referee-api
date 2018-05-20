@@ -57,6 +57,8 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     long deleteByDateLessThanAndUserId(long date, String userId);
 
+    long deleteByDateLessThanAndStatus(long date, String status);
+
     long deleteByDateLessThanAndUserIdAndStatus(long date, String userId, String status);
 
     long count();
