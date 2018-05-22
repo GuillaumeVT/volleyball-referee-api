@@ -94,6 +94,7 @@ public class GameServiceImpl implements GameService {
         gameDescription.setStatus(game.getStatus());
         gameDescription.setReferee(game.getReferee());
         gameDescription.setLeague(game.getLeague());
+        gameDescription.setDivision(game.getDivision());
         gameDescription.setRules(game.getRules().getName());
         gameDescription.sethName(game.gethTeam().getName());
         gameDescription.setgName(game.getgTeam().getName());
@@ -134,6 +135,7 @@ public class GameServiceImpl implements GameService {
             savedGameDescription.setStatus(game.getStatus());
             savedGameDescription.setReferee(game.getReferee());
             savedGameDescription.setLeague(game.getLeague());
+            savedGameDescription.setDivision(game.getDivision());
             savedGameDescription.setRules(game.getRules().getName());
             savedGameDescription.sethName(game.gethTeam().getName());
             savedGameDescription.setgName(game.getgTeam().getName());
@@ -148,6 +150,7 @@ public class GameServiceImpl implements GameService {
             savedGame.setStatus(game.getStatus());
             savedGame.setReferee(game.getReferee());
             savedGame.setLeague(game.getLeague());
+            savedGame.setDivision(game.getDivision());
             savedGame.setRules(game.getRules());
             savedGame.sethTeam(game.gethTeam());
             savedGame.setgTeam(game.getgTeam());

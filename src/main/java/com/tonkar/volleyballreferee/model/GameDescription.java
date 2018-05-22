@@ -31,6 +31,8 @@ public class GameDescription {
     private String referee;
     @NotNull
     private String league;
+    @NotNull
+    private String division;
     @NotEmpty
     private String hName;
     @NotEmpty
@@ -122,6 +124,14 @@ public class GameDescription {
 
     public void setLeague(String league) {
         this.league = league;
+    }
+
+    public String getDivision() {
+        return division;
+    }
+
+    public void setDivision(String division) {
+        this.division = division;
     }
 
     public String gethName() {

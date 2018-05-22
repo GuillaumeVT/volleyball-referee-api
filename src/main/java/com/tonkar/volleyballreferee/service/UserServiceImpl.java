@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeSet;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -306,7 +307,7 @@ public class UserServiceImpl implements UserService {
         if (league == null) {
             return new ArrayList<>();
         } else {
-            return gameDescriptionRepository.findByAndUserIdAndKindAndStatusAndLeague(
+            return gameDescriptionRepository.findByUserIdAndKindAndStatusAndLeague(
                     league.getUserId(), league.getKind(), GameStatus.LIVE.toString(), league.getName());
         }
     }
@@ -388,6 +389,7 @@ public class UserServiceImpl implements UserService {
                 game.setStatus(gameDescription.getStatus());
                 game.setReferee(gameDescription.getReferee());
                 game.setLeague(gameDescription.getLeague());
+                game.setDivision(gameDescription.getDivision());
                 game.sethTeam(hTeam);
                 game.setgTeam(gTeam);
                 game.setRules(rules);
@@ -448,6 +450,7 @@ public class UserServiceImpl implements UserService {
                 game.setStatus(gameDescription.getStatus());
                 game.setReferee(gameDescription.getReferee());
                 game.setLeague(gameDescription.getLeague());
+                game.setDivision(gameDescription.getDivision());
                 game.sethTeam(hTeam);
                 game.setgTeam(gTeam);
                 game.setRules(rules);
@@ -496,6 +499,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<League> listUserLeaguesOfKind(String userId, String kind) {
         return leagueRepository.findByUserIdAndKind(userId, kind);
+    }
+
+    @Override
+    public List<String> listUserDivisionsOfKind(String userId, String kind) {
+        List<GameDescription> games = gameDescriptionRepository.findByUserIdAndKindAndLeagueNotAndDivisionNot(userId, kind, "", "");
+        TreeSet<String> distinctDivisions = new TreeSet<>();
+
+        for (GameDescription game : games) {
+            distinctDivisions.add(game.getDivision());
+        }
+
+        return new ArrayList<>(distinctDivisions);
     }
 
     @Override

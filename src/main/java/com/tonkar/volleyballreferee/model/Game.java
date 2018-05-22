@@ -32,6 +32,8 @@ public class Game {
     private String         referee;
     @NotNull
     private String         league;
+    @NotNull
+    private String         division;
     @Valid
     @NotNull
     private Team           hTeam;
@@ -133,6 +135,14 @@ public class Game {
 
     public void setLeague(String league) {
         this.league = league;
+    }
+
+    public String getDivision() {
+        return division;
+    }
+
+    public void setDivision(String division) {
+        this.division = division;
     }
 
     public Team gethTeam() {

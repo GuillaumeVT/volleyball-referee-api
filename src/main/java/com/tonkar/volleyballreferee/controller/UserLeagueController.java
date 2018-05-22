@@ -39,6 +39,14 @@ public class UserLeagueController {
         return new ResponseEntity<>(leagues, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/division", params = { "userId", "kind" }, method = RequestMethod.GET)
+    public ResponseEntity<List<String>> listUserDivisions(@RequestParam("userId") String userId, @RequestParam("kind") String kind) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
+        List<String> divisions = userService.listUserDivisionsOfKind(userId, kind);
+        return new ResponseEntity<>(divisions, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "", params = { "date" }, method = RequestMethod.GET)
     public ResponseEntity<League> getUserLeague(@RequestParam("date") long date) {
         League league = userService.getUserLeague(date);

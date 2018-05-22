@@ -74,6 +74,8 @@ public interface UserService {
 
     List<League> listUserLeaguesOfKind(String userId, String kind);
 
+    List<String> listUserDivisionsOfKind(String userId, String kind);
+
     League getUserLeague(long date);
 
     League getUserLeague(String userId, long date);
@@ -85,4 +87,5 @@ public interface UserService {
     boolean createUserLeague(League league);
 
     boolean deleteUserLeague(String userId, long date);
+
 }
