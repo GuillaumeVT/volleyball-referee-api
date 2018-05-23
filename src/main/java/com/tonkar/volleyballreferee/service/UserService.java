@@ -26,7 +26,7 @@ public interface UserService {
 
     List<Team> listUserTeamsOfKind(String userId, String kind);
 
-    List<Team> listUserTeamsOfKindInLeague(long date);
+    List<Team> listUserTeamsInLeague(long date);
 
     Team getUserTeam(String userId, String name, String gender);
 

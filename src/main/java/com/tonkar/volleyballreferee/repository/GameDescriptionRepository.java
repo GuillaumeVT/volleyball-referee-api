@@ -51,6 +51,8 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     List<GameDescription> findByUserIdAndKindAndStatusAndLeague(String userId, String kind, String status, String leagueName);
 
+    List<GameDescription> findByUserIdAndKindAndLeagueAndDivisionNot(String userId, String kind, String notLeague, String notDivision);
+
     List<GameDescription> findByUserIdAndKindAndLeagueNotAndDivisionNot(String userId, String kind, String notLeague, String notDivision);
 
     void deleteByDateAndUserId(long date, String userId);

@@ -6,21 +6,24 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Document(collection="leagues")
 public class League {
 
     @Id
-    private String id;
+    private String       id;
     @Valid
     @NotNull
-    private String userId;
+    private String       userId;
     @NotEmpty
-    private String kind;
+    private String       kind;
     @NotNull
-    private long   date;
+    private long         date;
     @NotEmpty
-    private String name;
+    private String       name;
+    @NotNull
+    private List<String> divisions;
 
     public League() {}
 
@@ -62,5 +65,13 @@ public class League {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<String> getDivisions() {
+        return divisions;
+    }
+
+    public void setDivisions(List<String> divisions) {
+        this.divisions = divisions;
     }
 }

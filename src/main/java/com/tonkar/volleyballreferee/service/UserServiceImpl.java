@@ -164,7 +164,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<Team> listUserTeamsOfKindInLeague(long date) {
+    public List<Team> listUserTeamsInLeague(long date) {
         League league = getUserLeague(date);
         List<Team> allTeamsOfKind = listUserTeamsOfKind(league.getUserId(), league.getKind());
         List<GameDescription> leagueGames = listUserGamesInLeague(league.getUserId(), league.getKind(), league.getName());
@@ -403,6 +403,9 @@ public class UserServiceImpl implements UserService {
                 codeRepository.insert(code);
                 LOGGER.debug(String.format("Created game with date %d (%s vs %s) for user %s",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
+                if (!game.getLeague().isEmpty() && !game.getDivision().isEmpty()) {
+                    updateDivisionsOfLeague(userId, game.getLeague());
+                }
                 created = true;
             }
         } else {
@@ -463,6 +466,9 @@ public class UserServiceImpl implements UserService {
                 gameService.updateGame(game.getDate(), game);
                 LOGGER.debug(String.format("Updated game with date %d (%s vs %s) for user %s",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
+                if (!game.getLeague().isEmpty() && !game.getDivision().isEmpty()) {
+                    updateDivisionsOfLeague(userId, game.getLeague());
+                }
                 updated = true;
             }
         }
@@ -510,7 +516,7 @@ public class UserServiceImpl implements UserService {
             distinctDivisions.add(game.getDivision());
         }
 
-        return new ArrayList<>(distinctDivisions);
+        return new ArrayList<>();
     }
 
     @Override
@@ -554,6 +560,22 @@ public class UserServiceImpl implements UserService {
         leagueRepository.deleteByDateAndUserId(date, userId);
         LOGGER.debug(String.format("Deleted league with date %d for user %s", date, userId));
         return true;
+    }
+
+    private void updateDivisionsOfLeague(String userId, String leagueName) {
+        League league = leagueRepository.findByNameAndUserId(leagueName, userId);
+        league.getDivisions().clear();
+
+        List<GameDescription> games = gameDescriptionRepository.findByUserIdAndKindAndLeagueAndDivisionNot(userId, league.getKind(), league.getName(), "");
+        TreeSet<String> distinctDivisions = new TreeSet<>();
+
+        for (GameDescription game : games) {
+            distinctDivisions.add(game.getDivision());
+        }
+
+        league.getDivisions().addAll(distinctDivisions);
+
+        leagueRepository.save(league);
     }
 
     private int allocateUniqueCode() {

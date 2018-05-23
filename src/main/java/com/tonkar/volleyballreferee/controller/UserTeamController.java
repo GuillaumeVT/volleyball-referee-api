@@ -40,8 +40,8 @@ public class UserTeamController {
     }
 
     @RequestMapping(value = "", params = { "date" }, method = RequestMethod.GET)
-    public ResponseEntity<List<Team>> listUserTeamsOfKindInLeague(@RequestParam("date") long date) {
-        List<Team> teams = userService.listUserTeamsOfKindInLeague(date);
+    public ResponseEntity<List<Team>> listUserTeamsInLeague(@RequestParam("date") long date) {
+        List<Team> teams = userService.listUserTeamsInLeague(date);
         // This is called in a public context
         hideUserId(teams);
         return new ResponseEntity<>(teams, HttpStatus.OK);
