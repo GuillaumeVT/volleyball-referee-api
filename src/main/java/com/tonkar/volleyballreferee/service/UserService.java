@@ -88,6 +88,6 @@ public interface UserService {
 
     boolean deleteUserLeague(String userId, long date);
 
-    byte[] getCsvLeague(String userId, String league, String division);
+    byte[] getCsvLeague(String userId, String leagueName, String divisionName);
 
 }

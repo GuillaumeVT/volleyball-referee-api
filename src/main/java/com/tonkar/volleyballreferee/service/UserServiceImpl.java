@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.model.*;
+import com.tonkar.volleyballreferee.model.Set;
 import com.tonkar.volleyballreferee.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.util.*;
 
 @Service
@@ -562,8 +564,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public byte[] getCsvLeague(String userId, String league, String division) {
-        List<GameDescription> gameDescriptions = gameDescriptionRepository.findByUserIdAndLeagueAndDivision(userId, league, division);
+    public byte[] getCsvLeague(String userId, String leagueName, String divisionName) {
+        final List<GameDescription> gameDescriptions;
+
+        if (divisionName.isEmpty()) {
+            gameDescriptions = gameDescriptionRepository.findByUserIdAndStatusAndLeague(userId, GameStatus.COMPLETED.toString(), leagueName);
+        } else {
+            gameDescriptions = gameDescriptionRepository.findByUserIdAndStatusAndLeagueAndDivision(userId, GameStatus.COMPLETED.toString(), leagueName, divisionName);
+        }
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         PrintWriter printWriter = new PrintWriter(byteArrayOutputStream);
@@ -572,24 +580,62 @@ public class UserServiceImpl implements UserService {
 
         for (GameDescription gameDescription : gameDescriptions) {
             Game game = getUserGameFull(userId, gameDescription.getDate());
-            appendCsvGame(game, printWriter);
+            appendCsvGame(gameDescription, game, printWriter);
         }
 
         printWriter.close();
+
+        LOGGER.info("CSV for " + gameDescriptions.size() + " " + leagueName + " " + divisionName);
 
         return byteArrayOutputStream.toByteArray();
     }
 
     private void appendCsvHeader(PrintWriter printWriter) {
+        printWriter.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
+                "Date",
+                "League",
+                "Division",
+                "Gender",
+                "Home", "Guest",
+                "Sets Home", "Sets Guest",
+                "Set 1 Home", "Set 1 Guest",
+                "Set 2 Home", "Set 2 Guest",
+                "Set 3 Home", "Set 3 Guest",
+                "Set 4 Home", "Set 4 Guest",
+                "Set 5 Home", "Set 5 Guest"
+        ));
     }
 
-    private void appendCsvGame(Game game, PrintWriter printWriter) {
-        printWriter.append(String.format("\n%s;%s;%s;%s;%s",
-                new Date(game.getSchedule()).toString(),
-                game.getLeague(),
-                game.getDivision(),
-                game.gethTeam().getName(),
-                game.getgTeam().getName()
+    private void appendCsvGame(GameDescription gameDescription, Game game, PrintWriter printWriter) {
+        DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
+        formatter.setTimeZone(TimeZone.getDefault());
+
+        String[] hPoints = new String[5];
+        String[] gPoints = new String[5];
+
+        for (int index = 0; index < 5; index++) {
+            if (index < game.getSets().size()) {
+                Set set = game.getSets().get(index);
+                hPoints[index] = String.valueOf(set.gethPoints());
+                gPoints[index] = String.valueOf(set.getgPoints());
+            } else {
+                hPoints[index] = "";
+                gPoints[index] = "";
+            }
+        }
+
+        printWriter.append(String.format("\n%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s",
+                formatter.format(game.getSchedule()),
+                gameDescription.getLeague(),
+                gameDescription.getDivision(),
+                gameDescription.getGender(),
+                gameDescription.gethName(), gameDescription.getgName(),
+                gameDescription.gethSets(), gameDescription.getgSets(),
+                hPoints[0], gPoints[0],
+                hPoints[1], gPoints[1],
+                hPoints[2], gPoints[2],
+                hPoints[3], gPoints[3],
+                hPoints[4], gPoints[4]
         ));
     }
 

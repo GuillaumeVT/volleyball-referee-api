@@ -178,16 +178,22 @@ public class PdfGameWriter {
         infoTable.setWidthPercentage(100);
         infoTable.setSpacingBefore(5.f);
 
-        Font leagueFont = FontFactory.getFont(getFontname(mGame.getLeague()), BaseFont.IDENTITY_H, true, mDefaultFont.getSize(), mDefaultFont.getStyle(), mDefaultFont.getColor());
-        PdfPCell leagueCell = new PdfPCell(new Phrase(mGame.getLeague(), leagueFont));
+        String league = mGame.getLeague();
+        String division = mGame.getDivision();
+        if (!league.isEmpty() && !division.isEmpty()) {
+            league = league + " / " + division;
+        }
+
+        Font leagueFont = FontFactory.getFont(getFontname(league), BaseFont.IDENTITY_H, true, mDefaultFont.getSize(), mDefaultFont.getStyle(), mDefaultFont.getColor());
+        PdfPCell leagueCell = new PdfPCell(new Phrase(league, leagueFont));
         leagueCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         leagueCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         infoTable.addCell(leagueCell);
 
-        DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault());
+        DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault());
         formatter.setTimeZone(TimeZone.getDefault());
 
-        PdfPCell dateCell = new PdfPCell(new Phrase(formatter.format(new Date(mGame.getDate())), mDefaultFont));
+        PdfPCell dateCell = new PdfPCell(new Phrase(formatter.format(new Date(mGame.getSchedule())), mDefaultFont));
         dateCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         dateCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
         infoTable.addCell(dateCell);
