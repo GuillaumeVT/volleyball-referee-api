@@ -59,7 +59,7 @@ public class PdfGameWriter {
     public static PdfGame writeGame(Game game) throws IOException, DocumentException {
         DateFormat formatter = new SimpleDateFormat("dd_MM_yyyy", Locale.getDefault());
         formatter.setTimeZone(TimeZone.getDefault());
-        String date = formatter.format(new Date(game.getDate()));
+        String date = formatter.format(new Date(game.getSchedule()));
 
         String homeTeam = game.gethTeam().getName();
         String guestTeam = game.getgTeam().getName();

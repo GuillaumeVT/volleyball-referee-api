@@ -7,10 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.TreeSet;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -516,7 +515,7 @@ public class UserServiceImpl implements UserService {
             distinctDivisions.add(game.getDivision());
         }
 
-        return new ArrayList<>();
+        return new ArrayList<>(distinctDivisions);
     }
 
     @Override
@@ -560,6 +559,38 @@ public class UserServiceImpl implements UserService {
         leagueRepository.deleteByDateAndUserId(date, userId);
         LOGGER.debug(String.format("Deleted league with date %d for user %s", date, userId));
         return true;
+    }
+
+    @Override
+    public byte[] getCsvLeague(String userId, String league, String division) {
+        List<GameDescription> gameDescriptions = gameDescriptionRepository.findByUserIdAndLeagueAndDivision(userId, league, division);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PrintWriter printWriter = new PrintWriter(byteArrayOutputStream);
+
+        appendCsvHeader(printWriter);
+
+        for (GameDescription gameDescription : gameDescriptions) {
+            Game game = getUserGameFull(userId, gameDescription.getDate());
+            appendCsvGame(game, printWriter);
+        }
+
+        printWriter.close();
+
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    private void appendCsvHeader(PrintWriter printWriter) {
+    }
+
+    private void appendCsvGame(Game game, PrintWriter printWriter) {
+        printWriter.append(String.format("\n%s;%s;%s;%s;%s",
+                new Date(game.getSchedule()).toString(),
+                game.getLeague(),
+                game.getDivision(),
+                game.gethTeam().getName(),
+                game.getgTeam().getName()
+        ));
     }
 
     private void updateDivisionsOfLeague(String userId, String leagueName) {

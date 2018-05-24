@@ -6,7 +6,10 @@ import com.tonkar.volleyballreferee.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -111,4 +114,18 @@ public class UserLeagueController {
         }
     }
 
+    @RequestMapping(value = "/csv", params = { "userId", "league", "division" }, method = RequestMethod.GET)
+    public ResponseEntity<?> getCsvLeague(@RequestParam("userId") String userId, @RequestParam("league") String league, @RequestParam("division") String division) {
+        LOGGER.debug(String.format("Request download csv with league %s and division %s for user %s", league, division, userId));
+
+        byte[] data = userService.getCsvLeague(userId, league, division);
+
+        String fileName = league + "_" + division + ".csv";
+        ByteArrayResource resource = new ByteArrayResource(data);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileName)
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .contentLength(data.length)
+                .body(resource);
+    }
 }
