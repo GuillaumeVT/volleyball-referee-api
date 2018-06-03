@@ -103,4 +103,18 @@ public class UserRulesController {
         }
     }
 
+    @RequestMapping(value = "", params = { "userId" }, method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteAllUserRules(@RequestParam("userId") String userId) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
+        boolean result = userService.deleteAllUserRules(userId);
+
+        if (result) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            LOGGER.error(String.format("Failed to delete all rules for user %s", userId));
+            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+        }
+    }
+
 }

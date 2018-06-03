@@ -155,6 +155,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean deleteAllUserRules(String userId) {
+        List<Rules> allRules = listUserRules(userId);
+
+        for (Rules rules : allRules) {
+            deleteUserRules(userId, rules.getName());
+        }
+
+        return true;
+    }
+
+    @Override
     public List<Team> listUserTeams(String userId) {
         return teamRepository.findByUserId(userId);
     }
@@ -262,6 +273,17 @@ public class UserServiceImpl implements UserService {
         }
 
         return deleted;
+    }
+
+    @Override
+    public boolean deleteAllUserTeams(String userId) {
+        List<Team> allTeams = listUserTeams(userId);
+
+        for (Team team : allTeams) {
+            deleteUserTeam(userId, team.getName(), team.getGender());
+        }
+
+        return true;
     }
 
     @Override

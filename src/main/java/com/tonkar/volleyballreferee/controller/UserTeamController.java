@@ -113,6 +113,20 @@ public class UserTeamController {
         }
     }
 
+    @RequestMapping(value = "", params = { "userId" }, method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteAllUserTeams(@RequestParam("userId") String userId) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
+        boolean result = userService.deleteAllUserTeams(userId);
+
+        if (result) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            LOGGER.error(String.format("Failed to delete all teams for user %s", userId));
+            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+        }
+    }
+
     private void hideUserId(List<Team> teams) {
         for (Team team : teams) {
             team.setUserId(null);

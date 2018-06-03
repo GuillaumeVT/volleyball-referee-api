@@ -22,6 +22,8 @@ public interface UserService {
 
     boolean deleteUserRules(String userId, String name);
 
+    boolean deleteAllUserRules(String userId);
+
     List<Team> listUserTeams(String userId);
 
     List<Team> listUserTeamsOfKind(String userId, String kind);
@@ -37,6 +39,8 @@ public interface UserService {
     boolean updateUserTeam(Team team);
 
     boolean deleteUserTeam(String userId, String name, String gender);
+
+    boolean deleteAllUserTeams(String userId);
 
     List<GameDescription> listUserGames(String userId);
 

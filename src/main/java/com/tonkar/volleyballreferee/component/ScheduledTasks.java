@@ -27,7 +27,7 @@ public class ScheduledTasks {
     @Scheduled(cron = "0 5 4 * * *")
     public void deleteVeryOldLiveGames() {
         LOGGER.info("Deleting every live game older than 30 days");
-        gameService.deleteOldLiveGames(30);
+        gameService.deleteOldLiveGames(7);
     }
 
     // Every day at 4:15am
