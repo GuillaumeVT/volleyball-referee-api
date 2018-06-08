@@ -296,14 +296,14 @@ public class VolleyballRefereeApplicationTests {
 	@Test
 	public void testUserRules() {
         ResponseEntity<Rules> updateResponse = restTemplate.exchange(urlOf("/api/user/rules"), HttpMethod.PUT, entityOf(rules), Rules.class);
-        assertEquals(HttpStatus.NOT_MODIFIED, updateResponse.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, updateResponse.getStatusCode());
 
         ResponseEntity<Rules> createResponse = restTemplate.exchange(urlOf("/api/user/rules"), HttpMethod.POST, entityOf(rules), Rules.class);
         assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
         assertEquals("Test Rules", createResponse.getBody().getName());
 
         createResponse = restTemplate.exchange(urlOf("/api/user/rules"), HttpMethod.POST, entityOf(rules), Rules.class);
-        assertEquals(HttpStatus.NOT_MODIFIED, createResponse.getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, createResponse.getStatusCode());
 
         updateResponse = restTemplate.exchange(urlOf("/api/user/rules"), HttpMethod.PUT, entityOf(rules), Rules.class);
         assertEquals(HttpStatus.OK, updateResponse.getStatusCode());
@@ -347,7 +347,7 @@ public class VolleyballRefereeApplicationTests {
 	@Test
     public void testUserTeams() {
         ResponseEntity<Team> updateResponse = restTemplate.exchange(urlOf("/api/user/team"), HttpMethod.PUT, entityOf(team1), Team.class);
-        assertEquals(HttpStatus.NOT_MODIFIED, updateResponse.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, updateResponse.getStatusCode());
 
         ResponseEntity<Team> createResponse = restTemplate.exchange(urlOf("/api/user/team"), HttpMethod.POST, entityOf(team1), Team.class);
         assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
@@ -358,7 +358,7 @@ public class VolleyballRefereeApplicationTests {
         assertEquals("FRANCE", createResponse.getBody().getName());
 
         createResponse = restTemplate.exchange(urlOf("/api/user/team"), HttpMethod.POST, entityOf(team1), Team.class);
-        assertEquals(HttpStatus.NOT_MODIFIED, createResponse.getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, createResponse.getStatusCode());
 
         updateResponse = restTemplate.exchange(urlOf("/api/user/team"), HttpMethod.PUT, entityOf(team1), Team.class);
         assertEquals(HttpStatus.OK, updateResponse.getStatusCode());
@@ -431,7 +431,7 @@ public class VolleyballRefereeApplicationTests {
         assertEquals(HttpStatus.CREATED, createTeamResponse.getStatusCode());
 
         ResponseEntity<GameDescription> gameResponse = restTemplate.exchange(urlOf("/api/user/game"), HttpMethod.PUT, entityOf(description1), GameDescription.class);
-        assertEquals(HttpStatus.NOT_MODIFIED, gameResponse.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
 
         gameResponse = restTemplate.exchange(urlOf("/api/user/game"), HttpMethod.POST, entityOf(description1), GameDescription.class);
         assertEquals(HttpStatus.CREATED, gameResponse.getStatusCode());

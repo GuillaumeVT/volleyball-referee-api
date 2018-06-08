@@ -70,7 +70,7 @@ public class UserRulesController {
             return new ResponseEntity<>(rules, HttpStatus.CREATED);
         } else {
             LOGGER.error(String.format("Rules %s already exist for user %s", rules.getName(), rules.getUserId()));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
@@ -84,7 +84,7 @@ public class UserRulesController {
             return new ResponseEntity<>(rules, HttpStatus.OK);
         } else {
             LOGGER.error(String.format("Failed to update rules %s for user %s", rules.getName(), rules.getUserId()));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -99,7 +99,7 @@ public class UserRulesController {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             LOGGER.error(String.format("Failed to delete rules %s for user %s", name, userId));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -113,7 +113,7 @@ public class UserRulesController {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             LOGGER.error(String.format("Failed to delete all rules for user %s", userId));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

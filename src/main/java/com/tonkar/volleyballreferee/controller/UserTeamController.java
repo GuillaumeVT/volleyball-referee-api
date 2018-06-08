@@ -80,7 +80,7 @@ public class UserTeamController {
             return new ResponseEntity<>(team, HttpStatus.CREATED);
         } else {
             LOGGER.error(String.format("Team %s already exists for user %s", team.getName(), team.getUserId()));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
@@ -94,7 +94,7 @@ public class UserTeamController {
             return new ResponseEntity<>(team, HttpStatus.OK);
         } else {
             LOGGER.error(String.format("Failed to update team %s for user %s", team.getName(), team.getUserId()));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -109,7 +109,7 @@ public class UserTeamController {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             LOGGER.error(String.format("Failed to delete team %s for user %s", name, userId));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -123,7 +123,7 @@ public class UserTeamController {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             LOGGER.error(String.format("Failed to delete all teams for user %s", userId));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

@@ -105,7 +105,7 @@ public class UserGameController {
         } else {
             LOGGER.error(String.format("Game with date %d (%s vs %s) not created for user %s",
                     game.getDate(), game.gethName(), game.getgName(), game.getUserId()));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
@@ -120,7 +120,7 @@ public class UserGameController {
         } else {
             LOGGER.error(String.format("Failed to update game with date %d (%s vs %s) for user %s",
                     game.getDate(), game.gethName(), game.getgName(), game.getUserId()));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -134,7 +134,7 @@ public class UserGameController {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             LOGGER.error(String.format("Failed to delete game %d for user %s", id, userId));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

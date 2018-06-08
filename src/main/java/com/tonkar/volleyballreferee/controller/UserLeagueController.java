@@ -96,7 +96,7 @@ public class UserLeagueController {
             return new ResponseEntity<>(league, HttpStatus.CREATED);
         } else {
             LOGGER.error(String.format("League %s already exists for user %s", league.getName(), league.getUserId()));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
@@ -110,7 +110,7 @@ public class UserLeagueController {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             LOGGER.error(String.format("Failed to delete league with date %d for user %s", date, userId));
-            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
