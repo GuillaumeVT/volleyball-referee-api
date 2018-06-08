@@ -156,12 +156,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean deleteAllUserRules(String userId) {
-        List<Rules> allRules = listUserRules(userId);
-
-        for (Rules rules : allRules) {
-            deleteUserRules(userId, rules.getName());
-        }
-
+        rulesRepository.deleteByUserId(userId);
         return true;
     }
 
@@ -203,8 +198,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Team getUserTeam(String userId, String name, String gender) {
-        return teamRepository.findByNameAndUserIdAndGender(name, userId, gender);
+    public Team getUserTeam(String userId, String name, String gender, String kind) {
+        return teamRepository.findByNameAndUserIdAndGenderAndKind(name, userId, gender, kind);
     }
 
     @Override
@@ -216,7 +211,7 @@ public class UserServiceImpl implements UserService {
     public boolean createUserTeam(Team team) {
         final boolean created;
 
-        if (getUserTeam(team.getUserId(), team.getName(), team.getGender()) == null) {
+        if (getUserTeam(team.getUserId(), team.getName(), team.getGender(), team.getKind()) == null) {
             teamRepository.insert(team);
             LOGGER.debug(String.format("Created team %s for user %s", team.getName(), team.getUserId()));
             created = true;
@@ -232,7 +227,7 @@ public class UserServiceImpl implements UserService {
     public boolean updateUserTeam(Team team) {
         final boolean updated;
 
-        Team savedTeam = getUserTeam(team.getUserId(), team.getName(), team.getGender());
+        Team savedTeam = getUserTeam(team.getUserId(), team.getName(), team.getGender(), team.getKind());
 
         if (savedTeam == null) {
             LOGGER.error(String.format("Could not update team %s for user %s because it does not exist", team.getName(), team.getUserId()));
@@ -260,14 +255,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean deleteUserTeam(String userId, String name, String gender) {
+    public boolean deleteUserTeam(String userId, String name, String gender, String kind) {
         final boolean deleted;
 
         if (gameService.hasGameUsingTeam(name, userId)) {
             LOGGER.debug(String.format("Could not delete team %s for user %s because it is used in a game", name, userId));
             deleted = false;
         } else {
-            teamRepository.deleteByNameAndUserIdAndGender(name, userId, gender);
+            teamRepository.deleteByNameAndUserIdAndGenderAndKind(name, userId, gender, kind);
             LOGGER.debug(String.format("Deleted team %s for user %s", name, userId));
             deleted = true;
         }
@@ -277,12 +272,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean deleteAllUserTeams(String userId) {
-        List<Team> allTeams = listUserTeams(userId);
-
-        for (Team team : allTeams) {
-            deleteUserTeam(userId, team.getName(), team.getGender());
-        }
-
+        teamRepository.deleteByUserId(userId);
         return true;
     }
 
@@ -389,8 +379,8 @@ public class UserServiceImpl implements UserService {
             code.setDate(gameDescription.getDate());
             code.setCode(allocateUniqueCode());
 
-            Team hTeam = getUserTeam(userId, gameDescription.gethName(), gameDescription.getGender());
-            Team gTeam = getUserTeam(userId, gameDescription.getgName(), gameDescription.getGender());
+            Team hTeam = getUserTeam(userId, gameDescription.gethName(), gameDescription.getGender(), gameDescription.getKind());
+            Team gTeam = getUserTeam(userId, gameDescription.getgName(), gameDescription.getGender(), gameDescription.getKind());
             Rules rules = getRules(userId, gameDescription.getRules());
 
             if (hTeam == null || gTeam == null || rules == null || code.getCode() < 0) {
@@ -456,8 +446,8 @@ public class UserServiceImpl implements UserService {
                     gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId, game.getStatus()));
             updated = false;
         } else {
-            Team hTeam = getUserTeam(userId, gameDescription.gethName(), gameDescription.getGender());
-            Team gTeam = getUserTeam(userId, gameDescription.getgName(), gameDescription.getGender());
+            Team hTeam = getUserTeam(userId, gameDescription.gethName(), gameDescription.getGender(), game.getKind());
+            Team gTeam = getUserTeam(userId, gameDescription.getgName(), gameDescription.getGender(), game.getKind());
             Rules rules = getRules(userId, gameDescription.getRules());
 
             if (hTeam == null || gTeam == null || rules == null) {

@@ -388,14 +388,16 @@ public class VolleyballRefereeApplicationTests {
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
-                .queryParam("gender", "GENTS");
+                .queryParam("gender", "GENTS")
+                .queryParam("kind", "INDOOR");
         ResponseEntity<Team> teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
         assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "ITALY")
-                .queryParam("gender", "GENTS");
+                .queryParam("gender", "GENTS")
+                .queryParam("kind", "INDOOR");
         teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
         assertEquals(HttpStatus.NOT_FOUND, teamResponse.getStatusCode());
 
@@ -407,13 +409,15 @@ public class VolleyballRefereeApplicationTests {
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
-                .queryParam("gender", "GENTS");
+                .queryParam("gender", "GENTS")
+                .queryParam("kind", "INDOOR");;
         restTemplate.delete(builder.toUriString());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
                 .queryParam("userId", testUser)
                 .queryParam("name", "FRANCE")
-                .queryParam("gender", "GENTS");
+                .queryParam("gender", "GENTS")
+                .queryParam("kind", "INDOOR");;
         restTemplate.delete(builder.toUriString());
     }
 
@@ -477,13 +481,15 @@ public class VolleyballRefereeApplicationTests {
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
-                .queryParam("gender", "GENTS");
+                .queryParam("gender", "GENTS")
+                .queryParam("kind", "INDOOR");;
         restTemplate.delete(builder.toUriString());
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
 				.queryParam("name", "BRAZIL")
-                .queryParam("gender", "GENTS");
+                .queryParam("gender", "GENTS")
+                .queryParam("kind", "INDOOR");;
 		ResponseEntity<Team> teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
 		assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
 
@@ -510,19 +516,22 @@ public class VolleyballRefereeApplicationTests {
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
-                .queryParam("gender", "GENTS");
+                .queryParam("gender", "GENTS")
+                .queryParam("kind", "INDOOR");;
         restTemplate.delete(builder.toUriString());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "FRANCE")
-                .queryParam("gender", "GENTS");
+                .queryParam("gender", "GENTS")
+                .queryParam("kind", "INDOOR");;
         restTemplate.delete(builder.toUriString());
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
 				.queryParam("name", "BRAZIL")
-                .queryParam("gender", "GENTS");
+                .queryParam("gender", "GENTS")
+                .queryParam("kind", "INDOOR");;
 		teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
 		assertEquals(HttpStatus.NOT_FOUND, teamResponse.getStatusCode());
     }

@@ -11,6 +11,8 @@ public interface RulesRepository extends MongoRepository<Rules,String> {
 
     List<Rules> findByUserId(String userId);
 
+    void deleteByUserId(String userId);
+
     void deleteByNameAndUserId(String name, String userId);
 
     long countByUserId(String userId);

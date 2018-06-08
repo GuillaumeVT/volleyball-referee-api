@@ -30,7 +30,7 @@ public interface UserService {
 
     List<Team> listUserTeamsInLeague(long date);
 
-    Team getUserTeam(String userId, String name, String gender);
+    Team getUserTeam(String userId, String name, String gender, String kind);
 
     long getNumberOfUserTeams(String userId);
 
@@ -38,7 +38,7 @@ public interface UserService {
 
     boolean updateUserTeam(Team team);
 
-    boolean deleteUserTeam(String userId, String name, String gender);
+    boolean deleteUserTeam(String userId, String name, String gender, String kind);
 
     boolean deleteAllUserTeams(String userId);
 

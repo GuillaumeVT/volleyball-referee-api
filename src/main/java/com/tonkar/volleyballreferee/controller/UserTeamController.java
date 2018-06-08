@@ -47,12 +47,12 @@ public class UserTeamController {
         return new ResponseEntity<>(teams, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "", params = { "userId", "name", "gender" }, method = RequestMethod.GET)
-    public ResponseEntity<Team> getUserTeam(@RequestParam("userId") String userId, @RequestParam("name") String name, @RequestParam("gender") String gender) {
+    @RequestMapping(value = "", params = { "userId", "name", "gender", "kind" }, method = RequestMethod.GET)
+    public ResponseEntity<Team> getUserTeam(@RequestParam("userId") String userId, @RequestParam("name") String name, @RequestParam("gender") String gender, @RequestParam("kind") String kind) {
         if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
 
         name = ControllerUtils.decodeUrlParameter(name);
-        Team team = userService.getUserTeam(userId, name, gender);
+        Team team = userService.getUserTeam(userId, name, gender, kind);
 
         if (team == null) {
             LOGGER.error(String.format("No team %s found for user %s", name, userId));
@@ -98,12 +98,12 @@ public class UserTeamController {
         }
     }
 
-    @RequestMapping(value = "", params = { "userId", "name", "gender" }, method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteUserTeam(@RequestParam("userId") String userId, @RequestParam("name") String name, @RequestParam("gender") String gender) {
+    @RequestMapping(value = "", params = { "userId", "name", "gender", "kind" }, method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteUserTeam(@RequestParam("userId") String userId, @RequestParam("name") String name, @RequestParam("gender") String gender, @RequestParam("kind") String kind) {
         if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
 
         name = ControllerUtils.decodeUrlParameter(name);
-        boolean result = userService.deleteUserTeam(userId, name, gender);
+        boolean result = userService.deleteUserTeam(userId, name, gender, kind);
 
         if (result) {
             return new ResponseEntity<>(HttpStatus.OK);
