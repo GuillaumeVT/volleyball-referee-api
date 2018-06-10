@@ -1,6 +1,5 @@
 package com.tonkar.volleyballreferee.component;
 
-import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.GameService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,39 +17,44 @@ public class ScheduledTasks {
 
     // Every day at 4am
     @Scheduled(cron = "0 0 4 * * *")
-    public void deleteOldLiveGames() {
-        LOGGER.info("Deleting every live game older than 1 day");
-        gameService.deleteOldLiveGames(1, UserId.VBR_USER_ID);
+    public void deletePublicLiveGames() {
+        LOGGER.info("Deleting every public live game older than 1 day");
+        gameService.deletePublicLiveGames(1);
     }
 
     // Every day at 4:05am
     @Scheduled(cron = "0 5 4 * * *")
-    public void deleteVeryOldLiveGames() {
-        LOGGER.info("Deleting every live game older than 30 days");
+    public void deleteOldLiveGames() {
+        LOGGER.info("Deleting every live game older than 7 days");
         gameService.deleteOldLiveGames(7);
+    }
+
+    // Every day at 4:10am
+    @Scheduled(cron = "0 10 4 * * *")
+    public void deletePublicTestGames() {
+        LOGGER.info("Deleting every public test game with all sets duration under 5 minutes");
+        gameService.deletePublicTestGames(5);
     }
 
     // Every day at 4:15am
     @Scheduled(cron = "0 15 4 * * *")
-    public void deleteTestGames() {
-        LOGGER.info("Deleting every test game with a set duration under 5 minutes");
-        gameService.deleteTestGames(5);
+    public void deletePublicGames() {
+        LOGGER.info("Deleting every public game older than 2 days");
+        gameService.deletePublicGames(2);
     }
 
-    // Every monday at 4:30am
-    @Scheduled(cron = "0 30 4 1 * *")
-    public void deleteOldGames() {
-        LOGGER.info("Deleting every game older than 1 year");
-        gameService.deleteOldGames(365);
-        LOGGER.info("Deleting every code older than 1 year");
-        gameService.deleteOldCodes(365);
+    // Every day at 4:20am
+    @Scheduled(cron = "0 20 4 * * *")
+    public void deleteOldCodes() {
+        LOGGER.info("Deleting every code older than 90 days");
+        gameService.deleteOldCodes(90);
     }
 
     // Every day at 4pm
     @Scheduled(cron = "0 0 16 * * *")
-    public void deleteOldLiveGames2() {
-        LOGGER.info("Deleting every live game older than 1 day");
-        gameService.deleteOldLiveGames(1, UserId.VBR_USER_ID);
+    public void deletePublicLiveGames2() {
+        LOGGER.info("Deleting every public live game older than 1 day");
+        gameService.deletePublicLiveGames(1);
     }
 
 }

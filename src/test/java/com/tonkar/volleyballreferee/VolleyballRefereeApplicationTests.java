@@ -188,7 +188,7 @@ public class VolleyballRefereeApplicationTests {
 		assertEquals(2, gameStatistics.getGamesCount());
 		assertEquals(1, gameStatistics.getLiveGamesCount());
 
-		gameService.deleteOldGames(300);
+		gameService.deletePublicGames(300);
 
 		gameStatistics = gameService.getGameStatistics();
 		assertEquals(0, gameStatistics.getGamesCount());
@@ -213,11 +213,11 @@ public class VolleyballRefereeApplicationTests {
 
 		// Delete
 
-		gameService.deleteTestGames(5);
+		gameService.deletePublicTestGames(5);
 		GameStatistics gameStatistics = gameService.getGameStatistics();
 		assertEquals(3, gameStatistics.getGamesCount());
 
-		gameService.deleteTestGames(15);
+		gameService.deletePublicTestGames(15);
 		gameStatistics = gameService.getGameStatistics();
 		assertEquals(2, gameStatistics.getGamesCount());
 

@@ -32,15 +32,15 @@ public interface GameService {
 
     void deleteLiveGame(long date);
 
-    void deleteOldGames(int daysAgo);
+    void deletePublicGames(int daysAgo);
 
     void deleteOldLiveGames(int daysAgo);
 
-    void deleteOldLiveGames(int daysAgo, String userId);
+    void deletePublicLiveGames(int daysAgo);
 
     void deleteOldCodes(int daysAgo);
 
-    void deleteTestGames(int setDurationMinutesUnder);
+    void deletePublicTestGames(int setDurationMinutesUnder);
 
     boolean hasGameUsingRules(String rulesName, String userId);
 
