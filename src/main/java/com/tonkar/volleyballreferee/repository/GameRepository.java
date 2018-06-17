@@ -13,14 +13,14 @@ public interface GameRepository extends MongoRepository<Game,String> {
 
     List<Game> findByUserIdAndStatusAndSets_DurationLessThan(String userId, String status, long setDurationMillisUnder);
 
-    void deleteByDateAndUserIdAndStatus(long date, String userId, String status);
-
     void deleteByDateAndUserId(long date, String userId);
 
-    long deleteByDateLessThanAndUserId(long date, String userId);
+    void deleteByDateAndUserIdAndStatus(long date, String userId, String status);
 
-    long deleteByDateLessThanAndStatus(long date, String status);
+    long deleteByScheduleLessThanAndUserId(long schedule, String userId);
 
-    long deleteByDateLessThanAndUserIdAndStatus(long date, String userId, String status);
+    long deleteByScheduleLessThanAndStatus(long schedule, String status);
+
+    long deleteByScheduleLessThanAndUserIdAndStatus(long schedule, String userId, String status);
 
 }

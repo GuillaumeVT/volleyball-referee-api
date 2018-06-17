@@ -195,10 +195,10 @@ public class GameServiceImpl implements GameService {
     public void deletePublicGames(int daysAgo) {
         long dateNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
 
-        long count = gameDescriptionRepository.deleteByDateLessThanAndUserId(dateNDaysAgo, UserId.VBR_USER_ID);
+        long count = gameDescriptionRepository.deleteByScheduleLessThanAndUserId(dateNDaysAgo, UserId.VBR_USER_ID);
         LOGGER.debug(String.format("Deleted %d public game descriptions older than date %d", count, dateNDaysAgo));
 
-        count = gameRepository.deleteByDateLessThanAndUserId(dateNDaysAgo, UserId.VBR_USER_ID);
+        count = gameRepository.deleteByScheduleLessThanAndUserId(dateNDaysAgo, UserId.VBR_USER_ID);
         LOGGER.debug(String.format("Deleted %d public games older than date %d", count, dateNDaysAgo));
     }
 
@@ -206,10 +206,10 @@ public class GameServiceImpl implements GameService {
     public void deleteOldLiveGames(int daysAgo) {
         long dateNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
 
-        long count = gameDescriptionRepository.deleteByDateLessThanAndStatus(dateNDaysAgo, GameStatus.LIVE.toString());
+        long count = gameDescriptionRepository.deleteByScheduleLessThanAndStatus(dateNDaysAgo, GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d live game descriptions older than date %d", count, dateNDaysAgo));
 
-        count = gameRepository.deleteByDateLessThanAndStatus(dateNDaysAgo, GameStatus.LIVE.toString());
+        count = gameRepository.deleteByScheduleLessThanAndStatus(dateNDaysAgo, GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d live games older than date %d", count, dateNDaysAgo));
     }
 
@@ -217,10 +217,10 @@ public class GameServiceImpl implements GameService {
     public void deletePublicLiveGames(int daysAgo) {
         long dateNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
 
-        long count = gameDescriptionRepository.deleteByDateLessThanAndUserIdAndStatus(dateNDaysAgo, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
+        long count = gameDescriptionRepository.deleteByScheduleLessThanAndUserIdAndStatus(dateNDaysAgo, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d public live game descriptions older than date %d", count, dateNDaysAgo));
 
-        count = gameRepository.deleteByDateLessThanAndUserIdAndStatus(dateNDaysAgo, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
+        count = gameRepository.deleteByScheduleLessThanAndUserIdAndStatus(dateNDaysAgo, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d public live games older than date %d", count, dateNDaysAgo));
     }
 

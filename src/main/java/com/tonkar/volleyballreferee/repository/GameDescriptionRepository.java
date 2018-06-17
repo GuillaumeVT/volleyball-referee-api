@@ -63,11 +63,11 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     void deleteByDateAndUserIdAndStatus(long date, String userId, String status);
 
-    long deleteByDateLessThanAndUserId(long date, String userId);
+    long deleteByScheduleLessThanAndUserId(long schedule, String userId);
 
-    long deleteByDateLessThanAndStatus(long date, String status);
+    long deleteByScheduleLessThanAndStatus(long schedule, String status);
 
-    long deleteByDateLessThanAndUserIdAndStatus(long date, String userId, String status);
+    long deleteByScheduleLessThanAndUserIdAndStatus(long schedule, String userId, String status);
 
     long count();
 
