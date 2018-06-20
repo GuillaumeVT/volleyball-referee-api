@@ -72,6 +72,8 @@ public interface UserService {
 
     boolean deleteUserGame(String userId, long date);
 
+    boolean deleteAllUserGames(String userId);
+
     int getUserGameCode(String userId, long date);
 
     List<League> listUserLeagues(String userId);

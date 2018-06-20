@@ -11,38 +11,40 @@ import javax.validation.constraints.NotNull;
 public class GameDescription {
 
     @Id
-    private String id;
+    private String  id;
     @Valid
     @NotNull
-    private String userId;
+    private String  userId;
     @NotEmpty
-    private String kind;
+    private String  kind;
     @NotNull
-    private long   date;
+    private long    date;
     @NotNull
-    private long   schedule;
+    private long    schedule;
     @NotEmpty
-    private String gender;
+    private String  gender;
     @NotEmpty
-    private String usage;
+    private String  usage;
     @NotEmpty
-    private String status;
+    private String  status;
     @NotNull
-    private String referee;
+    private boolean indexed;
     @NotNull
-    private String league;
+    private String  referee;
     @NotNull
-    private String division;
+    private String  league;
+    @NotNull
+    private String  division;
     @NotEmpty
-    private String hName;
+    private String  hName;
     @NotEmpty
-    private String gName;
+    private String  gName;
     @NotNull
-    private int    hSets;
+    private int     hSets;
     @NotNull
-    private int    gSets;
+    private int     gSets;
     @NotEmpty
-    private String rules;
+    private String  rules;
 
     public GameDescription() {}
 
@@ -108,6 +110,14 @@ public class GameDescription {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public boolean isIndexed() {
+        return indexed;
+    }
+
+    public void setIndexed(boolean indexed) {
+        this.indexed = indexed;
     }
 
     public String getReferee() {

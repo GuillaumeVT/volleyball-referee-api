@@ -10,8 +10,6 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     boolean existsByDate(long date);
 
-    boolean existsByDateAndStatus(long date, String status);
-
     boolean existsByDateAndUserId(long date, String userId);
 
     boolean existsByUserIdAndStatusAndRules(String userId, String status, String rulesName);
@@ -24,11 +22,11 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     GameDescription findByDateAndUserId(long date, String userId);
 
-    List<GameDescription> findByStatus(String status);
+    List<GameDescription> findByStatusAndIndexed(String status, boolean indexed);
 
-    List<GameDescription> findByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLike(String hName, String gName, String leagueName, String refereeName);
+    List<GameDescription> findByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLikeAndIndexed(String hName, String gName, String leagueName, String refereeName, boolean indexed);
 
-    List<GameDescription> findByScheduleBetween(long fromDate, long toDate);
+    List<GameDescription> findByScheduleBetweenAndIndexed(long fromDate, long toDate, boolean index);
 
     List<GameDescription> findByUserId(String userId);
 

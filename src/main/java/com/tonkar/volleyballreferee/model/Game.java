@@ -29,6 +29,8 @@ public class Game {
     @NotEmpty
     private String         status;
     @NotNull
+    private boolean        indexed;
+    @NotNull
     private String         referee;
     @NotNull
     private String         league;
@@ -119,6 +121,14 @@ public class Game {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public boolean isIndexed() {
+        return indexed;
+    }
+
+    public void setIndexed(boolean indexed) {
+        this.indexed = indexed;
     }
 
     public String getReferee() {

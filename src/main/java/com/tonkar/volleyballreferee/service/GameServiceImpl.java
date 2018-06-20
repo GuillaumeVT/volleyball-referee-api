@@ -31,23 +31,18 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public boolean hasGameSynched(long date) {
-        return gameDescriptionRepository.existsByDateAndStatus(date, GameStatus.COMPLETED.toString());
-    }
-
-    @Override
     public List<GameDescription> listGameDescriptions(String token) {
-        return gameDescriptionRepository.findByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLike(token, token, token, token);
+        return gameDescriptionRepository.findByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLikeAndIndexed(token, token, token, token, true);
     }
 
     @Override
     public List<GameDescription> listGameDescriptionsBetween(long fromDate, long toDate) {
-        return gameDescriptionRepository.findByScheduleBetween(fromDate, toDate);
+        return gameDescriptionRepository.findByScheduleBetweenAndIndexed(fromDate, toDate, true);
     }
 
     @Override
     public List<GameDescription> listLiveGameDescriptions() {
-        return gameDescriptionRepository.findByStatus(GameStatus.LIVE.toString());
+        return gameDescriptionRepository.findByStatusAndIndexed(GameStatus.LIVE.toString(), true);
     }
 
     @Override
@@ -92,6 +87,7 @@ public class GameServiceImpl implements GameService {
         gameDescription.setGender(game.getGender());
         gameDescription.setUsage(game.getUsage());
         gameDescription.setStatus(game.getStatus());
+        gameDescription.setIndexed(game.isIndexed());
         gameDescription.setReferee(game.getReferee());
         gameDescription.setLeague(game.getLeague());
         gameDescription.setDivision(game.getDivision());
@@ -133,6 +129,7 @@ public class GameServiceImpl implements GameService {
             savedGameDescription.setGender(game.getGender());
             savedGameDescription.setUsage(game.getUsage());
             savedGameDescription.setStatus(game.getStatus());
+            savedGameDescription.setIndexed(game.isIndexed());
             savedGameDescription.setReferee(game.getReferee());
             savedGameDescription.setLeague(game.getLeague());
             savedGameDescription.setDivision(game.getDivision());
@@ -148,6 +145,7 @@ public class GameServiceImpl implements GameService {
             savedGame.setGender(game.getGender());
             savedGame.setUsage(game.getUsage());
             savedGame.setStatus(game.getStatus());
+            savedGame.setIndexed(game.isIndexed());
             savedGame.setReferee(game.getReferee());
             savedGame.setLeague(game.getLeague());
             savedGame.setDivision(game.getDivision());

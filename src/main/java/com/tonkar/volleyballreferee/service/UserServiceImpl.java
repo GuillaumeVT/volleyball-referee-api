@@ -400,6 +400,7 @@ public class UserServiceImpl implements UserService {
                 game.setGender(gameDescription.getGender());
                 game.setUsage(gameDescription.getUsage());
                 game.setStatus(gameDescription.getStatus());
+                game.setIndexed(gameDescription.isIndexed());
                 game.setReferee(gameDescription.getReferee());
                 game.setLeague(gameDescription.getLeague());
                 game.setDivision(gameDescription.getDivision());
@@ -464,6 +465,7 @@ public class UserServiceImpl implements UserService {
                 game.setGender(gameDescription.getGender());
                 game.setUsage(gameDescription.getUsage());
                 game.setStatus(gameDescription.getStatus());
+                game.setIndexed(gameDescription.isIndexed());
                 game.setReferee(gameDescription.getReferee());
                 game.setLeague(gameDescription.getLeague());
                 game.setDivision(gameDescription.getDivision());
@@ -494,6 +496,15 @@ public class UserServiceImpl implements UserService {
         codeRepository.deleteByDate(date);
         gameService.deleteGame(date, userId);
         LOGGER.debug(String.format("Deleted game with date %d for user %s", date, userId));
+        return true;
+    }
+
+    @Override
+    public boolean deleteAllUserGames(String userId) {
+        for (GameDescription game : listUserGames(userId)) {
+            deleteUserGame(userId, game.getDate());
+        }
+
         return true;
     }
 

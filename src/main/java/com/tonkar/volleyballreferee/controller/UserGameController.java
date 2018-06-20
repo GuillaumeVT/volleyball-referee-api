@@ -138,4 +138,18 @@ public class UserGameController {
         }
     }
 
+    @RequestMapping(value = "", params = { "userId" }, method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteAllUserGames(@RequestParam("userId") String userId) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
+        boolean result = userService.deleteAllUserGames(userId);
+
+        if (result) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            LOGGER.error(String.format("Failed to delete all games for user %s", userId));
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
