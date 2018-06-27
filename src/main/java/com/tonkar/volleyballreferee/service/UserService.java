@@ -44,6 +44,8 @@ public interface UserService {
 
     List<GameDescription> listUserGames(String userId);
 
+    List<GameDescription> listUserGames(String userId, GameStatus status);
+
     List<GameDescription> listAvailableUserGames(String userId);
 
     List<GameDescription> listUserGamesInLeague(String userId, String kind, String leagueName);

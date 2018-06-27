@@ -2,6 +2,7 @@ package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.model.Game;
 import com.tonkar.volleyballreferee.model.GameDescription;
+import com.tonkar.volleyballreferee.model.GameStatus;
 import com.tonkar.volleyballreferee.model.UserId;
 import com.tonkar.volleyballreferee.service.UserService;
 import org.slf4j.Logger;
@@ -29,6 +30,14 @@ public class UserGameController {
         if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
 
         List<GameDescription> games = userService.listUserGames(userId);
+        return new ResponseEntity<>(games, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/completed", params = { "userId" }, method = RequestMethod.GET)
+    public ResponseEntity<List<GameDescription>> listCompletedUserGames(@RequestParam("userId") String userId) {
+        if (UserId.VBR_USER_ID.equals(userId)) { return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); }
+
+        List<GameDescription> games = userService.listUserGames(userId, GameStatus.COMPLETED);
         return new ResponseEntity<>(games, HttpStatus.OK);
     }
 

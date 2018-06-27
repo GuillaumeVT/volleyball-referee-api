@@ -30,6 +30,8 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     List<GameDescription> findByUserId(String userId);
 
+    List<GameDescription> findByUserIdAndStatus(String userId, String status);
+
     @Query("{ '$and': [ { 'userId': ?0 }, { '$or': [ { 'status': 'SCHEDULED' }, { 'status': 'LIVE' } ] } ] }")
     List<GameDescription> findByUserIdAndAvailable(String userId);
 

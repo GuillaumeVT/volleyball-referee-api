@@ -282,6 +282,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<GameDescription> listUserGames(String userId, GameStatus status) {
+        return gameDescriptionRepository.findByUserIdAndStatus(userId, status.toString());
+    }
+
+    @Override
     public List<GameDescription> listAvailableUserGames(String userId) {
         return gameDescriptionRepository.findByUserIdAndAvailable(userId);
     }
