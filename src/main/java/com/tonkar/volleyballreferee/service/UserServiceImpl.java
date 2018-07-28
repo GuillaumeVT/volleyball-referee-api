@@ -423,7 +423,7 @@ public class UserServiceImpl implements UserService {
                 LOGGER.debug(String.format("Created game with date %d (%s vs %s) for user %s",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
                 if (!game.getLeague().isEmpty() && !game.getDivision().isEmpty()) {
-                    updateDivisionsOfLeague(userId, game.getLeague());
+                    updateDivisionsOfLeague(userId, gameDescription);
                 }
                 created = true;
             }
@@ -487,7 +487,7 @@ public class UserServiceImpl implements UserService {
                 LOGGER.debug(String.format("Updated game with date %d (%s vs %s) for user %s",
                         gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
                 if (!game.getLeague().isEmpty() && !game.getDivision().isEmpty()) {
-                    updateDivisionsOfLeague(userId, game.getLeague());
+                    updateDivisionsOfLeague(userId, gameDescription);
                 }
                 updated = true;
             }
@@ -667,15 +667,26 @@ public class UserServiceImpl implements UserService {
         ));
     }
 
-    private void updateDivisionsOfLeague(String userId, String leagueName) {
-        League league = leagueRepository.findByNameAndUserId(leagueName, userId);
+    private void updateDivisionsOfLeague(String userId, GameDescription game) {
+        League league = leagueRepository.findByNameAndUserId(game.getLeague(), userId);
+
+        if (league == null) {
+            league = new League();
+            league.setUserId(userId);
+            league.setKind(game.getKind());
+            league.setDate(System.currentTimeMillis());
+            league.setName(game.getLeague());
+            league.setDivisions(new ArrayList<>());
+            createUserLeague(league);
+        }
+
         league.getDivisions().clear();
 
         List<GameDescription> games = gameDescriptionRepository.findByUserIdAndKindAndLeagueAndDivisionNot(userId, league.getKind(), league.getName(), "");
         TreeSet<String> distinctDivisions = new TreeSet<>();
 
-        for (GameDescription game : games) {
-            distinctDivisions.add(game.getDivision());
+        for (GameDescription matchingGame : games) {
+            distinctDivisions.add(matchingGame.getDivision());
         }
 
         league.getDivisions().addAll(distinctDivisions);
