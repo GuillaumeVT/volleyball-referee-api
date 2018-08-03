@@ -6,6 +6,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Document(collection="games")
@@ -217,5 +219,102 @@ public class Game {
 
     public void setRules(Rules rules) {
         this.rules = rules;
+    }
+
+    public boolean isStartingLineupConfirmed(int setIndex) {
+        Set set = getSets().get(setIndex);
+        return !set.gethStartingPlayers().isEmpty() && !set.getgStartingPlayers().isEmpty();
+    }
+
+    public boolean hasSubstitutions(int setIndex) {
+        Set set = getSets().get(setIndex);
+        return !set.gethSubstitutions().isEmpty() || !set.getgSubstitutions().isEmpty();
+    }
+
+    public boolean hasTimeouts(int setIndex) {
+        Set set = getSets().get(setIndex);
+        return !set.gethCalledTimeouts().isEmpty() || !set.getgCalledTimeouts().isEmpty();
+    }
+
+    public boolean hasSanctions(int setIndex) {
+        boolean found = false;
+
+        Iterator<Sanction> sanctionsIt = gethCards().iterator();
+
+        while (!found && sanctionsIt.hasNext()) {
+            Sanction sanction = sanctionsIt.next();
+            found = sanction.getSet() == setIndex;
+        }
+
+        sanctionsIt = getgCards().iterator();
+
+        while (!found && sanctionsIt.hasNext()) {
+            Sanction sanction = sanctionsIt.next();
+            found = sanction.getSet() == setIndex;
+        }
+
+        return found;
+    }
+
+    public String getTeamColor(TeamType teamType) {
+        return TeamType.HOME.equals(teamType) ? gethTeam().getColor() : getgTeam().getColor();
+    }
+
+    public String getLiberoColor(TeamType teamType) {
+        return TeamType.HOME.equals(teamType) ? gethTeam().getLiberoColor() : getgTeam().getLiberoColor();
+    }
+
+    public List<Integer> getPlayers(TeamType teamType) {
+        return TeamType.HOME.equals(teamType) ? gethTeam().getPlayers() : getgTeam().getPlayers();
+    }
+
+    public List<Integer> getLiberos(TeamType teamType) {
+        return TeamType.HOME.equals(teamType) ? gethTeam().getLiberos() : getgTeam().getLiberos();
+    }
+
+    public boolean isLibero(TeamType teamType, int player) {
+        return getLiberos(teamType).contains(player);
+    }
+
+    public int getCaptain(TeamType teamType) {
+        return TeamType.HOME.equals(teamType) ? gethTeam().getCaptain() : getgTeam().getCaptain();
+    }
+
+    public List<Substitution> getSubstitutions(TeamType teamType, int setIndex) {
+        Set set = getSets().get(setIndex);
+        return TeamType.HOME.equals(teamType) ? set.gethSubstitutions() : set.getgSubstitutions();
+    }
+
+    public List<Timeout> getCalledTimeouts(TeamType teamType, int setIndex) {
+        Set set = getSets().get(setIndex);
+        return TeamType.HOME.equals(teamType) ? set.gethCalledTimeouts() : set.getgCalledTimeouts();
+    }
+
+    public List<Sanction> getGivenSanctions(TeamType teamType, int setIndex) {
+        List<Sanction> sanctions = new ArrayList<>();
+        List<Sanction> allSanctions = TeamType.HOME.equals(teamType) ? gethCards() : getgCards();
+
+        for (Sanction sanction: allSanctions) {
+            if (sanction.getSet() == setIndex) {
+                sanctions.add(sanction);
+            }
+        }
+
+        return sanctions;
+    }
+
+    public int getPlayerAtPositionInStartingLineup(TeamType teamType, int position, int setIndex) {
+        Set set = getSets().get(setIndex);
+        List<Player> startingLineup = TeamType.HOME.equals(teamType) ? set.gethStartingPlayers() : set.getgStartingPlayers();
+
+        int number = -1;
+
+        for (Player player: startingLineup) {
+            if (player.getPos() == position) {
+                number = player.getNum();
+            }
+        }
+
+        return number;
     }
 }
