@@ -5,14 +5,11 @@ import com.tonkar.volleyballreferee.model.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
@@ -21,6 +18,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class ScoreSheetWriter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScoreSheetWriter.class);
 
     private final Game     game;
     private final Document document;
@@ -741,17 +740,18 @@ public class ScoreSheetWriter {
         return new Element("div");
     }
 
-    private String toBase64(String imageFilename, int widthPixels, int heightPixels) {
-        try {
-            URL url = getClass().getResourceAsStream(String.format("/images/%s", imageFilename)).;
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(url.openStream());
-            bufferedInputStream.read()
-            ByteArrayOutputStream stream = new ByteArrayOutputStream(bufferedInputStream);
-        } catch (IOException e) {
+    private String toBase64(String imageFilename) {
+        String base64Image;
 
+        try {
+            byte[] imageData = getClass().getResourceAsStream(String.format("/images/%s", imageFilename)).readAllBytes();
+            base64Image = Base64.getEncoder().encodeToString(imageData);
+        } catch (IOException e) {
+            base64Image = "";
+            LOGGER.error(String.format("Could not encode the %s into base 64", imageFilename), e);
         }
 
-        return Base64.getEncoder().encodeToString(image.to.toByteArray(), Base64.NO_WRAP);
+        return base64Image;
     }
 
     private String getTextColor(String backgroundColor) {
@@ -834,7 +834,7 @@ public class ScoreSheetWriter {
                 String.format("      background-color: %s;\n", guestLiberoBackgroundColor) +
                 "    }\n" +
                 "    .div-card {\n" +
-                String.format("      background-color: %s;\n", colorIntToHtml(mContext.getResources().getColor(R.color.colorBackgroundCardview))) +
+                "      background-color: #f3f3f3;\n" +
                 "      padding: 8px;\n" +
                 "      margin: 8px;\n" +
                 "      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);\n" +
@@ -936,7 +936,7 @@ public class ScoreSheetWriter {
                 "      padding: 4px;\n" +
                 "    }\n" +
                 "    .bordered-cell {\n" +
-                String.format("      border: 1px solid %s;\n", colorIntToHtml(mContext.getResources().getColor(R.color.colorPrimaryText))) +
+                "      border: 1px solid #1f1f1f;\n" +
                 "      min-width: 25px;\n" +
                 "      text-align: center;\n" +
                 "      padding: 4px;\n" +
@@ -963,19 +963,19 @@ public class ScoreSheetWriter {
                 "      min-width: 34px;\n" +
                 "    }\n" +
                 "    .border {\n" +
-                String.format("      border: 1px solid %s;\n", colorIntToHtml(mContext.getResources().getColor(R.color.colorPrimaryText))) +
+                "      border: 1px solid #1f1f1f;\n" +
                 "      margin-right: -1px;\n" +
                 "      margin-bottom: -1px;\n" +
                 "    }\n" +
                 "    .substitution-image {\n" +
-                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64(R.drawable.ic_thumb_substitution, 42, 32)) +
+                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_sub.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
                 "      width: auto;\n" +
                 "      height: 20px;\n" +
                 "    }\n" +
                 "    .timeout-gray-image {\n" +
-                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64(R.drawable.ic_thumb_timeout, 32, 32)) +
+                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_timeout.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
                 "      width: auto;\n" +
@@ -983,7 +983,7 @@ public class ScoreSheetWriter {
                 "      height: 12px;\n" +
                 "    }\n" +
                 "    .timeout-white-image {\n" +
-                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64(R.drawable.ic_thumb_timeout_white, 32, 32)) +
+                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_timeout_white.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
                 "      width: auto;\n" +
@@ -991,42 +991,42 @@ public class ScoreSheetWriter {
                 "      height: 12px;\n" +
                 "    }\n" +
                 "    .yellow-card-image {\n" +
-                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64(R.drawable.yellow_card, 64, 64)) +
+                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_yellow_card.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
                 "      width: 24px;\n" +
                 "      height: 24px;\n" +
                 "    }\n" +
                 "    .red-card-image {\n" +
-                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64(R.drawable.red_card, 64, 64)) +
+                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_red_card.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
                 "      width: 24px;\n" +
                 "      height: 24px;\n" +
                 "    }\n" +
                 "    .expulsion-card-image {\n" +
-                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64(R.drawable.expulsion_card, 96, 64)) +
+                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_expulsion_card.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
                 "      width: 36px;\n" +
                 "      height: 24px;\n" +
                 "    }\n" +
                 "    .disqualification-card-image {\n" +
-                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64(R.drawable.disqualification_card, 128, 64)) +
+                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_disqualification_card.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
                 "      width: 48px;\n" +
                 "      height: 24px;\n" +
                 "    }\n" +
                 "    .delay-warning-image {\n" +
-                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64(R.drawable.delay_warning, 64, 64)) +
+                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_delay_warning.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
                 "      width: 24px;\n" +
                 "      height: 24px;\n" +
                 "    }\n" +
                 "    .delay-penalty-image {\n" +
-                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64(R.drawable.delay_penalty, 64, 64)) +
+                String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_delay_penalty.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
                 "      width: 24px;\n" +
