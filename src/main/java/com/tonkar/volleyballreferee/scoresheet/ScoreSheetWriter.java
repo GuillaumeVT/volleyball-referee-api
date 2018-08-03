@@ -971,14 +971,13 @@ public class ScoreSheetWriter {
                 String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_sub.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
-                "      width: auto;\n" +
+                "      width: 30px;\n" +
                 "      height: 20px;\n" +
                 "    }\n" +
                 "    .timeout-gray-image {\n" +
                 String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_timeout.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
-                "      width: auto;\n" +
                 "      min-width: 12px;\n" +
                 "      height: 12px;\n" +
                 "    }\n" +
@@ -986,7 +985,6 @@ public class ScoreSheetWriter {
                 String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_timeout_white.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
-                "      width: auto;\n" +
                 "      min-width: 12px;\n" +
                 "      height: 12px;\n" +
                 "    }\n" +
@@ -994,21 +992,21 @@ public class ScoreSheetWriter {
                 String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_yellow_card.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
-                "      width: 24px;\n" +
+                "      width: 48px;\n" +
                 "      height: 24px;\n" +
                 "    }\n" +
                 "    .red-card-image {\n" +
                 String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_red_card.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
-                "      width: 24px;\n" +
+                "      width: 48px;\n" +
                 "      height: 24px;\n" +
                 "    }\n" +
                 "    .expulsion-card-image {\n" +
                 String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_expulsion_card.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
-                "      width: 36px;\n" +
+                "      width: 48px;\n" +
                 "      height: 24px;\n" +
                 "    }\n" +
                 "    .disqualification-card-image {\n" +
@@ -1022,14 +1020,14 @@ public class ScoreSheetWriter {
                 String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_delay_warning.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
-                "      width: 24px;\n" +
+                "      width: 48px;\n" +
                 "      height: 24px;\n" +
                 "    }\n" +
                 "    .delay-penalty-image {\n" +
                 String.format("      background-image: url(\"data:image/png;base64,%s\");\n", toBase64("ic_delay_penalty.png")) +
                 "      background-repeat: no-repeat;\n" +
                 "      background-size: 100% 100%;\n" +
-                "      width: 24px;\n" +
+                "      width: 48px;\n" +
                 "      height: 24px;\n" +
                 "    }\n" +
                 "    </style>" +
