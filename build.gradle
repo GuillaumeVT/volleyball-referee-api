@@ -32,7 +32,6 @@ dependencies {
     }
     compile 'org.springframework.boot:spring-boot-starter-undertow'
     compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    compile 'com.itextpdf:itextpdf:5.5.13'
     compile 'org.jsoup:jsoup:1.11.3'
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
