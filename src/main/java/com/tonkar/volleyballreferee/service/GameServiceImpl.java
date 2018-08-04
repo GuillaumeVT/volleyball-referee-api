@@ -191,7 +191,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void deletePublicGames(int daysAgo) {
-        long dateNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
+        long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
 
         long count = gameDescriptionRepository.deleteByScheduleLessThanAndUserId(dateNDaysAgo, UserId.VBR_USER_ID);
         LOGGER.debug(String.format("Deleted %d public game descriptions older than date %d", count, dateNDaysAgo));
@@ -202,7 +202,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void deleteOldLiveGames(int daysAgo) {
-        long dateNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
+        long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
 
         long count = gameDescriptionRepository.deleteByScheduleLessThanAndStatus(dateNDaysAgo, GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d live game descriptions older than date %d", count, dateNDaysAgo));
@@ -213,7 +213,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void deletePublicLiveGames(int daysAgo) {
-        long dateNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
+        long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
 
         long count = gameDescriptionRepository.deleteByScheduleLessThanAndUserIdAndStatus(dateNDaysAgo, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d public live game descriptions older than date %d", count, dateNDaysAgo));
@@ -224,10 +224,10 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void deleteOldCodes(int daysAgo) {
-        long timeNDaysAgo = System.currentTimeMillis() - (daysAgo * 86400000L);
+        long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
 
-        long count = codeRepository.deleteByDateLessThan(timeNDaysAgo);
-        LOGGER.debug(String.format("Deleted %d codes older than date %d", count, timeNDaysAgo));
+        long count = codeRepository.deleteByDateLessThan(dateNDaysAgo);
+        LOGGER.debug(String.format("Deleted %d codes older than date %d", count, dateNDaysAgo));
     }
 
     @Override
@@ -248,6 +248,17 @@ public class GameServiceImpl implements GameService {
                 LOGGER.debug(String.format("Deleted public game at date %d with set shorter than %d minutes", game.getDate(), setDurationMinutesUnder));
             }
         }
+    }
+
+    @Override
+    public void deleteOldScheduledGames(int daysAgo) {
+        long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
+
+        long count = gameDescriptionRepository.deleteByScheduleLessThanAndStatus(dateNDaysAgo, GameStatus.SCHEDULED.toString());
+        LOGGER.debug(String.format("Deleted %d scheduled game descriptions older than date %d", count, dateNDaysAgo));
+
+        count = gameRepository.deleteByScheduleLessThanAndStatus(dateNDaysAgo, GameStatus.SCHEDULED.toString());
+        LOGGER.debug(String.format("Deleted %d scheduled games older than date %d", count, dateNDaysAgo));
     }
 
     @Override
@@ -274,6 +285,10 @@ public class GameServiceImpl implements GameService {
     public List<GameDescription> listGameDescriptionsUsingTeam(String teamName, String userId) {
         return gameDescriptionRepository.findByUserIdAndStatusAndTeamName(
                 userId, GameStatus.SCHEDULED.toString(), teamName);
+    }
+    
+    private long epochDateNDaysAgo(int daysAgo) {
+        return  System.currentTimeMillis() - (daysAgo * 86400000L);
     }
 
 }

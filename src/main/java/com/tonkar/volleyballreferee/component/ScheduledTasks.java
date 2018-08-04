@@ -50,6 +50,13 @@ public class ScheduledTasks {
         gameService.deleteOldCodes(90);
     }
 
+    // Every day at 4:25am
+    @Scheduled(cron = "0 25 4 * * *")
+    public void deleteOldScheduledGames() {
+        LOGGER.info("Deleting every scheduled game older than 30 days");
+        gameService.deleteOldScheduledGames(30);
+    }
+
     // Every day at 4pm
     @Scheduled(cron = "0 0 16 * * *")
     public void deletePublicLiveGames2() {

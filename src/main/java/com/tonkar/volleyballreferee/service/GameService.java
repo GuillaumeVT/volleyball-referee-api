@@ -40,6 +40,8 @@ public interface GameService {
 
     void deletePublicTestGames(int setDurationMinutesUnder);
 
+    void deleteOldScheduledGames(int daysAgo);
+
     boolean hasGameUsingRules(String rulesName, String userId);
 
     List<GameDescription> listGameDescriptionsUsingRules(String rulesName, String userId);
