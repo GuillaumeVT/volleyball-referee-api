@@ -68,7 +68,7 @@ public class ScoreSheetWriter {
         body.appendChild(createRecordedGameHeader());
 
         if ("NORMAL".equals(game.getUsage())) {
-            body.appendChild(createRecordedIndoorTeams());
+            body.appendChild(createRecordedTeams());
         }
 
         for (int setIndex = 0; setIndex < game.getSets().size(); setIndex++) {
@@ -166,7 +166,7 @@ public class ScoreSheetWriter {
         return cardDiv;
     }
 
-    private Element createRecordedIndoorTeams() {
+    private Element createRecordedTeams() {
         Element cardDiv = new Element("div");
         cardDiv.addClass("div-card").addClass("spacing-before");
 
@@ -539,7 +539,7 @@ public class ScoreSheetWriter {
         body.appendChild(createRecordedGameHeader());
 
         if ("NORMAL".equals(game.getUsage())) {
-            body.appendChild(createRecordedIndoorTeams());
+            body.appendChild(createRecordedTeams());
         }
 
         for (int setIndex = 0; setIndex < game.getSets().size(); setIndex++) {
@@ -616,6 +616,7 @@ public class ScoreSheetWriter {
 
     private void writeRecordedBeachGame() {
         body.appendChild(createRecordedGameHeader());
+        body.appendChild(createRecordedTeams());
 
         for (int setIndex = 0; setIndex < game.getSets().size(); setIndex++) {
             Element cardDiv = new Element("div");
