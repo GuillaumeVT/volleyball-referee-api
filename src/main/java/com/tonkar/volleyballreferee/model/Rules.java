@@ -1,5 +1,6 @@
 package com.tonkar.volleyballreferee.model;
 
+import com.tonkar.volleyballreferee.security.User;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -85,15 +86,15 @@ public class Rules {
         this.customConsecutiveServesPerPlayer = customConsecutiveServesPerPlayer;
     }
 
-    public static final Rules OFFICIAL_INDOOR_RULES    = new Rules(UserId.VBR_USER_ID, "FIVB indoor 6x6 rules", 0L,
+    public static final Rules OFFICIAL_INDOOR_RULES    = new Rules(User.VBR_USER_ID, "FIVB indoor 6x6 rules", 0L,
             5, 25, true, 15, true, true, true, 2, 30,
             true, 60, true, 180,
             6, false, 0, 0, 9999);
-    public static final Rules OFFICIAL_BEACH_RULES     = new Rules(UserId.VBR_USER_ID, "FIVB beach rules", 0L,
+    public static final Rules OFFICIAL_BEACH_RULES     = new Rules(User.VBR_USER_ID, "FIVB beach rules", 0L,
             3, 21, true, 15, true, true, true, 1, 30,
             true, 30, true, 60,
             0, true, 7, 5, 9999);
-    public static final Rules DEFAULT_INDOOR_4X4_RULES = new Rules(UserId.VBR_USER_ID, "Default 4x4 rules", 0L,
+    public static final Rules DEFAULT_INDOOR_4X4_RULES = new Rules(User.VBR_USER_ID, "Default 4x4 rules", 0L,
             5, 25, true, 15, true, true, true, 2, 30,
             true, 60, true, 180,
             4, false, 0, 0, 9999);

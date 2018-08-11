@@ -34,11 +34,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         super();
 
         publicUrls = new OrRequestMatcher(
-                new AntPathRequestMatcher("/api/manage/game/**"),
+                new AntPathRequestMatcher("/api/manage/**"),
                 new AntPathRequestMatcher("/api/message/**"),
-                new AntPathRequestMatcher("/api/search/game/**"),
+                new AntPathRequestMatcher("/api/search/**"),
                 new AntPathRequestMatcher("/api/stats/**"),
-                new AntPathRequestMatcher("/api/view/game/**")
+                new AntPathRequestMatcher("/api/view/**")
         );
         protectedUrls = new NegatedRequestMatcher(publicUrls);
     }

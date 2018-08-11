@@ -19,7 +19,7 @@
     <logger name="com.tonkar.volleyballreferee.controller.StatisticsController" level="DEBUG">
         <appender-ref ref="CONSOLE" />
     </logger>
-    <logger name="com.tonkar.volleyballreferee.controller.ViewGameController" level="DEBUG">
+    <logger name="com.tonkar.volleyballreferee.controller.ViewController" level="DEBUG">
         <appender-ref ref="CONSOLE" />
     </logger>
     <logger name="com.tonkar.volleyballreferee.controller.UserRulesController" level="DEBUG">

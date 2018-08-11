@@ -135,10 +135,10 @@ public class VolleyballRefereeApplicationTests {
 
 		// Delete
 
-		gameService.deleteGame(1516200793797L, UserId.VBR_USER_ID);
-		gameService.deleteGame(1516200802314L, UserId.VBR_USER_ID);
-		gameService.deleteGame(1516200804146L, UserId.VBR_USER_ID);
-		gameService.deleteGame(1516200806997L, UserId.VBR_USER_ID);
+		gameService.deleteGame(1516200793797L, User.VBR_USER_ID);
+		gameService.deleteGame(1516200802314L, User.VBR_USER_ID);
+		gameService.deleteGame(1516200804146L, User.VBR_USER_ID);
+		gameService.deleteGame(1516200806997L, User.VBR_USER_ID);
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class VolleyballRefereeApplicationTests {
 		assertEquals(1, gameStatistics.getGamesCount());
 		assertEquals(0, gameStatistics.getLiveGamesCount());
 
-		gameService.deleteGame(game.getDate(), UserId.VBR_USER_ID);
+		gameService.deleteGame(game.getDate(), User.VBR_USER_ID);
 	}
 
 	@Test
@@ -290,7 +290,7 @@ public class VolleyballRefereeApplicationTests {
 
 	private Game createTestGame(long date, GameStatus status) {
 		Game game = new Game();
-        game.setUserId(UserId.VBR_USER_ID);
+        game.setUserId(User.VBR_USER_ID);
 		game.setKind("kind");
 		game.setDate(date);
 		game.setGender("gender");
@@ -328,8 +328,7 @@ public class VolleyballRefereeApplicationTests {
         assertEquals(HttpStatus.OK, updateResponse.getStatusCode());
 		assertEquals("Test Rules", updateResponse.getBody().getName());
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-                .queryParam("userId", testUser);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"));
         ResponseEntity<Rules[]> rulesListResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Rules[].class);
         assertEquals(1, rulesListResponse.getBody().length);
         assertEquals("Test Rules", rulesListResponse.getBody()[0].getName());
@@ -338,24 +337,20 @@ public class VolleyballRefereeApplicationTests {
         assertEquals(3, rulesListResponse.getBody().length);
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-				.queryParam("userId", testUser)
                 .queryParam("name", "Test Rules");
         ResponseEntity<Rules> rulesResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Rules.class);
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-				.queryParam("userId", testUser)
                 .queryParam("name", "Unknown Rules");
         rulesResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Rules.class);
         assertEquals(HttpStatus.NOT_FOUND, rulesResponse.getStatusCode());
 
-		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules/count"))
-				.queryParam("userId", testUser);
+		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules/count"));
 		ResponseEntity<Long> rulesCountResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Long.class);
 		assertEquals(1L, rulesCountResponse.getBody().longValue());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-                .queryParam("userId", testUser)
                 .queryParam("name", "Test Rules");
         restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 	}
@@ -383,15 +378,13 @@ public class VolleyballRefereeApplicationTests {
         assertEquals(HttpStatus.OK, updateResponse.getStatusCode());
         assertEquals("BRAZIL", updateResponse.getBody().getName());
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"));
         ResponseEntity<Team[]> teamListResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team[].class);
         assertEquals(2, teamListResponse.getBody().length);
         assertEquals("BRAZIL", teamListResponse.getBody()[0].getName());
         assertEquals("FRANCE", teamListResponse.getBody()[1].getName());
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser)
 				.queryParam("kind", "INDOOR");
 		teamListResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team[].class);
 		assertEquals(2, teamListResponse.getBody().length);
@@ -399,13 +392,11 @@ public class VolleyballRefereeApplicationTests {
 		assertEquals("FRANCE", teamListResponse.getBody()[1].getName());
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser)
 				.queryParam("kind", "BEACH");
 		teamListResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team[].class);
 		assertEquals(0, teamListResponse.getBody().length);
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");
@@ -413,27 +404,23 @@ public class VolleyballRefereeApplicationTests {
         assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser)
                 .queryParam("name", "ITALY")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");
         teamResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team.class);
         assertEquals(HttpStatus.NOT_FOUND, teamResponse.getStatusCode());
 
-        builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team/count"))
-				.queryParam("userId", testUser);
+        builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team/count"));
         ResponseEntity<Long> teamCountResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Long.class);
         assertEquals(2L, teamCountResponse.getBody().longValue());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");
         restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-                .queryParam("userId", testUser)
                 .queryParam("name", "FRANCE")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");
@@ -462,19 +449,16 @@ public class VolleyballRefereeApplicationTests {
         gameResponse = restTemplate.exchange(urlOf("/api/user/game"), HttpMethod.PUT, entityOf(description1), GameDescription.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game/count"))
-				.queryParam("userId", testUser);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game/count"));
         ResponseEntity<Long> gameCountResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Long.class);
         assertEquals(1L, gameCountResponse.getBody().longValue());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game"))
-				.queryParam("userId", testUser)
                 .queryParam("id", "1520674661962");
 		ResponseEntity<Game> fullGameResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Game.class);
         assertEquals(1520674661962L, fullGameResponse.getBody().getDate());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game/code"))
-				.queryParam("userId", testUser)
                 .queryParam("id", "1520674661962");
         ResponseEntity<Integer> gameCodeResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Integer.class);
 
@@ -487,25 +471,21 @@ public class VolleyballRefereeApplicationTests {
         // Will fail until they are not used
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-				.queryParam("userId", testUser)
                 .queryParam("name", "Test Rules");
         restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-				.queryParam("userId", testUser)
 				.queryParam("name", "Test Rules");
 		ResponseEntity<Rules> rulesResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Rules.class);
 		assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");
         restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser)
 				.queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");
@@ -515,39 +495,33 @@ public class VolleyballRefereeApplicationTests {
 		// Delete game
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game"))
-                .queryParam("userId", testUser)
                 .queryParam("id", "1520674661962");
         restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
         // Now the rules and teams are free
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-				.queryParam("userId", testUser)
                 .queryParam("name", "Test Rules");
         restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
-				.queryParam("userId", testUser)
 				.queryParam("name", "Test Rules");
 		rulesResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Rules.class);
 		assertEquals(HttpStatus.NOT_FOUND, rulesResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");
         restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser)
                 .queryParam("name", "FRANCE")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");
         restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
-				.queryParam("userId", testUser)
 				.queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");

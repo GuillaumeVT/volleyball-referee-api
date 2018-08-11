@@ -4,6 +4,7 @@ import com.tonkar.volleyballreferee.model.*;
 import com.tonkar.volleyballreferee.repository.CodeRepository;
 import com.tonkar.volleyballreferee.repository.GameDescriptionRepository;
 import com.tonkar.volleyballreferee.repository.GameRepository;
+import com.tonkar.volleyballreferee.security.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,18 +186,18 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void deleteLiveGame(long date) {
-        gameDescriptionRepository.deleteByDateAndUserIdAndStatus(date, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
-        gameRepository.deleteByDateAndUserIdAndStatus(date, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
+        gameDescriptionRepository.deleteByDateAndUserIdAndStatus(date, User.VBR_USER_ID, GameStatus.LIVE.toString());
+        gameRepository.deleteByDateAndUserIdAndStatus(date, User.VBR_USER_ID, GameStatus.LIVE.toString());
     }
 
     @Override
     public void deletePublicGames(int daysAgo) {
         long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
 
-        long count = gameDescriptionRepository.deleteByScheduleLessThanAndUserId(dateNDaysAgo, UserId.VBR_USER_ID);
+        long count = gameDescriptionRepository.deleteByScheduleLessThanAndUserId(dateNDaysAgo, User.VBR_USER_ID);
         LOGGER.debug(String.format("Deleted %d public game descriptions older than date %d", count, dateNDaysAgo));
 
-        count = gameRepository.deleteByScheduleLessThanAndUserId(dateNDaysAgo, UserId.VBR_USER_ID);
+        count = gameRepository.deleteByScheduleLessThanAndUserId(dateNDaysAgo, User.VBR_USER_ID);
         LOGGER.debug(String.format("Deleted %d public games older than date %d", count, dateNDaysAgo));
     }
 
@@ -215,10 +216,10 @@ public class GameServiceImpl implements GameService {
     public void deletePublicLiveGames(int daysAgo) {
         long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
 
-        long count = gameDescriptionRepository.deleteByScheduleLessThanAndUserIdAndStatus(dateNDaysAgo, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
+        long count = gameDescriptionRepository.deleteByScheduleLessThanAndUserIdAndStatus(dateNDaysAgo, User.VBR_USER_ID, GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d public live game descriptions older than date %d", count, dateNDaysAgo));
 
-        count = gameRepository.deleteByScheduleLessThanAndUserIdAndStatus(dateNDaysAgo, UserId.VBR_USER_ID, GameStatus.LIVE.toString());
+        count = gameRepository.deleteByScheduleLessThanAndUserIdAndStatus(dateNDaysAgo, User.VBR_USER_ID, GameStatus.LIVE.toString());
         LOGGER.debug(String.format("Deleted %d public live games older than date %d", count, dateNDaysAgo));
     }
 
@@ -234,7 +235,7 @@ public class GameServiceImpl implements GameService {
     public void deletePublicTestGames(int setDurationMinutesUnder) {
         long setDurationMillisUnder = setDurationMinutesUnder * 60000L;
 
-        List<Game> games = gameRepository.findByUserIdAndStatusAndSets_DurationLessThan(UserId.VBR_USER_ID, GameStatus.COMPLETED.toString(), setDurationMillisUnder);
+        List<Game> games = gameRepository.findByUserIdAndStatusAndSets_DurationLessThan(User.VBR_USER_ID, GameStatus.COMPLETED.toString(), setDurationMillisUnder);
 
         for (Game game : games) {
             boolean delete = true;
@@ -244,7 +245,7 @@ public class GameServiceImpl implements GameService {
             }
 
             if (delete) {
-                deleteGame(game.getDate(), UserId.VBR_USER_ID);
+                deleteGame(game.getDate(), User.VBR_USER_ID);
                 LOGGER.debug(String.format("Deleted public game at date %d with set shorter than %d minutes", game.getDate(), setDurationMinutesUnder));
             }
         }

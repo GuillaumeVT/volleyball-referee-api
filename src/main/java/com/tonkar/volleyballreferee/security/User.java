@@ -20,7 +20,7 @@ public class User implements UserDetails {
         this.authProvider = authProvider;
     }
 
-    private String getUserId() {
+    public String getUserId() {
         return String.format("%s@%s", id, authProvider.toString().toLowerCase());
     }
 
@@ -58,4 +58,6 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public static String VBR_USER_ID = "01022018@vbr";
 }
