@@ -3,3 +3,15 @@ spring.data.mongodb.uri: mongodb://vbr_test_user:vbr@localhost:27017/vbr_test
 
 logging:
   config: classpath:logback-spring.xml
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 802590775795-kdff0cnflla62jr2dj0pleqbiv05q97l.apps.googleusercontent.com
+            client-secret: nVLZRfyU5UN9Ip98ZsnhlY_M
+          facebook:
+            client-id: 2086514551632301
+            client-secret: 4e69c0bd3f8f2f97d453e99306db7f11

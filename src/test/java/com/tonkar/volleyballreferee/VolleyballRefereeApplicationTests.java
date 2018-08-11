@@ -1,13 +1,18 @@
 package com.tonkar.volleyballreferee;
 
 import com.tonkar.volleyballreferee.model.*;
+import com.tonkar.volleyballreferee.security.User;
 import com.tonkar.volleyballreferee.service.GameService;
 import com.tonkar.volleyballreferee.service.MessageService;
+import com.tonkar.volleyballreferee.service.UserAuthenticationService;
 import com.tonkar.volleyballreferee.service.UserService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.*;
@@ -15,6 +20,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 
@@ -33,10 +40,22 @@ public class VolleyballRefereeApplicationTests {
 	@Autowired
 	private UserService userService;
 
+	@MockBean
+	private UserAuthenticationService userAuthenticationService;
+
 	@LocalServerPort
 	private int port;
 
 	private TestRestTemplate restTemplate = new TestRestTemplate();
+
+	@Before
+	public void setUp() {
+        Optional<User> validUser = Optional.of(new User("01022018", User.AuthenticationProvider.GOOGLE));
+        Optional<User> invalidUser = Optional.empty();
+
+		Mockito.when(userAuthenticationService.getUser(User.AuthenticationProvider.GOOGLE, "valid")).thenReturn(validUser);
+		Mockito.when(userAuthenticationService.getUser(User.AuthenticationProvider.GOOGLE, "invalid")).thenReturn(invalidUser);
+	}
 
 	@Test
 	public void testFromHttpToRepository() {
@@ -236,15 +255,32 @@ public class VolleyballRefereeApplicationTests {
 		return "http://localhost:" + port + apiUrl;
 	}
 
-	private HttpHeaders jsonHeader() {
+	private HttpHeaders jsonHeader(boolean validToken) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization", validToken ? "Bearer valid" : "Bearer invalid");
+        headers.add("AuthenticationProvider", "google");
 		return headers;
 	}
 
+    private HttpHeaders authHeader(boolean validToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", validToken ? "Bearer valid" : "Bearer invalid");
+        headers.add("AuthenticationProvider", "google");
+        return headers;
+    }
+
 	private HttpEntity<String> entityOf(String json) {
-		return new HttpEntity<>(json, jsonHeader());
+		return entityOf(json, true);
 	}
+
+    private HttpEntity<String> emptyEntity() {
+        return new HttpEntity<>(authHeader(true));
+    }
+
+    private HttpEntity<String> entityOf(String json, boolean validToken) {
+        return new HttpEntity<>(json, jsonHeader(validToken));
+    }
 
 	private String game1 = "{\"kind\":\"INDOOR\",\"date\":1516200793797,\"schedule\":1516200793797,\"gender\":\"GENTS\",\"usage\":\"NORMAL\",\"status\":\"COMPLETED\",\"indexed\":true,\"referee\":\"VBR\",\"league\":\"FIVB Volleyball World League 2017\",\"division\":\"\",\"userId\":\"01022018@vbr\",\"hTeam\":{\"name\":\"BRAZIL\",\"userId\":\"01022018@vbr\",\"kind\":\"INDOOR\",\"date\":1523199473000,\"color\":\"#f3bc07\",\"liberoColor\":\"#034694\",\"players\":[1,3,4,5,9,10,11,13,16,18,19,20],\"liberos\":[6,8],\"captain\":1,\"gender\":\"GENTS\"},\"gTeam\":{\"name\":\"FRANCE\",\"userId\":\"01022018@vbr\",\"kind\":\"INDOOR\",\"date\":1523199473000,\"color\":\"#034694\",\"liberoColor\":\"#bc0019\",\"players\":[5,6,8,9,10,11,12,14,16,17,18,21],\"liberos\":[2,20],\"captain\":6,\"gender\":\"GENTS\"},\"hSets\":2,\"gSets\":3,\"sets\":[{\"duration\":734,\"hPoints\":25,\"gPoints\":21,\"hTimeouts\":2,\"gTimeouts\":1,\"ladder\":[\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"G\",\"H\",\"G\",\"H\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"H\",\"H\",\"H\",\"G\",\"G\",\"H\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"H\",\"G\",\"H\",\"G\",\"H\"],\"serving\":\"H\",\"firstServing\":\"H\",\"hCurrentPlayers\":[{\"num\":1,\"pos\":2},{\"num\":3,\"pos\":1},{\"num\":4,\"pos\":5},{\"num\":16,\"pos\":4},{\"num\":18,\"pos\":6},{\"num\":19,\"pos\":3}],\"gCurrentPlayers\":[{\"num\":2,\"pos\":6},{\"num\":5,\"pos\":5},{\"num\":6,\"pos\":1},{\"num\":9,\"pos\":2},{\"num\":10,\"pos\":3},{\"num\":12,\"pos\":4}],\"hStartingPlayers\":[{\"num\":1,\"pos\":3},{\"num\":4,\"pos\":6},{\"num\":13,\"pos\":2},{\"num\":16,\"pos\":5},{\"num\":18,\"pos\":1},{\"num\":19,\"pos\":4}],\"gStartingPlayers\":[{\"num\":5,\"pos\":5},{\"num\":6,\"pos\":1},{\"num\":9,\"pos\":2},{\"num\":10,\"pos\":3},{\"num\":12,\"pos\":4},{\"num\":21,\"pos\":6}],\"hSubstitutions\":[{\"pIn\":3,\"pOut\":13,\"hPoints\":17,\"gPoints\":14}],\"gSubstitutions\":[],\"hCaptain\":1,\"gCaptain\":6,\"hCalledTimeouts\":[],\"gCalledTimeouts\":[{\"hPoints\":17,\"gPoints\":14}],\"rTime\":0},{\"duration\":758,\"hPoints\":15,\"gPoints\":25,\"hTimeouts\":2,\"gTimeouts\":2,\"ladder\":[\"G\",\"H\",\"G\",\"G\",\"G\",\"G\",\"H\",\"G\",\"G\",\"H\",\"G\",\"H\",\"H\",\"H\",\"G\",\"H\",\"G\",\"G\",\"G\",\"H\",\"G\",\"H\",\"G\",\"G\",\"G\",\"H\",\"H\",\"G\",\"H\",\"G\",\"G\",\"G\",\"H\",\"G\",\"G\",\"G\",\"H\",\"G\",\"H\",\"G\"],\"serving\":\"G\",\"firstServing\":\"H\",\"hCurrentPlayers\":[{\"num\":8,\"pos\":5},{\"num\":9,\"pos\":3},{\"num\":16,\"pos\":2},{\"num\":18,\"pos\":4},{\"num\":19,\"pos\":1},{\"num\":20,\"pos\":6}],\"gCurrentPlayers\":[{\"num\":5,\"pos\":6},{\"num\":6,\"pos\":2},{\"num\":9,\"pos\":3},{\"num\":10,\"pos\":4},{\"num\":12,\"pos\":5},{\"num\":21,\"pos\":1}],\"hStartingPlayers\":[{\"num\":1,\"pos\":6},{\"num\":4,\"pos\":3},{\"num\":13,\"pos\":5},{\"num\":16,\"pos\":2},{\"num\":18,\"pos\":4},{\"num\":19,\"pos\":1}],\"gStartingPlayers\":[{\"num\":5,\"pos\":1},{\"num\":6,\"pos\":3},{\"num\":9,\"pos\":4},{\"num\":10,\"pos\":5},{\"num\":12,\"pos\":6},{\"num\":21,\"pos\":2}],\"hSubstitutions\":[{\"pIn\":20,\"pOut\":1,\"hPoints\":12,\"gPoints\":19},{\"pIn\":9,\"pOut\":4,\"hPoints\":12,\"gPoints\":19}],\"gSubstitutions\":[],\"hCaptain\":20,\"gCaptain\":6,\"hCalledTimeouts\":[],\"gCalledTimeouts\":[],\"rTime\":0},{\"duration\":1262,\"hPoints\":23,\"gPoints\":25,\"hTimeouts\":2,\"gTimeouts\":2,\"ladder\":[\"G\",\"H\",\"H\",\"G\",\"H\",\"G\",\"G\",\"G\",\"H\",\"G\",\"G\",\"H\",\"G\",\"G\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"H\",\"H\",\"G\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"H\",\"H\",\"G\",\"H\",\"G\",\"H\",\"H\",\"H\",\"G\",\"G\",\"H\",\"G\",\"H\",\"G\",\"G\"],\"serving\":\"G\",\"firstServing\":\"H\",\"hCurrentPlayers\":[{\"num\":1,\"pos\":6},{\"num\":4,\"pos\":3},{\"num\":8,\"pos\":5},{\"num\":16,\"pos\":2},{\"num\":18,\"pos\":4},{\"num\":19,\"pos\":1}],\"gCurrentPlayers\":[{\"num\":8,\"pos\":3},{\"num\":9,\"pos\":6},{\"num\":10,\"pos\":1},{\"num\":11,\"pos\":5},{\"num\":12,\"pos\":2},{\"num\":21,\"pos\":4}],\"hStartingPlayers\":[{\"num\":1,\"pos\":4},{\"num\":4,\"pos\":1},{\"num\":13,\"pos\":3},{\"num\":16,\"pos\":6},{\"num\":18,\"pos\":2},{\"num\":19,\"pos\":5}],\"gStartingPlayers\":[{\"num\":5,\"pos\":1},{\"num\":6,\"pos\":3},{\"num\":9,\"pos\":4},{\"num\":10,\"pos\":5},{\"num\":12,\"pos\":6},{\"num\":21,\"pos\":2}],\"hSubstitutions\":[{\"pIn\":3,\"pOut\":13,\"hPoints\":6,\"gPoints\":11}],\"gSubstitutions\":[{\"pIn\":11,\"pOut\":6,\"hPoints\":17,\"gPoints\":18},{\"pIn\":8,\"pOut\":5,\"hPoints\":17,\"gPoints\":18}],\"hCaptain\":1,\"gCaptain\":8,\"hCalledTimeouts\":[],\"gCalledTimeouts\":[],\"rTime\":0},{\"duration\":1384,\"hPoints\":25,\"gPoints\":19,\"hTimeouts\":1,\"gTimeouts\":1,\"ladder\":[\"H\",\"G\",\"H\",\"G\",\"H\",\"H\",\"G\",\"H\",\"H\",\"H\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"G\",\"H\",\"G\",\"G\",\"H\",\"H\",\"G\",\"H\",\"G\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"H\",\"H\",\"G\",\"H\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\"],\"serving\":\"H\",\"firstServing\":\"H\",\"hCurrentPlayers\":[{\"num\":3,\"pos\":1},{\"num\":9,\"pos\":5},{\"num\":16,\"pos\":4},{\"num\":18,\"pos\":6},{\"num\":19,\"pos\":3},{\"num\":20,\"pos\":2}],\"gCurrentPlayers\":[{\"num\":2,\"pos\":5},{\"num\":5,\"pos\":4},{\"num\":9,\"pos\":1},{\"num\":10,\"pos\":2},{\"num\":11,\"pos\":6},{\"num\":12,\"pos\":3}],\"hStartingPlayers\":[{\"num\":1,\"pos\":6},{\"num\":3,\"pos\":5},{\"num\":4,\"pos\":3},{\"num\":16,\"pos\":2},{\"num\":18,\"pos\":4},{\"num\":19,\"pos\":1}],\"gStartingPlayers\":[{\"num\":5,\"pos\":2},{\"num\":6,\"pos\":4},{\"num\":9,\"pos\":5},{\"num\":10,\"pos\":6},{\"num\":12,\"pos\":1},{\"num\":21,\"pos\":3}],\"hSubstitutions\":[{\"pIn\":9,\"pOut\":4,\"hPoints\":20,\"gPoints\":15},{\"pIn\":20,\"pOut\":1,\"hPoints\":20,\"gPoints\":15}],\"gSubstitutions\":[{\"pIn\":8,\"pOut\":5,\"hPoints\":7,\"gPoints\":3},{\"pIn\":11,\"pOut\":6,\"hPoints\":20,\"gPoints\":15},{\"pIn\":5,\"pOut\":8,\"hPoints\":20,\"gPoints\":15}],\"hCaptain\":9,\"gCaptain\":9,\"hCalledTimeouts\":[{\"hPoints\":10,\"gPoints\":7}],\"gCalledTimeouts\":[{\"hPoints\":7,\"gPoints\":3}],\"rTime\":0},{\"duration\":1084,\"hPoints\":13,\"gPoints\":15,\"hTimeouts\":0,\"gTimeouts\":1,\"ladder\":[\"H\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"H\",\"G\",\"G\",\"G\",\"H\",\"G\",\"H\",\"H\",\"G\",\"H\",\"G\",\"G\",\"G\",\"G\",\"H\",\"G\",\"H\",\"G\"],\"serving\":\"G\",\"firstServing\":\"H\",\"hCurrentPlayers\":[{\"num\":1,\"pos\":2},{\"num\":4,\"pos\":5},{\"num\":13,\"pos\":1},{\"num\":16,\"pos\":4},{\"num\":18,\"pos\":6},{\"num\":19,\"pos\":3}],\"gCurrentPlayers\":[{\"num\":2,\"pos\":5},{\"num\":5,\"pos\":1},{\"num\":6,\"pos\":3},{\"num\":9,\"pos\":4},{\"num\":12,\"pos\":6},{\"num\":21,\"pos\":2}],\"hStartingPlayers\":[{\"num\":1,\"pos\":6},{\"num\":3,\"pos\":5},{\"num\":4,\"pos\":3},{\"num\":16,\"pos\":2},{\"num\":18,\"pos\":4},{\"num\":19,\"pos\":1}],\"gStartingPlayers\":[{\"num\":5,\"pos\":5},{\"num\":6,\"pos\":1},{\"num\":9,\"pos\":2},{\"num\":10,\"pos\":3},{\"num\":12,\"pos\":4},{\"num\":21,\"pos\":6}],\"hSubstitutions\":[{\"pIn\":13,\"pOut\":3,\"hPoints\":11,\"gPoints\":10}],\"gSubstitutions\":[],\"hCaptain\":1,\"gCaptain\":6,\"hCalledTimeouts\":[{\"hPoints\":7,\"gPoints\":7},{\"hPoints\":11,\"gPoints\":11}],\"gCalledTimeouts\":[{\"hPoints\":10,\"gPoints\":8}],\"rTime\":0}],\"hCards\":[],\"gCards\":[],\"rules\":{\"userId\":\"01022018@vbr\",\"name\":\"Test Rules\",\"date\":1523199473000,\"setsPerGame\":5,\"pointsPerSet\":25,\"tieBreakInLastSet\":true,\"pointsInTieBreak\":15,\"twoPointsDifference\":true,\"sanctions\":true,\"teamTimeouts\":true,\"teamTimeoutsPerSet\":2,\"teamTimeoutDuration\":30,\"technicalTimeouts\":true,\"technicalTimeoutDuration\":60,\"gameIntervals\":true,\"gameIntervalDuration\":180,\"teamSubstitutionsPerSet\":6,\"beachCourtSwitches\":false,\"beachCourtSwitchFreq\":0,\"beachCourtSwitchFreqTieBreak\":0,\"customConsecutiveServesPerPlayer\": 9999}}";
 	private String game2 = "{\"kind\":\"BEACH\",\"date\":1516200802314,\"schedule\":1516200802314,\"gender\":\"GENTS\",\"usage\":\"NORMAL\",\"status\":\"LIVE\",\"indexed\":true,\"referee\":\"VBR\",\"league\":\"FIVB Beach Volleyball World Championship 2017\",\"division\":\"\",\"userId\":\"01022018@vbr\",\"hTeam\":{\"name\":\"USA\",\"userId\":\"01022018@vbr\",\"kind\":\"BEACH\",\"date\":1523199473000,\"color\":\"#bc0019\",\"liberoColor\":\"#ffffff\",\"players\":[1,2],\"liberos\":[],\"captain\":-1,\"gender\":\"GENTS\"},\"gTeam\":{\"name\":\"ITALY\",\"userId\":\"01022018@vbr\",\"kind\":\"INDOOR\",\"date\":1523199473000,\"color\":\"#2980b9\",\"liberoColor\":\"#ffffff\",\"players\":[1,2],\"liberos\":[],\"captain\":-1,\"gender\":\"GENTS\"},\"hSets\":2,\"gSets\":0,\"sets\":[{\"duration\":317,\"hPoints\":21,\"gPoints\":18,\"hTimeouts\":0,\"gTimeouts\":0,\"ladder\":[\"H\",\"G\",\"H\",\"H\",\"G\",\"G\",\"H\",\"G\",\"G\",\"H\",\"H\",\"G\",\"G\",\"G\",\"H\",\"H\",\"H\",\"H\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"H\",\"G\",\"G\",\"H\",\"H\",\"G\",\"G\",\"G\",\"H\",\"G\",\"H\",\"G\",\"H\",\"H\",\"H\"],\"serving\":\"H\",\"firstServing\":\"H\",\"hCurrentPlayers\":[{\"num\":1,\"pos\":1},{\"num\":2,\"pos\":2}],\"gCurrentPlayers\":[{\"num\":1,\"pos\":2},{\"num\":2,\"pos\":1}],\"hStartingPlayers\":[],\"gStartingPlayers\":[],\"hSubstitutions\":[],\"gSubstitutions\":[],\"hCaptain\":0,\"gCaptain\":0,\"hCalledTimeouts\":[{\"hPoints\":16,\"gPoints\":16}],\"gCalledTimeouts\":[{\"hPoints\":10,\"gPoints\":8}],\"rTime\":0},{\"duration\":373,\"hPoints\":21,\"gPoints\":17,\"hTimeouts\":0,\"gTimeouts\":0,\"ladder\":[\"H\",\"G\",\"H\",\"G\",\"G\",\"H\",\"G\",\"H\",\"G\",\"G\",\"H\",\"H\",\"H\",\"G\",\"G\",\"H\",\"G\",\"H\",\"H\",\"G\",\"H\",\"H\",\"G\",\"G\",\"H\",\"H\",\"G\",\"G\",\"G\",\"H\",\"H\",\"H\",\"G\",\"H\",\"H\",\"H\",\"G\",\"H\"],\"serving\":\"H\",\"firstServing\":\"H\",\"hCurrentPlayers\":[{\"num\":1,\"pos\":2},{\"num\":2,\"pos\":1}],\"gCurrentPlayers\":[{\"num\":1,\"pos\":2},{\"num\":2,\"pos\":1}],\"hStartingPlayers\":[],\"gStartingPlayers\":[],\"hSubstitutions\":[],\"gSubstitutions\":[],\"hCaptain\":0,\"gCaptain\":0,\"hCalledTimeouts\":[{\"hPoints\":14,\"gPoints\":15}],\"gCalledTimeouts\":[{\"hPoints\":7,\"gPoints\":6}],\"rTime\":0}],\"hCards\":[],\"gCards\":[],\"rules\":{\"userId\":\"01022018@vbr\",\"name\":\"Test Rules\",\"date\":1523199473000,\"setsPerGame\":5,\"pointsPerSet\":25,\"tieBreakInLastSet\":true,\"pointsInTieBreak\":15,\"twoPointsDifference\":true,\"sanctions\":true,\"teamTimeouts\":true,\"teamTimeoutsPerSet\":2,\"teamTimeoutDuration\":30,\"technicalTimeouts\":true,\"technicalTimeoutDuration\":60,\"gameIntervals\":true,\"gameIntervalDuration\":180,\"teamSubstitutionsPerSet\":6,\"beachCourtSwitches\":false,\"beachCourtSwitchFreq\":0,\"beachCourtSwitchFreqTieBreak\":0,\"customConsecutiveServesPerPlayer\": 9999}}";
@@ -294,34 +330,34 @@ public class VolleyballRefereeApplicationTests {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
                 .queryParam("userId", testUser);
-        ResponseEntity<Rules[]> rulesListResponse = restTemplate.getForEntity(builder.toUriString(), Rules[].class);
+        ResponseEntity<Rules[]> rulesListResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Rules[].class);
         assertEquals(1, rulesListResponse.getBody().length);
         assertEquals("Test Rules", rulesListResponse.getBody()[0].getName());
 
-        rulesListResponse = restTemplate.getForEntity(urlOf("/api/user/rules/default"), Rules[].class);
+        rulesListResponse = restTemplate.exchange(urlOf("/api/user/rules/default"), HttpMethod.GET, emptyEntity(), Rules[].class);
         assertEquals(3, rulesListResponse.getBody().length);
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "Test Rules");
-        ResponseEntity<Rules> rulesResponse = restTemplate.getForEntity(builder.toUriString(), Rules.class);
+        ResponseEntity<Rules> rulesResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Rules.class);
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "Unknown Rules");
-        rulesResponse = restTemplate.getForEntity(builder.toUriString(), Rules.class);
+        rulesResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Rules.class);
         assertEquals(HttpStatus.NOT_FOUND, rulesResponse.getStatusCode());
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules/count"))
 				.queryParam("userId", testUser);
-		ResponseEntity<Long> rulesCountResponse = restTemplate.getForEntity(builder.toUriString(), Long.class);
+		ResponseEntity<Long> rulesCountResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Long.class);
 		assertEquals(1L, rulesCountResponse.getBody().longValue());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
                 .queryParam("userId", testUser)
-                .queryParam("name", "Test Rules");;
-        restTemplate.delete(builder.toUriString());
+                .queryParam("name", "Test Rules");
+        restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 	}
 
 	private String team1 = "{\"userId\":\"01022018@google\",\"name\":\"BRAZIL\",\"kind\":\"INDOOR\",\"date\":1523199473000,\"color\":\"#f3bc07\",\"liberoColor\":\"#034694\",\"players\":[1,3,4,5,9,10,11,13,16,18,19,20],\"liberos\":[6,8],\"captain\":1,\"gender\":\"GENTS\"}";
@@ -349,7 +385,7 @@ public class VolleyballRefereeApplicationTests {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser);
-        ResponseEntity<Team[]> teamListResponse = restTemplate.getForEntity(builder.toUriString(), Team[].class);
+        ResponseEntity<Team[]> teamListResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team[].class);
         assertEquals(2, teamListResponse.getBody().length);
         assertEquals("BRAZIL", teamListResponse.getBody()[0].getName());
         assertEquals("FRANCE", teamListResponse.getBody()[1].getName());
@@ -357,7 +393,7 @@ public class VolleyballRefereeApplicationTests {
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
 				.queryParam("kind", "INDOOR");
-		teamListResponse = restTemplate.getForEntity(builder.toUriString(), Team[].class);
+		teamListResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team[].class);
 		assertEquals(2, teamListResponse.getBody().length);
 		assertEquals("BRAZIL", teamListResponse.getBody()[0].getName());
 		assertEquals("FRANCE", teamListResponse.getBody()[1].getName());
@@ -365,7 +401,7 @@ public class VolleyballRefereeApplicationTests {
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
 				.queryParam("kind", "BEACH");
-		teamListResponse = restTemplate.getForEntity(builder.toUriString(), Team[].class);
+		teamListResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team[].class);
 		assertEquals(0, teamListResponse.getBody().length);
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
@@ -373,7 +409,7 @@ public class VolleyballRefereeApplicationTests {
                 .queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");
-        ResponseEntity<Team> teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
+        ResponseEntity<Team> teamResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team.class);
         assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
@@ -381,27 +417,27 @@ public class VolleyballRefereeApplicationTests {
                 .queryParam("name", "ITALY")
                 .queryParam("gender", "GENTS")
                 .queryParam("kind", "INDOOR");
-        teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
+        teamResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team.class);
         assertEquals(HttpStatus.NOT_FOUND, teamResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team/count"))
 				.queryParam("userId", testUser);
-        ResponseEntity<Long> teamCountResponse = restTemplate.getForEntity(builder.toUriString(), Long.class);
+        ResponseEntity<Long> teamCountResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Long.class);
         assertEquals(2L, teamCountResponse.getBody().longValue());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
-                .queryParam("kind", "INDOOR");;
-        restTemplate.delete(builder.toUriString());
+                .queryParam("kind", "INDOOR");
+        restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
                 .queryParam("userId", testUser)
                 .queryParam("name", "FRANCE")
                 .queryParam("gender", "GENTS")
-                .queryParam("kind", "INDOOR");;
-        restTemplate.delete(builder.toUriString());
+                .queryParam("kind", "INDOOR");
+        restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
     }
 
     private String description1 = "{\"userId\":\"01022018@google\",\"kind\":\"INDOOR\",\"date\":1520674661962,\"schedule\":0,\"gender\":\"GENTS\",\"usage\":\"NORMAL\",\"status\":\"SCHEDULED\",\"indexed\":true,\"referee\":\"VBR\",\"league\":\"FIVB Volleyball World League 2017\",\"division\":\"\",\"hName\":\"BRAZIL\",\"gName\":\"FRANCE\",\"hSets\":0,\"gSets\":0,\"rules\":\"Test Rules\"}";
@@ -428,23 +464,23 @@ public class VolleyballRefereeApplicationTests {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game/count"))
 				.queryParam("userId", testUser);
-        ResponseEntity<Long> gameCountResponse = restTemplate.getForEntity(builder.toUriString(), Long.class);
+        ResponseEntity<Long> gameCountResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Long.class);
         assertEquals(1L, gameCountResponse.getBody().longValue());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game"))
 				.queryParam("userId", testUser)
                 .queryParam("id", "1520674661962");
-		ResponseEntity<Game> fullGameResponse = restTemplate.getForEntity(builder.toUriString(), Game.class);
+		ResponseEntity<Game> fullGameResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Game.class);
         assertEquals(1520674661962L, fullGameResponse.getBody().getDate());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game/code"))
 				.queryParam("userId", testUser)
                 .queryParam("id", "1520674661962");
-        ResponseEntity<Integer> gameCodeResponse = restTemplate.getForEntity(builder.toUriString(), Integer.class);
+        ResponseEntity<Integer> gameCodeResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Integer.class);
 
         int code = gameCodeResponse.getBody();
 
-        ResponseEntity<Game> viewResponse = restTemplate.getForEntity(urlOf("/api/view/game/code/" + code), Game.class);
+        ResponseEntity<Game> viewResponse = restTemplate.exchange(urlOf("/api/view/game/code/" + code), HttpMethod.GET, emptyEntity(), Game.class);
         assertEquals("BRAZIL", viewResponse.getBody().gethTeam().getName());
         assertEquals("FRANCE", viewResponse.getBody().getgTeam().getName());
 
@@ -453,69 +489,69 @@ public class VolleyballRefereeApplicationTests {
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "Test Rules");
-        restTemplate.delete(builder.toUriString());
+        restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
 				.queryParam("userId", testUser)
 				.queryParam("name", "Test Rules");
-		ResponseEntity<Rules> rulesResponse = restTemplate.getForEntity(builder.toUriString(), Rules.class);
+		ResponseEntity<Rules> rulesResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Rules.class);
 		assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
-                .queryParam("kind", "INDOOR");;
-        restTemplate.delete(builder.toUriString());
+                .queryParam("kind", "INDOOR");
+        restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
 				.queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
-                .queryParam("kind", "INDOOR");;
-		ResponseEntity<Team> teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
+                .queryParam("kind", "INDOOR");
+		ResponseEntity<Team> teamResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team.class);
 		assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
 
 		// Delete game
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/game"))
                 .queryParam("userId", testUser)
-                .queryParam("id", "1520674661962");;
-        restTemplate.delete(builder.toUriString());
+                .queryParam("id", "1520674661962");
+        restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
         // Now the rules and teams are free
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
 				.queryParam("userId", testUser)
-                .queryParam("name", "Test Rules");;
-        restTemplate.delete(builder.toUriString());
+                .queryParam("name", "Test Rules");
+        restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/rules"))
 				.queryParam("userId", testUser)
 				.queryParam("name", "Test Rules");
-		rulesResponse = restTemplate.getForEntity(builder.toUriString(), Rules.class);
+		rulesResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Rules.class);
 		assertEquals(HttpStatus.NOT_FOUND, rulesResponse.getStatusCode());
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
-                .queryParam("kind", "INDOOR");;
-        restTemplate.delete(builder.toUriString());
+                .queryParam("kind", "INDOOR");
+        restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
         builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
                 .queryParam("name", "FRANCE")
                 .queryParam("gender", "GENTS")
-                .queryParam("kind", "INDOOR");;
-        restTemplate.delete(builder.toUriString());
+                .queryParam("kind", "INDOOR");
+        restTemplate.exchange(builder.toUriString(), HttpMethod.DELETE, emptyEntity(), String.class);
 
 		builder = UriComponentsBuilder.fromHttpUrl(urlOf("/api/user/team"))
 				.queryParam("userId", testUser)
 				.queryParam("name", "BRAZIL")
                 .queryParam("gender", "GENTS")
-                .queryParam("kind", "INDOOR");;
-		teamResponse = restTemplate.getForEntity(builder.toUriString(), Team.class);
+                .queryParam("kind", "INDOOR");
+		teamResponse = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, emptyEntity(), Team.class);
 		assertEquals(HttpStatus.NOT_FOUND, teamResponse.getStatusCode());
     }
 }

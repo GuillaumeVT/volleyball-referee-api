@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.0.3.RELEASE'
+        springBootVersion = '2.0.4.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -33,5 +33,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-undertow'
     compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
     compile 'org.jsoup:jsoup:1.11.3'
+    compile 'org.springframework.boot:spring-boot-starter-security'
+    compile 'com.google.api-client:google-api-client:1.23.0'
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
