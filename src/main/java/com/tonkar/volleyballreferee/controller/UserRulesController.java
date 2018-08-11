@@ -57,6 +57,7 @@ public class UserRulesController {
 
     @PostMapping("")
     public ResponseEntity<Rules> createUserRules(@AuthenticationPrincipal User user, @Valid @RequestBody Rules rules) {
+        rules.setUserId(user.getUserId());
         boolean result = userService.createUserRules(rules);
 
         if (result) {
@@ -69,6 +70,7 @@ public class UserRulesController {
 
     @PutMapping("")
     public ResponseEntity<Rules> updateUserRules(@AuthenticationPrincipal User user, @Valid @RequestBody Rules rules) {
+        rules.setUserId(user.getUserId());
         boolean result = userService.updateUserRules(rules);
 
         if (result) {

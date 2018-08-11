@@ -57,6 +57,7 @@ public class UserTeamController {
 
     @PostMapping("")
     public ResponseEntity<Team> createUserTeam(@AuthenticationPrincipal User user, @Valid @RequestBody Team team) {
+        team.setUserId(user.getUserId());
         boolean result = userService.createUserTeam(team);
 
         if (result) {
@@ -69,6 +70,7 @@ public class UserTeamController {
 
     @PutMapping("")
     public ResponseEntity<Team> updateUserTeam(@AuthenticationPrincipal User user, @Valid @RequestBody Team team) {
+        team.setUserId(user.getUserId());
         boolean result = userService.updateUserTeam(team);
 
         if (result) {

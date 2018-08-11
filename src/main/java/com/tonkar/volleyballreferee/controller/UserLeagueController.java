@@ -65,6 +65,7 @@ public class UserLeagueController {
 
     @PostMapping("")
     public ResponseEntity<League> createUserLeague(@AuthenticationPrincipal User user, @Valid @RequestBody League league) {
+        league.setUserId(user.getUserId());
         boolean result = userService.createUserLeague(league);
 
         if (result) {

@@ -90,6 +90,7 @@ public class UserGameController {
 
     @PostMapping("")
     public ResponseEntity<GameDescription> createUserGame(@AuthenticationPrincipal User user, @Valid @RequestBody GameDescription game) {
+        game.setUserId(user.getUserId());
         boolean result = userService.createUserGame(game);
 
         if (result) {
@@ -103,6 +104,7 @@ public class UserGameController {
 
     @PutMapping("")
     public ResponseEntity<GameDescription> updateUserGame(@AuthenticationPrincipal User user, @Valid @RequestBody GameDescription game) {
+        game.setUserId(user.getUserId());
         boolean result = userService.updateUserGame(game);
 
         if (result) {
