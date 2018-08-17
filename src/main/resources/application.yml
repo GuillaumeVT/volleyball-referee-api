@@ -1,9 +1,7 @@
 vbr:
   auth:
     facebookAppAccessToken: 2086514551632301|EShvFJ7FGAKChTSlqOXolTmcdVM
-    googleAndroidClientId: 802590775795-or7n177mbsbpgjda9r3mrpcaa4fot2j4.apps.googleusercontent.com
-    googleAndroidClientIdTest: 802590775795-0jm4o6n92qpmj1df27mcu10oc8prqtjb.apps.googleusercontent.com
-    googleAngularClientId: 802590775795-kdff0cnflla62jr2dj0pleqbiv05q97l.apps.googleusercontent.com
+    googleWebClientId: 802590775795-kdff0cnflla62jr2dj0pleqbiv05q97l.apps.googleusercontent.com
 
 spring.profiles: integration
 spring.data.mongodb.uri: mongodb://vbr_integ_user:vbr@localhost:27017/vbr_integ

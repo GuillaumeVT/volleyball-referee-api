@@ -17,7 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 @Service
@@ -28,14 +28,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     @Value("${vbr.auth.facebookAppAccessToken}")
     private String facebookAppAccessToken;
 
-    @Value("${vbr.auth.googleAndroidClientId}")
-    private String googleAndroidClientId;
-
-    @Value("${vbr.auth.googleAndroidClientIdTest}")
-    private String googleAndroidClientIdTest;
-
-    @Value("${vbr.auth.googleAngularClientId}")
-    private String googleAngularClientId;
+    @Value("${vbr.auth.googleWebClientId}")
+    private String googleWebClientId;
 
     private final RestTemplate restTemplate;
 
@@ -92,9 +86,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     private Optional<User> getGoogleUser(String idToken) {
         Optional<User> optUser;
 
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
-                .setAudience(Arrays.asList(googleAndroidClientId, googleAndroidClientIdTest, googleAngularClientId))
-                .build();
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory()).setAudience(Collections.singletonList(googleWebClientId)).build();
 
         try {
             GoogleIdToken googleIdToken = verifier.verify(idToken);
