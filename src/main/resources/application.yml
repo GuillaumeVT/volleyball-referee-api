@@ -1,14 +1,19 @@
+spring.profiles: integration
+spring.data.mongodb.uri: mongodb://vbr_integ_user:vbr@localhost:27017/vbr_integ
+
 vbr:
   auth:
     facebookAppAccessToken: 2086514551632301|EShvFJ7FGAKChTSlqOXolTmcdVM
     googleWebClientId: 802590775795-kdff0cnflla62jr2dj0pleqbiv05q97l.apps.googleusercontent.com
 
-spring.profiles: integration
-spring.data.mongodb.uri: mongodb://vbr_integ_user:vbr@localhost:27017/vbr_integ
-
 ---
 spring.profiles: production
 spring.data.mongodb.uri: mongodb://vbr_user:vbr@localhost:27017/vbr
+
+vbr:
+  auth:
+    facebookAppAccessToken: 2086514551632301|EShvFJ7FGAKChTSlqOXolTmcdVM
+    googleWebClientId: 802590775795-kdff0cnflla62jr2dj0pleqbiv05q97l.apps.googleusercontent.com
 
 logging:
   config: classpath:logback-spring.xml
