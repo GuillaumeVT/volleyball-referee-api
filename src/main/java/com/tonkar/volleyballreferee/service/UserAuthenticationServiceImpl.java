@@ -73,7 +73,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
                     || !facebookAppAccessToken.startsWith(facebookIdToken.getPayload().getAppId())) {
                 optUser = Optional.empty();
             } else {
-                User user = new User(facebookIdToken.getPayload().getUserId(), User.AuthenticationProvider.GOOGLE);
+                User user = new User(facebookIdToken.getPayload().getUserId(), User.AuthenticationProvider.FACEBOOK);
                 optUser = Optional.of(user);
             }
         } else {
