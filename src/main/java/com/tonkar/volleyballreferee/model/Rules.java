@@ -11,6 +11,10 @@ import javax.validation.constraints.NotNull;
 @Document(collection="rules")
 public class Rules {
 
+    public static final transient int SINGLE_SUBSTITUTE_TYPE  = 1;
+    public static final transient int PLURAL_SUBSTITUTES_TYPE = 2;
+    public static final transient int FREE_SUBSTITUTIONS_TYPE = 3;
+
     @Id
     private String  id;
     @Valid
@@ -47,6 +51,8 @@ public class Rules {
     @NotNull
     private int     gameIntervalDuration;
     @NotNull
+    private int     substitutionType;
+    @NotNull
     private int     teamSubstitutionsPerSet;
     @NotNull
     private boolean beachCourtSwitches;
@@ -62,7 +68,8 @@ public class Rules {
     public Rules(String userId, String name, long date, int setsPerGame, int pointsPerSet, boolean tieBreakInLastSet, int pointsInTieBreak, boolean twoPointsDifference, boolean sanctions,
                  boolean teamTimeouts, int teamTimeoutsPerSet, int teamTimeoutDuration,
                  boolean technicalTimeouts, int technicalTimeoutDuration, boolean gameIntervals, int gameIntervalDuration,
-                 int teamSubstitutionsPerSet, boolean beachCourtSwitches, int beachCourtSwitchFreq, int beachCourtSwitchFreqTieBreak, int customConsecutiveServesPerPlayer) {
+                 int substitutionType, int teamSubstitutionsPerSet,
+                 boolean beachCourtSwitches, int beachCourtSwitchFreq, int beachCourtSwitchFreqTieBreak, int customConsecutiveServesPerPlayer) {
         this.userId = userId;
         this.date = date;
         this.name = name;
@@ -79,25 +86,28 @@ public class Rules {
         this.technicalTimeoutDuration = technicalTimeoutDuration;
         this.gameIntervals = gameIntervals;
         this.gameIntervalDuration = gameIntervalDuration;
+        this.substitutionType = substitutionType;
         this.teamSubstitutionsPerSet = teamSubstitutionsPerSet;
         this.beachCourtSwitches = beachCourtSwitches;
         this.beachCourtSwitchFreq = beachCourtSwitchFreq;
         this.beachCourtSwitchFreqTieBreak = beachCourtSwitchFreqTieBreak;
         this.customConsecutiveServesPerPlayer = customConsecutiveServesPerPlayer;
+
+        checkSubstitutions();
     }
 
     public static final Rules OFFICIAL_INDOOR_RULES    = new Rules(User.VBR_USER_ID, "FIVB indoor 6x6 rules", 0L,
             5, 25, true, 15, true, true, true, 2, 30,
             true, 60, true, 180,
-            6, false, 0, 0, 9999);
+            SINGLE_SUBSTITUTE_TYPE, 6, false, 0, 0, 9999);
     public static final Rules OFFICIAL_BEACH_RULES     = new Rules(User.VBR_USER_ID, "FIVB beach rules", 0L,
             3, 21, true, 15, true, true, true, 1, 30,
             true, 30, true, 60,
-            0, true, 7, 5, 9999);
+            SINGLE_SUBSTITUTE_TYPE, 0, true, 7, 5, 9999);
     public static final Rules DEFAULT_INDOOR_4X4_RULES = new Rules(User.VBR_USER_ID, "Default 4x4 rules", 0L,
             5, 25, true, 15, true, true, true, 2, 30,
             true, 60, true, 180,
-            4, false, 0, 0, 9999);
+            FREE_SUBSTITUTIONS_TYPE, 4, false, 0, 0, 9999);
 
     public String getId() {
         return id;
@@ -235,6 +245,14 @@ public class Rules {
         this.gameIntervalDuration = gameIntervalDuration;
     }
 
+    public int getSubstitutionType() {
+        return substitutionType;
+    }
+
+    public void setSubstitutionType(int substitutionType) {
+        this.substitutionType = substitutionType;
+    }
+
     public int getTeamSubstitutionsPerSet() {
         return teamSubstitutionsPerSet;
     }
@@ -274,5 +292,12 @@ public class Rules {
     public void setCustomConsecutiveServesPerPlayer(int customConsecutiveServesPerPlayer) {
         this.customConsecutiveServesPerPlayer = customConsecutiveServesPerPlayer;
     }
+
+    private void checkSubstitutions() {
+        if (SINGLE_SUBSTITUTE_TYPE == substitutionType && teamSubstitutionsPerSet > 12) {
+            teamSubstitutionsPerSet = 12;
+        }
+    }
+
 
 }
