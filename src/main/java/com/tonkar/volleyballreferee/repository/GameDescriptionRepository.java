@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.repository;
 
 import com.tonkar.volleyballreferee.model.GameDescription;
+import org.springframework.data.mongodb.repository.ExistsQuery;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
@@ -14,9 +15,8 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     boolean existsByUserIdAndStatusAndRules(String userId, String status, String rulesName);
 
-    boolean existsByUserIdAndStatusAndHName(String userId, String status, String teamName);
-
-    boolean existsByUserIdAndStatusAndGName(String userId, String status, String teamName);
+    @ExistsQuery("{ '$and': [ { 'userId': ?0 }, { 'status': ?1 }, { 'kind': ?2 }, { 'gender': ?3 }, { '$or': [ { 'hName': ?4 }, { 'gName': ?4 } ] } ] }")
+    boolean existsByUserIdAndStatusAndKindAndGenderAndName(String userId, String status, String kind, String gender, String teamName);
 
     GameDescription findByDate(long date);
 
@@ -39,8 +39,8 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     List<GameDescription> findByUserIdAndStatusAndRules(String userId, String status, String rulesName);
 
-    @Query("{ '$and': [ { 'userId': ?0 }, { 'status': ?1 }, { '$or': [ { 'hName': ?2 }, { 'gName': ?2 } ] } ] }")
-    List<GameDescription> findByUserIdAndStatusAndTeamName(String userId, String status, String teamName);
+    @Query("{ '$and': [ { 'userId': ?0 }, { 'status': ?1 }, { 'kind': ?2 }, { 'gender': ?3 }, { '$or': [ { 'hName': ?4 }, { 'gName': ?4 } ] } ] }")
+    List<GameDescription> findByUserIdAndStatusAndKindAndGenderAndTeamName(String userId, String status, String kind, String gender, String teamName);
 
     @Query("{ '$and': [ { 'userId': ?0 }, { 'kind': ?1 }, { 'league': ?2 }, { '$or': [ { 'hName': ?3 }, { 'gName': ?3 } ] }, { 'gender': ?4 } ] }")
     List<GameDescription> findByUserIdAndKindAndLeagueAndTeamNameAndGender(String userId, String kind, String leagueName, String teamName, String teamGender);

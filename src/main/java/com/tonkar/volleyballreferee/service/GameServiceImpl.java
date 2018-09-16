@@ -275,17 +275,13 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public boolean hasGameUsingTeam(String teamName, String userId) {
-        return gameDescriptionRepository.existsByUserIdAndStatusAndHName(
-                userId, GameStatus.SCHEDULED.toString(), teamName)
-                || gameDescriptionRepository.existsByUserIdAndStatusAndGName(
-                userId, GameStatus.SCHEDULED.toString(), teamName);
+    public boolean hasGameUsingTeam(String teamName, String gender, String kind, String userId) {
+        return gameDescriptionRepository.existsByUserIdAndStatusAndKindAndGenderAndName(userId, GameStatus.SCHEDULED.toString(), kind, gender, teamName);
     }
 
     @Override
-    public List<GameDescription> listGameDescriptionsUsingTeam(String teamName, String userId) {
-        return gameDescriptionRepository.findByUserIdAndStatusAndTeamName(
-                userId, GameStatus.SCHEDULED.toString(), teamName);
+    public List<GameDescription> listGameDescriptionsUsingTeam(String teamName, String gender, String kind, String userId) {
+        return gameDescriptionRepository.findByUserIdAndStatusAndKindAndGenderAndTeamName(userId, GameStatus.SCHEDULED.toString(), kind, gender, teamName);
     }
     
     private long epochDateNDaysAgo(int daysAgo) {

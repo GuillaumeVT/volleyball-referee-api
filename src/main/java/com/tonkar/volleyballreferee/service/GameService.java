@@ -46,8 +46,8 @@ public interface GameService {
 
     List<GameDescription> listGameDescriptionsUsingRules(String rulesName, String userId);
 
-    boolean hasGameUsingTeam(String teamName, String userId);
+    boolean hasGameUsingTeam(String teamName, String gender, String kind, String userId);
 
-    List<GameDescription> listGameDescriptionsUsingTeam(String teamName, String userId);
+    List<GameDescription> listGameDescriptionsUsingTeam(String teamName, String gender, String kind, String userId);
 
 }

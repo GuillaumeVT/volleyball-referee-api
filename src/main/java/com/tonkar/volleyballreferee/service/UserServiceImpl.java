@@ -245,7 +245,7 @@ public class UserServiceImpl implements UserService {
             teamRepository.save(savedTeam);
             LOGGER.debug(String.format("Updated team %s for user %s", team.getName(), team.getUserId()));
 
-            for (GameDescription gameDescription : gameService.listGameDescriptionsUsingTeam(team.getName(), team.getUserId())) {
+            for (GameDescription gameDescription : gameService.listGameDescriptionsUsingTeam(team.getName(), team.getGender(), team.getKind(), team.getUserId())) {
                 updateUserGame(gameDescription);
             }
 
@@ -259,7 +259,7 @@ public class UserServiceImpl implements UserService {
     public boolean deleteUserTeam(String userId, String name, String gender, String kind) {
         final boolean deleted;
 
-        if (gameService.hasGameUsingTeam(name, userId)) {
+        if (gameService.hasGameUsingTeam(name, gender, kind, userId)) {
             LOGGER.debug(String.format("Could not delete team %s for user %s because it is used in a game", name, userId));
             deleted = false;
         } else {
