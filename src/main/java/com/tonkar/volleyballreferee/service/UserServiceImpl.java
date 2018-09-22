@@ -120,7 +120,7 @@ public class UserServiceImpl implements UserService {
             savedRules.setTechnicalTimeoutDuration(rules.getTechnicalTimeoutDuration());
             savedRules.setGameIntervals(rules.isGameIntervals());
             savedRules.setGameIntervalDuration(rules.getGameIntervalDuration());
-            savedRules.setSubstitutionType(rules.getSubstitutionType());
+            savedRules.setSubstitutionsLimitation(rules.getSubstitutionsLimitation());
             savedRules.setTeamSubstitutionsPerSet(rules.getTeamSubstitutionsPerSet());
             savedRules.setBeachCourtSwitches(rules.isBeachCourtSwitches());
             savedRules.setBeachCourtSwitchFreq(rules.getBeachCourtSwitchFreq());

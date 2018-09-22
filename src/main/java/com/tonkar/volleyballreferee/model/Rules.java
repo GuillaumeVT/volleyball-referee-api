@@ -11,9 +11,10 @@ import javax.validation.constraints.NotNull;
 @Document(collection="rules")
 public class Rules {
 
-    public static final transient int SINGLE_SUBSTITUTE_TYPE  = 1;
-    public static final transient int PLURAL_SUBSTITUTES_TYPE = 2;
-    public static final transient int FREE_SUBSTITUTIONS_TYPE = 3;
+    public static final transient int FIVB_LIMITATION = 1;
+    public static final transient int ALTERNATIVE_LIMITATION_1 = 2;
+    public static final transient int ALTERNATIVE_LIMITATION_2 = 3;
+    public static final transient int NO_LIMITATION = 3;
 
     @Id
     private String  id;
@@ -51,7 +52,7 @@ public class Rules {
     @NotNull
     private int     gameIntervalDuration;
     @NotNull
-    private int     substitutionType;
+    private int     substitutionsLimitation;
     @NotNull
     private int     teamSubstitutionsPerSet;
     @NotNull
@@ -68,7 +69,7 @@ public class Rules {
     public Rules(String userId, String name, long date, int setsPerGame, int pointsPerSet, boolean tieBreakInLastSet, int pointsInTieBreak, boolean twoPointsDifference, boolean sanctions,
                  boolean teamTimeouts, int teamTimeoutsPerSet, int teamTimeoutDuration,
                  boolean technicalTimeouts, int technicalTimeoutDuration, boolean gameIntervals, int gameIntervalDuration,
-                 int substitutionType, int teamSubstitutionsPerSet,
+                 int substitutionsLimitation, int teamSubstitutionsPerSet,
                  boolean beachCourtSwitches, int beachCourtSwitchFreq, int beachCourtSwitchFreqTieBreak, int customConsecutiveServesPerPlayer) {
         this.userId = userId;
         this.date = date;
@@ -86,7 +87,7 @@ public class Rules {
         this.technicalTimeoutDuration = technicalTimeoutDuration;
         this.gameIntervals = gameIntervals;
         this.gameIntervalDuration = gameIntervalDuration;
-        this.substitutionType = substitutionType;
+        this.substitutionsLimitation = substitutionsLimitation;
         this.teamSubstitutionsPerSet = teamSubstitutionsPerSet;
         this.beachCourtSwitches = beachCourtSwitches;
         this.beachCourtSwitchFreq = beachCourtSwitchFreq;
@@ -99,15 +100,15 @@ public class Rules {
     public static final Rules OFFICIAL_INDOOR_RULES    = new Rules(User.VBR_USER_ID, "FIVB indoor 6x6 rules", 0L,
             5, 25, true, 15, true, true, true, 2, 30,
             true, 60, true, 180,
-            SINGLE_SUBSTITUTE_TYPE, 6, false, 0, 0, 9999);
+            FIVB_LIMITATION, 6, false, 0, 0, 9999);
     public static final Rules OFFICIAL_BEACH_RULES     = new Rules(User.VBR_USER_ID, "FIVB beach rules", 0L,
             3, 21, true, 15, true, true, true, 1, 30,
             true, 30, true, 60,
-            SINGLE_SUBSTITUTE_TYPE, 0, true, 7, 5, 9999);
+            FIVB_LIMITATION, 0, true, 7, 5, 9999);
     public static final Rules DEFAULT_INDOOR_4X4_RULES = new Rules(User.VBR_USER_ID, "Default 4x4 rules", 0L,
             5, 25, true, 15, true, true, true, 2, 30,
             true, 60, true, 180,
-            FREE_SUBSTITUTIONS_TYPE, 4, false, 0, 0, 9999);
+            NO_LIMITATION, 4, false, 0, 0, 9999);
 
     public String getId() {
         return id;
@@ -245,12 +246,12 @@ public class Rules {
         this.gameIntervalDuration = gameIntervalDuration;
     }
 
-    public int getSubstitutionType() {
-        return substitutionType;
+    public int getSubstitutionsLimitation() {
+        return substitutionsLimitation;
     }
 
-    public void setSubstitutionType(int substitutionType) {
-        this.substitutionType = substitutionType;
+    public void setSubstitutionsLimitation(int substitutionsLimitation) {
+        this.substitutionsLimitation = substitutionsLimitation;
     }
 
     public int getTeamSubstitutionsPerSet() {
@@ -294,7 +295,7 @@ public class Rules {
     }
 
     private void checkSubstitutions() {
-        if (SINGLE_SUBSTITUTE_TYPE == substitutionType && teamSubstitutionsPerSet > 12) {
+        if (FIVB_LIMITATION == substitutionsLimitation && teamSubstitutionsPerSet > 12) {
             teamSubstitutionsPerSet = 12;
         }
     }
