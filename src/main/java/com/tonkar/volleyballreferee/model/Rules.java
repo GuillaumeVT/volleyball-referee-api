@@ -14,7 +14,7 @@ public class Rules {
     public static final transient int FIVB_LIMITATION = 1;
     public static final transient int ALTERNATIVE_LIMITATION_1 = 2;
     public static final transient int ALTERNATIVE_LIMITATION_2 = 3;
-    public static final transient int NO_LIMITATION = 3;
+    public static final transient int NO_LIMITATION = 4;
 
     @Id
     private String  id;
