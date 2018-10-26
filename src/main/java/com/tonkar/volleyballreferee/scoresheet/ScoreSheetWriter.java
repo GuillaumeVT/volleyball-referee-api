@@ -189,12 +189,8 @@ public class ScoreSheetWriter {
         Element teamDiv = new Element("div");
         teamDiv.addClass("div-grid-team");
 
-        for (int player : game.getPlayers(teamType)) {
-            teamDiv.appendChild(createPlayerSpan(teamType, player, false));
-        }
-        for (int player : game.getLiberos(teamType)) {
-            teamDiv.appendChild(createPlayerSpan(teamType, player, true));
-        }
+        game.getPlayers(teamType).forEach(player -> teamDiv.appendChild(createPlayerSpan(teamType, player, false)));
+        game.getLiberos(teamType).forEach(player -> teamDiv.appendChild(createPlayerSpan(teamType, player, true)));
 
         return teamDiv;
     }
@@ -360,9 +356,8 @@ public class ScoreSheetWriter {
         Element substitutionsDiv = new Element("div");
         substitutionsDiv.addClass("div-flex-column");
 
-        for (Substitution substitution : game.getSubstitutions(teamType, setIndex)) {
-            substitutionsDiv.appendChild(createSubstitutionDiv(teamType, substitution));
-        }
+        game.getSubstitutions(teamType, setIndex)
+                .forEach(substitution -> substitutionsDiv.appendChild(createSubstitutionDiv(teamType, substitution)));
 
         return substitutionsDiv;
     }
@@ -401,9 +396,8 @@ public class ScoreSheetWriter {
         Element timeoutsDiv = new Element("div");
         timeoutsDiv.addClass("div-flex-column");
 
-        for (Timeout timeout : game.getCalledTimeouts(teamType, setIndex)) {
-            timeoutsDiv.appendChild(createTimeoutDiv(teamType, timeout));
-        }
+        game.getCalledTimeouts(teamType, setIndex)
+                .forEach(timeout -> timeoutsDiv.appendChild(createTimeoutDiv(teamType, timeout)));
 
         return timeoutsDiv;
     }
@@ -455,9 +449,8 @@ public class ScoreSheetWriter {
         Element sanctionsDiv = new Element("div");
         sanctionsDiv.addClass("div-flex-column");
 
-        for (Sanction sanction : game.getGivenSanctions(teamType, setIndex)) {
-            sanctionsDiv.appendChild(createSanctionDiv(teamType, sanction));
-        }
+        game.getGivenSanctions(teamType, setIndex)
+                .forEach(sanction -> sanctionsDiv.appendChild(createSanctionDiv(teamType, sanction)));
 
         return sanctionsDiv;
     }

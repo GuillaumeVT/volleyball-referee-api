@@ -129,9 +129,7 @@ public class UserServiceImpl implements UserService {
             rulesRepository.save(savedRules);
             LOGGER.debug(String.format("Updated rules %s for user %s", rules.getName(), rules.getUserId()));
 
-            for (GameDescription gameDescription : gameService.listGameDescriptionsUsingRules(rules.getName(), rules.getUserId())) {
-                updateUserGame(gameDescription);
-            }
+            gameService.listGameDescriptionsUsingRules(rules.getName(), rules.getUserId()).forEach(this::updateUserGame);
 
             updated = true;
         }
@@ -245,9 +243,8 @@ public class UserServiceImpl implements UserService {
             teamRepository.save(savedTeam);
             LOGGER.debug(String.format("Updated team %s for user %s", team.getName(), team.getUserId()));
 
-            for (GameDescription gameDescription : gameService.listGameDescriptionsUsingTeam(team.getName(), team.getGender(), team.getKind(), team.getUserId())) {
-                updateUserGame(gameDescription);
-            }
+            gameService.listGameDescriptionsUsingTeam(team.getName(), team.getGender(), team.getKind(), team.getUserId())
+                    .forEach(this::updateUserGame);
 
             updated = true;
         }
@@ -507,10 +504,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean deleteAllUserGames(String userId) {
-        for (GameDescription game : listUserGames(userId)) {
-            deleteUserGame(userId, game.getDate());
-        }
-
+        listUserGames(userId).forEach(game -> deleteUserGame(userId, game.getDate()));
         return true;
     }
 
@@ -541,11 +535,7 @@ public class UserServiceImpl implements UserService {
     public List<String> listUserDivisionsOfKind(String userId, String kind) {
         List<GameDescription> games = gameDescriptionRepository.findByUserIdAndKindAndLeagueNotAndDivisionNot(userId, kind, "", "");
         TreeSet<String> distinctDivisions = new TreeSet<>();
-
-        for (GameDescription game : games) {
-            distinctDivisions.add(game.getDivision());
-        }
-
+        games.forEach(game -> distinctDivisions.add(game.getDivision()));
         return new ArrayList<>(distinctDivisions);
     }
 
@@ -685,10 +675,7 @@ public class UserServiceImpl implements UserService {
 
         List<GameDescription> games = gameDescriptionRepository.findByUserIdAndKindAndLeagueAndDivisionNot(userId, league.getKind(), league.getName(), "");
         TreeSet<String> distinctDivisions = new TreeSet<>();
-
-        for (GameDescription matchingGame : games) {
-            distinctDivisions.add(matchingGame.getDivision());
-        }
+        games.forEach(matchingGame -> distinctDivisions.add(matchingGame.getDivision()));
 
         league.getDivisions().addAll(distinctDivisions);
 
