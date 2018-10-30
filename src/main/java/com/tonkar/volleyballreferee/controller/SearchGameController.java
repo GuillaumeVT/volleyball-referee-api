@@ -129,9 +129,7 @@ public class SearchGameController {
     }
 
     private void hideUserId(List<GameDescription> gameDescriptions) {
-        for (GameDescription gameDescription : gameDescriptions) {
-            gameDescription.setUserId(null);
-        }
+        gameDescriptions.forEach(gameDescription -> gameDescription.setUserId(null));
     }
 
 }

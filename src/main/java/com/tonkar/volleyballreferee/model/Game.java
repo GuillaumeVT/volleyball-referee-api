@@ -6,9 +6,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Document(collection="games")
 public class Game {
@@ -291,30 +292,17 @@ public class Game {
     }
 
     public List<Sanction> getGivenSanctions(TeamType teamType, int setIndex) {
-        List<Sanction> sanctions = new ArrayList<>();
         List<Sanction> allSanctions = TeamType.HOME.equals(teamType) ? gethCards() : getgCards();
-
-        for (Sanction sanction: allSanctions) {
-            if (sanction.getSet() == setIndex) {
-                sanctions.add(sanction);
-            }
-        }
-
-        return sanctions;
+        return allSanctions.stream().filter(sanction -> sanction.getSet() == setIndex).collect(Collectors.toList());
     }
 
     public int getPlayerAtPositionInStartingLineup(TeamType teamType, int position, int setIndex) {
         Set set = getSets().get(setIndex);
         List<Player> startingLineup = TeamType.HOME.equals(teamType) ? set.gethStartingPlayers() : set.getgStartingPlayers();
 
-        int number = -1;
+        AtomicInteger number = new AtomicInteger(-1);
+        startingLineup.stream().filter(player -> player.getPos() == position).forEach(player -> number.set(player.getNum()));
 
-        for (Player player: startingLineup) {
-            if (player.getPos() == position) {
-                number = player.getNum();
-            }
-        }
-
-        return number;
+        return number.get();
     }
 }

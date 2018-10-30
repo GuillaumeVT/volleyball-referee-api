@@ -107,9 +107,7 @@ public class ViewController {
     }
 
     private void hideUserId(List<Team> teams) {
-        for (Team team : teams) {
-            team.setUserId(null);
-        }
+        teams.forEach(team -> team.setUserId(null));
     }
 
 }
