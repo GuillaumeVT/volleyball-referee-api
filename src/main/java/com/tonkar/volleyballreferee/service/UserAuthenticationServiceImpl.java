@@ -59,7 +59,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     private Optional<User> getFacebookUser(String idToken) {
         Optional<User> optUser;
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://graph.facebook.com/v3.1/debug_token")
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://graph.facebook.com/v3.2/debug_token")
                 .queryParam("input_token", idToken)
                 .queryParam("access_token", facebookAppAccessToken);
         ResponseEntity<FacebookIdToken> response = restTemplate.getForEntity(builder.toUriString(), FacebookIdToken.class);
