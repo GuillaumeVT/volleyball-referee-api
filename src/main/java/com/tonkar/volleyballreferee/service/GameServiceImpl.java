@@ -112,11 +112,11 @@ public class GameServiceImpl implements GameService {
         if (savedGameDescription == null || savedGame == null) {
             LOGGER.error(String.format("Could not update %s game with date %d (%s vs %s) because either game or description was not found", savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName()));
         } else {
-            if (!game.getStatus().equals(savedGame.getStatus()) && GameStatus.COMPLETED.equals(game.getStatus())) {
+            if (!game.getStatus().equals(savedGame.getStatus()) && GameStatus.COMPLETED.toString().equals(game.getStatus())) {
                 codeRepository.deleteByDate(game.getDate());
             }
 
-            String ownerUserId = savedGame.getUserId();
+            String ownerUserId = User.VBR_USER_ID.equals(savedGame.getUserId()) ? game.getUserId() : savedGame.getUserId();
             game.gethTeam().setUserId(ownerUserId);
             game.getgTeam().setUserId(ownerUserId);
             game.getRules().setUserId(ownerUserId);
@@ -125,6 +125,7 @@ public class GameServiceImpl implements GameService {
                 game.setSchedule(game.getDate());
             }
 
+            savedGameDescription.setUserId(ownerUserId);
             savedGameDescription.setKind(game.getKind());
             savedGameDescription.setSchedule(game.getSchedule());
             savedGameDescription.setGender(game.getGender());
@@ -141,6 +142,7 @@ public class GameServiceImpl implements GameService {
             savedGameDescription.setgSets(game.getgSets());
             gameDescriptionRepository.save(savedGameDescription);
 
+            savedGame.setUserId(ownerUserId);
             savedGame.setKind(game.getKind());
             savedGame.setSchedule(game.getSchedule());
             savedGame.setGender(game.getGender());
