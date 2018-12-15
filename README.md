@@ -1,6 +1,6 @@
-# VolleyballRefereeBackend
+# Volleyball Referee API
 
-Volleyball Referee Back-end is a Spring Boot application, part of the [Volleyball Referee system][vbr]
+Volleyball Referee API is a Spring Boot application, part of the [Volleyball Referee system][vbr]
 
 
 Provides REST controllers:
