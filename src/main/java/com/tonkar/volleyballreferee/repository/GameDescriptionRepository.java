@@ -22,15 +22,15 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     GameDescription findByDateAndUserId(long date, String userId);
 
-    List<GameDescription> findByStatusAndIndexed(String status, boolean indexed);
+    List<GameDescription> findByStatusAndIndexedOrderByScheduleDesc(String status, boolean indexed);
 
-    List<GameDescription> findByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLikeAndIndexed(String hName, String gName, String leagueName, String refereeName, boolean indexed);
+    List<GameDescription> findByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLikeAndIndexedOrderByScheduleDesc(String hName, String gName, String leagueName, String refereeName, boolean indexed);
 
-    List<GameDescription> findByScheduleBetweenAndIndexed(long fromDate, long toDate, boolean index);
+    List<GameDescription> findByScheduleBetweenAndIndexedOrderByScheduleDesc(long fromDate, long toDate, boolean index);
 
-    List<GameDescription> findByUserId(String userId);
+    List<GameDescription> findByUserIdOrderByScheduleDesc(String userId);
 
-    List<GameDescription> findByUserIdAndStatus(String userId, String status);
+    List<GameDescription> findByUserIdAndStatusOrderByScheduleDesc(String userId, String status);
 
     @Query("{ '$and': [ { 'userId': ?0 }, { '$or': [ { 'status': 'SCHEDULED' }, { 'status': 'LIVE' } ] } ] }")
     List<GameDescription> findByUserIdAndAvailable(String userId);
@@ -51,7 +51,7 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
 
     List<GameDescription> findByUserIdAndStatusAndLeague(String userId, String status, String leagueName);
 
-    List<GameDescription> findByUserIdAndKindAndStatusAndLeague(String userId, String kind, String status, String leagueName);
+    List<GameDescription> findByUserIdAndKindAndStatusAndLeagueOrderByScheduleDesc(String userId, String kind, String status, String leagueName);
 
     List<GameDescription> findByUserIdAndStatusAndLeagueAndDivision(String userId, String status, String leagueName, String divisionName);
 

@@ -110,13 +110,13 @@ public class VolleyballRefereeApplicationTests {
 
 		searchResponse = restTemplate.getForEntity(urlOf("/api/search/game/live"), GameDescription[].class);
 		assertEquals(2, searchResponse.getBody().length);
-		assertEquals(1516200802314L, searchResponse.getBody()[0].getDate());
-		assertEquals(1516200806997L, searchResponse.getBody()[1].getDate());
+		assertEquals(1516200802314L, searchResponse.getBody()[1].getDate());
+		assertEquals(1516200806997L, searchResponse.getBody()[0].getDate());
 
 		searchResponse = restTemplate.getForEntity(urlOf("/api/search/game/team"), GameDescription[].class);
 		assertEquals(2, searchResponse.getBody().length);
-		assertEquals(1516200804146L, searchResponse.getBody()[0].getDate());
-		assertEquals(1516200806997L, searchResponse.getBody()[1].getDate());
+		assertEquals(1516200804146L, searchResponse.getBody()[1].getDate());
+		assertEquals(1516200806997L, searchResponse.getBody()[0].getDate());
 
 		searchResponse = restTemplate.getForEntity(urlOf("/api/search/game/vbr"), GameDescription[].class);
 		assertEquals(4, searchResponse.getBody().length);

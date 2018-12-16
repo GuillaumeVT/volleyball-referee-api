@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<Rules> listUserRules(String userId) {
-        return rulesRepository.findByUserId(userId);
+        return rulesRepository.findByUserIdOrderByNameAsc(userId);
     }
 
     @Override
@@ -161,12 +161,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<Team> listUserTeams(String userId) {
-        return teamRepository.findByUserId(userId);
+        return teamRepository.findByUserIdOrderByNameAsc(userId);
     }
 
     @Override
     public List<Team> listUserTeamsOfKind(String userId, String kind) {
-        return teamRepository.findByUserIdAndKind(userId, kind);
+        return teamRepository.findByUserIdAndKindOrderByNameAsc(userId, kind);
     }
 
     @Override
@@ -276,12 +276,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<GameDescription> listUserGames(String userId) {
-        return gameDescriptionRepository.findByUserId(userId);
+        return gameDescriptionRepository.findByUserIdOrderByScheduleDesc(userId);
     }
 
     @Override
     public List<GameDescription> listUserGames(String userId, GameStatus status) {
-        return gameDescriptionRepository.findByUserIdAndStatus(userId, status.toString());
+        return gameDescriptionRepository.findByUserIdAndStatusOrderByScheduleDesc(userId, status.toString());
     }
 
     @Override
@@ -323,7 +323,7 @@ public class UserServiceImpl implements UserService {
         if (league == null) {
             return new ArrayList<>();
         } else {
-            return gameDescriptionRepository.findByUserIdAndKindAndStatusAndLeague(
+            return gameDescriptionRepository.findByUserIdAndKindAndStatusAndLeagueOrderByScheduleDesc(
                     league.getUserId(), league.getKind(), GameStatus.LIVE.toString(), league.getName());
         }
     }
@@ -523,12 +523,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<League> listUserLeagues(String userId) {
-        return leagueRepository.findByUserId(userId);
+        return leagueRepository.findByUserIdOrderByNameAsc(userId);
     }
 
     @Override
     public List<League> listUserLeaguesOfKind(String userId, String kind) {
-        return leagueRepository.findByUserIdAndKind(userId, kind);
+        return leagueRepository.findByUserIdAndKindOrderByNameAsc(userId, kind);
     }
 
     @Override

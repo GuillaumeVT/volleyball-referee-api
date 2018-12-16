@@ -13,9 +13,9 @@ public interface LeagueRepository extends MongoRepository<League,String> {
 
     League findByNameAndUserId(String name, String userId);
 
-    List<League> findByUserId(String userId);
+    List<League> findByUserIdOrderByNameAsc(String userId);
 
-    List<League> findByUserIdAndKind(String userId, String kind);
+    List<League> findByUserIdAndKindOrderByNameAsc(String userId, String kind);
 
     void deleteByDateAndUserId(long date, String userId);
 

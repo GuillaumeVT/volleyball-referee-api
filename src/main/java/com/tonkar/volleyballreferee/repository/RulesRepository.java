@@ -9,7 +9,7 @@ public interface RulesRepository extends MongoRepository<Rules,String> {
 
     Rules findByNameAndUserId(String name, String userId);
 
-    List<Rules> findByUserId(String userId);
+    List<Rules> findByUserIdOrderByNameAsc(String userId);
 
     void deleteByUserId(String userId);
 

@@ -33,17 +33,17 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<GameDescription> listGameDescriptions(String token) {
-        return gameDescriptionRepository.findByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLikeAndIndexed(token, token, token, token, true);
+        return gameDescriptionRepository.findByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLikeAndIndexedOrderByScheduleDesc(token, token, token, token, true);
     }
 
     @Override
     public List<GameDescription> listGameDescriptionsBetween(long fromDate, long toDate) {
-        return gameDescriptionRepository.findByScheduleBetweenAndIndexed(fromDate, toDate, true);
+        return gameDescriptionRepository.findByScheduleBetweenAndIndexedOrderByScheduleDesc(fromDate, toDate, true);
     }
 
     @Override
     public List<GameDescription> listLiveGameDescriptions() {
-        return gameDescriptionRepository.findByStatusAndIndexed(GameStatus.LIVE.toString(), true);
+        return gameDescriptionRepository.findByStatusAndIndexedOrderByScheduleDesc(GameStatus.LIVE.toString(), true);
     }
 
     @Override

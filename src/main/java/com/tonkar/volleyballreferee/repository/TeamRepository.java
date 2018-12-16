@@ -9,9 +9,9 @@ public interface TeamRepository extends MongoRepository<Team,String> {
 
     Team findByNameAndUserIdAndGenderAndKind(String name, String userId, String gender, String kind);
 
-    List<Team> findByUserId(String userId);
+    List<Team> findByUserIdOrderByNameAsc(String userId);
 
-    List<Team> findByUserIdAndKind(String userId, String kind);
+    List<Team> findByUserIdAndKindOrderByNameAsc(String userId, String kind);
 
     void deleteByUserId(String userId);
 
