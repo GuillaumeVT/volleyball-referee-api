@@ -6,6 +6,7 @@ import com.tonkar.volleyballreferee.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -286,7 +287,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<GameDescription> listAvailableUserGames(String userId) {
-        return gameDescriptionRepository.findByUserIdAndAvailable(userId);
+        return gameDescriptionRepository.findByUserIdAndAvailable(userId, new Sort(Sort.Direction.DESC, "schedule"));
     }
 
     @Override

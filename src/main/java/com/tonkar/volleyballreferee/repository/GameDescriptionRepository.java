@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.repository;
 
 import com.tonkar.volleyballreferee.model.GameDescription;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.ExistsQuery;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -33,7 +34,7 @@ public interface GameDescriptionRepository extends MongoRepository<GameDescripti
     List<GameDescription> findByUserIdAndStatusOrderByScheduleDesc(String userId, String status);
 
     @Query("{ '$and': [ { 'userId': ?0 }, { '$or': [ { 'status': 'SCHEDULED' }, { 'status': 'LIVE' } ] } ] }")
-    List<GameDescription> findByUserIdAndAvailable(String userId);
+    List<GameDescription> findByUserIdAndAvailable(String userId, Sort sort);
 
     List<GameDescription> findByUserIdAndKindAndLeague(String userId, String kind, String leagueName);
 
