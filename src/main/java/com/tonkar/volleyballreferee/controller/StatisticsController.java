@@ -1,28 +1,29 @@
 package com.tonkar.volleyballreferee.controller;
 
-import com.tonkar.volleyballreferee.model.GameStatistics;
-import com.tonkar.volleyballreferee.service.GameService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.tonkar.volleyballreferee.dto.Statistics;
+import com.tonkar.volleyballreferee.security.User;
+import com.tonkar.volleyballreferee.service.StatisticsService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/stats")
+@RequestMapping("/api/v3/statistics")
 @CrossOrigin("*")
+@Slf4j
 public class StatisticsController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsController.class);
-
     @Autowired
-    private GameService gameService;
+    private StatisticsService statisticsService;
 
-    @GetMapping("/game")
-    public ResponseEntity<GameStatistics> getGameStatistics() {
-        LOGGER.debug("Request get game statistics");
-        return new ResponseEntity<>(gameService.getGameStatistics(), HttpStatus.OK);
+    @GetMapping(value = "", produces = {"application/json"})
+    public ResponseEntity<Statistics> getStatistics(@AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(statisticsService.getStatistics(user.getUserId()), HttpStatus.OK);
     }
-
 }

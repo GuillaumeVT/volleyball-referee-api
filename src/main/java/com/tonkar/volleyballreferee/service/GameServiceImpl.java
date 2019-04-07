@@ -1,293 +1,456 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.model.*;
-import com.tonkar.volleyballreferee.repository.CodeRepository;
-import com.tonkar.volleyballreferee.repository.GameDescriptionRepository;
+import com.tonkar.volleyballreferee.dao.GameDao;
+import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.GameDescription;
+import com.tonkar.volleyballreferee.entity.Set;
+import com.tonkar.volleyballreferee.entity.*;
+import com.tonkar.volleyballreferee.exception.ConflictException;
+import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.repository.GameRepository;
-import com.tonkar.volleyballreferee.security.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.tonkar.volleyballreferee.repository.RulesRepository;
+import com.tonkar.volleyballreferee.repository.TeamRepository;
+import com.tonkar.volleyballreferee.repository.UserRepository;
+import com.tonkar.volleyballreferee.scoresheet.ScoreSheet;
+import com.tonkar.volleyballreferee.scoresheet.ScoreSheetWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 public class GameServiceImpl implements GameService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GameServiceImpl.class);
+    @Autowired
+    private TeamService teamService;
+
+    @Autowired
+    private RulesService rulesService;
+
+    @Autowired
+    private LeagueService leagueService;
 
     @Autowired
     private GameRepository gameRepository;
 
     @Autowired
-    private GameDescriptionRepository gameDescriptionRepository;
+    private GameDao gameDao;
 
     @Autowired
-    private CodeRepository codeRepository;
+    private TeamRepository teamRepository;
+
+    @Autowired
+    private RulesRepository rulesRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
-    public boolean hasGame(long date) {
-        return gameDescriptionRepository.existsByDate(date);
+    public List<GameDescription> listLiveGames() {
+        return gameDao.listLiveGames();
     }
 
     @Override
-    public List<GameDescription> listGameDescriptions(String token) {
-        return gameDescriptionRepository.findByHNameIgnoreCaseLikeOrGNameIgnoreCaseLikeOrLeagueIgnoreCaseLikeOrRefereeIgnoreCaseLikeAndIndexedOrderByScheduleDesc(token, token, token, token, true);
+    public List<GameDescription> listGamesMatchingToken(String token) {
+        return gameDao.listGamesMatchingToken(token);
     }
 
     @Override
-    public List<GameDescription> listGameDescriptionsBetween(long fromDate, long toDate) {
-        return gameDescriptionRepository.findByScheduleBetweenAndIndexedOrderByScheduleDesc(fromDate, toDate, true);
+    public List<GameDescription> listGamesWithScheduleDate(LocalDate date) {
+        return gameDao.listGamesWithScheduleDate(date);
     }
 
     @Override
-    public List<GameDescription> listLiveGameDescriptions() {
-        return gameDescriptionRepository.findByStatusAndIndexedOrderByScheduleDesc(GameStatus.LIVE.toString(), true);
+    public List<GameDescription> listGamesInLeague(UUID leagueId) {
+        return gameDao.listGamesInLeague(leagueId);
     }
 
     @Override
-    public GameStatistics getGameStatistics() {
-        GameStatistics gameStatistics = new GameStatistics();
-        gameStatistics.setGamesCount(gameDescriptionRepository.count());
-        gameStatistics.setLiveGamesCount(gameDescriptionRepository.countByStatus(GameStatus.LIVE.toString()));
-        return gameStatistics;
+    public List<GameDescription> listGamesOfTeamInLeague(UUID leagueId, UUID teamId) {
+        return gameDao.listGamesOfTeamInLeague(leagueId, teamId);
     }
 
     @Override
-    public Game getGame(long date) {
-        return gameRepository.findByDate(date);
+    public List<GameDescription> listLiveGamesInLeague(UUID leagueId) {
+        return gameDao.listLiveGamesInLeague(leagueId);
     }
 
     @Override
-    public Game getGameFromCode(int code) {
-        final Code fullCode = codeRepository.findByCode(code);
+    public List<GameDescription> listLast10GamesInLeague(UUID leagueId) {
+        return gameDao.listLast10GamesInLeague(leagueId);
+    }
 
-        final Game game;
+    @Override
+    public List<GameDescription> listNext10GamesInLeague(UUID leagueId) {
+        return gameDao.listNext10GamesInLeague(leagueId);
+    }
 
-        if (fullCode == null) {
-            game = null;
+    @Override
+    public Game getGame(UUID gameId) throws NotFoundException {
+        Optional<Game> optGame = gameRepository.findById(gameId);
+        if (optGame.isPresent()) {
+            return optGame.get();
         } else {
-            game = gameRepository.findByDate(fullCode.getDate());
+            throw new NotFoundException(String.format("Could not find game %s", gameId));
+        }
+    }
+
+    @Override
+    public ScoreSheet getScoreSheet(UUID gameId) throws NotFoundException {
+        Optional<Game> optGame = gameRepository.findById(gameId);
+        if (optGame.isPresent()) {
+            return ScoreSheetWriter.writeGame(optGame.get());
+        } else {
+            throw new NotFoundException(String.format("Could not find game %s", gameId));
+        }
+    }
+
+    @Override
+    public List<GameDescription> listGames(String userId) {
+        return gameDao.listGames(userId);
+    }
+
+    @Override
+    public List<GameDescription> listGamesWithStatus(String userId, GameStatus status) {
+        return gameDao.listGamesWithStatus(userId, status);
+    }
+
+    @Override
+    public List<GameDescription> listAvailableGames(String userId) {
+        return gameDao.listAvailableGames(userId);
+    }
+
+    @Override
+    public List<GameDescription> listGamesInLeague(String userId, UUID leagueId) {
+        return gameDao.listGamesInLeague(userId, leagueId);
+    }
+
+    @Override
+    public byte[] listGamesInLeagueCsv(String userId, UUID leagueId, Optional<String> divisionName) {
+        final Stream<Game> gameStream;
+
+        if (divisionName.isEmpty()) {
+            gameStream = gameRepository.findByIdAndCreatedByAndLeagueIdAndStatus(userId, leagueId, GameStatus.COMPLETED);
+        } else {
+            gameStream = gameRepository.findByIdAndCreatedByAndLeagueIdAndStatusAndDivisionName(userId, leagueId, GameStatus.COMPLETED, divisionName.get());
         }
 
-        return game;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        PrintWriter printWriter = new PrintWriter(byteArrayOutputStream);
+
+        appendCsvHeader(printWriter);
+        gameStream.forEach(game -> appendCsvGame(game, printWriter));
+
+        printWriter.close();
+
+        return byteArrayOutputStream.toByteArray();
     }
 
     @Override
-    public void createGame(Game game) {
-        if (game.getSchedule() == 0L) {
-            game.setSchedule(game.getDate());
-        }
-
-        GameDescription gameDescription = new GameDescription();
-        gameDescription.setUserId(game.getUserId());
-        gameDescription.setKind(game.getKind());
-        gameDescription.setDate(game.getDate());
-        gameDescription.setSchedule(game.getSchedule());
-        gameDescription.setGender(game.getGender());
-        gameDescription.setUsage(game.getUsage());
-        gameDescription.setStatus(game.getStatus());
-        gameDescription.setIndexed(game.isIndexed());
-        gameDescription.setReferee(game.getReferee());
-        gameDescription.setLeague(game.getLeague());
-        gameDescription.setDivision(game.getDivision());
-        gameDescription.setRules(game.getRules().getName());
-        gameDescription.sethName(game.gethTeam().getName());
-        gameDescription.setgName(game.getgTeam().getName());
-        gameDescription.sethSets(game.gethSets());
-        gameDescription.setgSets(game.getgSets());
-
-        gameDescriptionRepository.insert(gameDescription);
-        gameRepository.insert(game);
-
-        LOGGER.debug(String.format("Created %s game with date %d (%s vs %s)", game.getKind(), game.getDate(), game.gethTeam().getName(), game.getgTeam().getName()));
-    }
-
-    @Override
-    public void updateGame(long date, Game game) {
-        GameDescription savedGameDescription = gameDescriptionRepository.findByDate(date);
-        Game savedGame = gameRepository.findByDate(date);
-
-        if (savedGameDescription == null || savedGame == null) {
-            LOGGER.error(String.format("Could not update %s game with date %d (%s vs %s) because either game or description was not found", savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName()));
+    public Game getGame(String userId, UUID gameId) throws NotFoundException {
+        Optional<Game> optGame = gameRepository.findByIdAndCreatedBy(gameId, userId);
+        if (optGame.isPresent()) {
+            return optGame.get();
         } else {
-            if (!game.getStatus().equals(savedGame.getStatus()) && GameStatus.COMPLETED.toString().equals(game.getStatus())) {
-                codeRepository.deleteByDate(game.getDate());
+            throw new NotFoundException(String.format("Could not find game %s for user %s", gameId, userId));
+        }
+    }
+
+    @Override
+    public Count getNumberOfGames(String userId) {
+        return new Count(gameRepository.countByCreatedBy(userId));
+    }
+
+    @Override
+    public Count getNumberOfGamesInLeague(String userId, UUID leagueId) {
+        return new Count(gameRepository.countByCreatedByAndLeagueId(userId, leagueId));
+    }
+
+    @Override
+    public void createGame(String userId, GameDescription gameDescription) throws ConflictException, NotFoundException {
+        if (gameRepository.existsById(gameDescription.getId())) {
+            throw new ConflictException(String.format("Could not create game %s for user %s because it already exists", gameDescription.getId(), userId));
+        } else if (gameDescription.getHTeamId().equals(gameDescription.getGTeamId())) {
+            throw new ConflictException(String.format("Could not create game %s for user %s because team %s cannot play against itself", gameDescription.getId(), userId, gameDescription.getHTeamId()));
+        } else if (!gameDescription.getCreatedBy().equals(gameDescription.getRefereedBy()) && !userRepository.areFriends(gameDescription.getCreatedBy(), gameDescription.getRefereedBy())) {
+            throw new NotFoundException(String.format("Could not create game %s for user %s because %s and %s are not friends", gameDescription.getId(), userId, gameDescription.getCreatedBy(), gameDescription.getRefereedBy()));
+        } else {
+            Optional<Team> optHTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getHTeamId(), userId, gameDescription.getKind(), gameDescription.getGender());
+            Optional<Team> optGTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getGTeamId(), userId, gameDescription.getKind(), gameDescription.getGender());
+            Optional<Rules> optRules = rulesRepository.findByIdAndCreatedByAndKind(gameDescription.getRulesId(), userId, gameDescription.getKind());
+
+            if (optHTeam.isEmpty()) {
+                throw new NotFoundException(String.format("Could not find matching home team %s for user %s", gameDescription.getHTeamId(), userId));
+            } else if (optGTeam.isEmpty()) {
+                throw new NotFoundException(String.format("Could not find matching guest team %s for user %s", gameDescription.getGTeamId(), userId));
+            } else if (optRules.isEmpty()) {
+                throw new NotFoundException(String.format("Could not find matching rules %s for user %s", gameDescription.getRulesId(), userId));
+            } else {
+                Game game = new Game();
+
+                game.setId(gameDescription.getId());
+                game.setCreatedBy(gameDescription.getCreatedBy());
+                game.setCreatedAt(gameDescription.getCreatedAt());
+                game.setUpdatedAt(gameDescription.getUpdatedAt());
+                game.setScheduledAt(gameDescription.getScheduledAt());
+                game.setRefereedBy(gameDescription.getRefereedBy());
+                game.setRefereeName(gameDescription.getRefereeName());
+                game.setKind(gameDescription.getKind());
+                game.setGender(gameDescription.getGender());
+                game.setUsage(gameDescription.getUsage());
+                game.setStatus(GameStatus.SCHEDULED);
+                game.setIndexed(gameDescription.isIndexed());
+                game.setLeagueId(gameDescription.getLeagueId());
+                game.setLeagueName(gameDescription.getLeagueName());
+                game.setDivisionName(gameDescription.getDivisionName());
+                game.setHTeam(optHTeam.get());
+                game.setGTeam(optGTeam.get());
+                game.setHSets(0);
+                game.setGSets(0);
+                game.setSets(new ArrayList<>());
+                game.setHCards(new ArrayList<>());
+                game.setGCards(new ArrayList<>());
+                game.setRules(optRules.get());
+
+                gameRepository.save(game);
+
+                createOrUpdateLeagueIfNeeded(userId, game);
             }
+        }
+    }
 
-            String ownerUserId = User.VBR_USER_ID.equals(savedGame.getUserId()) ? game.getUserId() : savedGame.getUserId();
-            game.gethTeam().setUserId(ownerUserId);
-            game.getgTeam().setUserId(ownerUserId);
-            game.getRules().setUserId(ownerUserId);
+    @Override
+    public void createGame(String userId, Game game) throws ConflictException, NotFoundException {
+        if (gameRepository.existsById(game.getId())) {
+            throw new ConflictException(String.format("Could not create game %s for user %s because it already exists", game.getId(), userId));
+        } else if (game.getHTeam().getId().equals(game.getGTeam().getId())) {
+            throw new ConflictException(String.format("Could not create game %s for user %s because team %s cannot play against itself", game.getId(), userId, game.getHTeam().getId()));
+        } else if (!game.getCreatedBy().equals(game.getRefereedBy()) && !userRepository.areFriends(game.getCreatedBy(), game.getRefereedBy())) {
+            throw new NotFoundException(String.format("Could not create game %s for user %s because %s and %s are not friends", game.getId(), userId, game.getCreatedBy(), game.getRefereedBy()));
+        } else {
+            game.setCreatedBy(userId);
+            game.getHTeam().setCreatedBy(userId);
+            game.getGTeam().setCreatedBy(userId);
+            game.getRules().setCreatedBy(userId);
+            gameRepository.save(game);
 
-            if (game.getSchedule() == 0L) {
-                game.setSchedule(game.getDate());
+            createTeamsAndRulesAndLeaguesIfNeeded(userId, game);
+        }
+    }
+
+    private void createTeamsAndRulesAndLeaguesIfNeeded(String userId, Game game) {
+        try {
+            teamService.createTeam(userId, game.getHTeam());
+        } catch (ConflictException e) { /* already exists */ }
+        try {
+            teamService.createTeam(userId, game.getGTeam());
+        } catch (ConflictException e) { /* already exists */ }
+        try {
+            rulesService.createRules(userId, game.getRules());
+        } catch (ConflictException e) { /* already exists */ }
+
+        createOrUpdateLeagueIfNeeded(userId, game);
+    }
+
+    private void createOrUpdateLeagueIfNeeded(String userId, Game game) {
+        if (game.getLeagueId() != null) {
+            try {
+                leagueService.updateDivisions(userId, game.getLeagueId());
+            } catch (NotFoundException e) {
+                /* does not exist */
+                if (game.getLeagueName() != null && !game.getLeagueName().isBlank()) {
+                    League league = new League();
+                    league.setId(game.getLeagueId());
+                    league.setCreatedBy(userId);
+                    league.setCreatedAt(game.getCreatedAt());
+                    league.setKind(game.getKind());
+                    league.setName(game.getLeagueName());
+                    league.setDivisions(new ArrayList<>());
+                    if (game.getDivisionName() != null && !game.getDivisionName().isBlank()) {
+                        league.getDivisions().add(game.getDivisionName());
+                    }
+
+                    try {
+                        leagueService.createLeague(userId, league);
+                    } catch (ConflictException e2) {
+                        /* already exists */
+                    }
+                }
             }
+        }
+    }
 
-            savedGameDescription.setUserId(ownerUserId);
-            savedGameDescription.setKind(game.getKind());
-            savedGameDescription.setSchedule(game.getSchedule());
-            savedGameDescription.setGender(game.getGender());
-            savedGameDescription.setUsage(game.getUsage());
-            savedGameDescription.setStatus(game.getStatus());
-            savedGameDescription.setIndexed(game.isIndexed());
-            savedGameDescription.setReferee(game.getReferee());
-            savedGameDescription.setLeague(game.getLeague());
-            savedGameDescription.setDivision(game.getDivision());
-            savedGameDescription.setRules(game.getRules().getName());
-            savedGameDescription.sethName(game.gethTeam().getName());
-            savedGameDescription.setgName(game.getgTeam().getName());
-            savedGameDescription.sethSets(game.gethSets());
-            savedGameDescription.setgSets(game.getgSets());
-            gameDescriptionRepository.save(savedGameDescription);
+    @Override
+    public void updateGame(String userId, GameDescription gameDescription) throws ConflictException, NotFoundException {
+        Optional<Game> optSavedGame = gameRepository.findByIdAndAllowedUserAndStatus(gameDescription.getId(), userId, GameStatus.SCHEDULED);
 
-            savedGame.setUserId(ownerUserId);
-            savedGame.setKind(game.getKind());
-            savedGame.setSchedule(game.getSchedule());
-            savedGame.setGender(game.getGender());
-            savedGame.setUsage(game.getUsage());
+        if (optSavedGame.isEmpty()) {
+            throw new NotFoundException(String.format("Could not find game %s %s for user %s", gameDescription.getId(), GameStatus.SCHEDULED, userId));
+        } else if (gameDescription.getHTeamId().equals(gameDescription.getGTeamId())) {
+            throw new ConflictException(String.format("Could not create game %s for user %s because team %s cannot play against itself", gameDescription.getId(), userId, gameDescription.getHTeamId()));
+        } else if (!gameDescription.getCreatedBy().equals(gameDescription.getRefereedBy()) && !userRepository.areFriends(gameDescription.getCreatedBy(), gameDescription.getRefereedBy())) {
+            throw new NotFoundException(String.format("Could not create game %s for user %s because %s and %s are not friends", gameDescription.getId(), userId, gameDescription.getCreatedBy(), gameDescription.getRefereedBy()));
+        } else {
+            Game savedGame = optSavedGame.get();
+
+            Optional<Team> optHTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getHTeamId(), userId, savedGame.getKind(), gameDescription.getGender());
+            Optional<Team> optGTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getGTeamId(), userId, savedGame.getKind(), gameDescription.getGender());
+            Optional<Rules> optRules = rulesRepository.findByIdAndCreatedByAndKind(gameDescription.getRulesId(), userId, savedGame.getKind());
+
+            if (optHTeam.isEmpty()) {
+                throw new NotFoundException(String.format("Could not find matching home team %s for user %s", gameDescription.getHTeamId(), userId));
+            } else if (optGTeam.isEmpty()) {
+                throw new NotFoundException(String.format("Could not find matching guest team %s for user %s", gameDescription.getGTeamId(), userId));
+            } else if (optRules.isEmpty()) {
+                throw new NotFoundException(String.format("Could not find matching rules %s for user %s", gameDescription.getRulesId(), userId));
+            } else {
+                savedGame.setUpdatedAt(gameDescription.getUpdatedAt());
+                savedGame.setScheduledAt(gameDescription.getScheduledAt());
+                savedGame.setRefereedBy(gameDescription.getRefereedBy());
+                savedGame.setRefereeName(gameDescription.getRefereeName());
+                savedGame.setGender(gameDescription.getGender());
+                savedGame.setUsage(gameDescription.getUsage());
+                savedGame.setIndexed(gameDescription.isIndexed());
+                savedGame.setLeagueId(gameDescription.getLeagueId());
+                savedGame.setLeagueName(gameDescription.getLeagueName());
+                savedGame.setDivisionName(gameDescription.getDivisionName());
+                savedGame.setHTeam(optHTeam.get());
+                savedGame.setGTeam(optGTeam.get());
+                savedGame.setHSets(0);
+                savedGame.setGSets(0);
+                savedGame.setSets(new ArrayList<>());
+                savedGame.setHCards(new ArrayList<>());
+                savedGame.setGCards(new ArrayList<>());
+                savedGame.setRules(optRules.get());
+
+                gameRepository.save(savedGame);
+
+                createOrUpdateLeagueIfNeeded(userId, savedGame);
+            }
+        }
+    }
+
+    @Override
+    public void updateGame(String userId, Game game) throws NotFoundException {
+        Optional<Game> optSavedGame = gameRepository.findByIdAndAllowedUserAndStatusNot(game.getId(), userId, GameStatus.COMPLETED);
+
+        if (optSavedGame.isPresent()) {
+            Game savedGame = optSavedGame.get();
+
+            savedGame.setUpdatedAt(game.getUpdatedAt());
             savedGame.setStatus(game.getStatus());
             savedGame.setIndexed(game.isIndexed());
-            savedGame.setReferee(game.getReferee());
-            savedGame.setLeague(game.getLeague());
-            savedGame.setDivision(game.getDivision());
-            savedGame.setRules(game.getRules());
-            savedGame.sethTeam(game.gethTeam());
-            savedGame.setgTeam(game.getgTeam());
-            savedGame.sethSets(game.gethSets());
-            savedGame.setgSets(game.getgSets());
+            savedGame.setLeagueId(game.getLeagueId());
+            savedGame.setLeagueName(game.getLeagueName());
+            savedGame.setDivisionName(game.getDivisionName());
+            savedGame.setHTeam(game.getHTeam());
+            savedGame.setGTeam(game.getGTeam());
+            savedGame.setHSets(game.getHSets());
+            savedGame.setGSets(game.getGSets());
             savedGame.setSets(game.getSets());
-            savedGame.sethCards(game.gethCards());
-            savedGame.setgCards(game.getgCards());
+            savedGame.setHCards(game.getHCards());
+            savedGame.setGCards(game.getGCards());
+            savedGame.setRules(game.getRules());
+
             gameRepository.save(savedGame);
-
-            LOGGER.debug(String.format("Updated %s game with date %d (%s vs %s)", game.getKind(), date, game.gethTeam().getName(), game.getgTeam().getName()));
-        }
-    }
-
-    @Override
-    public void updateSet(long date, int setIndex, Set set) {
-        Game savedGame = gameRepository.findByDate(date);
-
-        if (setIndex < savedGame.getSets().size()) {
-            savedGame.getSets().set(setIndex, set);
-            gameRepository.save(savedGame);
-            LOGGER.debug(String.format("Updated set #%d of %s game with date %d (%s vs %s)", setIndex, savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName()));
         } else {
-            LOGGER.error(String.format("Could not update %s game with date %d (%s vs %s) because set #%d does not exist", savedGame.getKind(), date, savedGame.gethTeam().getName(), savedGame.getgTeam().getName(), setIndex));
+            throw new NotFoundException(String.format("Could not find game %s for user %s", game.getId(), userId));
         }
     }
 
     @Override
-    public void deleteGame(long date, String userId) {
-        gameDescriptionRepository.deleteByDateAndUserId(date, userId);
-        gameRepository.deleteByDateAndUserId(date, userId);
-        codeRepository.deleteByDate(date);
+    public void updateSet(String userId, UUID gameId, int setIndex, Set set) throws NotFoundException {
+        Optional<Game> optSavedGame = gameRepository.findByIdAndAllowedUserAndStatus(gameId, userId, GameStatus.LIVE);
+
+        if (optSavedGame.isPresent()) {
+            Game savedGame = optSavedGame.get();
+
+            if (setIndex > 0 && setIndex <= savedGame.getSets().size()) {
+                savedGame.getSets().set(setIndex - 1, set);
+                gameRepository.save(savedGame);
+            } else {
+                throw new NotFoundException(String.format("Could not find set %d of game %s for user %s", setIndex, savedGame.getId(), userId));
+            }
+        } else {
+            throw new NotFoundException(String.format("Could not find game %s for user %s", gameId, userId));
+        }
     }
 
     @Override
-    public void deleteLiveGame(long date) {
-        gameDescriptionRepository.deleteByDateAndUserIdAndStatus(date, User.VBR_USER_ID, GameStatus.LIVE.toString());
-        gameRepository.deleteByDateAndUserIdAndStatus(date, User.VBR_USER_ID, GameStatus.LIVE.toString());
+    public void deleteGame(String userId, UUID gameId) {
+        gameRepository.deleteByIdAndCreatedBy(gameId, userId);
     }
 
     @Override
-    public void deletePublicGames(int daysAgo) {
-        long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
-
-        long count = gameDescriptionRepository.deleteByScheduleLessThanAndUserId(dateNDaysAgo, User.VBR_USER_ID);
-        LOGGER.debug(String.format("Deleted %d public game descriptions older than date %d", count, dateNDaysAgo));
-
-        count = gameRepository.deleteByScheduleLessThanAndUserId(dateNDaysAgo, User.VBR_USER_ID);
-        LOGGER.debug(String.format("Deleted %d public games older than date %d", count, dateNDaysAgo));
+    public void deleteAllGames(String userId) {
+        gameRepository.deleteByCreatedBy(userId);
     }
 
     @Override
     public void deleteOldLiveGames(int daysAgo) {
-        long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
-
-        long count = gameDescriptionRepository.deleteByScheduleLessThanAndStatus(dateNDaysAgo, GameStatus.LIVE.toString());
-        LOGGER.debug(String.format("Deleted %d live game descriptions older than date %d", count, dateNDaysAgo));
-
-        count = gameRepository.deleteByScheduleLessThanAndStatus(dateNDaysAgo, GameStatus.LIVE.toString());
-        LOGGER.debug(String.format("Deleted %d live games older than date %d", count, dateNDaysAgo));
-    }
-
-    @Override
-    public void deletePublicLiveGames(int daysAgo) {
-        long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
-
-        long count = gameDescriptionRepository.deleteByScheduleLessThanAndUserIdAndStatus(dateNDaysAgo, User.VBR_USER_ID, GameStatus.LIVE.toString());
-        LOGGER.debug(String.format("Deleted %d public live game descriptions older than date %d", count, dateNDaysAgo));
-
-        count = gameRepository.deleteByScheduleLessThanAndUserIdAndStatus(dateNDaysAgo, User.VBR_USER_ID, GameStatus.LIVE.toString());
-        LOGGER.debug(String.format("Deleted %d public live games older than date %d", count, dateNDaysAgo));
-    }
-
-    @Override
-    public void deleteOldCodes(int daysAgo) {
-        long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
-
-        long count = codeRepository.deleteByDateLessThan(dateNDaysAgo);
-        LOGGER.debug(String.format("Deleted %d codes older than date %d", count, dateNDaysAgo));
-    }
-
-    @Override
-    public void deletePublicTestGames(int setDurationMinutesUnder) {
-        long setDurationMillisUnder = setDurationMinutesUnder * 60000L;
-
-        List<Game> games = gameRepository.findByUserIdAndStatusAndSets_DurationLessThan(User.VBR_USER_ID, GameStatus.COMPLETED.toString(), setDurationMillisUnder);
-
-        for (Game game : games) {
-            boolean delete = true;
-
-            for (Set set : game.getSets()) {
-                delete = delete && (set.getDuration() < setDurationMillisUnder);
-            }
-
-            if (delete) {
-                deleteGame(game.getDate(), User.VBR_USER_ID);
-                LOGGER.debug(String.format("Deleted public game at date %d with set shorter than %d minutes", game.getDate(), setDurationMinutesUnder));
-            }
-        }
+        gameRepository.deleteByScheduledAtLessThanAndStatus(epochDateNDaysAgo(daysAgo), GameStatus.LIVE);
     }
 
     @Override
     public void deleteOldScheduledGames(int daysAgo) {
-        long dateNDaysAgo = epochDateNDaysAgo(daysAgo);
-
-        long count = gameDescriptionRepository.deleteByScheduleLessThanAndStatus(dateNDaysAgo, GameStatus.SCHEDULED.toString());
-        LOGGER.debug(String.format("Deleted %d scheduled game descriptions older than date %d", count, dateNDaysAgo));
-
-        count = gameRepository.deleteByScheduleLessThanAndStatus(dateNDaysAgo, GameStatus.SCHEDULED.toString());
-        LOGGER.debug(String.format("Deleted %d scheduled games older than date %d", count, dateNDaysAgo));
+        gameRepository.deleteByScheduledAtLessThanAndStatus(epochDateNDaysAgo(daysAgo), GameStatus.SCHEDULED);
     }
 
-    @Override
-    public boolean hasGameUsingRules(String rulesName, String userId) {
-        return gameDescriptionRepository.existsByUserIdAndStatusAndRules(
-                userId, GameStatus.SCHEDULED.toString(), rulesName);
-    }
-
-    @Override
-    public List<GameDescription> listGameDescriptionsUsingRules(String rulesName, String userId) {
-        return gameDescriptionRepository.findByUserIdAndStatusAndRules(
-                userId, GameStatus.SCHEDULED.toString(), rulesName);
-    }
-
-    @Override
-    public boolean hasGameUsingTeam(String teamName, String gender, String kind, String userId) {
-        return gameDescriptionRepository.existsByUserIdAndStatusAndKindAndGenderAndName(userId, GameStatus.SCHEDULED.toString(), kind, gender, teamName);
-    }
-
-    @Override
-    public List<GameDescription> listGameDescriptionsUsingTeam(String teamName, String gender, String kind, String userId) {
-        return gameDescriptionRepository.findByUserIdAndStatusAndKindAndGenderAndTeamName(userId, GameStatus.SCHEDULED.toString(), kind, gender, teamName);
-    }
-    
     private long epochDateNDaysAgo(int daysAgo) {
         return  System.currentTimeMillis() - (daysAgo * 86400000L);
     }
 
+    private void appendCsvHeader(PrintWriter printWriter) {
+        printWriter.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
+                "Date",
+                "League",
+                "Division",
+                "Gender",
+                "Home", "Guest",
+                "Sets Home", "Sets Guest",
+                "Set 1 Home", "Set 1 Guest",
+                "Set 2 Home", "Set 2 Guest",
+                "Set 3 Home", "Set 3 Guest",
+                "Set 4 Home", "Set 4 Guest",
+                "Set 5 Home", "Set 5 Guest"
+        ));
+    }
+
+    private void appendCsvGame(Game game, PrintWriter printWriter) {
+        DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
+        formatter.setTimeZone(TimeZone.getDefault());
+
+        String[] hPoints = new String[5];
+        String[] gPoints = new String[5];
+
+        for (int index = 0; index < 5; index++) {
+            if (index < game.getSets().size()) {
+                Set set = game.getSets().get(index);
+                hPoints[index] = String.valueOf(set.getHPoints());
+                gPoints[index] = String.valueOf(set.getGPoints());
+            } else {
+                hPoints[index] = "";
+                gPoints[index] = "";
+            }
+        }
+
+        printWriter.append(String.format("\n%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s",
+                formatter.format(game.getScheduledAt()),
+                game.getLeagueName(),
+                game.getDivisionName(),
+                game.getGender(),
+                game.getHTeam().getName(), game.getHTeam().getName(),
+                game.getHSets(), game.getGSets(),
+                hPoints[0], gPoints[0],
+                hPoints[1], gPoints[1],
+                hPoints[2], gPoints[2],
+                hPoints[3], gPoints[3],
+                hPoints[4], gPoints[4]
+        ));
+    }
 }

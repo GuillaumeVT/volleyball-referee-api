@@ -1,24 +1,25 @@
 package com.tonkar.volleyballreferee.repository;
 
-import com.tonkar.volleyballreferee.model.League;
+import com.tonkar.volleyballreferee.entity.GameType;
+import com.tonkar.volleyballreferee.entity.League;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-public interface LeagueRepository extends MongoRepository<League,String> {
+public interface LeagueRepository extends MongoRepository<League, UUID> {
 
-    League findByDate(long date);
+    List<League> findByCreatedByAndKindOrderByNameAsc(String userId, GameType kind);
 
-    League findByDateAndUserId(long date, String userId);
+    List<League> findByCreatedByOrderByNameAsc(String userId);
 
-    League findByNameAndUserId(String name, String userId);
+    Optional<League> findByIdAndCreatedBy(UUID id, String userId);
 
-    List<League> findByUserIdOrderByNameAsc(String userId);
+    boolean existsByCreatedByAndNameAndKind(String userId, String name, GameType kind);
 
-    List<League> findByUserIdAndKindOrderByNameAsc(String userId, String kind);
+    long countByCreatedBy(String userId);
 
-    void deleteByDateAndUserId(long date, String userId);
-
-    long countByUserId(String userId);
+    void deleteByIdAndCreatedBy(UUID id, String userId);
 
 }

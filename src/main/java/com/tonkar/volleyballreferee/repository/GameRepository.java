@@ -1,26 +1,44 @@
 package com.tonkar.volleyballreferee.repository;
 
-import com.tonkar.volleyballreferee.model.Game;
+import com.tonkar.volleyballreferee.entity.Game;
+import com.tonkar.volleyballreferee.entity.GameStatus;
+import org.springframework.data.mongodb.repository.ExistsQuery;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
-public interface GameRepository extends MongoRepository<Game,String> {
+public interface GameRepository extends MongoRepository<Game, UUID> {
 
-    Game findByDate(long date);
+    Stream<Game> findByIdAndCreatedByAndLeagueIdAndStatus(String userId, UUID leagueId, GameStatus status);
 
-    Game findByDateAndUserId(long date, String userId);
+    Stream<Game> findByIdAndCreatedByAndLeagueIdAndStatusAndDivisionName(String userId, UUID leagueId, GameStatus status, String divisionName);
 
-    List<Game> findByUserIdAndStatusAndSets_DurationLessThan(String userId, String status, long setDurationMillisUnder);
+    Optional<Game> findByIdAndCreatedBy(UUID id, String userId);
 
-    void deleteByDateAndUserId(long date, String userId);
+    @Query("{ '$and': [ { 'id': ?0 }, { '$or': [ { 'createdBy': ?1 }, { 'refereedBy': ?1 } ] } , { 'status': ?2 } ] }")
+    Optional<Game> findByIdAndAllowedUserAndStatus(UUID id, String userId, GameStatus status);
 
-    void deleteByDateAndUserIdAndStatus(long date, String userId, String status);
+    @Query("{ '$and': [ { 'id': ?0 }, { '$or': [ { 'createdBy': ?1 }, { 'refereedBy': ?1 } ] } , { 'status': { $ne: ?2 } } ] }")
+    Optional<Game> findByIdAndAllowedUserAndStatusNot(UUID id, String userId, GameStatus status);
 
-    long deleteByScheduleLessThanAndUserId(long schedule, String userId);
+    boolean existsByCreatedByAndRules_IdAndStatus(String userId, UUID rulesId, GameStatus status);
 
-    long deleteByScheduleLessThanAndStatus(long schedule, String status);
+    @ExistsQuery("{ '$and': [ { 'createdBy': ?0 }, { 'status': ?2 }, { '$or': [ { 'hTeam.id': ?1 }, { 'gTeam.id': ?1 } ] } ] }")
+    boolean existsByCreatedByAndTeamAndStatus(String userId, UUID teamId, GameStatus status);
 
-    long deleteByScheduleLessThanAndUserIdAndStatus(long schedule, String userId, String status);
+    boolean existsByCreatedByAndLeagueIdAndStatus(String userId, UUID leagueId, GameStatus status);
+
+    long countByCreatedBy(String userId);
+
+    long countByCreatedByAndLeagueId(String userId, UUID leagueId);
+
+    void deleteByCreatedBy(String userId);
+
+    void deleteByIdAndCreatedBy(UUID id, String userId);
+
+    long deleteByScheduledAtLessThanAndStatus(long scheduledAt, GameStatus status);
 
 }

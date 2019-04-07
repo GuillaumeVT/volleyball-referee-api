@@ -17,7 +17,6 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
@@ -33,13 +32,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public SecurityConfiguration() {
         super();
 
-        publicUrls = new OrRequestMatcher(
-                new AntPathRequestMatcher("/api/manage/**"),
-                new AntPathRequestMatcher("/api/message/**"),
-                new AntPathRequestMatcher("/api/search/**"),
-                new AntPathRequestMatcher("/api/stats/**"),
-                new AntPathRequestMatcher("/api/view/**")
-        );
+        publicUrls = new AntPathRequestMatcher("/api/v3/public/**");
         protectedUrls = new NegatedRequestMatcher(publicUrls);
     }
 

@@ -1,53 +1,77 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.model.*;
+import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.GameDescription;
+import com.tonkar.volleyballreferee.entity.Game;
+import com.tonkar.volleyballreferee.entity.GameStatus;
+import com.tonkar.volleyballreferee.entity.Set;
+import com.tonkar.volleyballreferee.exception.ConflictException;
+import com.tonkar.volleyballreferee.exception.NotFoundException;
+import com.tonkar.volleyballreferee.scoresheet.ScoreSheet;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public interface GameService {
 
-    boolean hasGame(long date);
+    // Public
 
-    List<GameDescription> listGameDescriptions(String token);
+    List<GameDescription> listLiveGames();
 
-    List<GameDescription> listGameDescriptionsBetween(long fromDate, long toDate);
+    List<GameDescription> listGamesMatchingToken(String token);
 
-    List<GameDescription> listLiveGameDescriptions();
+    List<GameDescription> listGamesWithScheduleDate(LocalDate date);
 
-    GameStatistics getGameStatistics();
+    List<GameDescription> listGamesInLeague(UUID leagueId);
 
-    Game getGame(long date);
+    List<GameDescription> listGamesOfTeamInLeague(UUID leagueId, UUID teamId);
 
-    Game getGameFromCode(int code);
+    List<GameDescription> listLiveGamesInLeague(UUID leagueId);
 
-    void createGame(Game game);
+    List<GameDescription> listLast10GamesInLeague(UUID leagueId);
 
-    void updateGame(long date, Game game);
+    List<GameDescription> listNext10GamesInLeague(UUID leagueId);
 
-    void updateSet(long date, int setIndex, Set set);
+    Game getGame(UUID gameId) throws NotFoundException;
 
-    void deleteGame(long date, String userId);
+    ScoreSheet getScoreSheet(UUID gameId) throws NotFoundException;
 
-    void deleteLiveGame(long date);
+    // User only
 
-    void deletePublicGames(int daysAgo);
+    List<GameDescription> listGames(String userId);
+
+    List<GameDescription> listGamesWithStatus(String userId, GameStatus status);
+
+    List<GameDescription> listAvailableGames(String userId);
+
+    List<GameDescription> listGamesInLeague(String userId, UUID leagueId);
+
+    byte[] listGamesInLeagueCsv(String userId, UUID leagueId, Optional<String> divisionName);
+
+    Game getGame(String userId, UUID gameId) throws NotFoundException;
+
+    Count getNumberOfGames(String userId);
+
+    Count getNumberOfGamesInLeague(String userId, UUID leagueId);
+
+    void createGame(String userId, GameDescription gameDescription) throws ConflictException, NotFoundException;
+
+    void createGame(String userId, Game game) throws ConflictException, NotFoundException;
+
+    void updateGame(String userId, GameDescription gameDescription) throws ConflictException, NotFoundException;
+
+    void updateGame(String userId, Game game) throws NotFoundException;
+
+    void updateSet(String userId, UUID gameId, int setIndex, Set set) throws NotFoundException;
+
+    void deleteGame(String userId, UUID gameId);
+
+    void deleteAllGames(String userId);
 
     void deleteOldLiveGames(int daysAgo);
 
-    void deletePublicLiveGames(int daysAgo);
-
-    void deleteOldCodes(int daysAgo);
-
-    void deletePublicTestGames(int setDurationMinutesUnder);
-
     void deleteOldScheduledGames(int daysAgo);
-
-    boolean hasGameUsingRules(String rulesName, String userId);
-
-    List<GameDescription> listGameDescriptionsUsingRules(String rulesName, String userId);
-
-    boolean hasGameUsingTeam(String teamName, String gender, String kind, String userId);
-
-    List<GameDescription> listGameDescriptionsUsingTeam(String teamName, String gender, String kind, String userId);
 
 }

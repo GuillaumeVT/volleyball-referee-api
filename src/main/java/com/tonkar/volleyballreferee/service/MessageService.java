@@ -1,13 +1,10 @@
 package com.tonkar.volleyballreferee.service;
 
+import com.tonkar.volleyballreferee.entity.Message;
+import com.tonkar.volleyballreferee.exception.NotFoundException;
+
 public interface MessageService {
 
-    boolean hasMessage();
-
-    String getMessage();
-
-    void addMessage(String content);
-
-    void removeMessage();
+    Message getMessage() throws NotFoundException;
 
 }

@@ -5,10 +5,11 @@ Volleyball Referee API is a Spring Boot application, part of the [Volleyball Ref
 
 Provides REST controllers:
 <ul>
-  <li>to create, update or delete volleyball matches</li>
-  <li>to retrieve matches</li>
-  <li>to view matches and download their scoresheets in PDF format</li>
-  <li>to view basic statistics about the stored matches</li>
+  <li>to manage VBR matches</li>
+  <li>to manage VBR teams</li>
+  <li>to manage VBR rules</li>
+  <li>to manage VBR users and friends</li>
+  <li>to search VBR matches</li>
 </ul>
 
 [vbr]: https://www.facebook.com/VolleyballReferee/

@@ -1,697 +1,159 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.model.*;
-import com.tonkar.volleyballreferee.model.Set;
-import com.tonkar.volleyballreferee.repository.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.entity.FriendRequest;
+import com.tonkar.volleyballreferee.entity.User;
+import com.tonkar.volleyballreferee.exception.ConflictException;
+import com.tonkar.volleyballreferee.exception.NotFoundException;
+import com.tonkar.volleyballreferee.repository.FriendRequestRepository;
+import com.tonkar.volleyballreferee.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
-    private RulesRepository rulesRepository;
-
-    @Autowired
-    private TeamRepository  teamRepository;
-
-    @Autowired
-    private GameRepository gameRepository;
-
-    @Autowired
-    private GameDescriptionRepository gameDescriptionRepository;
-
-    @Autowired
-    private LeagueRepository leagueRepository;
-
-    @Autowired
-    private CodeRepository codeRepository;
-
-    @Autowired
-    private GameService gameService;
-
-    private final Random random = new Random();
+    private FriendRequestRepository friendRequestRepository;
 
     @Override
-    public List<Rules> listUserRules(String userId) {
-        return rulesRepository.findByUserIdOrderByNameAsc(userId);
-    }
-
-    @Override
-    public List<Rules> listDefaultRules() {
-        List<Rules> rules = new ArrayList<>();
-        rules.add(Rules.OFFICIAL_INDOOR_RULES);
-        rules.add(Rules.OFFICIAL_BEACH_RULES);
-        rules.add(Rules.DEFAULT_INDOOR_4X4_RULES);
-        return rules;
-    }
-
-    @Override
-    public Rules getUserRules(String userId, String name) {
-        return rulesRepository.findByNameAndUserId(name, userId);
-    }
-
-    @Override
-    public Rules getRules(String userId, String name) {
-        Rules rules = getUserRules(userId, name);
-
-        if (rules == null) {
-            for (Rules defaultRules : listDefaultRules()) {
-                if (defaultRules.getName().equals(name)) {
-                    rules = defaultRules;
-                }
-            }
-        }
-
-        return rules;
-    }
-
-    @Override
-    public long getNumberOfUserRules(String userId) {
-        return rulesRepository.countByUserId(userId);
-    }
-
-    @Override
-    public boolean createUserRules(Rules rules) {
-        final boolean created;
-
-        if (getUserRules(rules.getUserId(), rules.getName()) == null) {
-            rulesRepository.insert(rules);
-            LOGGER.debug(String.format("Created rules %s for user %s", rules.getName(), rules.getUserId()));
-            created = true;
+    public User getUser(String userId) throws NotFoundException {
+        Optional<User> optUser = userRepository.findById(userId);
+        if (optUser.isPresent()) {
+            return optUser.get();
         } else {
-            LOGGER.error(String.format("Could not create rules %s for user %s because they already exist", rules.getName(), rules.getUserId()));
-            created = false;
+            throw new NotFoundException(String.format("Could not find user %s", userId));
         }
-
-        return created;
     }
 
-    @Override
-    public boolean updateUserRules(Rules rules) {
-        final boolean updated;
-
-        Rules savedRules = getUserRules(rules.getUserId(), rules.getName());
-
-        if (savedRules == null) {
-            LOGGER.error(String.format("Could not update rules %s for user %s because they don't exist", rules.getName(), rules.getUserId()));
-            updated = false;
+    private User getUserByPseudo(String pseudo) throws NotFoundException {
+        Optional<User> optUser = userRepository.findByPseudo(pseudo);
+        if (optUser.isPresent()) {
+            return optUser.get();
         } else {
-            savedRules.setDate(rules.getDate());
-            savedRules.setSetsPerGame(rules.getSetsPerGame());
-            savedRules.setPointsPerSet(rules.getPointsPerSet());
-            savedRules.setTieBreakInLastSet(rules.isTieBreakInLastSet());
-            savedRules.setPointsInTieBreak(rules.getPointsInTieBreak());
-            savedRules.setTwoPointsDifference(rules.isTwoPointsDifference());
-            savedRules.setSanctions(rules.isSanctions());
-            savedRules.setTeamTimeouts(rules.isTeamTimeouts());
-            savedRules.setTeamTimeoutsPerSet(rules.getTeamTimeoutsPerSet());
-            savedRules.setTeamTimeoutDuration(rules.getTeamTimeoutDuration());
-            savedRules.setTechnicalTimeouts(rules.isTechnicalTimeouts());
-            savedRules.setTechnicalTimeoutDuration(rules.getTechnicalTimeoutDuration());
-            savedRules.setGameIntervals(rules.isGameIntervals());
-            savedRules.setGameIntervalDuration(rules.getGameIntervalDuration());
-            savedRules.setSubstitutionsLimitation(rules.getSubstitutionsLimitation());
-            savedRules.setTeamSubstitutionsPerSet(rules.getTeamSubstitutionsPerSet());
-            savedRules.setBeachCourtSwitches(rules.isBeachCourtSwitches());
-            savedRules.setBeachCourtSwitchFreq(rules.getBeachCourtSwitchFreq());
-            savedRules.setBeachCourtSwitchFreqTieBreak(rules.getBeachCourtSwitchFreqTieBreak());
-            savedRules.setCustomConsecutiveServesPerPlayer(rules.getCustomConsecutiveServesPerPlayer());
-            rulesRepository.save(savedRules);
-            LOGGER.debug(String.format("Updated rules %s for user %s", rules.getName(), rules.getUserId()));
-
-            gameService.listGameDescriptionsUsingRules(rules.getName(), rules.getUserId()).forEach(this::updateUserGame);
-
-            updated = true;
+            throw new NotFoundException(String.format("Could not find user %s", pseudo));
         }
-
-        return updated;
     }
 
     @Override
-    public boolean deleteUserRules(String userId, String name) {
-        final boolean deleted;
+    public void createUser(String userId, String pseudo) throws ConflictException {
+        if (userRepository.existsById(userId)) {
+            throw new ConflictException(String.format("Found an existing user with id %s", userId));
+        } else if (userRepository.existsByPseudo(pseudo)) {
+            throw new ConflictException(String.format("Found an existing user with pseudo %s", pseudo));
+        }  else {
+            User user = new User();
+            user.setId(userId);
+            user.setPseudo(pseudo);
+            user.setFriends(new ArrayList<>());
+            userRepository.save(user);
+            log.info(String.format("Created user with id %s and pseudo %s", user.getId(), user.getPseudo()));
+        }
+    }
 
-        if (gameService.hasGameUsingRules(name, userId)) {
-            LOGGER.debug(String.format("Could not delete rules %s for user %s because they are used in a game", name, userId));
-            deleted = false;
+    @Override
+    public void deleteUser(String userId) {
+        userRepository.findByFriend(userId).forEach(user -> {
+            user.getFriends().removeIf(friend -> friend.getId().equals(userId));
+            userRepository.save(user);
+        });
+        userRepository.deleteById(userId);
+        log.info(String.format("Deleted user with id %s", userId));
+    }
+
+    @Override
+    public Count getNumberOfFriendRequestsReceivedBy(String receiverId) {
+        return new Count(friendRequestRepository.countByReceiverId(receiverId));
+    }
+
+    @Override
+    public List<FriendRequest> listFriendRequestsSentBy(String senderId) {
+        return friendRequestRepository.findBySenderId(senderId);
+    }
+
+    @Override
+    public List<FriendRequest> listFriendRequestsReceivedBy(String receiverId) {
+        return friendRequestRepository.findByReceiverId(receiverId);
+    }
+
+    @Override
+    public void sendFriendRequest(String senderId, String receiverPseudo) throws ConflictException, NotFoundException {
+        User senderUser = getUser(senderId);
+        User receiverUser = getUserByPseudo(receiverPseudo);
+
+        if (senderUser.getId().equals(receiverUser.getId())) {
+            throw new ConflictException(String.format("%s cannot be friend with himself", senderUser.getId()));
+        } else if (userRepository.areFriends(senderUser.getId(), receiverUser.getId())) {
+            throw new ConflictException(String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
+        } else if (friendRequestRepository.existsBySenderIdAndReceiverId(senderUser.getId(), receiverUser.getId())) {
+            throw new ConflictException(String.format("Found an existing friend request from %s to %s", senderUser.getId(), receiverUser.getId()));
         } else {
-            rulesRepository.deleteByNameAndUserId(name, userId);
-            LOGGER.debug(String.format("Deleted rules %s for user %s", name, userId));
-            deleted = true;
-        }
-
-        return deleted;
-    }
-
-    @Override
-    public boolean deleteAllUserRules(String userId) {
-        rulesRepository.deleteByUserId(userId);
-        return true;
-    }
-
-    @Override
-    public List<Team> listUserTeams(String userId) {
-        return teamRepository.findByUserIdOrderByNameAsc(userId);
-    }
-
-    @Override
-    public List<Team> listUserTeamsOfKind(String userId, String kind) {
-        return teamRepository.findByUserIdAndKindOrderByNameAsc(userId, kind);
-    }
-
-    @Override
-    public List<Team> listUserTeamsInLeague(long date) {
-        League league = getUserLeague(date);
-        List<Team> allTeamsOfKind = listUserTeamsOfKind(league.getUserId(), league.getKind());
-        List<GameDescription> leagueGames = listUserGamesInLeague(league.getUserId(), league.getKind(), league.getName());
-
-        List<Team> teams = new ArrayList<>();
-
-        for (Team team : allTeamsOfKind) {
-            boolean found = false;
-            int index = 0;
-
-            while (!found && index < leagueGames.size()) {
-                GameDescription game = leagueGames.get(index);
-
-                if (team.getName().equals(game.gethName()) || team.getName().equals(game.getgName())) {
-                    teams.add(team);
-                    found = true;
-                }
-
-                index++;
-            }
-        }
-
-        return teams;
-    }
-
-    @Override
-    public Team getUserTeam(String userId, String name, String gender, String kind) {
-        return teamRepository.findByNameAndUserIdAndGenderAndKind(name, userId, gender, kind);
-    }
-
-    @Override
-    public long getNumberOfUserTeams(String userId) {
-        return teamRepository.countByUserId(userId);
-    }
-
-    @Override
-    public boolean createUserTeam(Team team) {
-        final boolean created;
-
-        if (getUserTeam(team.getUserId(), team.getName(), team.getGender(), team.getKind()) == null) {
-            teamRepository.insert(team);
-            LOGGER.debug(String.format("Created team %s for user %s", team.getName(), team.getUserId()));
-            created = true;
-        } else {
-            LOGGER.error(String.format("Could not create team %s for user %s because it already exists", team.getName(), team.getUserId()));
-            created = false;
-        }
-
-        return created;
-    }
-
-    @Override
-    public boolean updateUserTeam(Team team) {
-        final boolean updated;
-
-        Team savedTeam = getUserTeam(team.getUserId(), team.getName(), team.getGender(), team.getKind());
-
-        if (savedTeam == null) {
-            LOGGER.error(String.format("Could not update team %s for user %s because it does not exist", team.getName(), team.getUserId()));
-            updated = false;
-        } else {
-            savedTeam.setKind(team.getKind());
-            savedTeam.setDate(team.getDate());
-            savedTeam.setColor(team.getColor());
-            savedTeam.setLiberoColor(team.getLiberoColor());
-            savedTeam.setPlayers(team.getPlayers());
-            savedTeam.setLiberos(team.getLiberos());
-            savedTeam.setCaptain(team.getCaptain());
-            savedTeam.setGender(team.getGender());
-            teamRepository.save(savedTeam);
-            LOGGER.debug(String.format("Updated team %s for user %s", team.getName(), team.getUserId()));
-
-            gameService.listGameDescriptionsUsingTeam(team.getName(), team.getGender(), team.getKind(), team.getUserId())
-                    .forEach(this::updateUserGame);
-
-            updated = true;
-        }
-
-        return updated;
-    }
-
-    @Override
-    public boolean deleteUserTeam(String userId, String name, String gender, String kind) {
-        final boolean deleted;
-
-        if (gameService.hasGameUsingTeam(name, gender, kind, userId)) {
-            LOGGER.debug(String.format("Could not delete team %s for user %s because it is used in a game", name, userId));
-            deleted = false;
-        } else {
-            teamRepository.deleteByNameAndUserIdAndGenderAndKind(name, userId, gender, kind);
-            LOGGER.debug(String.format("Deleted team %s for user %s", name, userId));
-            deleted = true;
-        }
-
-        return deleted;
-    }
-
-    @Override
-    public boolean deleteAllUserTeams(String userId) {
-        teamRepository.deleteByUserId(userId);
-        return true;
-    }
-
-    @Override
-    public List<GameDescription> listUserGames(String userId) {
-        return gameDescriptionRepository.findByUserIdOrderByScheduleDesc(userId);
-    }
-
-    @Override
-    public List<GameDescription> listUserGames(String userId, GameStatus status) {
-        return gameDescriptionRepository.findByUserIdAndStatusOrderByScheduleDesc(userId, status.toString());
-    }
-
-    @Override
-    public List<GameDescription> listAvailableUserGames(String userId) {
-        return gameDescriptionRepository.findByUserIdAndAvailable(userId, new Sort(Sort.Direction.DESC, "schedule"));
-    }
-
-    @Override
-    public List<GameDescription> listUserGamesInLeague(String userId, String kind, String leagueName) {
-        return gameDescriptionRepository.findByUserIdAndKindAndLeague(userId, kind, leagueName);
-    }
-
-    @Override
-    public List<GameDescription> listUserGamesInLeague(long leagueDate) {
-        League league = leagueRepository.findByDate(leagueDate);
-
-        if (league == null) {
-            return new ArrayList<>();
-        } else {
-            return gameDescriptionRepository.findByUserIdAndKindAndLeague(league.getUserId(), league.getKind(), league.getName());
+            FriendRequest friendRequest = new FriendRequest();
+            friendRequest.setId(UUID.randomUUID());
+            friendRequest.setSenderId(senderUser.getId());
+            friendRequest.setSenderPseudo(senderUser.getPseudo());
+            friendRequest.setReceiverId(receiverUser.getId());
+            friendRequest.setReceiverPseudo(receiverUser.getPseudo());
+            friendRequestRepository.save(friendRequest);
         }
     }
 
     @Override
-    public List<GameDescription> listUserGamesOfTeamInLeague(long leagueDate, String teamName, String teamGender) {
-        League league = leagueRepository.findByDate(leagueDate);
+    public void acceptFriendRequest(String userId, UUID friendRequestId) throws ConflictException, NotFoundException {
+        Optional<FriendRequest> optFriendRequest = friendRequestRepository.findByIdAndReceiverId(friendRequestId, userId);
 
-        if (league == null) {
-            return new ArrayList<>();
-        } else {
-            return gameDescriptionRepository.findByUserIdAndKindAndLeagueAndTeamNameAndGender(league.getUserId(), league.getKind(), league.getName(), teamName, teamGender);
-        }
-    }
+        if (optFriendRequest.isPresent()) {
+            FriendRequest friendRequest = optFriendRequest.get();
 
-    @Override
-    public List<GameDescription> listLiveUserGamesInLeague(long leagueDate) {
-        League league = leagueRepository.findByDate(leagueDate);
+            User senderUser = getUser(friendRequest.getSenderId());
+            User receiverUser = getUser(friendRequest.getReceiverId());
 
-        if (league == null) {
-            return new ArrayList<>();
-        } else {
-            return gameDescriptionRepository.findByUserIdAndKindAndStatusAndLeagueOrderByScheduleDesc(
-                    league.getUserId(), league.getKind(), GameStatus.LIVE.toString(), league.getName());
-        }
-    }
-
-    @Override
-    public List<GameDescription> listLast10UserGamesInLeague(long leagueDate) {
-        League league = leagueRepository.findByDate(leagueDate);
-
-        if (league == null) {
-            return new ArrayList<>();
-        } else {
-            return gameDescriptionRepository.findTop10ByUserIdAndKindAndStatusAndLeagueOrderByScheduleDesc(
-                    league.getUserId(), league.getKind(), GameStatus.COMPLETED.toString(), league.getName());
-        }
-    }
-
-    @Override
-    public List<GameDescription> listNext10UserGamesInLeague(long leagueDate) {
-        League league = leagueRepository.findByDate(leagueDate);
-
-        if (league == null) {
-            return new ArrayList<>();
-        } else {
-            return gameDescriptionRepository.findTop10ByUserIdAndKindAndStatusAndLeagueOrderByScheduleAsc(
-                    league.getUserId(), league.getKind(), GameStatus.SCHEDULED.toString(), league.getName());
-        }
-    }
-
-    @Override
-    public GameDescription getUserGame(String userId, long date) {
-        return gameDescriptionRepository.findByDateAndUserId(date, userId);
-    }
-
-    @Override
-    public Game getUserGameFull(String userId, long date) {
-        return gameRepository.findByDateAndUserId(date, userId);
-    }
-
-    @Override
-    public long getNumberOfUserGames(String userId) {
-        return gameDescriptionRepository.countByUserId(userId);
-    }
-
-    @Override
-    public long getNumberOfUserGames(String userId, String kind, String leagueName) {
-        return gameDescriptionRepository.countByUserIdAndKindAndLeague(userId, kind, leagueName);
-    }
-
-    @Override
-    public boolean createUserGame(GameDescription gameDescription) {
-        final boolean created;
-        final String userId = gameDescription.getUserId();
-
-        if (getUserGame(userId, gameDescription.getDate()) == null) {
-            Code code = new Code();
-            code.setDate(gameDescription.getDate());
-            code.setCode(allocateUniqueCode());
-
-            Team hTeam = getUserTeam(userId, gameDescription.gethName(), gameDescription.getGender(), gameDescription.getKind());
-            Team gTeam = getUserTeam(userId, gameDescription.getgName(), gameDescription.getGender(), gameDescription.getKind());
-            Rules rules = getRules(userId, gameDescription.getRules());
-
-            if (hTeam == null || gTeam == null || rules == null || code.getCode() < 0) {
-                LOGGER.error(String.format("Could not create game with date %d (%s vs %s) for user %s because at least one input was not found",
-                        gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
-                created = false;
-            } else if (!gameDescription.getKind().equals(hTeam.getKind()) || !gameDescription.getKind().equals(gTeam.getKind())) {
-                LOGGER.error(String.format("Could not create game with date %d (%s vs %s) for user %s because the game kind doesn't match with the team kinds",
-                        gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
-                created = false;
+            if (userRepository.areFriends(senderUser.getId(), receiverUser.getId())) {
+                throw new ConflictException(String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
             } else {
-                Game game = new Game();
-                game.setUserId(userId);
-                game.setKind(gameDescription.getKind());
-                game.setDate(gameDescription.getDate());
-                game.setSchedule(gameDescription.getSchedule());
-                game.setGender(gameDescription.getGender());
-                game.setUsage(gameDescription.getUsage());
-                game.setStatus(gameDescription.getStatus());
-                game.setIndexed(gameDescription.isIndexed());
-                game.setReferee(gameDescription.getReferee());
-                game.setLeague(gameDescription.getLeague());
-                game.setDivision(gameDescription.getDivision());
-                game.sethTeam(hTeam);
-                game.setgTeam(gTeam);
-                game.setRules(rules);
-                game.sethSets(gameDescription.gethSets());
-                game.setgSets(gameDescription.getgSets());
-                game.setSets(new ArrayList<>());
-                game.sethCards(new ArrayList<>());
-                game.setgCards(new ArrayList<>());
+                senderUser.getFriends().add(new User.Friend(receiverUser.getId(), receiverUser.getPseudo()));
+                receiverUser.getFriends().add(new User.Friend(senderUser.getId(), senderUser.getPseudo()));
 
-                gameService.createGame(game);
-                codeRepository.insert(code);
-                LOGGER.debug(String.format("Created game with date %d (%s vs %s) for user %s",
-                        gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
-                if (!game.getLeague().isEmpty() && !game.getDivision().isEmpty()) {
-                    updateDivisionsOfLeague(userId, gameDescription);
-                }
-                created = true;
+                userRepository.save(senderUser);
+                userRepository.save(receiverUser);
+                log.info(String.format("%s and %s are now friends", senderUser.getId(), receiverUser.getId()));
             }
+
+            friendRequestRepository.delete(friendRequest);
         } else {
-            LOGGER.error(String.format("Could not create game with date %d (%s vs %s) for user %s because it already exists",
-                    gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
-            created = false;
+            throw new NotFoundException(String.format("Could not find friend request %s with receiver %s", friendRequestId, userId));
         }
-
-        return created;
     }
 
     @Override
-    public boolean updateUserGame(GameDescription gameDescription) {
-        final boolean updated;
+    public void rejectFriendRequest(String userId, UUID friendRequestId) {
+        friendRequestRepository.deleteByIdAndReceiverId(friendRequestId, userId);
+    }
 
-        final String userId = gameDescription.getUserId();
-        final Game game = getUserGameFull(userId, gameDescription.getDate());
+    @Override
+    public void removeFriend(String userId, String friendId) throws NotFoundException {
+        if (userRepository.areFriends(userId, friendId)) {
+            User user = getUser(userId);
+            User friendUser = getUser(friendId);
 
-        if (game == null) {
-            LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because it does not exist",
-                    gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
-            updated = false;
-        } else if (!GameStatus.SCHEDULED.toString().equals(game.getStatus())) {
-            LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because it is %s",
-                    gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId, game.getStatus()));
-            updated = false;
+            user.getFriends().removeIf(friend -> friend.getId().equals(friendUser.getId()));
+            friendUser.getFriends().removeIf(friend -> friend.getId().equals(user.getId()));
+
+            userRepository.save(user);
+            userRepository.save(friendUser);
+            log.info(String.format("%s and %s are no longer friends", user.getId(), friendUser.getId()));
         } else {
-            Team hTeam = getUserTeam(userId, gameDescription.gethName(), gameDescription.getGender(), game.getKind());
-            Team gTeam = getUserTeam(userId, gameDescription.getgName(), gameDescription.getGender(), game.getKind());
-            Rules rules = getRules(userId, gameDescription.getRules());
-
-            if (hTeam == null || gTeam == null || rules == null) {
-                LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because at least one input was not found",
-                        gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
-                updated = false;
-            } else if (!gameDescription.getKind().equals(hTeam.getKind()) || !gameDescription.getKind().equals(gTeam.getKind())) {
-                LOGGER.error(String.format("Could not update game with date %d (%s vs %s) for user %s because the game kind doesn't match with the team kinds",
-                        gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
-                updated = false;
-            } else {
-                game.setKind(gameDescription.getKind());
-                game.setSchedule(gameDescription.getSchedule());
-                game.setGender(gameDescription.getGender());
-                game.setUsage(gameDescription.getUsage());
-                game.setStatus(gameDescription.getStatus());
-                game.setIndexed(gameDescription.isIndexed());
-                game.setReferee(gameDescription.getReferee());
-                game.setLeague(gameDescription.getLeague());
-                game.setDivision(gameDescription.getDivision());
-                game.sethTeam(hTeam);
-                game.setgTeam(gTeam);
-                game.setRules(rules);
-                game.sethSets(gameDescription.gethSets());
-                game.setgSets(gameDescription.getgSets());
-                game.setSets(new ArrayList<>());
-                game.sethCards(new ArrayList<>());
-                game.setgCards(new ArrayList<>());
-
-                gameService.updateGame(game.getDate(), game);
-                LOGGER.debug(String.format("Updated game with date %d (%s vs %s) for user %s",
-                        gameDescription.getDate(), gameDescription.gethName(), gameDescription.getgName(), userId));
-                if (!game.getLeague().isEmpty() && !game.getDivision().isEmpty()) {
-                    updateDivisionsOfLeague(userId, gameDescription);
-                }
-                updated = true;
-            }
+            throw new NotFoundException(String.format("%s and %s are not friends", userId, friendId));
         }
-
-        return updated;
-    }
-
-    @Override
-    public boolean deleteUserGame(String userId, long date) {
-        codeRepository.deleteByDate(date);
-        gameService.deleteGame(date, userId);
-        LOGGER.debug(String.format("Deleted game with date %d for user %s", date, userId));
-        return true;
-    }
-
-    @Override
-    public boolean deleteAllUserGames(String userId) {
-        listUserGames(userId).forEach(game -> deleteUserGame(userId, game.getDate()));
-        return true;
-    }
-
-    @Override
-    public int getUserGameCode(String userId, long date) {
-        final int code;
-
-        if (gameDescriptionRepository.existsByDateAndUserId(date, userId)) {
-            code = codeRepository.findByDate(date).getCode();
-        } else {
-            code = -1;
-        }
-
-        return code;
-    }
-
-    @Override
-    public List<League> listUserLeagues(String userId) {
-        return leagueRepository.findByUserIdOrderByNameAsc(userId);
-    }
-
-    @Override
-    public List<League> listUserLeaguesOfKind(String userId, String kind) {
-        return leagueRepository.findByUserIdAndKindOrderByNameAsc(userId, kind);
-    }
-
-    @Override
-    public List<String> listUserDivisionsOfKind(String userId, String kind) {
-        List<GameDescription> games = gameDescriptionRepository.findByUserIdAndKindAndLeagueNotAndDivisionNot(userId, kind, "", "");
-        TreeSet<String> distinctDivisions = new TreeSet<>();
-        games.forEach(game -> distinctDivisions.add(game.getDivision()));
-        return new ArrayList<>(distinctDivisions);
-    }
-
-    @Override
-    public League getUserLeague(long date) {
-        return leagueRepository.findByDate(date);
-    }
-
-    @Override
-    public League getUserLeague(String userId, long date) {
-        return leagueRepository.findByDateAndUserId(date, userId);
-    }
-
-    @Override
-    public League getUserLeague(String userId, String name) {
-        return leagueRepository.findByNameAndUserId(name, userId);
-    }
-
-    @Override
-    public long getNumberOfUserLeagues(String userId) {
-        return leagueRepository.countByUserId(userId);
-    }
-
-    @Override
-    public boolean createUserLeague(League league) {
-        final boolean created;
-
-        if (getUserLeague(league.getUserId(), league.getName()) == null) {
-            leagueRepository.insert(league);
-            LOGGER.debug(String.format("Created league %s for user %s", league.getName(), league.getUserId()));
-            created = true;
-        } else {
-            LOGGER.error(String.format("Could not create league %s for user %s because it already exists", league.getName(), league.getUserId()));
-            created = false;
-        }
-
-        return created;
-    }
-
-    @Override
-    public boolean deleteUserLeague(String userId, long date) {
-        leagueRepository.deleteByDateAndUserId(date, userId);
-        LOGGER.debug(String.format("Deleted league with date %d for user %s", date, userId));
-        return true;
-    }
-
-    @Override
-    public byte[] getCsvLeague(String userId, String leagueName, String divisionName) {
-        final List<GameDescription> gameDescriptions;
-
-        if (divisionName.isEmpty()) {
-            gameDescriptions = gameDescriptionRepository.findByUserIdAndStatusAndLeague(userId, GameStatus.COMPLETED.toString(), leagueName);
-        } else {
-            gameDescriptions = gameDescriptionRepository.findByUserIdAndStatusAndLeagueAndDivision(userId, GameStatus.COMPLETED.toString(), leagueName, divisionName);
-        }
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        PrintWriter printWriter = new PrintWriter(byteArrayOutputStream);
-
-        appendCsvHeader(printWriter);
-
-        for (GameDescription gameDescription : gameDescriptions) {
-            Game game = getUserGameFull(userId, gameDescription.getDate());
-            appendCsvGame(gameDescription, game, printWriter);
-        }
-
-        printWriter.close();
-
-        LOGGER.info("CSV for " + gameDescriptions.size() + " " + leagueName + " " + divisionName);
-
-        return byteArrayOutputStream.toByteArray();
-    }
-
-    private void appendCsvHeader(PrintWriter printWriter) {
-        printWriter.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
-                "Date",
-                "League",
-                "Division",
-                "Gender",
-                "Home", "Guest",
-                "Sets Home", "Sets Guest",
-                "Set 1 Home", "Set 1 Guest",
-                "Set 2 Home", "Set 2 Guest",
-                "Set 3 Home", "Set 3 Guest",
-                "Set 4 Home", "Set 4 Guest",
-                "Set 5 Home", "Set 5 Guest"
-        ));
-    }
-
-    private void appendCsvGame(GameDescription gameDescription, Game game, PrintWriter printWriter) {
-        DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
-        formatter.setTimeZone(TimeZone.getDefault());
-
-        String[] hPoints = new String[5];
-        String[] gPoints = new String[5];
-
-        for (int index = 0; index < 5; index++) {
-            if (index < game.getSets().size()) {
-                Set set = game.getSets().get(index);
-                hPoints[index] = String.valueOf(set.gethPoints());
-                gPoints[index] = String.valueOf(set.getgPoints());
-            } else {
-                hPoints[index] = "";
-                gPoints[index] = "";
-            }
-        }
-
-        printWriter.append(String.format("\n%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s",
-                formatter.format(game.getSchedule()),
-                gameDescription.getLeague(),
-                gameDescription.getDivision(),
-                gameDescription.getGender(),
-                gameDescription.gethName(), gameDescription.getgName(),
-                gameDescription.gethSets(), gameDescription.getgSets(),
-                hPoints[0], gPoints[0],
-                hPoints[1], gPoints[1],
-                hPoints[2], gPoints[2],
-                hPoints[3], gPoints[3],
-                hPoints[4], gPoints[4]
-        ));
-    }
-
-    private void updateDivisionsOfLeague(String userId, GameDescription game) {
-        League league = leagueRepository.findByNameAndUserId(game.getLeague(), userId);
-
-        if (league == null) {
-            league = new League();
-            league.setUserId(userId);
-            league.setKind(game.getKind());
-            league.setDate(System.currentTimeMillis());
-            league.setName(game.getLeague());
-            league.setDivisions(new ArrayList<>());
-            createUserLeague(league);
-        }
-
-        league.getDivisions().clear();
-
-        List<GameDescription> games = gameDescriptionRepository.findByUserIdAndKindAndLeagueAndDivisionNot(userId, league.getKind(), league.getName(), "");
-        TreeSet<String> distinctDivisions = new TreeSet<>();
-        games.forEach(matchingGame -> distinctDivisions.add(matchingGame.getDivision()));
-
-        league.getDivisions().addAll(distinctDivisions);
-
-        leagueRepository.save(league);
-    }
-
-    private int allocateUniqueCode() {
-        boolean exists = true;
-        int code = -1;
-
-        while (exists) {
-            code = random.nextInt(99999999 - 10000000) + 10000000;
-            exists = (codeRepository.findByCode(code) != null);
-        }
-
-        return code;
     }
 }
