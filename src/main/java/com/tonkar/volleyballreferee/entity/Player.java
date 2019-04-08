@@ -8,7 +8,7 @@ import lombok.Setter;
 @NoArgsConstructor @AllArgsConstructor @Getter @Setter
 public class Player {
 
-    private int    number;
+    private int    num;
     private String name;
 
 }

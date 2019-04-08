@@ -185,8 +185,8 @@ public class ScoreSheetWriter {
         Element teamDiv = new Element("div");
         teamDiv.addClass("div-grid-team");
 
-        game.getPlayers(teamType).forEach(player -> teamDiv.appendChild(createPlayerSpan(teamType, player.getNumber(), false)));
-        game.getLiberos(teamType).forEach(player -> teamDiv.appendChild(createPlayerSpan(teamType, player.getNumber(), true)));
+        game.getPlayers(teamType).forEach(player -> teamDiv.appendChild(createPlayerSpan(teamType, player.getNum(), false)));
+        game.getLiberos(teamType).forEach(player -> teamDiv.appendChild(createPlayerSpan(teamType, player.getNum(), true)));
 
         return teamDiv;
     }

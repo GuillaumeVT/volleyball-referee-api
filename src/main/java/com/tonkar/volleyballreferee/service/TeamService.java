@@ -18,7 +18,7 @@ public interface TeamService {
 
     // User only
 
-    List<Team> listTeams(String userId);
+    List<TeamDescription> listTeams(String userId);
 
     List<TeamDescription> listTeamsOfKind(String userId, GameType kind);
 

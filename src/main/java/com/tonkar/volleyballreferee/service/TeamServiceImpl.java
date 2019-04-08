@@ -44,8 +44,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<Team> listTeams(String userId) {
-        return teamRepository.findByCreatedByOrderByNameAsc(userId);
+    public List<TeamDescription> listTeams(String userId) {
+        return teamDao.listTeams(userId);
     }
 
     @Override

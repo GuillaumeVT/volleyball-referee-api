@@ -36,6 +36,13 @@ public class TeamDao {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    public List<TeamDescription> listTeams(String userId) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sTeamDescriptionProjection, sortOperation),
+                mongoTemplate.getCollectionName(Team.class), TeamDescription.class).getMappedResults();
+    }
+
     public List<TeamDescription> listTeamsOfKind(String userId, GameType kind) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("kind").is(kind));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");

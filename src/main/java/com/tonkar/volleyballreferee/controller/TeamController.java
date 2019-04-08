@@ -29,7 +29,7 @@ public class TeamController {
     private TeamService teamService;
 
     @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<List<Team>> listTeams(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<TeamDescription>> listTeams(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(teamService.listTeams(user.getUserId()), HttpStatus.OK);
     }
 

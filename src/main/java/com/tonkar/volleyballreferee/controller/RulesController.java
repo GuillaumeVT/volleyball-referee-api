@@ -29,7 +29,7 @@ public class RulesController {
     private RulesService rulesService;
 
     @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<List<Rules>> listRules(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<RulesDescription>> listRules(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(rulesService.listRules(user.getUserId()), HttpStatus.OK);
     }
 

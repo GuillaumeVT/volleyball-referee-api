@@ -22,12 +22,11 @@ public class RulesTests extends VbrTests {
 
     @Test
     public void testNotAuthenticated() {
-        ParameterizedTypeReference<List<Rules>> typeReference = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<Rules>> getAllRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
-        assertEquals(HttpStatus.UNAUTHORIZED, getAllRulesResponse.getStatusCode());
+        ParameterizedTypeReference<List<RulesDescription>> typeReference = new ParameterizedTypeReference<>() {};
+        ResponseEntity<List<RulesDescription>> getRulesDescrResponse = restTemplate.exchange(urlOf("/api/v3/rules"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
+        assertEquals(HttpStatus.UNAUTHORIZED, getRulesDescrResponse.getStatusCode());
 
-        ParameterizedTypeReference<List<RulesDescription>> typeReference2 = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<RulesDescription>> getRulesDescrResponse = restTemplate.exchange(urlOf("/api/v3/rules/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference2);
+        getRulesDescrResponse = restTemplate.exchange(urlOf("/api/v3/rules/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
         assertEquals(HttpStatus.UNAUTHORIZED, getRulesDescrResponse.getStatusCode());
 
         ResponseEntity<Rules> getRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), Rules.class);
@@ -121,19 +120,18 @@ public class RulesTests extends VbrTests {
 
         // List all rules
 
-        ParameterizedTypeReference<List<Rules>> typeReference = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<Rules>> getAllRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
-        assertEquals(HttpStatus.OK, getAllRulesResponse.getStatusCode());
-        assertEquals(1, getAllRulesResponse.getBody().size());
-
-        // List all rules of kind
-
-        ParameterizedTypeReference<List<RulesDescription>> typeReference2 = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<RulesDescription>> getRulesDescrResponse = restTemplate.exchange(urlOf("/api/v3/rules/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference2);
+        ParameterizedTypeReference<List<RulesDescription>> typeReference = new ParameterizedTypeReference<>() {};
+        ResponseEntity<List<RulesDescription>> getRulesDescrResponse = restTemplate.exchange(urlOf("/api/v3/rules"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
         assertEquals(HttpStatus.OK, getRulesDescrResponse.getStatusCode());
         assertEquals(1, getRulesDescrResponse.getBody().size());
 
-        getRulesDescrResponse = restTemplate.exchange(urlOf("/api/v3/rules/kind/" + GameType.BEACH), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference2);
+        // List all rules of kind
+
+        getRulesDescrResponse = restTemplate.exchange(urlOf("/api/v3/rules/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
+        assertEquals(HttpStatus.OK, getRulesDescrResponse.getStatusCode());
+        assertEquals(1, getRulesDescrResponse.getBody().size());
+
+        getRulesDescrResponse = restTemplate.exchange(urlOf("/api/v3/rules/kind/" + GameType.BEACH), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
         assertEquals(HttpStatus.OK, getRulesDescrResponse.getStatusCode());
         assertEquals(0, getRulesDescrResponse.getBody().size());
 
@@ -145,8 +143,8 @@ public class RulesTests extends VbrTests {
         rulesResponse = restTemplate.exchange(urlOf("/api/v3/rules"), HttpMethod.DELETE, emptyPayloadWithAuth(testUser1Auth), String.class);
         assertEquals(HttpStatus.NO_CONTENT, rulesResponse.getStatusCode());
 
-        getAllRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
-        assertEquals(HttpStatus.OK, getAllRulesResponse.getStatusCode());
-        assertEquals(0, getAllRulesResponse.getBody().size());
+        getRulesDescrResponse = restTemplate.exchange(urlOf("/api/v3/rules"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
+        assertEquals(HttpStatus.OK, getRulesDescrResponse.getStatusCode());
+        assertEquals(0, getRulesDescrResponse.getBody().size());
     }
 }

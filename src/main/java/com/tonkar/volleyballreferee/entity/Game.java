@@ -112,7 +112,7 @@ public class Game {
     }
 
     public boolean isLibero(TeamType teamType, int player) {
-        return getLiberos(teamType).stream().anyMatch(libero -> libero.getNumber() == player);
+        return getLiberos(teamType).stream().anyMatch(libero -> libero.getNum() == player);
     }
 
     public int getCaptain(TeamType teamType) {

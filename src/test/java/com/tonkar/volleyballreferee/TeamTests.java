@@ -27,12 +27,11 @@ public class TeamTests extends VbrTests {
     public void testNotAuthenticated() {
         Team team = new Team();
 
-        ParameterizedTypeReference<List<Team>> typeReference = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<Team>> getAllTeamsResponse = restTemplate.exchange(urlOf("/api/v3/teams"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
-        assertEquals(HttpStatus.UNAUTHORIZED, getAllTeamsResponse.getStatusCode());
+        ParameterizedTypeReference<List<TeamDescription>> typeReference = new ParameterizedTypeReference<>() {};
+        ResponseEntity<List<TeamDescription>> getTeamDescrResponse = restTemplate.exchange(urlOf("/api/v3/teams"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
+        assertEquals(HttpStatus.UNAUTHORIZED, getTeamDescrResponse.getStatusCode());
 
-        ParameterizedTypeReference<List<TeamDescription>> typeReference2 = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<TeamDescription>> getTeamDescrResponse = restTemplate.exchange(urlOf("/api/v3/teams/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference2);
+        getTeamDescrResponse = restTemplate.exchange(urlOf("/api/v3/teams/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
         assertEquals(HttpStatus.UNAUTHORIZED, getTeamDescrResponse.getStatusCode());
 
         ResponseEntity<Team> getTeamResponse = restTemplate.exchange(urlOf("/api/v3/teams/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), Team.class);
@@ -122,19 +121,18 @@ public class TeamTests extends VbrTests {
 
         // List all teams
 
-        ParameterizedTypeReference<List<Team>> typeReference = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<Team>> getAllTeamsResponse = restTemplate.exchange(urlOf("/api/v3/teams"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
-        assertEquals(HttpStatus.OK, getAllTeamsResponse.getStatusCode());
-        assertEquals(1, getAllTeamsResponse.getBody().size());
-
-        // List all team of kind
-
-        ParameterizedTypeReference<List<TeamDescription>> typeReference2 = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<TeamDescription>> getTeamDescrResponse = restTemplate.exchange(urlOf("/api/v3/teams/kind/" + GameType.BEACH), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference2);
+        ParameterizedTypeReference<List<TeamDescription>> typeReference = new ParameterizedTypeReference<>() {};
+        ResponseEntity<List<TeamDescription>> getTeamDescrResponse = restTemplate.exchange(urlOf("/api/v3/teams"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
         assertEquals(HttpStatus.OK, getTeamDescrResponse.getStatusCode());
         assertEquals(1, getTeamDescrResponse.getBody().size());
 
-        getTeamDescrResponse = restTemplate.exchange(urlOf("/api/v3/teams/kind/" + GameType.INDOOR_4X4), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference2);
+        // List all team of kind
+
+        getTeamDescrResponse = restTemplate.exchange(urlOf("/api/v3/teams/kind/" + GameType.BEACH), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
+        assertEquals(HttpStatus.OK, getTeamDescrResponse.getStatusCode());
+        assertEquals(1, getTeamDescrResponse.getBody().size());
+
+        getTeamDescrResponse = restTemplate.exchange(urlOf("/api/v3/teams/kind/" + GameType.INDOOR_4X4), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
         assertEquals(HttpStatus.OK, getTeamDescrResponse.getStatusCode());
         assertEquals(0, getTeamDescrResponse.getBody().size());
 
@@ -146,8 +144,8 @@ public class TeamTests extends VbrTests {
         teamResponse = restTemplate.exchange(urlOf("/api/v3/teams"), HttpMethod.DELETE, emptyPayloadWithAuth(testUser1Auth), String.class);
         assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
 
-        getAllTeamsResponse = restTemplate.exchange(urlOf("/api/v3/teams"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
-        assertEquals(HttpStatus.OK, getAllTeamsResponse.getStatusCode());
-        assertEquals(0, getAllTeamsResponse.getBody().size());
+        getTeamDescrResponse = restTemplate.exchange(urlOf("/api/v3/teams"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
+        assertEquals(HttpStatus.OK, getTeamDescrResponse.getStatusCode());
+        assertEquals(0, getTeamDescrResponse.getBody().size());
     }
 }

@@ -5,13 +5,13 @@ import com.tonkar.volleyballreferee.entity.GenderType;
 import com.tonkar.volleyballreferee.entity.Team;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public interface TeamRepository extends MongoRepository<Team, UUID> {
 
-    List<Team> findByCreatedByOrderByNameAsc(String userId);
+    Stream<Team> findByCreatedByOrderByNameAsc(String userId);
 
     Optional<Team> findByIdAndCreatedBy(UUID id, String userId);
 

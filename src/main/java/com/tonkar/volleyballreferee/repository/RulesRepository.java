@@ -4,13 +4,13 @@ import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public interface RulesRepository extends MongoRepository<Rules, UUID> {
 
-    List<Rules> findByCreatedByOrderByNameAsc(String userId);
+    Stream<Rules> findByCreatedByOrderByNameAsc(String userId);
 
     Optional<Rules> findByIdAndCreatedBy(UUID id, String userId);
 

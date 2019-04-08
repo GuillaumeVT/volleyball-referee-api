@@ -32,8 +32,8 @@ public class RulesServiceImpl implements RulesService {
     private GameRepository gameRepository;
 
     @Override
-    public List<Rules> listRules(String userId) {
-        return rulesRepository.findByCreatedByOrderByNameAsc(userId);
+    public List<RulesDescription> listRules(String userId) {
+        return rulesDao.listRules(userId);
     }
 
     @Override
