@@ -54,11 +54,25 @@ public class GameController {
     }
 
     @GetMapping("/league/{leagueId}/csv")
-    public ResponseEntity<?> getCsvLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId, @RequestParam("divisionName") Optional<String> divisionName) {
+    public ResponseEntity<?> listGamesInLeagueCsv(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
 
-        byte[] data = gameService.listGamesInLeagueCsv(user.getUserId(), leagueId, divisionName);
+        byte[] data = gameService.listGamesInLeagueCsv(user.getUserId(), leagueId, Optional.empty());
 
-        String fileName = leagueId + (divisionName.map(name -> "_" + name).orElse("")) + ".csv";
+        String fileName = leagueId + ".csv";
+        ByteArrayResource resource = new ByteArrayResource(data);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileName)
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .contentLength(data.length)
+                .body(resource);
+    }
+
+    @GetMapping("/league/{leagueId}/division/{divisionName}/csv")
+    public ResponseEntity<?> listGamesInDivisionCsv(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
+
+        byte[] data = gameService.listGamesInLeagueCsv(user.getUserId(), leagueId, Optional.of(divisionName));
+
+        String fileName = leagueId + "_" + divisionName + ".csv";
         ByteArrayResource resource = new ByteArrayResource(data);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileName)

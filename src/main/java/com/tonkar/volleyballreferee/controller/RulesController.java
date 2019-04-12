@@ -49,7 +49,7 @@ public class RulesController {
     }
 
     @GetMapping(value = "/default/kind/{kind}", produces = {"application/json"})
-    public ResponseEntity<Rules> getDefaultRules(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
+    public ResponseEntity<RulesDescription> getDefaultRules(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
         return new ResponseEntity<>(rulesService.getDefaultRules(kind), HttpStatus.OK);
     }
 

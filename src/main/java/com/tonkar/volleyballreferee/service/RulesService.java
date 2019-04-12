@@ -18,7 +18,7 @@ public interface RulesService {
 
     Rules getRules(String userId, UUID rulesId) throws NotFoundException;
 
-    Rules getDefaultRules(GameType kind);
+    RulesDescription getDefaultRules(GameType kind);
 
     Count getNumberOfRules(String userId);
 

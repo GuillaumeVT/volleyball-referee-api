@@ -32,8 +32,8 @@ public class RulesTests extends VbrTests {
         ResponseEntity<Rules> getRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), Rules.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getRulesResponse.getStatusCode());
 
-        getRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules/default/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), Rules.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, getRulesResponse.getStatusCode());
+        ResponseEntity<RulesDescription> getDefaultRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules/default/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), RulesDescription.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, getDefaultRulesResponse.getStatusCode());
 
         ResponseEntity<Count> getRulesCountResponse = restTemplate.exchange(urlOf("/api/v3/rules/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), Count.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getRulesCountResponse.getStatusCode());
@@ -69,14 +69,14 @@ public class RulesTests extends VbrTests {
 
         // Default rules
 
-        getRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules/default/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), Rules.class);
-        assertEquals(HttpStatus.OK, getRulesResponse.getStatusCode());
+        ResponseEntity<RulesDescription> getDefaultRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules/default/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), RulesDescription.class);
+        assertEquals(HttpStatus.OK, getDefaultRulesResponse.getStatusCode());
 
-        getRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules/default/kind/" + GameType.INDOOR_4X4), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), Rules.class);
-        assertEquals(HttpStatus.OK, getRulesResponse.getStatusCode());
+        getDefaultRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules/default/kind/" + GameType.INDOOR_4X4), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), RulesDescription.class);
+        assertEquals(HttpStatus.OK, getDefaultRulesResponse.getStatusCode());
 
-        getRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules/default/kind/" + GameType.BEACH), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), Rules.class);
-        assertEquals(HttpStatus.OK, getRulesResponse.getStatusCode());
+        getDefaultRulesResponse = restTemplate.exchange(urlOf("/api/v3/rules/default/kind/" + GameType.BEACH), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), RulesDescription.class);
+        assertEquals(HttpStatus.OK, getDefaultRulesResponse.getStatusCode());
 
         // Create rules
 

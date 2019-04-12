@@ -52,7 +52,7 @@ public class RulesServiceImpl implements RulesService {
     }
 
     @Override
-    public Rules getDefaultRules(GameType kind) {
+    public RulesDescription getDefaultRules(GameType kind) {
         final Rules rules;
 
         switch (kind) {
@@ -70,7 +70,15 @@ public class RulesServiceImpl implements RulesService {
                 break;
         }
 
-        return rules;
+        RulesDescription rulesDescription = new RulesDescription();
+        rulesDescription.setId(rules.getId());
+        rulesDescription.setCreatedBy(rules.getCreatedBy());
+        rulesDescription.setCreatedAt(rules.getCreatedAt());
+        rulesDescription.setUpdatedAt(rules.getUpdatedAt());
+        rulesDescription.setKind(rules.getKind());
+        rulesDescription.setName(rules.getName());
+
+        return rulesDescription;
     }
 
     @Override
@@ -80,7 +88,9 @@ public class RulesServiceImpl implements RulesService {
 
     @Override
     public void createRules(String userId, Rules rules) throws ConflictException {
-        if (rulesRepository.existsById(rules.getId())) {
+        if (Rules.getDefaultRules(rules.getId(), rules.getKind()).isPresent()) {
+            throw new ConflictException(String.format("Could not create rules %s for user %s because they are default rules", rules.getId(), userId));
+        } else if (rulesRepository.existsById(rules.getId())) {
             throw new ConflictException(String.format("Could not create rules %s for user %s because they already exist", rules.getId(), userId));
         } else if (rulesRepository.existsByCreatedByAndNameAndKind(userId, rules.getName(), rules.getKind())) {
             throw new ConflictException(String.format("Could not create rules %s %s for user %s because they already exist", rules.getName(), rules.getKind(), userId));

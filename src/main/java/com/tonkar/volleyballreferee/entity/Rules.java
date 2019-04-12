@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 import java.util.UUID;
 
 @Document(collection="rules")
@@ -101,6 +102,18 @@ public class Rules {
             true, 60, true, 180,
             NO_LIMITATION, 4, false, 0, 0, 9999);
 
+    public static Optional<Rules> getDefaultRules(UUID rulesId, GameType kind) {
+        switch (kind) {
+            case INDOOR:
+                return OFFICIAL_INDOOR_RULES.getId().equals(rulesId) ? Optional.of(OFFICIAL_INDOOR_RULES) : Optional.empty();
+            case BEACH:
+                return OFFICIAL_BEACH_RULES.getId().equals(rulesId) ? Optional.of(OFFICIAL_BEACH_RULES) : Optional.empty();
+            case INDOOR_4X4:
+                return DEFAULT_INDOOR_4X4_RULES.getId().equals(rulesId) ? Optional.of(DEFAULT_INDOOR_4X4_RULES) : Optional.empty();
+            default:
+                return Optional.empty();
+        }
+    }
 
     private void checkSubstitutions() {
         if (FIVB_LIMITATION == substitutionsLimitation && teamSubstitutionsPerSet > 12) {

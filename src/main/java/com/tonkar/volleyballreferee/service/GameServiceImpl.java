@@ -182,7 +182,7 @@ public class GameServiceImpl implements GameService {
         } else {
             Optional<Team> optHTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getHTeamId(), userId, gameDescription.getKind(), gameDescription.getGender());
             Optional<Team> optGTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getGTeamId(), userId, gameDescription.getKind(), gameDescription.getGender());
-            Optional<Rules> optRules = rulesRepository.findByIdAndCreatedByAndKind(gameDescription.getRulesId(), userId, gameDescription.getKind());
+            Optional<Rules> optRules = findRules(userId, gameDescription.getRulesId(), gameDescription.getKind());
 
             if (optHTeam.isEmpty()) {
                 throw new NotFoundException(String.format("Could not find matching home team %s for user %s", gameDescription.getHTeamId(), userId));
@@ -300,7 +300,7 @@ public class GameServiceImpl implements GameService {
 
             Optional<Team> optHTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getHTeamId(), userId, savedGame.getKind(), gameDescription.getGender());
             Optional<Team> optGTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getGTeamId(), userId, savedGame.getKind(), gameDescription.getGender());
-            Optional<Rules> optRules = rulesRepository.findByIdAndCreatedByAndKind(gameDescription.getRulesId(), userId, savedGame.getKind());
+            Optional<Rules> optRules = findRules(userId, gameDescription.getRulesId(), savedGame.getKind());
 
             if (optHTeam.isEmpty()) {
                 throw new NotFoundException(String.format("Could not find matching home team %s for user %s", gameDescription.getHTeamId(), userId));
@@ -399,6 +399,16 @@ public class GameServiceImpl implements GameService {
     @Override
     public void deleteOldScheduledGames(int daysAgo) {
         gameRepository.deleteByScheduledAtLessThanAndStatus(epochDateNDaysAgo(daysAgo), GameStatus.SCHEDULED);
+    }
+
+    private Optional<Rules> findRules(String userId, UUID rulesId, GameType kind) {
+        Optional<Rules> optRules = Rules.getDefaultRules(rulesId, kind);
+
+        if (optRules.isEmpty()) {
+            optRules = rulesRepository.findByIdAndCreatedByAndKind(rulesId, userId, kind);
+        }
+
+        return optRules;
     }
 
     private long epochDateNDaysAgo(int daysAgo) {
