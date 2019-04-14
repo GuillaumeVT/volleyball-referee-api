@@ -99,12 +99,12 @@ public class GameTests extends VbrTests {
         gameDescription.setLeagueId(null);
         gameDescription.setLeagueName(null);
         gameDescription.setDivisionName(null);
-        gameDescription.setHTeamId(team1.getId());
-        gameDescription.setHTeamName(team1.getName());
-        gameDescription.setGTeamId(team2.getId());
-        gameDescription.setGTeamName(team2.getName());
-        gameDescription.setHSets(0);
-        gameDescription.setGSets(0);
+        gameDescription.setHomeTeamId(team1.getId());
+        gameDescription.setHomeTeamName(team1.getName());
+        gameDescription.setGuestTeamId(team2.getId());
+        gameDescription.setGuestTeamName(team2.getName());
+        gameDescription.setHomeSets(0);
+        gameDescription.setGuestSets(0);
         gameDescription.setRulesId(rules.getId());
         gameDescription.setRulesName(rules.getName());
 
@@ -221,15 +221,15 @@ public class GameTests extends VbrTests {
         game.setLeagueId(leagueId);
         game.setLeagueName("Test league");
         game.setDivisionName("Test division");
-        game.setHTeam(team1);
-        game.setGTeam(team2);
-        game.setHSets(0);
-        game.setGSets(0);
+        game.setHomeTeam(team1);
+        game.setGuestTeam(team2);
+        game.setHomeSets(0);
+        game.setGuestSets(0);
         game.setRules(rules);
         game.setSets(new ArrayList<>());
         game.getSets().add(buildSet());
-        game.setHCards(new ArrayList<>());
-        game.setGCards(new ArrayList<>());
+        game.setHomeCards(new ArrayList<>());
+        game.setGuestCards(new ArrayList<>());
 
         // Game does not exist
 
@@ -304,12 +304,12 @@ public class GameTests extends VbrTests {
         gameDescription.setLeagueId(null);
         gameDescription.setLeagueName(null);
         gameDescription.setDivisionName(null);
-        gameDescription.setHTeamId(team1.getId());
-        gameDescription.setHTeamName(team1.getName());
-        gameDescription.setGTeamId(team2.getId());
-        gameDescription.setGTeamName(team2.getName());
-        gameDescription.setHSets(0);
-        gameDescription.setGSets(0);
+        gameDescription.setHomeTeamId(team1.getId());
+        gameDescription.setHomeTeamName(team1.getName());
+        gameDescription.setGuestTeamId(team2.getId());
+        gameDescription.setGuestTeamName(team2.getName());
+        gameDescription.setHomeSets(0);
+        gameDescription.setGuestSets(0);
         gameDescription.setRulesId(rules.getId());
         gameDescription.setRulesName(rules.getName());
 
@@ -387,15 +387,15 @@ public class GameTests extends VbrTests {
         game.setLeagueId(null);
         game.setLeagueName(null);
         game.setDivisionName(null);
-        game.setHTeam(team1);
-        game.setGTeam(team2);
-        game.setHSets(0);
-        game.setGSets(0);
+        game.setHomeTeam(team1);
+        game.setGuestTeam(team2);
+        game.setHomeSets(0);
+        game.setGuestSets(0);
         game.setRules(rules);
         game.setSets(new ArrayList<>());
         game.getSets().add(buildSet());
-        game.setHCards(new ArrayList<>());
-        game.setGCards(new ArrayList<>());
+        game.setHomeCards(new ArrayList<>());
+        game.setGuestCards(new ArrayList<>());
 
         gameResponse = restTemplate.exchange(urlOf("/api/v3/games/full"), HttpMethod.PUT, payloadWithAuth(testUser1Auth, game), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
@@ -455,15 +455,15 @@ public class GameTests extends VbrTests {
         game.setLeagueId(leagueId);
         game.setLeagueName("Test league");
         game.setDivisionName("Test division");
-        game.setHTeam(team1);
-        game.setGTeam(team2);
-        game.setHSets(0);
-        game.setGSets(0);
+        game.setHomeTeam(team1);
+        game.setGuestTeam(team2);
+        game.setHomeSets(0);
+        game.setGuestSets(0);
         game.setRules(rules);
         game.setSets(new ArrayList<>());
         game.getSets().add(buildSet());
-        game.setHCards(new ArrayList<>());
-        game.setGCards(new ArrayList<>());
+        game.setHomeCards(new ArrayList<>());
+        game.setGuestCards(new ArrayList<>());
 
         // Create game
 
@@ -498,7 +498,7 @@ public class GameTests extends VbrTests {
         assertEquals(HttpStatus.OK, getGameDescrResponse.getStatusCode());
         assertEquals(1, getGameDescrResponse.getBody().size());
 
-        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/public/games/token/" + game.getHTeam().getName()), HttpMethod.GET, emptyPayloadWithoutAuth(), typeReference);
+        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/public/games/token/" + game.getHomeTeam().getName()), HttpMethod.GET, emptyPayloadWithoutAuth(), typeReference);
         assertEquals(HttpStatus.OK, getGameDescrResponse.getStatusCode());
         assertEquals(1, getGameDescrResponse.getBody().size());
 
@@ -584,10 +584,10 @@ public class GameTests extends VbrTests {
         set.setLadder(new ArrayList<>());
         set.setServing("H");
         set.setFirstServing("H");
-        set.setHSubstitutions(new ArrayList<>());
-        set.setGSubstitutions(new ArrayList<>());
-        set.setHCalledTimeouts(new ArrayList<>());
-        set.setGCalledTimeouts(new ArrayList<>());
+        set.setHomeSubstitutions(new ArrayList<>());
+        set.setGuestSubstitutions(new ArrayList<>());
+        set.setHomeCalledTimeouts(new ArrayList<>());
+        set.setGuestCalledTimeouts(new ArrayList<>());
 
         return set;
     }

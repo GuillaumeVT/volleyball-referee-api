@@ -175,19 +175,19 @@ public class GameServiceImpl implements GameService {
     public void createGame(String userId, GameDescription gameDescription) throws ConflictException, NotFoundException {
         if (gameRepository.existsById(gameDescription.getId())) {
             throw new ConflictException(String.format("Could not create game %s for user %s because it already exists", gameDescription.getId(), userId));
-        } else if (gameDescription.getHTeamId().equals(gameDescription.getGTeamId())) {
-            throw new ConflictException(String.format("Could not create game %s for user %s because team %s cannot play against itself", gameDescription.getId(), userId, gameDescription.getHTeamId()));
+        } else if (gameDescription.getHomeTeamId().equals(gameDescription.getGuestTeamId())) {
+            throw new ConflictException(String.format("Could not create game %s for user %s because team %s cannot play against itself", gameDescription.getId(), userId, gameDescription.getHomeTeamId()));
         } else if (!gameDescription.getCreatedBy().equals(gameDescription.getRefereedBy()) && !userRepository.areFriends(gameDescription.getCreatedBy(), gameDescription.getRefereedBy())) {
             throw new NotFoundException(String.format("Could not create game %s for user %s because %s and %s are not friends", gameDescription.getId(), userId, gameDescription.getCreatedBy(), gameDescription.getRefereedBy()));
         } else {
-            Optional<Team> optHTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getHTeamId(), userId, gameDescription.getKind(), gameDescription.getGender());
-            Optional<Team> optGTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getGTeamId(), userId, gameDescription.getKind(), gameDescription.getGender());
+            Optional<Team> optHTeam = teamRepository.findByIdAndCreatedByAndKind(gameDescription.getHomeTeamId(), userId, gameDescription.getKind());
+            Optional<Team> optGTeam = teamRepository.findByIdAndCreatedByAndKind(gameDescription.getGuestTeamId(), userId, gameDescription.getKind());
             Optional<Rules> optRules = findRules(userId, gameDescription.getRulesId(), gameDescription.getKind());
 
             if (optHTeam.isEmpty()) {
-                throw new NotFoundException(String.format("Could not find matching home team %s for user %s", gameDescription.getHTeamId(), userId));
+                throw new NotFoundException(String.format("Could not find matching home team %s for user %s", gameDescription.getHomeTeamId(), userId));
             } else if (optGTeam.isEmpty()) {
-                throw new NotFoundException(String.format("Could not find matching guest team %s for user %s", gameDescription.getGTeamId(), userId));
+                throw new NotFoundException(String.format("Could not find matching guest team %s for user %s", gameDescription.getGuestTeamId(), userId));
             } else if (optRules.isEmpty()) {
                 throw new NotFoundException(String.format("Could not find matching rules %s for user %s", gameDescription.getRulesId(), userId));
             } else {
@@ -208,13 +208,13 @@ public class GameServiceImpl implements GameService {
                 game.setLeagueId(gameDescription.getLeagueId());
                 game.setLeagueName(gameDescription.getLeagueName());
                 game.setDivisionName(gameDescription.getDivisionName());
-                game.setHTeam(optHTeam.get());
-                game.setGTeam(optGTeam.get());
-                game.setHSets(0);
-                game.setGSets(0);
+                game.setHomeTeam(optHTeam.get());
+                game.setGuestTeam(optGTeam.get());
+                game.setHomeSets(0);
+                game.setGuestSets(0);
                 game.setSets(new ArrayList<>());
-                game.setHCards(new ArrayList<>());
-                game.setGCards(new ArrayList<>());
+                game.setHomeCards(new ArrayList<>());
+                game.setGuestCards(new ArrayList<>());
                 game.setRules(optRules.get());
 
                 gameRepository.save(game);
@@ -228,14 +228,14 @@ public class GameServiceImpl implements GameService {
     public void createGame(String userId, Game game) throws ConflictException, NotFoundException {
         if (gameRepository.existsById(game.getId())) {
             throw new ConflictException(String.format("Could not create game %s for user %s because it already exists", game.getId(), userId));
-        } else if (game.getHTeam().getId().equals(game.getGTeam().getId())) {
-            throw new ConflictException(String.format("Could not create game %s for user %s because team %s cannot play against itself", game.getId(), userId, game.getHTeam().getId()));
+        } else if (game.getHomeTeam().getId().equals(game.getGuestTeam().getId())) {
+            throw new ConflictException(String.format("Could not create game %s for user %s because team %s cannot play against itself", game.getId(), userId, game.getHomeTeam().getId()));
         } else if (!game.getCreatedBy().equals(game.getRefereedBy()) && !userRepository.areFriends(game.getCreatedBy(), game.getRefereedBy())) {
             throw new NotFoundException(String.format("Could not create game %s for user %s because %s and %s are not friends", game.getId(), userId, game.getCreatedBy(), game.getRefereedBy()));
         } else {
             game.setCreatedBy(userId);
-            game.getHTeam().setCreatedBy(userId);
-            game.getGTeam().setCreatedBy(userId);
+            game.getHomeTeam().setCreatedBy(userId);
+            game.getGuestTeam().setCreatedBy(userId);
             game.getRules().setCreatedBy(userId);
             gameRepository.save(game);
 
@@ -245,10 +245,10 @@ public class GameServiceImpl implements GameService {
 
     private void createTeamsAndRulesAndLeaguesIfNeeded(String userId, Game game) {
         try {
-            teamService.createTeam(userId, game.getHTeam());
+            teamService.createTeam(userId, game.getHomeTeam());
         } catch (ConflictException e) { /* already exists */ }
         try {
-            teamService.createTeam(userId, game.getGTeam());
+            teamService.createTeam(userId, game.getGuestTeam());
         } catch (ConflictException e) { /* already exists */ }
         try {
             rulesService.createRules(userId, game.getRules());
@@ -291,21 +291,21 @@ public class GameServiceImpl implements GameService {
 
         if (optSavedGame.isEmpty()) {
             throw new NotFoundException(String.format("Could not find game %s %s for user %s", gameDescription.getId(), GameStatus.SCHEDULED, userId));
-        } else if (gameDescription.getHTeamId().equals(gameDescription.getGTeamId())) {
-            throw new ConflictException(String.format("Could not create game %s for user %s because team %s cannot play against itself", gameDescription.getId(), userId, gameDescription.getHTeamId()));
+        } else if (gameDescription.getHomeTeamId().equals(gameDescription.getGuestTeamId())) {
+            throw new ConflictException(String.format("Could not create game %s for user %s because team %s cannot play against itself", gameDescription.getId(), userId, gameDescription.getHomeTeamId()));
         } else if (!gameDescription.getCreatedBy().equals(gameDescription.getRefereedBy()) && !userRepository.areFriends(gameDescription.getCreatedBy(), gameDescription.getRefereedBy())) {
             throw new NotFoundException(String.format("Could not create game %s for user %s because %s and %s are not friends", gameDescription.getId(), userId, gameDescription.getCreatedBy(), gameDescription.getRefereedBy()));
         } else {
             Game savedGame = optSavedGame.get();
 
-            Optional<Team> optHTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getHTeamId(), userId, savedGame.getKind(), gameDescription.getGender());
-            Optional<Team> optGTeam = teamRepository.findByIdAndCreatedByAndKindAndGender(gameDescription.getGTeamId(), userId, savedGame.getKind(), gameDescription.getGender());
+            Optional<Team> optHTeam = teamRepository.findByIdAndCreatedByAndKind(gameDescription.getHomeTeamId(), userId, savedGame.getKind());
+            Optional<Team> optGTeam = teamRepository.findByIdAndCreatedByAndKind(gameDescription.getGuestTeamId(), userId, savedGame.getKind());
             Optional<Rules> optRules = findRules(userId, gameDescription.getRulesId(), savedGame.getKind());
 
             if (optHTeam.isEmpty()) {
-                throw new NotFoundException(String.format("Could not find matching home team %s for user %s", gameDescription.getHTeamId(), userId));
+                throw new NotFoundException(String.format("Could not find matching home team %s for user %s", gameDescription.getHomeTeamId(), userId));
             } else if (optGTeam.isEmpty()) {
-                throw new NotFoundException(String.format("Could not find matching guest team %s for user %s", gameDescription.getGTeamId(), userId));
+                throw new NotFoundException(String.format("Could not find matching guest team %s for user %s", gameDescription.getGuestTeamId(), userId));
             } else if (optRules.isEmpty()) {
                 throw new NotFoundException(String.format("Could not find matching rules %s for user %s", gameDescription.getRulesId(), userId));
             } else {
@@ -319,13 +319,13 @@ public class GameServiceImpl implements GameService {
                 savedGame.setLeagueId(gameDescription.getLeagueId());
                 savedGame.setLeagueName(gameDescription.getLeagueName());
                 savedGame.setDivisionName(gameDescription.getDivisionName());
-                savedGame.setHTeam(optHTeam.get());
-                savedGame.setGTeam(optGTeam.get());
-                savedGame.setHSets(0);
-                savedGame.setGSets(0);
+                savedGame.setHomeTeam(optHTeam.get());
+                savedGame.setGuestTeam(optGTeam.get());
+                savedGame.setHomeSets(0);
+                savedGame.setGuestSets(0);
                 savedGame.setSets(new ArrayList<>());
-                savedGame.setHCards(new ArrayList<>());
-                savedGame.setGCards(new ArrayList<>());
+                savedGame.setHomeCards(new ArrayList<>());
+                savedGame.setGuestCards(new ArrayList<>());
                 savedGame.setRules(optRules.get());
 
                 gameRepository.save(savedGame);
@@ -348,13 +348,13 @@ public class GameServiceImpl implements GameService {
             savedGame.setLeagueId(game.getLeagueId());
             savedGame.setLeagueName(game.getLeagueName());
             savedGame.setDivisionName(game.getDivisionName());
-            savedGame.setHTeam(game.getHTeam());
-            savedGame.setGTeam(game.getGTeam());
-            savedGame.setHSets(game.getHSets());
-            savedGame.setGSets(game.getGSets());
+            savedGame.setHomeTeam(game.getHomeTeam());
+            savedGame.setGuestTeam(game.getGuestTeam());
+            savedGame.setHomeSets(game.getHomeSets());
+            savedGame.setGuestSets(game.getGuestSets());
             savedGame.setSets(game.getSets());
-            savedGame.setHCards(game.getHCards());
-            savedGame.setGCards(game.getGCards());
+            savedGame.setHomeCards(game.getHomeCards());
+            savedGame.setGuestCards(game.getGuestCards());
             savedGame.setRules(game.getRules());
 
             gameRepository.save(savedGame);
@@ -441,8 +441,8 @@ public class GameServiceImpl implements GameService {
         for (int index = 0; index < 5; index++) {
             if (index < game.getSets().size()) {
                 Set set = game.getSets().get(index);
-                hPoints[index] = String.valueOf(set.getHPoints());
-                gPoints[index] = String.valueOf(set.getGPoints());
+                hPoints[index] = String.valueOf(set.getHomePoints());
+                gPoints[index] = String.valueOf(set.getGuestPoints());
             } else {
                 hPoints[index] = "";
                 gPoints[index] = "";
@@ -454,8 +454,8 @@ public class GameServiceImpl implements GameService {
                 game.getLeagueName(),
                 game.getDivisionName(),
                 game.getGender(),
-                game.getHTeam().getName(), game.getHTeam().getName(),
-                game.getHSets(), game.getGSets(),
+                game.getHomeTeam().getName(), game.getHomeTeam().getName(),
+                game.getHomeSets(), game.getGuestSets(),
                 hPoints[0], gPoints[0],
                 hPoints[1], gPoints[1],
                 hPoints[2], gPoints[2],

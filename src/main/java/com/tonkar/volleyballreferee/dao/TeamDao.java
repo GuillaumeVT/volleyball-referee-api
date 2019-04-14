@@ -61,18 +61,18 @@ public class TeamDao {
         Query query = Query.query(
                 Criteria.where("createdBy").is(userId)
                         .and("status").is(GameStatus.SCHEDULED)
-                        .and("hTeam._id").is(team.getId())
-                        .and("hTeam.createdBy").is(userId));
-        mongoTemplate.updateMulti(query, Update.update("hTeam", team), mongoTemplate.getCollectionName(Game.class));
+                        .and("homeTeam._id").is(team.getId())
+                        .and("homeTeam.createdBy").is(userId));
+        mongoTemplate.updateMulti(query, Update.update("homeTeam", team), mongoTemplate.getCollectionName(Game.class));
     }
 
     public void updateScheduledGamesWithGuestTeam(String userId, Team team) {
         Query query = Query.query(
                 Criteria.where("createdBy").is(userId)
                         .and("status").is(GameStatus.SCHEDULED)
-                        .and("gTeam._id").is(team.getId())
-                        .and("gTeam.createdBy").is(userId));
-        mongoTemplate.updateMulti(query, Update.update("gTeam", team), mongoTemplate.getCollectionName(Game.class));
+                        .and("guestTeam._id").is(team.getId())
+                        .and("guestTeam.createdBy").is(userId));
+        mongoTemplate.updateMulti(query, Update.update("guestTeam", team), mongoTemplate.getCollectionName(Game.class));
     }
 
 }

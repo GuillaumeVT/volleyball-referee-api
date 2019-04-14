@@ -44,48 +44,48 @@ public class Game {
     private String         divisionName;
     @Valid
     @NotNull
-    private Team           hTeam;
+    private Team           homeTeam;
     @Valid
     @NotNull
-    private Team           gTeam;
-    private int            hSets;
-    private int            gSets;
+    private Team           guestTeam;
+    private int            homeSets;
+    private int            guestSets;
     @NotNull
     private List<Set>      sets;
     @NotNull
-    private List<Sanction> hCards;
+    private List<Sanction> homeCards;
     @NotNull
-    private List<Sanction> gCards;
+    private List<Sanction> guestCards;
     @Valid
     @NotNull
     private Rules          rules;
 
     public boolean isStartingLineupConfirmed(int setIndex) {
         Set set = getSets().get(setIndex);
-        return set.getHStartingPlayers().isFilled() && set.getGStartingPlayers().isFilled();
+        return set.getHomeStartingPlayers().isFilled() && set.getGuestStartingPlayers().isFilled();
     }
 
     public boolean hasSubstitutions(int setIndex) {
         Set set = getSets().get(setIndex);
-        return !set.getHSubstitutions().isEmpty() || !set.getGSubstitutions().isEmpty();
+        return !set.getHomeSubstitutions().isEmpty() || !set.getGuestSubstitutions().isEmpty();
     }
 
     public boolean hasTimeouts(int setIndex) {
         Set set = getSets().get(setIndex);
-        return !set.getHCalledTimeouts().isEmpty() || !set.getGCalledTimeouts().isEmpty();
+        return !set.getHomeCalledTimeouts().isEmpty() || !set.getGuestCalledTimeouts().isEmpty();
     }
 
     public boolean hasSanctions(int setIndex) {
         boolean found = false;
 
-        Iterator<Sanction> sanctionsIt = getHCards().iterator();
+        Iterator<Sanction> sanctionsIt = getHomeCards().iterator();
 
         while (!found && sanctionsIt.hasNext()) {
             Sanction sanction = sanctionsIt.next();
             found = sanction.getSet() == setIndex;
         }
 
-        sanctionsIt = getGCards().iterator();
+        sanctionsIt = getGuestCards().iterator();
 
         while (!found && sanctionsIt.hasNext()) {
             Sanction sanction = sanctionsIt.next();
@@ -96,19 +96,19 @@ public class Game {
     }
 
     public String getTeamColor(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? getHTeam().getColor() : getGTeam().getColor();
+        return TeamType.HOME.equals(teamType) ? getHomeTeam().getColor() : getGuestTeam().getColor();
     }
 
     public String getLiberoColor(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? getHTeam().getLiberoColor() : getGTeam().getLiberoColor();
+        return TeamType.HOME.equals(teamType) ? getHomeTeam().getLiberoColor() : getGuestTeam().getLiberoColor();
     }
 
     public List<Player> getPlayers(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? getHTeam().getPlayers() : getGTeam().getPlayers();
+        return TeamType.HOME.equals(teamType) ? getHomeTeam().getPlayers() : getGuestTeam().getPlayers();
     }
 
     public List<Player> getLiberos(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? getHTeam().getLiberos() : getGTeam().getLiberos();
+        return TeamType.HOME.equals(teamType) ? getHomeTeam().getLiberos() : getGuestTeam().getLiberos();
     }
 
     public boolean isLibero(TeamType teamType, int player) {
@@ -116,26 +116,26 @@ public class Game {
     }
 
     public int getCaptain(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? getHTeam().getCaptain() : getGTeam().getCaptain();
+        return TeamType.HOME.equals(teamType) ? getHomeTeam().getCaptain() : getGuestTeam().getCaptain();
     }
 
     public List<Substitution> getSubstitutions(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
-        return TeamType.HOME.equals(teamType) ? set.getHSubstitutions() : set.getGSubstitutions();
+        return TeamType.HOME.equals(teamType) ? set.getHomeSubstitutions() : set.getGuestSubstitutions();
     }
 
     public List<Timeout> getCalledTimeouts(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
-        return TeamType.HOME.equals(teamType) ? set.getHCalledTimeouts() : set.getGCalledTimeouts();
+        return TeamType.HOME.equals(teamType) ? set.getHomeCalledTimeouts() : set.getGuestCalledTimeouts();
     }
 
     public List<Sanction> getGivenSanctions(TeamType teamType, int setIndex) {
-        List<Sanction> allSanctions = TeamType.HOME.equals(teamType) ? getHCards() : getGCards();
+        List<Sanction> allSanctions = TeamType.HOME.equals(teamType) ? getHomeCards() : getGuestCards();
         return allSanctions.stream().filter(sanction -> sanction.getSet() == setIndex).collect(Collectors.toList());
     }
 
     public Court getStartingLineup(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
-        return TeamType.HOME.equals(teamType) ? set.getHStartingPlayers() : set.getGStartingPlayers();
+        return TeamType.HOME.equals(teamType) ? set.getHomeStartingPlayers() : set.getGuestStartingPlayers();
     }
 }

@@ -29,8 +29,8 @@ public class ScoreSheetWriter {
         formatter.setTimeZone(TimeZone.getDefault());
         String date = formatter.format(new Date(game.getScheduledAt()));
 
-        String homeTeam = game.getHTeam().getName();
-        String guestTeam = game.getGTeam().getName();
+        String homeTeam = game.getHomeTeam().getName();
+        String guestTeam = game.getGuestTeam().getName();
 
         String filename = String.format(Locale.getDefault(), "%s_%s_%s.html", homeTeam, guestTeam, date);
         ScoreSheetWriter scoreSheetWriter = new ScoreSheetWriter(game, filename);
@@ -133,15 +133,15 @@ public class ScoreSheetWriter {
         Element homeSetInfoDiv = new Element("div");
         homeSetInfoDiv.addClass("div-grid-sets-info");
 
-        Element homeTeamNameSpan = createCellSpan(game.getHTeam().getName(), true, false);
+        Element homeTeamNameSpan = createCellSpan(game.getHomeTeam().getName(), true, false);
         homeTeamNameSpan.addClass("vbr-home-team");
         homeSetInfoDiv.appendChild(homeTeamNameSpan);
 
-        homeSetInfoDiv.appendChild(createCellSpan(String.valueOf(game.getHSets()), true, false));
+        homeSetInfoDiv.appendChild(createCellSpan(String.valueOf(game.getHomeSets()), true, false));
 
         int setIndex = 0;
         for (Set set : game.getSets()) {
-            homeSetInfoDiv.appendChild(createSetCellAnchor(String.valueOf(set.getHPoints()), setIndex));
+            homeSetInfoDiv.appendChild(createSetCellAnchor(String.valueOf(set.getHomePoints()), setIndex));
             setIndex++;
         }
 
@@ -150,15 +150,15 @@ public class ScoreSheetWriter {
         Element guestSetInfoDiv = new Element("div");
         guestSetInfoDiv.addClass("div-grid-sets-info");
 
-        Element guestTeamNameSpan = createCellSpan(game.getGTeam().getName(), true, false);
+        Element guestTeamNameSpan = createCellSpan(game.getGuestTeam().getName(), true, false);
         guestTeamNameSpan.addClass("vbr-guest-team");
         guestSetInfoDiv.appendChild(guestTeamNameSpan);
 
-        guestSetInfoDiv.appendChild(createCellSpan(String.valueOf(game.getGSets()), true, false));
+        guestSetInfoDiv.appendChild(createCellSpan(String.valueOf(game.getGuestSets()), true, false));
 
         setIndex = 0;
         for (Set set : game.getSets()) {
-            guestSetInfoDiv.appendChild(createSetCellAnchor(String.valueOf(set.getGPoints()), setIndex));
+            guestSetInfoDiv.appendChild(createSetCellAnchor(String.valueOf(set.getGuestPoints()), setIndex));
             setIndex++;
         }
 
@@ -249,7 +249,7 @@ public class ScoreSheetWriter {
         setInfoLine2Div.addClass("div-grid-set-info");
 
         Element indexSpan = createCellSpan(String.format(Locale.getDefault(),"Set %d", (setIndex + 1)), true, false);
-        indexSpan.addClass((set.getHPoints() > set.getGPoints()) ? "vbr-home-team" : "vbr-guest-team");
+        indexSpan.addClass((set.getHomePoints() > set.getGuestPoints()) ? "vbr-home-team" : "vbr-guest-team");
         setInfoLine1Div.appendChild(indexSpan);
 
         int duration = (int) Math.ceil(set.getDuration() / 60000.0);
@@ -277,14 +277,14 @@ public class ScoreSheetWriter {
             }
         }
 
-        setInfoLine1Div.appendChild(createCellSpan(String.valueOf(set.getHPoints()), true, false));
+        setInfoLine1Div.appendChild(createCellSpan(String.valueOf(set.getHomePoints()), true, false));
         setInfoLine1Div.appendChild(createCellSpan(String.valueOf(hScore1), true, false));
 
         if (hScore2 > 0 && gScore2 > 0) {
             setInfoLine1Div.appendChild(createCellSpan(String.valueOf(hScore2), true, false));
         }
 
-        setInfoLine2Div.appendChild(createCellSpan(String.valueOf(set.getGPoints()), true, false));
+        setInfoLine2Div.appendChild(createCellSpan(String.valueOf(set.getGuestPoints()), true, false));
         setInfoLine2Div.appendChild(createCellSpan(String.valueOf(gScore1), true, false));
 
         if (hScore2 > 0 && gScore2 > 0) {
@@ -365,12 +365,12 @@ public class ScoreSheetWriter {
         substitutionDiv.addClass("div-grid-substitution");
 
         String score = String.format(Locale.getDefault(), "%d-%d",
-                TeamType.HOME.equals(teamType) ? substitution.getHPoints() : substitution.getGPoints(),
-                TeamType.HOME.equals(teamType) ? substitution.getGPoints() : substitution.getHPoints());
+                TeamType.HOME.equals(teamType) ? substitution.getHomePoints() : substitution.getGuestPoints(),
+                TeamType.HOME.equals(teamType) ? substitution.getGuestPoints() : substitution.getHomePoints());
 
-        substitutionDiv.appendChild(createPlayerSpan(teamType, substitution.getPIn(), false));
+        substitutionDiv.appendChild(createPlayerSpan(teamType, substitution.getPlayerIn(), false));
         substitutionDiv.appendChild(new Element("div").addClass("substitution-image"));
-        substitutionDiv.appendChild(createPlayerSpan(teamType, substitution.getPOut(), false));
+        substitutionDiv.appendChild(createPlayerSpan(teamType, substitution.getPlayerOut(), false));
         substitutionDiv.appendChild(createCellSpan(score, false, false));
 
         return substitutionDiv;
@@ -405,8 +405,8 @@ public class ScoreSheetWriter {
         timeoutDiv.addClass("div-grid-timeout");
 
         String score = String.format(Locale.getDefault(), "%d-%d",
-                TeamType.HOME.equals(teamType) ? timeout.getHPoints() : timeout.getGPoints(),
-                TeamType.HOME.equals(teamType) ? timeout.getGPoints() : timeout.getHPoints());
+                TeamType.HOME.equals(teamType) ? timeout.getHomePoints() : timeout.getGuestPoints(),
+                TeamType.HOME.equals(teamType) ? timeout.getGuestPoints() : timeout.getHomePoints());
 
         timeoutDiv.appendChild(createPlayerSpan(teamType, -1, false).addClass(getTimeoutImageClass(game.getTeamColor(teamType))));
         timeoutDiv.appendChild(createCellSpan(score, false, false));
@@ -460,8 +460,8 @@ public class ScoreSheetWriter {
         int player = sanction.getNum();
 
         String score = String.format(Locale.getDefault(), "%d-%d",
-                TeamType.HOME.equals(teamType) ? sanction.getHPoints() : sanction.getGPoints(),
-                TeamType.HOME.equals(teamType) ? sanction.getGPoints() : sanction.getHPoints());
+                TeamType.HOME.equals(teamType) ? sanction.getHomePoints() : sanction.getGuestPoints(),
+                TeamType.HOME.equals(teamType) ? sanction.getGuestPoints() : sanction.getHomePoints());
 
         sanctionDiv.appendChild(new Element("div").addClass(getSanctionImageClass(sanction.getCard())));
         sanctionDiv.appendChild(createPlayerSpan(teamType, player, game.isLibero(teamType, player)));
@@ -661,7 +661,7 @@ public class ScoreSheetWriter {
         setInfoLine2Div.addClass("div-grid-set-info");
 
         Element indexSpan = createCellSpan(String.format(Locale.getDefault(), "Set %d", (setIndex + 1)), true, false);
-        indexSpan.addClass((set.getHPoints() > set.getGPoints()) ? "vbr-home-team" : "vbr-guest-team");
+        indexSpan.addClass((set.getHomePoints() > set.getGuestPoints()) ? "vbr-home-team" : "vbr-guest-team");
         setInfoLine1Div.appendChild(indexSpan);
 
         int duration = (int) Math.ceil(set.getDuration() / 60000.0);
@@ -683,13 +683,13 @@ public class ScoreSheetWriter {
             }
         }
 
-        setInfoLine1Div.appendChild(createCellSpan(String.valueOf(set.getHPoints()), true, false));
+        setInfoLine1Div.appendChild(createCellSpan(String.valueOf(set.getHomePoints()), true, false));
 
         if (hScore1 > 0 && gScore1 > 0) {
             setInfoLine1Div.appendChild(createCellSpan(String.valueOf(hScore1), true, false));
         }
 
-        setInfoLine2Div.appendChild(createCellSpan(String.valueOf(set.getGPoints()), true, false));
+        setInfoLine2Div.appendChild(createCellSpan(String.valueOf(set.getGuestPoints()), true, false));
 
         if (hScore1 > 0 && gScore1 > 0) {
             setInfoLine2Div.appendChild(createCellSpan(String.valueOf(gScore1), true, false));
@@ -725,14 +725,14 @@ public class ScoreSheetWriter {
         setInfoLine2Div.addClass("div-grid-set-info");
 
         Element indexSpan = createCellSpan(String.format(Locale.getDefault(), "Set %d", (setIndex + 1)), true, false);
-        indexSpan.addClass((game.getSets().get(setIndex).getHPoints() > game.getSets().get(setIndex).getGPoints()) ? "vbr-home-team" : "vbr-guest-team");
+        indexSpan.addClass((game.getSets().get(setIndex).getHomePoints() > game.getSets().get(setIndex).getGuestPoints()) ? "vbr-home-team" : "vbr-guest-team");
         setInfoLine1Div.appendChild(indexSpan);
 
         int duration = (int) Math.ceil(game.getSets().get(setIndex).getDuration() / 60000.0);
         setInfoLine2Div.appendChild(createCellSpan(String.format(Locale.getDefault(), "%d min", duration), true, false));
 
-        setInfoLine1Div.appendChild(createCellSpan(String.valueOf(game.getSets().get(setIndex).getHPoints()), true, false));
-        setInfoLine2Div.appendChild(createCellSpan(String.valueOf(game.getSets().get(setIndex).getGPoints()), true, false));
+        setInfoLine1Div.appendChild(createCellSpan(String.valueOf(game.getSets().get(setIndex).getHomePoints()), true, false));
+        setInfoLine2Div.appendChild(createCellSpan(String.valueOf(game.getSets().get(setIndex).getGuestPoints()), true, false));
 
         setInfoDiv.appendChild(setInfoLine1Div);
         setInfoDiv.appendChild(setInfoLine2Div);

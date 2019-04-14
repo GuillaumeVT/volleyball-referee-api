@@ -26,7 +26,7 @@ public interface GameRepository extends MongoRepository<Game, UUID> {
 
     boolean existsByCreatedByAndRules_IdAndStatus(String userId, UUID rulesId, GameStatus status);
 
-    @ExistsQuery("{ '$and': [ { 'createdBy': ?0 }, { 'status': ?2 }, { '$or': [ { 'hTeam.id': ?1 }, { 'gTeam.id': ?1 } ] } ] }")
+    @ExistsQuery("{ '$and': [ { 'createdBy': ?0 }, { 'status': ?2 }, { '$or': [ { 'homeTeam.id': ?1 }, { 'guestTeam.id': ?1 } ] } ] }")
     boolean existsByCreatedByAndTeamAndStatus(String userId, UUID teamId, GameStatus status);
 
     boolean existsByCreatedByAndLeagueIdAndStatus(String userId, UUID leagueId, GameStatus status);
@@ -39,6 +39,6 @@ public interface GameRepository extends MongoRepository<Game, UUID> {
 
     void deleteByIdAndCreatedBy(UUID id, String userId);
 
-    long deleteByScheduledAtLessThanAndStatus(long scheduledAt, GameStatus status);
+    void deleteByScheduledAtLessThanAndStatus(long scheduledAt, GameStatus status);
 
 }

@@ -17,6 +17,7 @@ public class GameDescription {
 
     @NotNull
     private UUID       id;
+    @NotBlank
     private String     createdBy;
     private long       createdAt;
     private long       updatedAt;
@@ -38,15 +39,15 @@ public class GameDescription {
     private String     leagueName;
     private String     divisionName;
     @NotNull
-    private UUID       hTeamId;
+    private UUID       homeTeamId;
     @NotBlank
-    private String     hTeamName;
+    private String     homeTeamName;
     @NotNull
-    private UUID       gTeamId;
+    private UUID       guestTeamId;
     @NotBlank
-    private String     gTeamName;
-    private int        hSets;
-    private int        gSets;
+    private String     guestTeamName;
+    private int        homeSets;
+    private int        guestSets;
     @NotNull
     private UUID       rulesId;
     @NotBlank

@@ -38,10 +38,10 @@ public class GameDao {
             .and("leagueId").as("leagueId")
             .and("leagueName").as("leagueName")
             .and("divisionName").as("divisionName")
-            .and("hTeam._id").as("hTeamId")
-            .and("hTeam.name").as("hTeamName")
-            .and("gTeam._id").as("gTeamId")
-            .and("gTeam.name").as("gTeamName")
+            .and("homeTeam._id").as("homeTeamId")
+            .and("homeTeam.name").as("homeTeamName")
+            .and("guestTeam._id").as("guestTeamId")
+            .and("guestTeam.name").as("guestTeamName")
             .and("hSets").as("hSets")
             .and("gSets").as("gSets")
             .and("rules._id").as("rulesId")
@@ -59,8 +59,8 @@ public class GameDao {
 
     public List<GameDescription> listGamesMatchingToken(String token) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("indexed").is(true).orOperator(
-                Criteria.where("hTeam.name").regex(".*" + token + ".*", "i"),
-                Criteria.where("gTeam.name").regex(".*" + token + ".*", "i"),
+                Criteria.where("homeTeam.name").regex(".*" + token + ".*", "i"),
+                Criteria.where("guestTeam.name").regex(".*" + token + ".*", "i"),
                 Criteria.where("leagueName").regex(".*" + token + ".*", "i"),
                 Criteria.where("refereeName").regex(".*" + token + ".*", "i")
         ));
@@ -87,7 +87,7 @@ public class GameDao {
     }
 
     public List<GameDescription> listGamesOfTeamInLeague(UUID leagueId, UUID teamId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).orOperator(Criteria.where("hTeam._id").is(teamId), Criteria.where("gTeam._id").is(teamId)));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).orOperator(Criteria.where("homeTeam._id").is(teamId), Criteria.where("guestTeam._id").is(teamId)));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
                 mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
@@ -109,7 +109,7 @@ public class GameDao {
     }
 
     public List<GameDescription> listNext10GamesInLeague(UUID leagueId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("league").is(leagueId).and("status").is(GameStatus.SCHEDULED));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("status").is(GameStatus.SCHEDULED));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "scheduledAt");
         LimitOperation limitOperation = Aggregation.limit(10L);
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation, limitOperation),

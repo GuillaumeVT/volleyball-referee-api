@@ -13,10 +13,10 @@ import java.util.List;
 public class Set {
 
     private long               duration;
-    private int                hPoints;
-    private int                gPoints;
-    private int                hTimeouts;
-    private int                gTimeouts;
+    private int                homePoints;
+    private int                guestPoints;
+    private int                homeTimeouts;
+    private int                guestTimeouts;
     @NotNull
     private List<String>       ladder;
     @NotBlank
@@ -24,23 +24,23 @@ public class Set {
     @NotBlank
     private String             firstServing;
     @Valid
-    private Court              hCurrentPlayers;
+    private Court              homeCurrentPlayers;
     @Valid
-    private Court              gCurrentPlayers;
+    private Court              guestCurrentPlayers;
     @Valid
-    private Court              hStartingPlayers;
+    private Court              homeStartingPlayers;
     @Valid
-    private Court              gStartingPlayers;
+    private Court              guestStartingPlayers;
     @NotNull
-    private List<Substitution> hSubstitutions;
+    private List<Substitution> homeSubstitutions;
     @NotNull
-    private List<Substitution> gSubstitutions;
-    private int                hCaptain;
-    private int                gCaptain;
+    private List<Substitution> guestSubstitutions;
+    private int                homeCaptain;
+    private int                guestCaptain;
     @NotNull
-    private List<Timeout>      hCalledTimeouts;
+    private List<Timeout>      homeCalledTimeouts;
     @NotNull
-    private List<Timeout>      gCalledTimeouts;
-    private long               rTime;
+    private List<Timeout>      guestCalledTimeouts;
+    private long               remainingTime;
 
 }

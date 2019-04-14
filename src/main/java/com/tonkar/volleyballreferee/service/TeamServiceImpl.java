@@ -36,8 +36,8 @@ public class TeamServiceImpl implements TeamService {
         Set<UUID> teamIds = new TreeSet<>();
 
         gameDao.listGamesInLeague(leagueId).forEach(gameDescription -> {
-            teamIds.add(gameDescription.getHTeamId());
-            teamIds.add(gameDescription.getGTeamId());
+            teamIds.add(gameDescription.getHomeTeamId());
+            teamIds.add(gameDescription.getGuestTeamId());
         });
 
         return teamDao.listTeamsWithIds(teamIds);

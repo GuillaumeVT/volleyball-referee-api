@@ -7,7 +7,7 @@ import lombok.Setter;
 @NoArgsConstructor @Getter @Setter
 public class Timeout {
 
-    private int hPoints;
-    private int gPoints;
+    private int homePoints;
+    private int guestPoints;
 
 }

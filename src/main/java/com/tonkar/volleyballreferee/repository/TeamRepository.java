@@ -15,7 +15,7 @@ public interface TeamRepository extends MongoRepository<Team, UUID> {
 
     Optional<Team> findByIdAndCreatedBy(UUID id, String userId);
 
-    Optional<Team> findByIdAndCreatedByAndKindAndGender(UUID id, String userId, GameType kind, GenderType gender);
+    Optional<Team> findByIdAndCreatedByAndKind(UUID id, String userId, GameType kind);
 
     boolean existsByCreatedByAndNameAndKindAndGender(String userId, String name, GameType kind, GenderType gender);
 

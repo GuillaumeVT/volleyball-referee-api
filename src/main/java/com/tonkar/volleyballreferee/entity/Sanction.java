@@ -13,7 +13,7 @@ public class Sanction {
     private String card;
     private int    num;
     private int    set;
-    private int    hPoints;
-    private int    gPoints;
+    private int    homePoints;
+    private int    guestPoints;
 
 }

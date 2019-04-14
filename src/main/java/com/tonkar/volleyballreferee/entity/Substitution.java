@@ -7,9 +7,9 @@ import lombok.Setter;
 @NoArgsConstructor @Getter @Setter
 public class Substitution {
 
-    private int pIn;
-    private int pOut;
-    private int hPoints;
-    private int gPoints;
+    private int playerIn;
+    private int playerOut;
+    private int homePoints;
+    private int guestPoints;
 
 }
