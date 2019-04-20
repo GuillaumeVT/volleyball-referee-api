@@ -183,7 +183,7 @@ public class ExcelDivisionWriter {
     private XSSFCellStyle createExcelTeamStyle(String color) {
         XSSFCellStyle style = workbook.createCellStyle();
         style.setFillForegroundColor(new XSSFColor(Color.decode(ScoreSheetWriter.getTextColor(color)), new DefaultIndexedColorMap()));
-        style.setFillBackgroundColor(new XSSFColor(Color.decode(color), new DefaultIndexedColorMap()));
+        style.setFillForegroundColor(new XSSFColor(Color.decode(color), new DefaultIndexedColorMap()));
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
         style.setBorderTop(BorderStyle.THIN);
@@ -210,7 +210,7 @@ public class ExcelDivisionWriter {
 
     private XSSFCellStyle createExcelBorderedStyle(String color, TeamType teamType) {
         XSSFCellStyle style = workbook.createCellStyle();
-        style.setFillBackgroundColor(new XSSFColor(Color.decode(color), new DefaultIndexedColorMap()));
+        style.setFillForegroundColor(new XSSFColor(Color.decode(color), new DefaultIndexedColorMap()));
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
         style.setBorderTop(TeamType.HOME.equals(teamType) ? BorderStyle.THIN : BorderStyle.NONE);
@@ -231,7 +231,7 @@ public class ExcelDivisionWriter {
 
     private XSSFCellStyle createExcelBorderedStyle(String color) {
         XSSFCellStyle style = workbook.createCellStyle();
-        style.setFillBackgroundColor(new XSSFColor(Color.decode(color), new DefaultIndexedColorMap()));
+        style.setFillForegroundColor(new XSSFColor(Color.decode(color), new DefaultIndexedColorMap()));
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
         style.setBorderTop(BorderStyle.THIN);
