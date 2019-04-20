@@ -160,7 +160,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public FileWrapper listGamesInDivisionExcel(String userId, UUID leagueId, String divisionName) throws IOException {
-        final List<Game> games = gameRepository.findByIdAndCreatedByAndLeagueIdAndStatusAndDivisionNameOrderByScheduledAtAsc(userId, leagueId, GameStatus.COMPLETED, divisionName);
+        List<Game> games = gameRepository.findByCreatedByAndLeagueIdAndDivisionNameAndStatusOrderByScheduledAtAsc(userId, leagueId, divisionName, GameStatus.COMPLETED);
         return ExcelDivisionWriter.writeExcelDivision(divisionName, games);
     }
 
