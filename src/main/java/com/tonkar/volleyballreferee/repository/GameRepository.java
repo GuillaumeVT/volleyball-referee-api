@@ -6,15 +6,15 @@ import org.springframework.data.mongodb.repository.ExistsQuery;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 public interface GameRepository extends MongoRepository<Game, UUID> {
 
-    Stream<Game> findByIdAndCreatedByAndLeagueIdAndStatus(String userId, UUID leagueId, GameStatus status);
+    List<Game> findByIdAndCreatedByAndLeagueIdAndStatusOrderByScheduledAtAsc(String userId, UUID leagueId, GameStatus status);
 
-    Stream<Game> findByIdAndCreatedByAndLeagueIdAndStatusAndDivisionName(String userId, UUID leagueId, GameStatus status, String divisionName);
+    List<Game> findByIdAndCreatedByAndLeagueIdAndStatusAndDivisionNameOrderByScheduledAtAsc(String userId, UUID leagueId, GameStatus status, String divisionName);
 
     Optional<Game> findByIdAndCreatedBy(UUID id, String userId);
 

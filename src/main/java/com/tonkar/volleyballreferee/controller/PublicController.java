@@ -3,11 +3,11 @@ package com.tonkar.volleyballreferee.controller;
 import com.tonkar.volleyballreferee.dto.GameDescription;
 import com.tonkar.volleyballreferee.dto.Statistics;
 import com.tonkar.volleyballreferee.dto.TeamDescription;
+import com.tonkar.volleyballreferee.entity.FileWrapper;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.League;
 import com.tonkar.volleyballreferee.entity.Message;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
-import com.tonkar.volleyballreferee.scoresheet.ScoreSheet;
 import com.tonkar.volleyballreferee.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class PublicController {
     @GetMapping(value = "/games/{gameId}/score-sheet", produces = {"application/json"})
     public ResponseEntity<?> getScoreSheet(@PathVariable("gameId") UUID gameId) {
         try {
-            ScoreSheet scoreSheet = gameService.getScoreSheet(gameId);
+            FileWrapper scoreSheet = gameService.getScoreSheet(gameId);
             ByteArrayResource resource = new ByteArrayResource(scoreSheet.getData());
             return ResponseEntity
                     .ok()
@@ -118,9 +118,39 @@ public class PublicController {
         return new ResponseEntity<>(gameService.listGamesOfTeamInLeague(leagueId, teamId), HttpStatus.OK);
     }
 
+    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}", produces = {"application/json"})
+    public ResponseEntity<List<GameDescription>> listGamesInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
+        return new ResponseEntity<>(gameService.listGamesInDivision(leagueId, divisionName), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/live", produces = {"application/json"})
+    public ResponseEntity<List<GameDescription>> listLiveGamesInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
+        return new ResponseEntity<>(gameService.listLiveGamesInDivision(leagueId, divisionName), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/next-10", produces = {"application/json"})
+    public ResponseEntity<List<GameDescription>> listNext10GamesInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
+        return new ResponseEntity<>(gameService.listNext10GamesInDivision(leagueId, divisionName), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/last-10", produces = {"application/json"})
+    public ResponseEntity<List<GameDescription>> listLast10GamesInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
+        return new ResponseEntity<>(gameService.listLast10GamesInDivision(leagueId, divisionName), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/team/{teamId}", produces = {"application/json"})
+    public ResponseEntity<List<GameDescription>> listGamesOfTeamInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName, @PathVariable("teamId") UUID teamId) {
+        return new ResponseEntity<>(gameService.listGamesOfTeamInDivision(leagueId, divisionName, teamId), HttpStatus.OK);
+    }
+
     @GetMapping(value = "/teams/league/{leagueId}", produces = {"application/json"})
     public ResponseEntity<List<TeamDescription>> listTeamsOfLeague(@PathVariable("leagueId") UUID leagueId) {
         return new ResponseEntity<>(teamService.listTeamsOfLeague(leagueId), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/teams/league/{leagueId}/division/{divisionName}", produces = {"application/json"})
+    public ResponseEntity<List<TeamDescription>> listTeamsOfDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
+        return new ResponseEntity<>(teamService.listTeamsOfDivision(leagueId, divisionName), HttpStatus.OK);
     }
 
     @GetMapping(value = "/leagues/{leagueId}", produces = {"application/json"})

@@ -44,6 +44,18 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public List<TeamDescription> listTeamsOfDivision(UUID leagueId, String divisionName) {
+        Set<UUID> teamIds = new TreeSet<>();
+
+        gameDao.listGamesInDivision(leagueId, divisionName).forEach(gameDescription -> {
+            teamIds.add(gameDescription.getHomeTeamId());
+            teamIds.add(gameDescription.getGuestTeamId());
+        });
+
+        return teamDao.listTeamsWithIds(teamIds);
+    }
+
+    @Override
     public List<TeamDescription> listTeams(String userId) {
         return teamDao.listTeams(userId);
     }

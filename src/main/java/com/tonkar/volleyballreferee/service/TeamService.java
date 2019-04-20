@@ -16,6 +16,8 @@ public interface TeamService {
 
     List<TeamDescription> listTeamsOfLeague(UUID leagueId);
 
+    List<TeamDescription> listTeamsOfDivision(UUID leagueId, String divisionName);
+
     // User only
 
     List<TeamDescription> listTeams(String userId);

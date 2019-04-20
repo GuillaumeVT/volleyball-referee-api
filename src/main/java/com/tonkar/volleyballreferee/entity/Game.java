@@ -60,6 +60,10 @@ public class Game {
     @NotNull
     private Rules          rules;
 
+    public Team getTeam(TeamType teamType) {
+        return TeamType.HOME.equals(teamType) ? homeTeam : guestTeam;
+    }
+
     public boolean isStartingLineupConfirmed(int setIndex) {
         Set set = getSets().get(setIndex);
         return set.getHomeStartingPlayers().isFilled() && set.getGuestStartingPlayers().isFilled();

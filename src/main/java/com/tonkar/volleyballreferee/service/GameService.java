@@ -2,16 +2,16 @@ package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.GameDescription;
+import com.tonkar.volleyballreferee.entity.FileWrapper;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.Set;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
-import com.tonkar.volleyballreferee.scoresheet.ScoreSheet;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface GameService {
@@ -34,9 +34,19 @@ public interface GameService {
 
     List<GameDescription> listNext10GamesInLeague(UUID leagueId);
 
+    List<GameDescription> listGamesInDivision(UUID leagueId, String divisionName);
+
+    List<GameDescription> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId);
+
+    List<GameDescription> listLiveGamesInDivision(UUID leagueId, String divisionName);
+
+    List<GameDescription> listLast10GamesInDivision(UUID leagueId, String divisionName);
+
+    List<GameDescription> listNext10GamesInDivision(UUID leagueId, String divisionName);
+
     Game getGame(UUID gameId) throws NotFoundException;
 
-    ScoreSheet getScoreSheet(UUID gameId) throws NotFoundException;
+    FileWrapper getScoreSheet(UUID gameId) throws NotFoundException;
 
     // User only
 
@@ -46,9 +56,11 @@ public interface GameService {
 
     List<GameDescription> listAvailableGames(String userId);
 
+    List<GameDescription> listCompletedGames(String userId);
+
     List<GameDescription> listGamesInLeague(String userId, UUID leagueId);
 
-    byte[] listGamesInLeagueCsv(String userId, UUID leagueId, Optional<String> divisionName);
+    FileWrapper listGamesInDivisionExcel(String userId, UUID leagueId, String divisionName) throws IOException;
 
     Game getGame(String userId, UUID gameId) throws NotFoundException;
 

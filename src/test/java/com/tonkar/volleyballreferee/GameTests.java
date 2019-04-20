@@ -37,10 +37,13 @@ public class GameTests extends VbrTests {
         getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/games/available"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
         assertEquals(HttpStatus.UNAUTHORIZED, getGameDescrResponse.getStatusCode());
 
+        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/games/completed"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
+        assertEquals(HttpStatus.UNAUTHORIZED, getGameDescrResponse.getStatusCode());
+
         getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/games/league/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
         assertEquals(HttpStatus.UNAUTHORIZED, getGameDescrResponse.getStatusCode());
 
-        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/games/league/" + UUID.randomUUID() + "/csv"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
+        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/games/league/" + UUID.randomUUID() + "/division/div/excel"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
         assertEquals(HttpStatus.UNAUTHORIZED, getGameDescrResponse.getStatusCode());
 
         ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), Game.class);
@@ -220,7 +223,7 @@ public class GameTests extends VbrTests {
         game.setIndexed(true);
         game.setLeagueId(leagueId);
         game.setLeagueName("Test league");
-        game.setDivisionName("Test division");
+        game.setDivisionName("PoolA");
         game.setHomeTeam(team1);
         game.setGuestTeam(team2);
         game.setHomeSets(0);
@@ -259,6 +262,23 @@ public class GameTests extends VbrTests {
         ResponseEntity<List<GameDescription>> getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/games/league/" + leagueId), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
         assertEquals(HttpStatus.OK, getGameDescrResponse.getStatusCode());
         assertEquals(1, getGameDescrResponse.getBody().size());
+
+        typeReference = new ParameterizedTypeReference<>() {};
+        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/public/games/league/" + leagueId), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
+        assertEquals(HttpStatus.OK, getGameDescrResponse.getStatusCode());
+        assertEquals(1, getGameDescrResponse.getBody().size());
+
+        // Get games in division
+
+        typeReference = new ParameterizedTypeReference<>() {};
+        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/public/games/league/" + leagueId + "/division/" + game.getDivisionName()), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
+        assertEquals(HttpStatus.OK, getGameDescrResponse.getStatusCode());
+        assertEquals(1, getGameDescrResponse.getBody().size());
+
+        typeReference = new ParameterizedTypeReference<>() {};
+        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/public/games/league/" + leagueId + "/division/somediv"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
+        assertEquals(HttpStatus.OK, getGameDescrResponse.getStatusCode());
+        assertEquals(0, getGameDescrResponse.getBody().size());
 
         // Count games in league
 
@@ -414,6 +434,14 @@ public class GameTests extends VbrTests {
         assertEquals(1, getGameDescrResponse.getBody().size());
 
         getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/games/status/" + GameStatus.COMPLETED), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference2);
+        assertEquals(HttpStatus.OK, getGameDescrResponse.getStatusCode());
+        assertEquals(1, getGameDescrResponse.getBody().size());
+
+        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/games/completed"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference2);
+        assertEquals(HttpStatus.OK, getGameDescrResponse.getStatusCode());
+        assertEquals(1, getGameDescrResponse.getBody().size());
+
+        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/games/completed"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference2);
         assertEquals(HttpStatus.OK, getGameDescrResponse.getStatusCode());
         assertEquals(1, getGameDescrResponse.getBody().size());
 

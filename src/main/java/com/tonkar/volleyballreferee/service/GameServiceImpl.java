@@ -5,23 +5,21 @@ import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.GameDescription;
 import com.tonkar.volleyballreferee.entity.Set;
 import com.tonkar.volleyballreferee.entity.*;
+import com.tonkar.volleyballreferee.generated.ExcelDivisionWriter;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.repository.GameRepository;
 import com.tonkar.volleyballreferee.repository.RulesRepository;
 import com.tonkar.volleyballreferee.repository.TeamRepository;
 import com.tonkar.volleyballreferee.repository.UserRepository;
-import com.tonkar.volleyballreferee.scoresheet.ScoreSheet;
-import com.tonkar.volleyballreferee.scoresheet.ScoreSheetWriter;
+import com.tonkar.volleyballreferee.generated.ScoreSheetWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.text.DateFormat;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.List;
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -91,6 +89,31 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public List<GameDescription> listGamesInDivision(UUID leagueId, String divisionName) {
+        return gameDao.listGamesInDivision(leagueId, divisionName);
+    }
+
+    @Override
+    public List<GameDescription> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId) {
+        return gameDao.listGamesOfTeamInDivision(leagueId, divisionName, teamId);
+    }
+
+    @Override
+    public List<GameDescription> listLiveGamesInDivision(UUID leagueId, String divisionName) {
+        return gameDao.listLiveGamesInDivision(leagueId, divisionName);
+    }
+
+    @Override
+    public List<GameDescription> listLast10GamesInDivision(UUID leagueId, String divisionName) {
+        return gameDao.listLast10GamesInDivision(leagueId, divisionName);
+    }
+
+    @Override
+    public List<GameDescription> listNext10GamesInDivision(UUID leagueId, String divisionName) {
+        return gameDao.listNext10GamesInDivision(leagueId, divisionName);
+    }
+
+    @Override
     public Game getGame(UUID gameId) throws NotFoundException {
         Optional<Game> optGame = gameRepository.findById(gameId);
         if (optGame.isPresent()) {
@@ -101,7 +124,7 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public ScoreSheet getScoreSheet(UUID gameId) throws NotFoundException {
+    public FileWrapper getScoreSheet(UUID gameId) throws NotFoundException {
         Optional<Game> optGame = gameRepository.findById(gameId);
         if (optGame.isPresent()) {
             return ScoreSheetWriter.writeGame(optGame.get());
@@ -126,29 +149,19 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public List<GameDescription> listCompletedGames(String userId) {
+        return gameDao.listCompletedGames(userId);
+    }
+
+    @Override
     public List<GameDescription> listGamesInLeague(String userId, UUID leagueId) {
         return gameDao.listGamesInLeague(userId, leagueId);
     }
 
     @Override
-    public byte[] listGamesInLeagueCsv(String userId, UUID leagueId, Optional<String> divisionName) {
-        final Stream<Game> gameStream;
-
-        if (divisionName.isEmpty()) {
-            gameStream = gameRepository.findByIdAndCreatedByAndLeagueIdAndStatus(userId, leagueId, GameStatus.COMPLETED);
-        } else {
-            gameStream = gameRepository.findByIdAndCreatedByAndLeagueIdAndStatusAndDivisionName(userId, leagueId, GameStatus.COMPLETED, divisionName.get());
-        }
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        PrintWriter printWriter = new PrintWriter(byteArrayOutputStream);
-
-        appendCsvHeader(printWriter);
-        gameStream.forEach(game -> appendCsvGame(game, printWriter));
-
-        printWriter.close();
-
-        return byteArrayOutputStream.toByteArray();
+    public FileWrapper listGamesInDivisionExcel(String userId, UUID leagueId, String divisionName) throws IOException {
+        final List<Game> games = gameRepository.findByIdAndCreatedByAndLeagueIdAndStatusAndDivisionNameOrderByScheduledAtAsc(userId, leagueId, GameStatus.COMPLETED, divisionName);
+        return ExcelDivisionWriter.writeExcelDivision(divisionName, games);
     }
 
     @Override
@@ -415,52 +428,4 @@ public class GameServiceImpl implements GameService {
         return  System.currentTimeMillis() - (daysAgo * 86400000L);
     }
 
-    private void appendCsvHeader(PrintWriter printWriter) {
-        printWriter.append(String.format("%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
-                "Date",
-                "League",
-                "Division",
-                "Gender",
-                "Home", "Guest",
-                "Sets Home", "Sets Guest",
-                "Set 1 Home", "Set 1 Guest",
-                "Set 2 Home", "Set 2 Guest",
-                "Set 3 Home", "Set 3 Guest",
-                "Set 4 Home", "Set 4 Guest",
-                "Set 5 Home", "Set 5 Guest"
-        ));
-    }
-
-    private void appendCsvGame(Game game, PrintWriter printWriter) {
-        DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
-        formatter.setTimeZone(TimeZone.getDefault());
-
-        String[] hPoints = new String[5];
-        String[] gPoints = new String[5];
-
-        for (int index = 0; index < 5; index++) {
-            if (index < game.getSets().size()) {
-                Set set = game.getSets().get(index);
-                hPoints[index] = String.valueOf(set.getHomePoints());
-                gPoints[index] = String.valueOf(set.getGuestPoints());
-            } else {
-                hPoints[index] = "";
-                gPoints[index] = "";
-            }
-        }
-
-        printWriter.append(String.format("\n%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s",
-                formatter.format(game.getScheduledAt()),
-                game.getLeagueName(),
-                game.getDivisionName(),
-                game.getGender(),
-                game.getHomeTeam().getName(), game.getHomeTeam().getName(),
-                game.getHomeSets(), game.getGuestSets(),
-                hPoints[0], gPoints[0],
-                hPoints[1], gPoints[1],
-                hPoints[2], gPoints[2],
-                hPoints[3], gPoints[3],
-                hPoints[4], gPoints[4]
-        ));
-    }
 }

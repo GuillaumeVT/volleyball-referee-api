@@ -1,4 +1,4 @@
-package com.tonkar.volleyballreferee.scoresheet;
+package com.tonkar.volleyballreferee.generated;
 
 import com.tonkar.volleyballreferee.entity.*;
 import org.jsoup.Jsoup;
@@ -7,7 +7,7 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -24,7 +24,7 @@ public class ScoreSheetWriter {
     private final Document document;
     private final Element  body;
 
-    public static ScoreSheet writeGame(Game game) {
+    public static FileWrapper writeGame(Game game) {
         DateFormat formatter = new SimpleDateFormat("dd_MM_yyyy", Locale.getDefault());
         formatter.setTimeZone(TimeZone.getDefault());
         String date = formatter.format(new Date(game.getScheduledAt()));
@@ -50,7 +50,7 @@ public class ScoreSheetWriter {
                 break;
         }
 
-        return new ScoreSheet(filename, scoreSheetWriter.getScoreSheet());
+        return new FileWrapper(filename, scoreSheetWriter.getScoreSheet());
     }
 
     private ScoreSheetWriter(Game game, String filename) {
@@ -218,8 +218,10 @@ public class ScoreSheetWriter {
 
         if (player < 0) {
             playerStr = "-";
-        } else if (player == 0) {
+        } else if (player == 100) {
             playerStr = "C";
+        } else if (player == 200) {
+            playerStr = "T";
         }
 
         Element playerSpan = createCellSpan(playerStr, false, true);
@@ -764,7 +766,7 @@ public class ScoreSheetWriter {
         return base64Image;
     }
 
-    private String getTextColor(String backgroundColor) {
+    public static String getTextColor(String backgroundColor) {
         Color color = Color.decode(backgroundColor);
         String textColor;
 

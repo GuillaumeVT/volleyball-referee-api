@@ -2,6 +2,7 @@ package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.GameDescription;
+import com.tonkar.volleyballreferee.entity.FileWrapper;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.Set;
@@ -20,8 +21,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -48,37 +49,30 @@ public class GameController {
         return new ResponseEntity<>(gameService.listAvailableGames(user.getUserId()), HttpStatus.OK);
     }
 
+    @GetMapping(value = "/completed", produces = {"application/json"})
+    public ResponseEntity<List<GameDescription>> listCompletedGames(@AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(gameService.listCompletedGames(user.getUserId()), HttpStatus.OK);
+    }
+
     @GetMapping(value = "/league/{leagueId}", produces = {"application/json"})
     public ResponseEntity<List<GameDescription>> listGamesInLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
         return new ResponseEntity<>(gameService.listGamesInLeague(user.getUserId(), leagueId), HttpStatus.OK);
     }
 
-    @GetMapping("/league/{leagueId}/csv")
-    public ResponseEntity<?> listGamesInLeagueCsv(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
-
-        byte[] data = gameService.listGamesInLeagueCsv(user.getUserId(), leagueId, Optional.empty());
-
-        String fileName = leagueId + ".csv";
-        ByteArrayResource resource = new ByteArrayResource(data);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileName)
-                .contentType(MediaType.parseMediaType("text/csv"))
-                .contentLength(data.length)
-                .body(resource);
-    }
-
-    @GetMapping("/league/{leagueId}/division/{divisionName}/csv")
-    public ResponseEntity<?> listGamesInDivisionCsv(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
-
-        byte[] data = gameService.listGamesInLeagueCsv(user.getUserId(), leagueId, Optional.of(divisionName));
-
-        String fileName = leagueId + "_" + divisionName + ".csv";
-        ByteArrayResource resource = new ByteArrayResource(data);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileName)
-                .contentType(MediaType.parseMediaType("text/csv"))
-                .contentLength(data.length)
-                .body(resource);
+    @GetMapping("/league/{leagueId}/division/{divisionName}/excel")
+    public ResponseEntity<?> listGamesInDivisionExcel(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
+        try {
+            FileWrapper excelDivision = gameService.listGamesInDivisionExcel(user.getUserId(), leagueId, divisionName);
+            ByteArrayResource resource = new ByteArrayResource(excelDivision.getData());
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + excelDivision.getFilename())
+                    .contentType(MediaType.parseMediaType(" application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .contentLength(excelDivision.getData().length)
+                    .body(resource);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping(value = "/{gameId}", produces = {"application/json"})

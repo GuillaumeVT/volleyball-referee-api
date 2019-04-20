@@ -43,4 +43,7 @@ public class Set {
     private List<Timeout>      guestCalledTimeouts;
     private long               remainingTime;
 
+    public int getPoints(TeamType teamType) {
+        return TeamType.HOME.equals(teamType) ? homePoints : guestPoints;
+    }
 }

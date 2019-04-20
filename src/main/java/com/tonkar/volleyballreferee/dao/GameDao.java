@@ -86,6 +86,13 @@ public class GameDao {
                 mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
     }
 
+    public List<GameDescription> listGamesInDivision(UUID leagueId, String divisionName) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("divisionName").is(divisionName));
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
+                mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
+    }
+
     public List<GameDescription> listGamesOfTeamInLeague(UUID leagueId, UUID teamId) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).orOperator(Criteria.where("homeTeam._id").is(teamId), Criteria.where("guestTeam._id").is(teamId)));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
@@ -116,6 +123,40 @@ public class GameDao {
                 mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
     }
 
+    public List<GameDescription> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId) {
+        MatchOperation matchOperation = Aggregation.match(
+                Criteria.where("leagueId").is(leagueId)
+                        .and("divisionName").is(divisionName)
+                        .orOperator(Criteria.where("homeTeam._id").is(teamId), Criteria.where("guestTeam._id").is(teamId))
+        );
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
+                mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
+    }
+
+    public List<GameDescription> listLiveGamesInDivision(UUID leagueId, String divisionName) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("divisionName").is(divisionName).and("status").is(GameStatus.LIVE));
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
+                mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
+    }
+
+    public List<GameDescription> listLast10GamesInDivision(UUID leagueId, String divisionName) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("divisionName").is(divisionName).and("status").is(GameStatus.COMPLETED));
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
+        LimitOperation limitOperation = Aggregation.limit(10L);
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation, limitOperation),
+                mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
+    }
+
+    public List<GameDescription> listNext10GamesInDivision(UUID leagueId, String divisionName) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("divisionName").is(divisionName).and("status").is(GameStatus.SCHEDULED));
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "scheduledAt");
+        LimitOperation limitOperation = Aggregation.limit(10L);
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation, limitOperation),
+                mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
+    }
+
     public List<GameDescription> listGames(String userId) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
@@ -133,6 +174,15 @@ public class GameDao {
     public List<GameDescription> listAvailableGames(String userId) {
         MatchOperation matchOperation = Aggregation.match(Criteria
                 .where("status").in(GameStatus.SCHEDULED, GameStatus.LIVE)
+                .orOperator(Criteria.where("createdBy").is(userId), Criteria.where("refereedBy").is(userId)));
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
+                mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
+    }
+
+    public List<GameDescription> listCompletedGames(String userId) {
+        MatchOperation matchOperation = Aggregation.match(Criteria
+                .where("status").is(GameStatus.COMPLETED)
                 .orOperator(Criteria.where("createdBy").is(userId), Criteria.where("refereedBy").is(userId)));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
