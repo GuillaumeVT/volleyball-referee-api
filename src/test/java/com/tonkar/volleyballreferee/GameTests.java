@@ -282,7 +282,7 @@ public class GameTests extends VbrTests {
 
         // Download excel file for division
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/league/" + UUID.randomUUID() + "/division/" + game.getDivisionName() + "/excel"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/league/" + leagueId + "/division/" + game.getDivisionName() + "/excel"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // Count games in league
