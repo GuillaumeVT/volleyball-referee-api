@@ -66,7 +66,7 @@ public class GameController {
             ByteArrayResource resource = new ByteArrayResource(excelDivision.getData());
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + excelDivision.getFilename())
-                    .contentType(MediaType.parseMediaType(" application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                     .contentLength(excelDivision.getData().length)
                     .body(resource);
         } catch (IOException e) {
