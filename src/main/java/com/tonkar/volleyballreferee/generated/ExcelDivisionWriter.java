@@ -55,7 +55,7 @@ public class ExcelDivisionWriter {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         workbook.write(byteArrayOutputStream);
 
-        String filename = String.format(Locale.getDefault(), "%s.xslx", divisionName);
+        String filename = String.format(Locale.getDefault(), "%s.xlsx", divisionName);
         return new FileWrapper(filename, byteArrayOutputStream.toByteArray());
     }
 
