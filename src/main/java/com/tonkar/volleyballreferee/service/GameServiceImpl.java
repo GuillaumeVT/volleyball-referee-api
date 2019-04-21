@@ -371,7 +371,7 @@ public class GameServiceImpl implements GameService {
             savedGame.setHomeCards(game.getHomeCards());
             savedGame.setGuestCards(game.getGuestCards());
             savedGame.setRules(game.getRules());
-            savedGame.setScore(game.getScore());
+            savedGame.setScore(buildScore(savedGame));
 
             gameRepository.save(savedGame);
         } else {
@@ -431,4 +431,13 @@ public class GameServiceImpl implements GameService {
         return  System.currentTimeMillis() - (daysAgo * 86400000L);
     }
 
+    private String buildScore(Game game) {
+        StringBuilder scoreBuilder = new StringBuilder();
+
+        for (Set set : game.getSets()) {
+            scoreBuilder.append(String.format("%d-%d\t\t", set.getHomePoints(), set.getGuestPoints()));
+        }
+
+        return scoreBuilder.toString().trim();
+    }
 }
