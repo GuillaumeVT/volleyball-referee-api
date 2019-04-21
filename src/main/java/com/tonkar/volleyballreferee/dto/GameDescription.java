@@ -52,5 +52,7 @@ public class GameDescription {
     private UUID       rulesId;
     @NotBlank
     private String     rulesName;
+    @NotNull
+    private String     score;
 
 }

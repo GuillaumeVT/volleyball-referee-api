@@ -229,6 +229,7 @@ public class GameServiceImpl implements GameService {
                 game.setHomeCards(new ArrayList<>());
                 game.setGuestCards(new ArrayList<>());
                 game.setRules(optRules.get());
+                game.setScore("");
 
                 gameRepository.save(game);
 
@@ -340,6 +341,7 @@ public class GameServiceImpl implements GameService {
                 savedGame.setHomeCards(new ArrayList<>());
                 savedGame.setGuestCards(new ArrayList<>());
                 savedGame.setRules(optRules.get());
+                savedGame.setScore("");
 
                 gameRepository.save(savedGame);
 
@@ -369,6 +371,7 @@ public class GameServiceImpl implements GameService {
             savedGame.setHomeCards(game.getHomeCards());
             savedGame.setGuestCards(game.getGuestCards());
             savedGame.setRules(game.getRules());
+            savedGame.setScore(game.getScore());
 
             gameRepository.save(savedGame);
         } else {

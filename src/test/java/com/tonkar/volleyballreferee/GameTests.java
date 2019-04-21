@@ -110,6 +110,7 @@ public class GameTests extends VbrTests {
         gameDescription.setGuestSets(0);
         gameDescription.setRulesId(rules.getId());
         gameDescription.setRulesName(rules.getName());
+        gameDescription.setScore("");
 
         // Create teams and rules
 
@@ -233,6 +234,7 @@ public class GameTests extends VbrTests {
         game.getSets().add(buildSet());
         game.setHomeCards(new ArrayList<>());
         game.setGuestCards(new ArrayList<>());
+        game.setScore("");
 
         // Game does not exist
 
@@ -337,6 +339,7 @@ public class GameTests extends VbrTests {
         gameDescription.setGuestSets(0);
         gameDescription.setRulesId(rules.getId());
         gameDescription.setRulesName(rules.getName());
+        gameDescription.setScore("");
 
         // Create teams and rules
 
@@ -421,6 +424,7 @@ public class GameTests extends VbrTests {
         game.getSets().add(buildSet());
         game.setHomeCards(new ArrayList<>());
         game.setGuestCards(new ArrayList<>());
+        game.setScore("");
 
         gameResponse = restTemplate.exchange(urlOf("/api/v3/games/full"), HttpMethod.PUT, payloadWithAuth(testUser1Auth, game), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
@@ -497,6 +501,7 @@ public class GameTests extends VbrTests {
         game.getSets().add(buildSet());
         game.setHomeCards(new ArrayList<>());
         game.setGuestCards(new ArrayList<>());
+        game.setScore("");
 
         // Create game
 

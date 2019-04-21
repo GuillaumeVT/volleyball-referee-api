@@ -59,6 +59,8 @@ public class Game {
     @Valid
     @NotNull
     private Rules          rules;
+    @NotNull
+    private String         score;
 
     public Team getTeam(TeamType teamType) {
         return TeamType.HOME.equals(teamType) ? homeTeam : guestTeam;

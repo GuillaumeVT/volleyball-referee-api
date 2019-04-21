@@ -45,7 +45,8 @@ public class GameDao {
             .and("hSets").as("hSets")
             .and("gSets").as("gSets")
             .and("rules._id").as("rulesId")
-            .and("rules.name").as("rulesName");
+            .and("rules.name").as("rulesName")
+            .and("score").as("score");
 
     @Autowired
     private MongoTemplate mongoTemplate;
