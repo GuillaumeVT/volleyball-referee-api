@@ -21,6 +21,7 @@ public class League {
     @NotBlank
     private String       createdBy;
     private long         createdAt;
+    private long         updatedAt;
     @NotNull
     private GameType     kind;
     @NotBlank

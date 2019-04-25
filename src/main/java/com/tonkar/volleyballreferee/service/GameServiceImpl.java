@@ -282,6 +282,7 @@ public class GameServiceImpl implements GameService {
                     league.setId(game.getLeagueId());
                     league.setCreatedBy(userId);
                     league.setCreatedAt(game.getCreatedAt());
+                    league.setUpdatedAt(game.getUpdatedAt());
                     league.setKind(game.getKind());
                     league.setName(game.getLeagueName());
                     league.setDivisions(new ArrayList<>());

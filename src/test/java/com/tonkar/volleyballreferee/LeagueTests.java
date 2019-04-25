@@ -52,6 +52,7 @@ public class LeagueTests extends VbrTests {
         league.setId(leagueId);
         league.setCreatedBy(testUser1Id);
         league.setCreatedAt(System.currentTimeMillis());
+        league.setUpdatedAt(System.currentTimeMillis());
         league.setKind(GameType.INDOOR_4X4);
         league.setName("Test league");
         league.setDivisions(new ArrayList<>());
