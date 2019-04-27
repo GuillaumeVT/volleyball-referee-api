@@ -67,6 +67,9 @@ public class GameTests extends VbrTests {
         gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + UUID.randomUUID() + "/set/2"), HttpMethod.PATCH, emptyPayloadWithAuth(testUserInvalidAuth), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
 
+        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + UUID.randomUUID() + "/indexed/true"), HttpMethod.PATCH, emptyPayloadWithAuth(testUserInvalidAuth), String.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
+
         gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidAuth), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
 
@@ -249,6 +252,14 @@ public class GameTests extends VbrTests {
         // Update set
 
         gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + game.getId() + "/set/1"), HttpMethod.PATCH, payloadWithAuth(testUser1Auth, buildSet()), String.class);
+        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+
+        // Update indexed
+
+        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + game.getId() + "/indexed/false"), HttpMethod.PATCH, emptyPayloadWithAuth(testUser1Auth), String.class);
+        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+
+        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + game.getId() + "/indexed/true"), HttpMethod.PATCH, emptyPayloadWithAuth(testUser1Auth), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // Update game

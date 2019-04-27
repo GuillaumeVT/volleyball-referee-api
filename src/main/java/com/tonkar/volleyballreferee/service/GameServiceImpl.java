@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.List;
 
@@ -115,22 +117,15 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game getGame(UUID gameId) throws NotFoundException {
-        Optional<Game> optGame = gameRepository.findById(gameId);
-        if (optGame.isPresent()) {
-            return optGame.get();
-        } else {
-            throw new NotFoundException(String.format("Could not find game %s", gameId));
-        }
+        return gameRepository
+                .findById(gameId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find game %s", gameId)));
     }
 
     @Override
     public FileWrapper getScoreSheet(UUID gameId) throws NotFoundException {
-        Optional<Game> optGame = gameRepository.findById(gameId);
-        if (optGame.isPresent()) {
-            return ScoreSheetWriter.writeGame(optGame.get());
-        } else {
-            throw new NotFoundException(String.format("Could not find game %s", gameId));
-        }
+        Game game = getGame(gameId);
+        return ScoreSheetWriter.writeGame(game);
     }
 
     @Override
@@ -166,12 +161,9 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game getGame(String userId, UUID gameId) throws NotFoundException {
-        Optional<Game> optGame = gameRepository.findByIdAndCreatedBy(gameId, userId);
-        if (optGame.isPresent()) {
-            return optGame.get();
-        } else {
-            throw new NotFoundException(String.format("Could not find game %s for user %s", gameId, userId));
-        }
+        return gameRepository
+                .findByIdAndCreatedBy(gameId, userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find game %s for user %s", gameId, userId)));
     }
 
     @Override
@@ -208,8 +200,8 @@ public class GameServiceImpl implements GameService {
 
                 game.setId(gameDescription.getId());
                 game.setCreatedBy(gameDescription.getCreatedBy());
-                game.setCreatedAt(gameDescription.getCreatedAt());
-                game.setUpdatedAt(gameDescription.getUpdatedAt());
+                game.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+                game.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
                 game.setScheduledAt(gameDescription.getScheduledAt());
                 game.setRefereedBy(gameDescription.getRefereedBy());
                 game.setRefereeName(gameDescription.getRefereeName());
@@ -248,6 +240,8 @@ public class GameServiceImpl implements GameService {
             throw new NotFoundException(String.format("Could not create game %s for user %s because %s and %s are not friends", game.getId(), userId, game.getCreatedBy(), game.getRefereedBy()));
         } else {
             game.setCreatedBy(userId);
+            game.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            game.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             game.getHomeTeam().setCreatedBy(userId);
             game.getGuestTeam().setCreatedBy(userId);
             game.getRules().setCreatedBy(userId);
@@ -281,8 +275,8 @@ public class GameServiceImpl implements GameService {
                     League league = new League();
                     league.setId(game.getLeagueId());
                     league.setCreatedBy(userId);
-                    league.setCreatedAt(game.getCreatedAt());
-                    league.setUpdatedAt(game.getUpdatedAt());
+                    league.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+                    league.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
                     league.setKind(game.getKind());
                     league.setName(game.getLeagueName());
                     league.setDivisions(new ArrayList<>());
@@ -324,7 +318,7 @@ public class GameServiceImpl implements GameService {
             } else if (optRules.isEmpty()) {
                 throw new NotFoundException(String.format("Could not find matching rules %s for user %s", gameDescription.getRulesId(), userId));
             } else {
-                savedGame.setUpdatedAt(gameDescription.getUpdatedAt());
+                savedGame.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
                 savedGame.setScheduledAt(gameDescription.getScheduledAt());
                 savedGame.setRefereedBy(gameDescription.getRefereedBy());
                 savedGame.setRefereeName(gameDescription.getRefereeName());
@@ -382,20 +376,25 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void updateSet(String userId, UUID gameId, int setIndex, Set set) throws NotFoundException {
-        Optional<Game> optSavedGame = gameRepository.findByIdAndAllowedUserAndStatus(gameId, userId, GameStatus.LIVE);
+        Game savedGame = gameRepository
+                .findByIdAndAllowedUserAndStatus(gameId, userId, GameStatus.LIVE)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find game %s for user %s", gameId, userId)));
 
-        if (optSavedGame.isPresent()) {
-            Game savedGame = optSavedGame.get();
-
-            if (setIndex > 0 && setIndex <= savedGame.getSets().size()) {
-                savedGame.getSets().set(setIndex - 1, set);
-                gameRepository.save(savedGame);
-            } else {
-                throw new NotFoundException(String.format("Could not find set %d of game %s for user %s", setIndex, savedGame.getId(), userId));
-            }
+        if (setIndex > 0 && setIndex <= savedGame.getSets().size()) {
+            savedGame.getSets().set(setIndex - 1, set);
+            savedGame.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            gameRepository.save(savedGame);
         } else {
-            throw new NotFoundException(String.format("Could not find game %s for user %s", gameId, userId));
+            throw new NotFoundException(String.format("Could not find set %d of game %s for user %s", setIndex, savedGame.getId(), userId));
         }
+    }
+
+    @Override
+    public void setIndexed(String userId, UUID gameId, boolean indexed) throws NotFoundException {
+        Game game = getGame(userId, gameId);
+        game.setIndexed(indexed);
+        game.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        gameRepository.save(game);
     }
 
     @Override

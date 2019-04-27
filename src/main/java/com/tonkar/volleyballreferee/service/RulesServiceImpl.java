@@ -14,8 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -43,12 +44,9 @@ public class RulesServiceImpl implements RulesService {
 
     @Override
     public Rules getRules(String userId, UUID rulesId) throws NotFoundException {
-        Optional<Rules> optRules = rulesRepository.findByIdAndCreatedBy(rulesId, userId);
-        if (optRules.isPresent()) {
-            return optRules.get();
-        } else {
-            throw new NotFoundException(String.format("Could not find rules %s for user %s", rulesId, userId));
-        }
+        return rulesRepository
+                .findByIdAndCreatedBy(rulesId, userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find rules %s for user %s", rulesId, userId)));
     }
 
     @Override
@@ -96,42 +94,41 @@ public class RulesServiceImpl implements RulesService {
             throw new ConflictException(String.format("Could not create rules %s %s for user %s because they already exist", rules.getName(), rules.getKind(), userId));
         } else {
             rules.setCreatedBy(userId);
+            rules.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            rules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             rulesRepository.save(rules);
         }
     }
 
     @Override
     public void updateRules(String userId, Rules rules) throws NotFoundException {
-        Optional<Rules> optSavedRules = rulesRepository.findByIdAndCreatedBy(rules.getId(), userId);
+        Rules savedRules = rulesRepository
+                .findByIdAndCreatedBy(rules.getId(), userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find rules %s %s for user %s", rules.getName(), rules.getKind(), userId)));
 
-        if (optSavedRules.isPresent()) {
-            Rules savedRules = optSavedRules.get();
-            savedRules.setUpdatedAt(rules.getUpdatedAt());
-            savedRules.setSetsPerGame(rules.getSetsPerGame());
-            savedRules.setPointsPerSet(rules.getPointsPerSet());
-            savedRules.setTieBreakInLastSet(rules.isTieBreakInLastSet());
-            savedRules.setPointsInTieBreak(rules.getPointsInTieBreak());
-            savedRules.setTwoPointsDifference(rules.isTwoPointsDifference());
-            savedRules.setSanctions(rules.isSanctions());
-            savedRules.setTeamTimeouts(rules.isTeamTimeouts());
-            savedRules.setTeamTimeoutsPerSet(rules.getTeamTimeoutsPerSet());
-            savedRules.setTeamTimeoutDuration(rules.getTeamTimeoutDuration());
-            savedRules.setTechnicalTimeouts(rules.isTechnicalTimeouts());
-            savedRules.setTechnicalTimeoutDuration(rules.getTechnicalTimeoutDuration());
-            savedRules.setGameIntervals(rules.isGameIntervals());
-            savedRules.setGameIntervalDuration(rules.getGameIntervalDuration());
-            savedRules.setSubstitutionsLimitation(rules.getSubstitutionsLimitation());
-            savedRules.setTeamSubstitutionsPerSet(rules.getTeamSubstitutionsPerSet());
-            savedRules.setBeachCourtSwitches(rules.isBeachCourtSwitches());
-            savedRules.setBeachCourtSwitchFreq(rules.getBeachCourtSwitchFreq());
-            savedRules.setBeachCourtSwitchFreqTieBreak(rules.getBeachCourtSwitchFreqTieBreak());
-            savedRules.setCustomConsecutiveServesPerPlayer(rules.getCustomConsecutiveServesPerPlayer());
-            rulesRepository.save(savedRules);
+        savedRules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        savedRules.setSetsPerGame(rules.getSetsPerGame());
+        savedRules.setPointsPerSet(rules.getPointsPerSet());
+        savedRules.setTieBreakInLastSet(rules.isTieBreakInLastSet());
+        savedRules.setPointsInTieBreak(rules.getPointsInTieBreak());
+        savedRules.setTwoPointsDifference(rules.isTwoPointsDifference());
+        savedRules.setSanctions(rules.isSanctions());
+        savedRules.setTeamTimeouts(rules.isTeamTimeouts());
+        savedRules.setTeamTimeoutsPerSet(rules.getTeamTimeoutsPerSet());
+        savedRules.setTeamTimeoutDuration(rules.getTeamTimeoutDuration());
+        savedRules.setTechnicalTimeouts(rules.isTechnicalTimeouts());
+        savedRules.setTechnicalTimeoutDuration(rules.getTechnicalTimeoutDuration());
+        savedRules.setGameIntervals(rules.isGameIntervals());
+        savedRules.setGameIntervalDuration(rules.getGameIntervalDuration());
+        savedRules.setSubstitutionsLimitation(rules.getSubstitutionsLimitation());
+        savedRules.setTeamSubstitutionsPerSet(rules.getTeamSubstitutionsPerSet());
+        savedRules.setBeachCourtSwitches(rules.isBeachCourtSwitches());
+        savedRules.setBeachCourtSwitchFreq(rules.getBeachCourtSwitchFreq());
+        savedRules.setBeachCourtSwitchFreqTieBreak(rules.getBeachCourtSwitchFreqTieBreak());
+        savedRules.setCustomConsecutiveServesPerPlayer(rules.getCustomConsecutiveServesPerPlayer());
+        rulesRepository.save(savedRules);
 
-            rulesDao.updateScheduledGamesWithRules(userId, savedRules);
-        } else {
-            throw new NotFoundException(String.format("Could not find rules %s %s for user %s", rules.getName(), rules.getKind(), userId));
-        }
+        rulesDao.updateScheduledGamesWithRules(userId, savedRules);
     }
 
     @Override

@@ -78,6 +78,8 @@ public interface GameService {
 
     void updateSet(String userId, UUID gameId, int setIndex, Set set) throws NotFoundException;
 
+    void setIndexed(String userId, UUID gameId, boolean indexed) throws NotFoundException;
+
     void deleteGame(String userId, UUID gameId);
 
     void deleteAllGames(String userId);

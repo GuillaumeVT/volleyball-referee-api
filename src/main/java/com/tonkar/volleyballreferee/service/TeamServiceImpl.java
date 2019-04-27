@@ -14,7 +14,12 @@ import com.tonkar.volleyballreferee.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
 @Service
 public class TeamServiceImpl implements TeamService {
@@ -67,12 +72,9 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Team getTeam(String userId, UUID teamId) throws NotFoundException {
-        Optional<Team> optTeam = teamRepository.findByIdAndCreatedBy(teamId, userId);
-        if (optTeam.isPresent()) {
-            return optTeam.get();
-        } else {
-            throw new NotFoundException(String.format("Could not find team %s for user %s", teamId, userId));
-        }
+        return teamRepository
+                .findByIdAndCreatedBy(teamId, userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find team %s for user %s", teamId, userId)));
     }
 
     @Override
@@ -88,28 +90,27 @@ public class TeamServiceImpl implements TeamService {
             throw new ConflictException(String.format("Could not create team %s %s %s for user %s because it already exists", team.getName(), team.getKind(), team.getGender(), userId));
         } else {
             team.setCreatedBy(userId);
+            team.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            team.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             teamRepository.save(team);
         }
     }
 
     @Override
     public void updateTeam(String userId, Team team) throws NotFoundException {
-        Optional<Team> optSavedTeam = teamRepository.findByIdAndCreatedBy(team.getId(), userId);
+        Team savedTeam = teamRepository
+                .findByIdAndCreatedBy(team.getId(), userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find team %s %s %s for user %s", team.getName(), team.getKind(), team.getGender(), userId)));
 
-        if (optSavedTeam.isPresent()) {
-            Team savedTeam = optSavedTeam.get();
-            savedTeam.setUpdatedAt(team.getUpdatedAt());
-            savedTeam.setColor(team.getColor());
-            savedTeam.setLiberoColor(team.getLiberoColor());
-            savedTeam.setPlayers(team.getPlayers());
-            savedTeam.setLiberos(team.getLiberos());
-            savedTeam.setCaptain(team.getCaptain());
-            teamRepository.save(savedTeam);
+        savedTeam.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        savedTeam.setColor(team.getColor());
+        savedTeam.setLiberoColor(team.getLiberoColor());
+        savedTeam.setPlayers(team.getPlayers());
+        savedTeam.setLiberos(team.getLiberos());
+        savedTeam.setCaptain(team.getCaptain());
+        teamRepository.save(savedTeam);
 
-            updateScheduledGamesWithTeam(userId, savedTeam);
-        } else {
-            throw new NotFoundException(String.format("Could not find team %s %s %s for user %s", team.getName(), team.getKind(), team.getGender(), userId));
-        }
+        updateScheduledGamesWithTeam(userId, savedTeam);
     }
 
     private void updateScheduledGamesWithTeam(String userId, Team team) {

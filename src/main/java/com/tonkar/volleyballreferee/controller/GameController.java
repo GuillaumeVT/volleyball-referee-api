@@ -159,6 +159,17 @@ public class GameController {
         }
     }
 
+    @PatchMapping(value = "/{gameId}/indexed/{indexed}", produces = {"application/json"})
+    public ResponseEntity<String> setIndexed(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId, @PathVariable("indexed") boolean indexed) {
+        try {
+            gameService.setIndexed(user.getUserId(), gameId, indexed);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NotFoundException e) {
+            log.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     @DeleteMapping(value = "/{gameId}", produces = {"application/json"})
     public ResponseEntity<String> deleteGame(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId) {
         gameService.deleteGame(user.getUserId(), gameId);

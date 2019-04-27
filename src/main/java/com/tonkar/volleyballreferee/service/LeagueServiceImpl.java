@@ -12,6 +12,8 @@ import com.tonkar.volleyballreferee.repository.LeagueRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,12 +32,9 @@ public class LeagueServiceImpl implements LeagueService {
 
     @Override
     public League getLeague(UUID leagueId) throws NotFoundException {
-        Optional<League> optLeague = leagueRepository.findById(leagueId);
-        if (optLeague.isPresent()) {
-            return optLeague.get();
-        } else {
-            throw new NotFoundException(String.format("Could not find league %s", leagueId));
-        }
+        return leagueRepository
+                .findById(leagueId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find league %s", leagueId)));
     }
 
     @Override
@@ -50,12 +49,9 @@ public class LeagueServiceImpl implements LeagueService {
 
     @Override
     public League getLeague(String userId, UUID leagueId) throws NotFoundException {
-        Optional<League> optLeague = leagueRepository.findByIdAndCreatedBy(leagueId, userId);
-        if (optLeague.isPresent()) {
-            return optLeague.get();
-        } else {
-            throw new NotFoundException(String.format("Could not find league %s for user %s", leagueId, userId));
-        }
+        return leagueRepository
+                .findByIdAndCreatedBy(leagueId, userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find league %s for user %s", leagueId, userId)));
     }
 
     @Override
@@ -77,15 +73,13 @@ public class LeagueServiceImpl implements LeagueService {
 
     @Override
     public void updateDivisions(String userId, UUID leagueId) throws NotFoundException {
-        Optional<League> optSavedLeague = leagueRepository.findByIdAndCreatedBy(leagueId, userId);
+        League savedLeague = leagueRepository
+                .findByIdAndCreatedBy(leagueId, userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find league %s for user %s", leagueId, userId)));
 
-        if (optSavedLeague.isPresent()) {
-            League savedLeague = optSavedLeague.get();
-            savedLeague.setDivisions(gameDao.listDivisionsInLeague(userId, savedLeague.getId()));
-            leagueRepository.save(savedLeague);
-        } else {
-            throw new NotFoundException(String.format("Could not find league %s for user %s", leagueId, userId));
-        }
+        savedLeague.setDivisions(gameDao.listDivisionsInLeague(userId, savedLeague.getId()));
+        savedLeague.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        leagueRepository.save(savedLeague);
     }
 
     @Override

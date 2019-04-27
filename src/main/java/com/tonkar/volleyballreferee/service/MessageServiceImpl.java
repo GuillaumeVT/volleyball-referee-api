@@ -6,8 +6,6 @@ import com.tonkar.volleyballreferee.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class MessageServiceImpl implements MessageService {
 
@@ -17,12 +15,8 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Message getMessage() throws NotFoundException {
         String mainMessageId = "main-message";
-        Optional<Message> optMessage = messageRepository.findById(mainMessageId);
-
-        if (optMessage.isPresent()) {
-            return optMessage.get();
-        } else {
-            throw new NotFoundException(String.format("Could not find message %s", mainMessageId));
-        }
+        return messageRepository
+                .findById(mainMessageId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find message %s", mainMessageId)));
     }
 }

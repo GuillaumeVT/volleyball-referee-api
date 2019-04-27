@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,21 +27,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUser(String userId) throws NotFoundException {
-        Optional<User> optUser = userRepository.findById(userId);
-        if (optUser.isPresent()) {
-            return optUser.get();
-        } else {
-            throw new NotFoundException(String.format("Could not find user %s", userId));
-        }
+        return userRepository
+                .findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find user %s", userId)));
     }
 
     private User getUserByPseudo(String pseudo) throws NotFoundException {
-        Optional<User> optUser = userRepository.findByPseudo(pseudo);
-        if (optUser.isPresent()) {
-            return optUser.get();
-        } else {
-            throw new NotFoundException(String.format("Could not find user %s", pseudo));
-        }
+        return userRepository
+                .findByPseudo(pseudo)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find user %s", pseudo)));
     }
 
     @Override
@@ -110,29 +103,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void acceptFriendRequest(String userId, UUID friendRequestId) throws ConflictException, NotFoundException {
-        Optional<FriendRequest> optFriendRequest = friendRequestRepository.findByIdAndReceiverId(friendRequestId, userId);
+        FriendRequest friendRequest = friendRequestRepository
+                .findByIdAndReceiverId(friendRequestId, userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find friend request %s with receiver %s", friendRequestId, userId)));
 
-        if (optFriendRequest.isPresent()) {
-            FriendRequest friendRequest = optFriendRequest.get();
+        User senderUser = getUser(friendRequest.getSenderId());
+        User receiverUser = getUser(friendRequest.getReceiverId());
 
-            User senderUser = getUser(friendRequest.getSenderId());
-            User receiverUser = getUser(friendRequest.getReceiverId());
-
-            if (userRepository.areFriends(senderUser.getId(), receiverUser.getId())) {
-                throw new ConflictException(String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
-            } else {
-                senderUser.getFriends().add(new User.Friend(receiverUser.getId(), receiverUser.getPseudo()));
-                receiverUser.getFriends().add(new User.Friend(senderUser.getId(), senderUser.getPseudo()));
-
-                userRepository.save(senderUser);
-                userRepository.save(receiverUser);
-                log.info(String.format("%s and %s are now friends", senderUser.getId(), receiverUser.getId()));
-            }
-
-            friendRequestRepository.delete(friendRequest);
+        if (userRepository.areFriends(senderUser.getId(), receiverUser.getId())) {
+            throw new ConflictException(String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
         } else {
-            throw new NotFoundException(String.format("Could not find friend request %s with receiver %s", friendRequestId, userId));
+            senderUser.getFriends().add(new User.Friend(receiverUser.getId(), receiverUser.getPseudo()));
+            receiverUser.getFriends().add(new User.Friend(senderUser.getId(), senderUser.getPseudo()));
+
+            userRepository.save(senderUser);
+            userRepository.save(receiverUser);
+            log.info(String.format("%s and %s are now friends", senderUser.getId(), receiverUser.getId()));
         }
+
+        friendRequestRepository.delete(friendRequest);
     }
 
     @Override
