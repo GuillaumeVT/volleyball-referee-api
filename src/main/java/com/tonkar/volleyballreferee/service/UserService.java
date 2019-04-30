@@ -13,7 +13,7 @@ public interface UserService {
 
     User getUser(String userId) throws NotFoundException;
 
-    void createUser(String userId, String pseudo) throws ConflictException;
+    void createUser(User user) throws ConflictException;
 
     void deleteUser(String userId);
 

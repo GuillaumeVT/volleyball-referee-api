@@ -39,15 +39,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createUser(String userId, String pseudo) throws ConflictException {
-        if (userRepository.existsById(userId)) {
-            throw new ConflictException(String.format("Found an existing user with id %s", userId));
-        } else if (userRepository.existsByPseudo(pseudo)) {
-            throw new ConflictException(String.format("Found an existing user with pseudo %s", pseudo));
+    public void createUser(User user) throws ConflictException {
+        if (userRepository.existsById(user.getId())) {
+            throw new ConflictException(String.format("Found an existing user with id %s", user.getId()));
+        } else if (userRepository.existsByPseudo(user.getPseudo())) {
+            throw new ConflictException(String.format("Found an existing user with pseudo %s", user.getPseudo()));
         }  else {
-            User user = new User();
-            user.setId(userId);
-            user.setPseudo(pseudo);
             user.setFriends(new ArrayList<>());
             userRepository.save(user);
             log.info(String.format("Created user with id %s and pseudo %s", user.getId(), user.getPseudo()));

@@ -2,10 +2,7 @@ package com.tonkar.volleyballreferee;
 
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.TeamDescription;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.GenderType;
-import com.tonkar.volleyballreferee.entity.Player;
-import com.tonkar.volleyballreferee.entity.Team;
+import com.tonkar.volleyballreferee.entity.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.ParameterizedTypeReference;
@@ -72,6 +69,16 @@ public class TeamTests extends VbrTests {
         team.getPlayers().add(new Player(2, "you"));
         team.setLiberos(new ArrayList<>());
         team.setCaptain(1);
+
+        User user = new User();
+        user.setId(testUser1Id);
+        user.setPseudo("VBR1");
+        user.setFriends(new ArrayList<>());
+
+        // Create user
+
+        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user), String.class);
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
 
         // Team does not exist yet
 

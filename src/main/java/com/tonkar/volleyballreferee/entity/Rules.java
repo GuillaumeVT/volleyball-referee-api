@@ -1,6 +1,5 @@
 package com.tonkar.volleyballreferee.entity;
 
-import com.tonkar.volleyballreferee.security.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

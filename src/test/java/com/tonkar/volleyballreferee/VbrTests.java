@@ -1,11 +1,12 @@
 package com.tonkar.volleyballreferee;
 
 import com.tonkar.volleyballreferee.entity.*;
-import com.tonkar.volleyballreferee.security.User;
+import com.tonkar.volleyballreferee.service.AuthenticationProvider;
 import com.tonkar.volleyballreferee.service.UserAuthenticationService;
 import org.junit.Before;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -44,13 +45,15 @@ public class VbrTests {
         mongoTemplate.dropCollection(League.class);
         mongoTemplate.dropCollection(Game.class);
 
-        Optional<User> validTestUser1 = Optional.of(new User(testUser1Auth, User.AuthenticationProvider.GOOGLE));
-        Optional<User> validTestUser2 = Optional.of(new User(testUser2Auth, User.AuthenticationProvider.GOOGLE));
-        Optional<User> invalidTestUser = Optional.empty();
-
-        Mockito.when(userAuthenticationService.getUser(User.AuthenticationProvider.GOOGLE, testUser1Auth)).thenReturn(validTestUser1);
-        Mockito.when(userAuthenticationService.getUser(User.AuthenticationProvider.GOOGLE, testUser2Auth)).thenReturn(validTestUser2);
-        Mockito.when(userAuthenticationService.getUser(User.AuthenticationProvider.GOOGLE, testUserInvalidAuth)).thenReturn(invalidTestUser);
+        Mockito
+                .when(userAuthenticationService.getUserId(AuthenticationProvider.GOOGLE, testUser1Auth))
+                .thenReturn(Optional.of(testUser1Id));
+        Mockito
+                .when(userAuthenticationService.getUserId(AuthenticationProvider.GOOGLE, testUser2Auth))
+                .thenReturn(Optional.of(testUser2Id));
+        Mockito
+                .when(userAuthenticationService.getUserId(AuthenticationProvider.GOOGLE, testUserInvalidAuth))
+                .thenReturn(Optional.empty());
     }
 
     String testUser1Auth       = "user1";
@@ -60,11 +63,14 @@ public class VbrTests {
     String testUser1Id = "user1@google";
     String testUser2Id = "user2@google";
 
+    @Value("${vbr.auth.signUpKey}")
+    String vbrSignUpKey;
+
     String urlOf(String apiUrl) {
         return "http://localhost:" + port + apiUrl;
     }
 
-    HttpHeaders headersWithAuth(String testUser) {
+    private HttpHeaders headersWithAuth(String testUser) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Authorization", String.format("Bearer %s", testUser));
@@ -72,7 +78,7 @@ public class VbrTests {
         return headers;
     }
 
-    HttpHeaders headersWithoutAuth() {
+    private HttpHeaders headersWithoutAuth() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
@@ -88,6 +94,10 @@ public class VbrTests {
 
     HttpEntity<?> payloadWithAuth(String testUser, Object body) {
         return new HttpEntity<>(body, headersWithAuth(testUser));
+    }
+
+    HttpEntity<?> payloadWithoutAuth(Object body) {
+        return new HttpEntity<>(body, headersWithoutAuth());
     }
 
 }

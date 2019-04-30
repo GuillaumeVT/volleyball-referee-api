@@ -1,7 +1,7 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.Statistics;
-import com.tonkar.volleyballreferee.security.User;
+import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.service.StatisticsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,6 @@ public class StatisticsController {
 
     @GetMapping(value = "", produces = {"application/json"})
     public ResponseEntity<Statistics> getStatistics(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(statisticsService.getStatistics(user.getUserId()), HttpStatus.OK);
+        return new ResponseEntity<>(statisticsService.getStatistics(user.getId()), HttpStatus.OK);
     }
 }

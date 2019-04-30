@@ -15,3 +15,7 @@ spring:
           facebook:
             client-id: 2086514551632301
             client-secret: 4e69c0bd3f8f2f97d453e99306db7f11
+
+vbr:
+  auth:
+    signUpKey: 161adaea-90a1-46b7-be28-b27c0837aea8

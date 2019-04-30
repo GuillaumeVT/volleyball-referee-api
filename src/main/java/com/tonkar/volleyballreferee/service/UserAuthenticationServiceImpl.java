@@ -4,10 +4,9 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.security.FacebookIdToken;
-import com.tonkar.volleyballreferee.security.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +19,9 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class UserAuthenticationServiceImpl implements UserAuthenticationService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserAuthenticationServiceImpl.class);
 
     @Value("${vbr.auth.facebookAppAccessToken}")
     private String facebookAppAccessToken;
@@ -38,26 +36,30 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     }
 
     @Override
-    public Optional<User> getUser(User.AuthenticationProvider authProvider, String idToken) {
-        Optional<User> optUser;
+    public Optional<String> getUserId(AuthenticationProvider authProvider, String idToken) {
+        Optional<String> optUserId;
 
         switch (authProvider) {
             case FACEBOOK:
-                optUser = getFacebookUser(idToken);
+                optUserId = getUserIdWithFacebook(idToken);
                 break;
             case GOOGLE:
-                optUser = getGoogleUser(idToken);
+                optUserId = getUserIdWithGoogle(idToken);
                 break;
             default:
-                optUser = Optional.empty();
+                optUserId = Optional.empty();
                 break;
         }
 
-        return optUser;
+        return optUserId;
     }
 
-    private Optional<User> getFacebookUser(String idToken) {
-        Optional<User> optUser;
+    private String computeUserId(String user, AuthenticationProvider authProvider) {
+        return String.format("%s@%s", user, authProvider.toString().toLowerCase());
+    }
+
+    private Optional<String> getUserIdWithFacebook(String idToken) {
+        Optional<String> optUserId;
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://graph.facebook.com/v3.2/debug_token")
                 .queryParam("input_token", idToken)
@@ -71,20 +73,20 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
                     || facebookIdToken.getPayload() == null
                     || !facebookIdToken.getPayload().isValid()
                     || !facebookAppAccessToken.startsWith(facebookIdToken.getPayload().getAppId())) {
-                optUser = Optional.empty();
+                optUserId = Optional.empty();
             } else {
-                User user = new User(facebookIdToken.getPayload().getUserId(), User.AuthenticationProvider.FACEBOOK);
-                optUser = Optional.of(user);
+                String userId = computeUserId(facebookIdToken.getPayload().getUserId(), AuthenticationProvider.FACEBOOK);
+                optUserId = Optional.of(userId);
             }
         } else {
-            optUser = Optional.empty();
+            optUserId = Optional.empty();
         }
 
-        return optUser;
+        return optUserId;
     }
 
-    private Optional<User> getGoogleUser(String idToken) {
-        Optional<User> optUser;
+    private Optional<String> getUserIdWithGoogle(String idToken) {
+        Optional<String> optUserId;
 
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory()).setAudience(Collections.singletonList(googleWebClientId)).build();
 
@@ -92,18 +94,18 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
             GoogleIdToken googleIdToken = verifier.verify(idToken);
 
             if (googleIdToken == null) {
-                optUser = Optional.empty();
+                optUserId = Optional.empty();
             } else {
                 GoogleIdToken.Payload payload = googleIdToken.getPayload();
-                User user = new User(payload.getSubject(), User.AuthenticationProvider.GOOGLE);
-                optUser = Optional.of(user);
+                String userId = computeUserId(payload.getSubject(), AuthenticationProvider.GOOGLE);
+                optUserId = Optional.of(userId);
             }
         } catch (GeneralSecurityException | IOException e) {
-            optUser = Optional.empty();
-            LOGGER.error("Exception while reading google id token", e);
+            optUserId = Optional.empty();
+            log.error("Exception while reading google id token", e);
         }
 
-        return optUser;
+        return optUserId;
     }
 
 

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,11 +22,13 @@ public class UserTests extends VbrTests {
 
     @Test
     public void testNotAuthenticated() {
+        User user = new User();
+
         ResponseEntity<User> getUserResponse = restTemplate.exchange(urlOf("/api/v3/users"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), User.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getUserResponse.getStatusCode());
 
-        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf("/api/v3/users/anyPseudo"), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidAuth), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, postUserResponse.getStatusCode());
+        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf("/api/v3/public/users/123"), HttpMethod.POST, payloadWithAuth(testUserInvalidAuth, user), String.class);
+        assertEquals(HttpStatus.FORBIDDEN, postUserResponse.getStatusCode());
 
         ResponseEntity<String> deleteUserResponse = restTemplate.exchange(urlOf("/api/v3/users"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidAuth), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, deleteUserResponse.getStatusCode());
@@ -55,30 +58,37 @@ public class UserTests extends VbrTests {
 
     @Test
     public void testManageUsers() {
-        String pseudo1 = "VBR1";
-        String pseudo2 = "VBR2";
+        String pseudo = "VBR1";
+
+        User user = new User();
+        user.setId(testUser1Id);
+        user.setPseudo(pseudo);
+        user.setFriends(new ArrayList<>());
 
         // User does not exist yet
 
         ResponseEntity<User> getUserResponse = restTemplate.exchange(urlOf("/api/v3/users"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), User.class);
-        assertEquals(HttpStatus.NOT_FOUND, getUserResponse.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, getUserResponse.getStatusCode());
 
         // Create user
 
-        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/users/%s", pseudo1)), HttpMethod.POST, emptyPayloadWithAuth(testUser1Auth), String.class);
+        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf("/api/v3/public/users/54Hhfht"), HttpMethod.POST, payloadWithoutAuth(user), String.class);
+        assertEquals(HttpStatus.FORBIDDEN, postUserResponse.getStatusCode());
+
+        postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user), String.class);
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
 
         // User already exists
 
-        postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/users/%s", pseudo1)), HttpMethod.POST, emptyPayloadWithAuth(testUser1Auth), String.class);
-        assertEquals(HttpStatus.CONFLICT, postUserResponse.getStatusCode());
-
-        postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/users/%s", pseudo2)), HttpMethod.POST, emptyPayloadWithAuth(testUser1Auth), String.class);
+        postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user), String.class);
         assertEquals(HttpStatus.CONFLICT, postUserResponse.getStatusCode());
 
         // User pseudo is taken
 
-        postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/users/%s", pseudo1)), HttpMethod.POST, emptyPayloadWithAuth(testUser2Auth), String.class);
+        user.setId(testUser2Id);
+        user.setPseudo(pseudo);
+
+        postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user), String.class);
         assertEquals(HttpStatus.CONFLICT, postUserResponse.getStatusCode());
 
         // Get user
@@ -97,12 +107,22 @@ public class UserTests extends VbrTests {
         String pseudo1 = "VBR1";
         String pseudo2 = "VBR2";
 
+        User user1 = new User();
+        user1.setId(testUser1Id);
+        user1.setPseudo(pseudo1);
+        user1.setFriends(new ArrayList<>());
+
+        User user2 = new User();
+        user2.setId(testUser2Id);
+        user2.setPseudo(pseudo2);
+        user2.setFriends(new ArrayList<>());
+
         // Create users
 
-        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/users/%s", pseudo1)), HttpMethod.POST, emptyPayloadWithAuth(testUser1Auth), String.class);
+        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user1), String.class);
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
 
-        postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/users/%s", pseudo2)), HttpMethod.POST, emptyPayloadWithAuth(testUser2Auth), String.class);
+        postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user2), String.class);
         assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
 
         // Can't request friend with self

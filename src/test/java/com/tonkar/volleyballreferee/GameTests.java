@@ -115,6 +115,16 @@ public class GameTests extends VbrTests {
         gameDescription.setRulesName(rules.getName());
         gameDescription.setScore("");
 
+        User user = new User();
+        user.setId(testUser1Id);
+        user.setPseudo("VBR1");
+        user.setFriends(new ArrayList<>());
+
+        // Create user
+
+        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user), String.class);
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+
         // Create teams and rules
 
         ResponseEntity<String> rulesResponse = restTemplate.exchange(urlOf("/api/v3/rules"), HttpMethod.POST, payloadWithAuth(testUser1Auth, rules), String.class);
@@ -239,6 +249,16 @@ public class GameTests extends VbrTests {
         game.setGuestCards(new ArrayList<>());
         game.setScore("");
 
+        User user = new User();
+        user.setId(testUser1Id);
+        user.setPseudo("VBR1");
+        user.setFriends(new ArrayList<>());
+
+        // Create user
+
+        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user), String.class);
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+
         // Game does not exist
 
         ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/api/v3/games/full"), HttpMethod.PUT, payloadWithAuth(testUser1Auth, game), String.class);
@@ -319,6 +339,16 @@ public class GameTests extends VbrTests {
         String pseudo1 = "VBR1";
         String pseudo2 = "VBR2";
 
+        User user1 = new User();
+        user1.setId(testUser1Id);
+        user1.setPseudo(pseudo1);
+        user1.setFriends(new ArrayList<>());
+
+        User user2 = new User();
+        user2.setId(testUser2Id);
+        user2.setPseudo(pseudo2);
+        user2.setFriends(new ArrayList<>());
+
         Team team1 = buildBeachTeam("Team 1");
         Team team2 = buildBeachTeam("Team 2");
         Rules rules = buildBeachRules();
@@ -352,6 +382,14 @@ public class GameTests extends VbrTests {
         gameDescription.setRulesName(rules.getName());
         gameDescription.setScore("");
 
+        // Create users
+
+        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user1), String.class);
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+
+        postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user2), String.class);
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+
         // Create teams and rules
 
         ResponseEntity<String> rulesResponse = restTemplate.exchange(urlOf("/api/v3/rules"), HttpMethod.POST, payloadWithAuth(testUser1Auth, rules), String.class);
@@ -362,14 +400,6 @@ public class GameTests extends VbrTests {
 
         teamResponse =  restTemplate.exchange(urlOf("/api/v3/teams"), HttpMethod.POST, payloadWithAuth(testUser1Auth, team2), String.class);
         assertEquals(HttpStatus.CREATED, teamResponse.getStatusCode());
-
-        // Create users
-
-        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/users/%s", pseudo1)), HttpMethod.POST, emptyPayloadWithAuth(testUser1Auth), String.class);
-        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
-
-        postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/users/%s", pseudo2)), HttpMethod.POST, emptyPayloadWithAuth(testUser2Auth), String.class);
-        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
 
         // Can't create game when referee is not friend
 
@@ -513,6 +543,16 @@ public class GameTests extends VbrTests {
         game.setHomeCards(new ArrayList<>());
         game.setGuestCards(new ArrayList<>());
         game.setScore("");
+
+        User user = new User();
+        user.setId(testUser1Id);
+        user.setPseudo("VBR1");
+        user.setFriends(new ArrayList<>());
+
+        // Create user
+
+        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user), String.class);
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
 
         // Create game
 

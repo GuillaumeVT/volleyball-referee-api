@@ -3,6 +3,7 @@ package com.tonkar.volleyballreferee;
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
+import com.tonkar.volleyballreferee.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.ParameterizedTypeReference;
@@ -58,6 +59,16 @@ public class LeagueTests extends VbrTests {
         league.setDivisions(new ArrayList<>());
         league.getDivisions().add("Division 1");
         league.getDivisions().add("Division 2");
+
+        User user = new User();
+        user.setId(testUser1Id);
+        user.setPseudo("VBR1");
+        user.setFriends(new ArrayList<>());
+
+        // Create user
+
+        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user), String.class);
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
 
         // League does not exist yet
 

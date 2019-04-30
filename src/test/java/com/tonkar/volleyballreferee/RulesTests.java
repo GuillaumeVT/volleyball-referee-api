@@ -4,6 +4,7 @@ import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.RulesDescription;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
+import com.tonkar.volleyballreferee.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.ParameterizedTypeReference;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,6 +60,16 @@ public class RulesTests extends VbrTests {
                 true, 60, true, 180,
                 Rules.NO_LIMITATION, 6, false, 0, 0, 9999);
         UUID rulesId = rules.getId();
+
+        User user = new User();
+        user.setId(testUser1Id);
+        user.setPseudo("VBR1");
+        user.setFriends(new ArrayList<>());
+
+        // Create user
+
+        ResponseEntity<String> postUserResponse = restTemplate.exchange(urlOf(String.format("/api/v3/public/users/%s", vbrSignUpKey)), HttpMethod.POST, payloadWithoutAuth(user), String.class);
+        assertEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
 
         // Rules don't exist yet
 

@@ -3,14 +3,13 @@ package com.tonkar.volleyballreferee.controller;
 import com.tonkar.volleyballreferee.dto.GameDescription;
 import com.tonkar.volleyballreferee.dto.Statistics;
 import com.tonkar.volleyballreferee.dto.TeamDescription;
-import com.tonkar.volleyballreferee.entity.FileWrapper;
-import com.tonkar.volleyballreferee.entity.Game;
-import com.tonkar.volleyballreferee.entity.League;
-import com.tonkar.volleyballreferee.entity.Message;
+import com.tonkar.volleyballreferee.entity.*;
+import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -45,6 +44,28 @@ public class PublicController {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private UserService userService;
+
+    @Value("${vbr.auth.signUpKey}")
+    private String vbrSignUpKey;
+
+    @PostMapping(value = "/users/{signUpKey}", produces = {"application/json"})
+    public ResponseEntity<String> createUser(@PathVariable("signUpKey") String signUpKey, @RequestBody User user) {
+        if (vbrSignUpKey.equals(signUpKey)) {
+            try {
+                userService.createUser(user);
+                return new ResponseEntity<>(HttpStatus.CREATED);
+            } catch (ConflictException e) {
+                log.error(e.getMessage(), e);
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+        } else {
+            log.error(String.format("Invalid sign-up key %s", signUpKey));
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
 
     @GetMapping(value = "/statistics", produces = {"application/json"})
     public ResponseEntity<Statistics> getStatistics() {

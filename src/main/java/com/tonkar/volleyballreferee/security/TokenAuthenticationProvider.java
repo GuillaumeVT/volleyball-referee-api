@@ -1,8 +1,10 @@
 package com.tonkar.volleyballreferee.security;
 
+import com.tonkar.volleyballreferee.entity.User;
+import com.tonkar.volleyballreferee.repository.UserRepository;
+import com.tonkar.volleyballreferee.service.AuthenticationProvider;
 import com.tonkar.volleyballreferee.service.UserAuthenticationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
@@ -11,13 +13,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 final class TokenAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TokenAuthenticationProvider.class);
-
     @Autowired
     private UserAuthenticationService userAuthenticationService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
@@ -32,14 +36,15 @@ final class TokenAuthenticationProvider extends AbstractUserDetailsAuthenticatio
         User user;
 
         if (authProviderObj == null || tokenObj == null) {
-            LOGGER.error("Authentication provider or token are missing");
+            log.error("Authentication provider or token are missing");
             throw new UsernameNotFoundException("Authentication provider or token are missing");
         } else {
-            User.AuthenticationProvider authProvider = (User.AuthenticationProvider) authProviderObj;
+            AuthenticationProvider authProvider = (AuthenticationProvider) authProviderObj;
             String token = String.valueOf(tokenObj);
             user = userAuthenticationService
-                    .getUser(authProvider, token)
-                    .orElseThrow(() -> new UsernameNotFoundException("Authentication provider or token are invalid"));
+                    .getUserId(authProvider, token)
+                    .flatMap(userRepository::findById)
+                    .orElseThrow(() -> new UsernameNotFoundException("Failed to authenticate or to find user"));
         }
 
         return user;

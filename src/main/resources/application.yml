@@ -5,6 +5,7 @@ vbr:
   auth:
     facebookAppAccessToken: 2086514551632301|EShvFJ7FGAKChTSlqOXolTmcdVM
     googleWebClientId: 802590775795-kdff0cnflla62jr2dj0pleqbiv05q97l.apps.googleusercontent.com
+    signUpKey: 161adaea-90a1-46b7-be28-b27c0837aea8
 
 ---
 spring.profiles: production
@@ -14,6 +15,7 @@ vbr:
   auth:
     facebookAppAccessToken: 2086514551632301|EShvFJ7FGAKChTSlqOXolTmcdVM
     googleWebClientId: 802590775795-kdff0cnflla62jr2dj0pleqbiv05q97l.apps.googleusercontent.com
+    signUpKey: d14e2e45-0475-43ac-b6e4-56aae0e383fc
 
 logging:
   config: classpath:logback-spring.xml
