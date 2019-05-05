@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee;
 
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.LeagueDescription;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
 import com.tonkar.volleyballreferee.entity.User;
@@ -25,8 +26,8 @@ public class LeagueTests extends VbrTests {
     public void testNotAuthenticated() {
         League league = new League();
 
-        ParameterizedTypeReference<List<League>> typeReference = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<League>> getLeaguesResponse = restTemplate.exchange(urlOf("/api/v3/leagues"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
+        ParameterizedTypeReference<List<LeagueDescription>> typeReference = new ParameterizedTypeReference<>() {};
+        ResponseEntity<List<LeagueDescription>> getLeaguesResponse = restTemplate.exchange(urlOf("/api/v3/leagues"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
         assertEquals(HttpStatus.UNAUTHORIZED, getLeaguesResponse.getStatusCode());
 
         getLeaguesResponse = restTemplate.exchange(urlOf("/api/v3/leagues/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
@@ -100,8 +101,8 @@ public class LeagueTests extends VbrTests {
 
         // List all leagues
 
-        ParameterizedTypeReference<List<League>> typeReference = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<League>> getLeaguesResponse = restTemplate.exchange(urlOf("/api/v3/leagues"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
+        ParameterizedTypeReference<List<LeagueDescription>> typeReference = new ParameterizedTypeReference<>() {};
+        ResponseEntity<List<LeagueDescription>> getLeaguesResponse = restTemplate.exchange(urlOf("/api/v3/leagues"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
         assertEquals(HttpStatus.OK, getLeaguesResponse.getStatusCode());
         assertEquals(1, getLeaguesResponse.getBody().size());
 

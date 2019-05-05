@@ -1,7 +1,9 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dao.GameDao;
+import com.tonkar.volleyballreferee.dao.LeagueDao;
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.LeagueDescription;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,6 +29,9 @@ public class LeagueServiceImpl implements LeagueService {
     private GameRepository gameRepository;
 
     @Autowired
+    private LeagueDao leagueDao;
+
+    @Autowired
     private GameDao gameDao;
 
     @Override
@@ -38,13 +42,13 @@ public class LeagueServiceImpl implements LeagueService {
     }
 
     @Override
-    public List<League> listLeagues(String userId) {
-        return leagueRepository.findByCreatedByOrderByNameAsc(userId);
+    public List<LeagueDescription> listLeagues(String userId) {
+        return leagueDao.listLeagues(userId);
     }
 
     @Override
-    public List<League> listLeaguesOfKind(String userId, GameType kind) {
-        return leagueRepository.findByCreatedByAndKindOrderByNameAsc(userId, kind);
+    public List<LeagueDescription> listLeaguesOfKind(String userId, GameType kind) {
+        return leagueDao.listLeaguesOfKind(userId, kind);
     }
 
     @Override
