@@ -217,9 +217,10 @@ public class GameTests extends VbrTests {
         Team team1 = buildBeachTeam("Team 1");
         Team team2 = buildBeachTeam("Team 2");
         Rules rules = buildBeachRules();
+        SelectedLeague league = buildBeachLeague("Test league", "Pool A");
 
         UUID gameId = UUID.randomUUID();
-        UUID leagueId = UUID.randomUUID();
+        UUID leagueId = league.getId();
 
         Game game = new Game();
 
@@ -235,9 +236,7 @@ public class GameTests extends VbrTests {
         game.setUsage(UsageType.NORMAL);
         game.setStatus(GameStatus.LIVE);
         game.setIndexed(true);
-        game.setLeagueId(leagueId);
-        game.setLeagueName("Test league");
-        game.setDivisionName("Pool A");
+        game.setLeague(league);
         game.setHomeTeam(team1);
         game.setGuestTeam(team2);
         game.setHomeSets(0);
@@ -304,7 +303,7 @@ public class GameTests extends VbrTests {
         // Get games in division
 
         typeReference = new ParameterizedTypeReference<>() {};
-        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/public/games/league/" + leagueId + "/division/" + game.getDivisionName()), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
+        getGameDescrResponse = restTemplate.exchange(urlOf("/api/v3/public/games/league/" + leagueId + "/division/" + game.getLeague().getDivision()), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
         assertEquals(HttpStatus.OK, getGameDescrResponse.getStatusCode());
         assertEquals(1, getGameDescrResponse.getBody().size());
 
@@ -315,7 +314,7 @@ public class GameTests extends VbrTests {
 
         // Download excel file for division
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/league/" + leagueId + "/division/" + game.getDivisionName() + "/excel"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/league/" + leagueId + "/division/" + game.getLeague().getDivision() + "/excel"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // Count games in league
@@ -453,9 +452,7 @@ public class GameTests extends VbrTests {
         game.setUsage(UsageType.NORMAL);
         game.setStatus(GameStatus.LIVE);
         game.setIndexed(true);
-        game.setLeagueId(null);
-        game.setLeagueName(null);
-        game.setDivisionName(null);
+        game.setLeague(null);
         game.setHomeTeam(team1);
         game.setGuestTeam(team2);
         game.setHomeSets(0);
@@ -512,9 +509,10 @@ public class GameTests extends VbrTests {
         Team team1 = buildBeachTeam("Team 1");
         Team team2 = buildBeachTeam("Team 2");
         Rules rules = buildBeachRules();
+        SelectedLeague league = buildBeachLeague("Test league", "Test division");
 
         UUID gameId = UUID.randomUUID();
-        UUID leagueId = UUID.randomUUID();
+        UUID leagueId = league.getId();
 
         Game game = new Game();
 
@@ -530,9 +528,7 @@ public class GameTests extends VbrTests {
         game.setUsage(UsageType.NORMAL);
         game.setStatus(GameStatus.LIVE);
         game.setIndexed(true);
-        game.setLeagueId(leagueId);
-        game.setLeagueName("Test league");
-        game.setDivisionName("Test division");
+        game.setLeague(league);
         game.setHomeTeam(team1);
         game.setGuestTeam(team2);
         game.setHomeSets(0);
@@ -681,4 +677,15 @@ public class GameTests extends VbrTests {
         return set;
     }
 
+    private SelectedLeague buildBeachLeague(String name, String division) {
+        SelectedLeague selectedLeague = new SelectedLeague();
+        selectedLeague.setId(UUID.randomUUID());
+        selectedLeague.setCreatedBy(testUser1Id);
+        selectedLeague.setCreatedAt(System.currentTimeMillis());
+        selectedLeague.setUpdatedAt(System.currentTimeMillis());
+        selectedLeague.setName(name);
+        selectedLeague.setKind(GameType.BEACH);
+        selectedLeague.setDivision(division);
+        return selectedLeague;
+    }
 }

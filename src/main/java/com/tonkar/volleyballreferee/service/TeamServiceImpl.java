@@ -90,7 +90,6 @@ public class TeamServiceImpl implements TeamService {
             throw new ConflictException(String.format("Could not create team %s %s %s for user %s because it already exists", team.getName(), team.getKind(), team.getGender(), userId));
         } else {
             team.setCreatedBy(userId);
-            team.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             team.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             teamRepository.save(team);
         }

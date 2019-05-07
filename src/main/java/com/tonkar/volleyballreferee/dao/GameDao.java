@@ -35,9 +35,9 @@ public class GameDao {
             .and("usage").as("usage")
             .and("status").as("status")
             .and("indexed").as("indexed")
-            .and("leagueId").as("leagueId")
-            .and("leagueName").as("leagueName")
-            .and("divisionName").as("divisionName")
+            .and("league._id").as("leagueId")
+            .and("league.name").as("leagueName")
+            .and("league.division").as("divisionName")
             .and("homeTeam._id").as("homeTeamId")
             .and("homeTeam.name").as("homeTeamName")
             .and("guestTeam._id").as("guestTeamId")
@@ -62,7 +62,7 @@ public class GameDao {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("indexed").is(true).orOperator(
                 Criteria.where("homeTeam.name").regex(".*" + token + ".*", "i"),
                 Criteria.where("guestTeam.name").regex(".*" + token + ".*", "i"),
-                Criteria.where("leagueName").regex(".*" + token + ".*", "i"),
+                Criteria.where("league.name").regex(".*" + token + ".*", "i"),
                 Criteria.where("refereeName").regex(".*" + token + ".*", "i")
         ));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
@@ -81,35 +81,35 @@ public class GameDao {
     }
 
     public List<GameDescription> listGamesInLeague(UUID leagueId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
                 mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
     }
 
     public List<GameDescription> listGamesInDivision(UUID leagueId, String divisionName) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("divisionName").is(divisionName));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
                 mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
     }
 
     public List<GameDescription> listGamesOfTeamInLeague(UUID leagueId, UUID teamId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).orOperator(Criteria.where("homeTeam._id").is(teamId), Criteria.where("guestTeam._id").is(teamId)));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).orOperator(Criteria.where("homeTeam._id").is(teamId), Criteria.where("guestTeam._id").is(teamId)));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
                 mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
     }
 
     public List<GameDescription> listLiveGamesInLeague(UUID leagueId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("status").is(GameStatus.LIVE));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("status").is(GameStatus.LIVE));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
                 mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
     }
 
     public List<GameDescription> listLast10GamesInLeague(UUID leagueId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("status").is(GameStatus.COMPLETED));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("status").is(GameStatus.COMPLETED));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         LimitOperation limitOperation = Aggregation.limit(10L);
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation, limitOperation),
@@ -117,7 +117,7 @@ public class GameDao {
     }
 
     public List<GameDescription> listNext10GamesInLeague(UUID leagueId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("status").is(GameStatus.SCHEDULED));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("status").is(GameStatus.SCHEDULED));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "scheduledAt");
         LimitOperation limitOperation = Aggregation.limit(10L);
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation, limitOperation),
@@ -126,8 +126,8 @@ public class GameDao {
 
     public List<GameDescription> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId) {
         MatchOperation matchOperation = Aggregation.match(
-                Criteria.where("leagueId").is(leagueId)
-                        .and("divisionName").is(divisionName)
+                Criteria.where("league._id").is(leagueId)
+                        .and("league.division").is(divisionName)
                         .orOperator(Criteria.where("homeTeam._id").is(teamId), Criteria.where("guestTeam._id").is(teamId))
         );
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
@@ -136,14 +136,14 @@ public class GameDao {
     }
 
     public List<GameDescription> listLiveGamesInDivision(UUID leagueId, String divisionName) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("divisionName").is(divisionName).and("status").is(GameStatus.LIVE));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName).and("status").is(GameStatus.LIVE));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
                 mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
     }
 
     public List<GameDescription> listLast10GamesInDivision(UUID leagueId, String divisionName) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("divisionName").is(divisionName).and("status").is(GameStatus.COMPLETED));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName).and("status").is(GameStatus.COMPLETED));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         LimitOperation limitOperation = Aggregation.limit(10L);
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation, limitOperation),
@@ -151,7 +151,7 @@ public class GameDao {
     }
 
     public List<GameDescription> listNext10GamesInDivision(UUID leagueId, String divisionName) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("leagueId").is(leagueId).and("divisionName").is(divisionName).and("status").is(GameStatus.SCHEDULED));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName).and("status").is(GameStatus.SCHEDULED));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "scheduledAt");
         LimitOperation limitOperation = Aggregation.limit(10L);
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation, limitOperation),
@@ -191,15 +191,15 @@ public class GameDao {
     }
 
     public List<GameDescription> listGamesInLeague(String userId, UUID leagueId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("leagueId").is(leagueId));
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("league._id").is(leagueId));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameDescriptionProjection, sortOperation),
                 mongoTemplate.getCollectionName(Game.class), GameDescription.class).getMappedResults();
     }
 
     public List<String> listDivisionsInLeague(String userId, UUID leagueId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("leagueId").is(leagueId).and("divisionName").exists(true).ne(""));
-        ProjectionOperation projectionOperation = Aggregation.project("divisionName");
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("league._id").is(leagueId).and("league.division").exists(true).ne(""));
+        ProjectionOperation projectionOperation = Aggregation.project().and("league.division").as("divisionName");
         GroupOperation groupOperation = Aggregation
                 .group("divisionName")
                 .first("divisionName").as("divisionName");

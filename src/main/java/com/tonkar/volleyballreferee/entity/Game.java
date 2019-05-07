@@ -39,9 +39,8 @@ public class Game {
     @NotNull
     private GameStatus     status;
     private boolean        indexed;
-    private UUID           leagueId;
-    private String         leagueName;
-    private String         divisionName;
+    @Valid
+    private SelectedLeague league;
     @Valid
     @NotNull
     private Team           homeTeam;

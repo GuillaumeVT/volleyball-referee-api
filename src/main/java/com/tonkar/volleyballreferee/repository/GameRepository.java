@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface GameRepository extends MongoRepository<Game, UUID> {
 
-    List<Game> findByCreatedByAndLeagueIdAndDivisionNameAndStatusOrderByScheduledAtAsc(String userId, UUID leagueId, String divisionName, GameStatus status);
+    List<Game> findByCreatedByAndLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(String userId, UUID leagueId, String divisionName, GameStatus status);
 
     Optional<Game> findByIdAndCreatedBy(UUID id, String userId);
 

@@ -114,11 +114,8 @@ public class ScoreSheetWriter {
         Element infoDiv = new Element("div");
         infoDiv.addClass("div-grid-info");
 
-        String league = game.getLeagueName();
-        String division = game.getDivisionName();
-        if (!league.isBlank() && !division.isBlank()) {
-            league = league + " / " + division;
-        }
+        SelectedLeague selectedLeague = game.getLeague();
+        String league = selectedLeague == null ? "" : selectedLeague.getName() + " / " + selectedLeague.getDivision();
 
         infoDiv.appendChild(createCellSpan(league, true, false));
 

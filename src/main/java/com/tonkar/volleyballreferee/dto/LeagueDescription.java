@@ -13,14 +13,14 @@ import java.util.UUID;
 public class LeagueDescription {
 
     @NotNull
-    private UUID         id;
+    private UUID     id;
     @NotBlank
-    private String       createdBy;
-    private long         createdAt;
-    private long         updatedAt;
+    private String   createdBy;
+    private long     createdAt;
+    private long     updatedAt;
     @NotNull
-    private GameType     kind;
+    private GameType kind;
     @NotBlank
-    private String       name;
+    private String   name;
 
 }

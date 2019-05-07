@@ -71,6 +71,7 @@ public class LeagueServiceImpl implements LeagueService {
             throw new ConflictException(String.format("Could not create league %s %s for user %s because it already exists", league.getName(), league.getKind(), userId));
         } else {
             league.setCreatedBy(userId);
+            league.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             leagueRepository.save(league);
         }
     }

@@ -94,7 +94,6 @@ public class RulesServiceImpl implements RulesService {
             throw new ConflictException(String.format("Could not create rules %s %s for user %s because they already exist", rules.getName(), rules.getKind(), userId));
         } else {
             rules.setCreatedBy(userId);
-            rules.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             rules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             rulesRepository.save(rules);
         }
