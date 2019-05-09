@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.FriendsAndRequests;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.ConflictException;
@@ -74,6 +75,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<FriendRequest> listFriendRequestsReceivedBy(String receiverId) {
         return friendRequestRepository.findByReceiverId(receiverId);
+    }
+
+    @Override
+    public FriendsAndRequests listFriendsAndRequests(User user) {
+        FriendsAndRequests friendsAndRequests = new FriendsAndRequests();
+
+        friendsAndRequests.setFriends(user.getFriends());
+        friendsAndRequests.setReceivedFriendRequests(friendRequestRepository.findByReceiverId(user.getId()));
+        friendsAndRequests.setSentFriendRequests(friendRequestRepository.findBySenderId(user.getId()));
+
+        return friendsAndRequests;
     }
 
     @Override

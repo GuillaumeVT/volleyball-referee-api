@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.FriendsAndRequests;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.ConflictException;
@@ -49,6 +50,11 @@ public class UserController {
     @GetMapping(value = "/friends/received/count", produces = {"application/json"})
     public ResponseEntity<Count> getNumberOfFriendRequestsReceivedBy(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(userService.getNumberOfFriendRequestsReceivedBy(user.getId()), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/friends", produces = {"application/json"})
+    public ResponseEntity<FriendsAndRequests> listFriendsAndRequests(@AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(userService.listFriendsAndRequests(user), HttpStatus.OK);
     }
 
     @PostMapping(value = "/friends/request/{receiverPseudo}", produces = {"application/json"})

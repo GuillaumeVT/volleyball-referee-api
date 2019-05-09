@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee;
 
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.FriendsAndRequests;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
 import org.junit.Test;
@@ -32,6 +33,9 @@ public class UserTests extends VbrTests {
 
         ResponseEntity<String> deleteUserResponse = restTemplate.exchange(urlOf("/api/v3/users"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidAuth), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, deleteUserResponse.getStatusCode());
+
+        ResponseEntity<FriendsAndRequests> friendsAndRequestsResponse = restTemplate.exchange(urlOf("/api/v3/users/friends"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), FriendsAndRequests.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, friendsAndRequestsResponse.getStatusCode());
 
         ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
         ResponseEntity<List<FriendRequest>> getFriendsResponse = restTemplate.exchange(urlOf("/api/v3/users/friends/requested"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), typeReference);
@@ -170,6 +174,11 @@ public class UserTests extends VbrTests {
         getFriendsResponse = restTemplate.exchange(urlOf("/api/v3/users/friends/requested"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), typeReference);
         assertEquals(HttpStatus.OK, getFriendsResponse.getStatusCode());
         assertEquals(1, getFriendsResponse.getBody().size());
+
+        // List all friends and requests
+
+        ResponseEntity<FriendsAndRequests> friendsAndRequestsResponse = restTemplate.exchange(urlOf("/api/v3/users/friends"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), FriendsAndRequests.class);
+        assertEquals(HttpStatus.OK, friendsAndRequestsResponse.getStatusCode());
 
         // Reject friend request
 
