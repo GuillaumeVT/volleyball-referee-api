@@ -4,8 +4,11 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.tonkar.volleyballreferee.entity.UserToken;
+import com.tonkar.volleyballreferee.repository.UserTokenRepository;
 import com.tonkar.volleyballreferee.security.FacebookIdToken;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +31,9 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     @Value("${vbr.auth.googleWebClientId}")
     private String googleWebClientId;
 
+    @Autowired
+    private UserTokenRepository userTokenRepository;
+
     private final RestTemplate restTemplate;
 
     public UserAuthenticationServiceImpl() {
@@ -38,16 +44,22 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     public Optional<String> getUserId(AuthenticationProvider authProvider, String idToken) {
         Optional<String> optUserId;
 
-        switch (authProvider) {
-            case FACEBOOK:
-                optUserId = getUserIdWithFacebook(idToken);
-                break;
-            case GOOGLE:
-                optUserId = getUserIdWithGoogle(idToken);
-                break;
-            default:
-                optUserId = Optional.empty();
-                break;
+        Optional<UserToken> optUserToken = userTokenRepository.findById(idToken);
+
+        if (optUserToken.isPresent()) {
+            optUserId = Optional.of(optUserToken.get().getId());
+        } else {
+            switch (authProvider) {
+                case FACEBOOK:
+                    optUserId = getUserIdWithFacebook(idToken);
+                    break;
+                case GOOGLE:
+                    optUserId = getUserIdWithGoogle(idToken);
+                    break;
+                default:
+                    optUserId = Optional.empty();
+                    break;
+            }
         }
 
         return optUserId;
@@ -76,6 +88,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
             } else {
                 String userId = computeUserId(facebookIdToken.getPayload().getUserId(), AuthenticationProvider.FACEBOOK);
                 optUserId = Optional.of(userId);
+                userTokenRepository.insert(new UserToken(idToken, userId));
             }
         } else {
             optUserId = Optional.empty();
@@ -98,6 +111,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
                 GoogleIdToken.Payload payload = googleIdToken.getPayload();
                 String userId = computeUserId(payload.getSubject(), AuthenticationProvider.GOOGLE);
                 optUserId = Optional.of(userId);
+                userTokenRepository.insert(new UserToken(idToken, userId));
             }
         } catch (GeneralSecurityException | IOException e) {
             optUserId = Optional.empty();
