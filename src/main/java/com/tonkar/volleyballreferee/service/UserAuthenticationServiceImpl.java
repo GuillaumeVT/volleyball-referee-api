@@ -88,7 +88,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
             } else {
                 String userId = computeUserId(facebookIdToken.getPayload().getUserId(), AuthenticationProvider.FACEBOOK);
                 optUserId = Optional.of(userId);
-                userTokenRepository.insert(new UserToken(userId, idToken));
+                userTokenRepository.save(new UserToken(userId, idToken));
             }
         } else {
             optUserId = Optional.empty();
@@ -111,7 +111,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
                 GoogleIdToken.Payload payload = googleIdToken.getPayload();
                 String userId = computeUserId(payload.getSubject(), AuthenticationProvider.GOOGLE);
                 optUserId = Optional.of(userId);
-                userTokenRepository.insert(new UserToken(userId, idToken));
+                userTokenRepository.save(new UserToken(userId, idToken));
             }
         } catch (GeneralSecurityException | IOException e) {
             optUserId = Optional.empty();
