@@ -256,15 +256,17 @@ public class GameServiceImpl implements GameService {
     }
 
     private void createTeamsAndRulesAndLeaguesIfNeeded(String userId, Game game) {
-        try {
-            teamService.createTeam(userId, game.getHomeTeam());
-        } catch (ConflictException e) { /* already exists */ }
-        try {
-            teamService.createTeam(userId, game.getGuestTeam());
-        } catch (ConflictException e) { /* already exists */ }
-        try {
-            rulesService.createRules(userId, game.getRules());
-        } catch (ConflictException e) { /* already exists */ }
+        if (!GameType.TIME.equals(game.getKind())) {
+            try {
+                teamService.createTeam(userId, game.getHomeTeam());
+            } catch (ConflictException e) { /* already exists */ }
+            try {
+                teamService.createTeam(userId, game.getGuestTeam());
+            } catch (ConflictException e) { /* already exists */ }
+            try {
+                rulesService.createRules(userId, game.getRules());
+            } catch (ConflictException e) { /* already exists */ }
+        }
 
         createOrUpdateLeagueIfNeeded(userId, game);
     }
