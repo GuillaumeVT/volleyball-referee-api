@@ -44,7 +44,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     public Optional<String> getUserId(AuthenticationProvider authProvider, String idToken) {
         Optional<String> optUserId;
 
-        Optional<UserToken> optUserToken = userTokenRepository.findById(idToken);
+        Optional<UserToken> optUserToken = userTokenRepository.findByToken(idToken);
 
         if (optUserToken.isPresent()) {
             optUserId = Optional.of(optUserToken.get().getId());
@@ -88,7 +88,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
             } else {
                 String userId = computeUserId(facebookIdToken.getPayload().getUserId(), AuthenticationProvider.FACEBOOK);
                 optUserId = Optional.of(userId);
-                userTokenRepository.insert(new UserToken(idToken, userId));
+                userTokenRepository.insert(new UserToken(userId, idToken));
             }
         } else {
             optUserId = Optional.empty();
@@ -111,7 +111,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
                 GoogleIdToken.Payload payload = googleIdToken.getPayload();
                 String userId = computeUserId(payload.getSubject(), AuthenticationProvider.GOOGLE);
                 optUserId = Optional.of(userId);
-                userTokenRepository.insert(new UserToken(idToken, userId));
+                userTokenRepository.insert(new UserToken(userId, idToken));
             }
         } catch (GeneralSecurityException | IOException e) {
             optUserId = Optional.empty();

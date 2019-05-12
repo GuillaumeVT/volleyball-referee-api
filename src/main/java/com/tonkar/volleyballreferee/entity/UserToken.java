@@ -17,6 +17,6 @@ public class UserToken {
     @NotBlank
     private String id;
     @NotBlank
-    private String userId;
+    private String token;
 
 }
