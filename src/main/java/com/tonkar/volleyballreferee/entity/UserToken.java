@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.constraints.NotBlank;
 
 @NoArgsConstructor @AllArgsConstructor @Getter @Setter
-@Document(collection="user_tokens")
+@Document(collection="userTokens")
 public class UserToken {
 
     @Id
