@@ -189,7 +189,6 @@ public class PublicController {
         try {
             return new ResponseEntity<>(messageService.getMessage(), HttpStatus.OK);
         } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

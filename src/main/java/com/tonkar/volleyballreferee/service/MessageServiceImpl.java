@@ -17,6 +17,6 @@ public class MessageServiceImpl implements MessageService {
         String mainMessageId = "main-message";
         return messageRepository
                 .findById(mainMessageId)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find message %s", mainMessageId)));
+                .orElseThrow(() -> new NotFoundException(""));
     }
 }
