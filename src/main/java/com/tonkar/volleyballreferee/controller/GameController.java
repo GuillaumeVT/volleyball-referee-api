@@ -60,7 +60,8 @@ public class GameController {
         try {
             FileWrapper excelDivision = gameService.listGamesInDivisionExcel(user.getId(), leagueId, divisionName);
             ByteArrayResource resource = new ByteArrayResource(excelDivision.getData());
-            return ResponseEntity.ok()
+            return ResponseEntity
+                    .ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + excelDivision.getFilename())
                     .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                     .contentLength(excelDivision.getData().length)

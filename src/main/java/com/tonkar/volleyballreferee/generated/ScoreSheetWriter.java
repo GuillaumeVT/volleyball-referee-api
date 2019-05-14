@@ -763,7 +763,7 @@ public class ScoreSheetWriter {
         return base64Image;
     }
 
-    public static String getTextColor(String backgroundColor) {
+    private String getTextColor(String backgroundColor) {
         Color color = Color.decode(backgroundColor);
         String textColor;
 

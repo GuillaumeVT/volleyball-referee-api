@@ -4,6 +4,8 @@ import com.tonkar.volleyballreferee.dto.Ranking;
 import com.tonkar.volleyballreferee.entity.*;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 
@@ -17,8 +19,8 @@ import java.util.TimeZone;
 
 public class ExcelDivisionWriter {
 
-    private String divisionName;
-    private XSSFWorkbook workbook;
+    private String        divisionName;
+    private XSSFWorkbook  workbook;
     private XSSFCellStyle headerStyle;
     private XSSFCellStyle matchStyle;
     private XSSFCellStyle setStyle;
@@ -91,7 +93,7 @@ public class ExcelDivisionWriter {
         cell.setCellStyle(createExcelTeamStyle(teamType, game.getTeam(teamType).getColor()));
 
         cell = row.createCell(2);
-        cell.setCellValue(game.getHomeSets());
+        cell.setCellValue(TeamType.HOME.equals(teamType) ? game.getHomeSets() : game.getGuestSets());
         cell.setCellStyle(TeamType.HOME.equals(teamType) ? homeSetStyle : guestSetStyle);
 
         createSetsExcelRow(row, teamType, game);
@@ -182,17 +184,17 @@ public class ExcelDivisionWriter {
 
     private XSSFCellStyle createExcelTeamStyle(String color) {
         XSSFCellStyle style = workbook.createCellStyle();
-        style.setFillForegroundColor(new XSSFColor(Color.decode(ScoreSheetWriter.getTextColor(color)), new DefaultIndexedColorMap()));
         style.setFillForegroundColor(new XSSFColor(Color.decode(color), new DefaultIndexedColorMap()));
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
         style.setBorderTop(BorderStyle.THIN);
         style.setBorderBottom(BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
 
         org.apache.poi.ss.usermodel.Font font = workbook.createFont();
-        font.setBold(true);
+        font.setFontHeight((short) 200);
+        font.setColor(getTextColor(color));
         style.setFont(font);
 
         return style;
@@ -200,11 +202,12 @@ public class ExcelDivisionWriter {
 
     private XSSFCellStyle createExcelTeamStyle(TeamType teamType, String color) {
         XSSFCellStyle style = createExcelTeamStyle(color);
-
         style.setBorderTop(TeamType.HOME.equals(teamType) ? BorderStyle.THIN : BorderStyle.NONE);
         style.setBorderBottom(TeamType.HOME.equals(teamType) ? BorderStyle.NONE : BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+
         return style;
     }
 
@@ -212,11 +215,11 @@ public class ExcelDivisionWriter {
         XSSFCellStyle style = workbook.createCellStyle();
         style.setFillForegroundColor(new XSSFColor(Color.decode(color), new DefaultIndexedColorMap()));
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
         style.setBorderTop(TeamType.HOME.equals(teamType) ? BorderStyle.THIN : BorderStyle.NONE);
         style.setBorderBottom(TeamType.HOME.equals(teamType) ? BorderStyle.NONE : BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         return style;
     }
 
@@ -226,6 +229,7 @@ public class ExcelDivisionWriter {
         style.setBorderBottom(TeamType.HOME.equals(teamType) ? BorderStyle.NONE : BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         return style;
     }
 
@@ -233,11 +237,26 @@ public class ExcelDivisionWriter {
         XSSFCellStyle style = workbook.createCellStyle();
         style.setFillForegroundColor(new XSSFColor(Color.decode(color), new DefaultIndexedColorMap()));
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
         style.setBorderTop(BorderStyle.THIN);
         style.setBorderBottom(BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         return style;
+    }
+
+    private short getTextColor(String backgroundColor) {
+        Color color = Color.decode(backgroundColor);
+        short textColor;
+
+        double a = 1 - ( 0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
+
+        if (a < 0.5) {
+            textColor = IndexedColors.BLACK.getIndex();
+        } else {
+            textColor = IndexedColors.WHITE.getIndex();
+        }
+
+        return textColor;
     }
 }

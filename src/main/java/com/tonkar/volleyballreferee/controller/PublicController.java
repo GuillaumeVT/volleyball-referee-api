@@ -82,7 +82,7 @@ public class PublicController {
         }
     }
 
-    @GetMapping(value = "/games/{gameId}/score-sheet", produces = {"application/json"})
+    @GetMapping(value = "/games/{gameId}/score-sheet")
     public ResponseEntity<?> getScoreSheet(@PathVariable("gameId") UUID gameId) {
         try {
             FileWrapper scoreSheet = gameService.getScoreSheet(gameId);

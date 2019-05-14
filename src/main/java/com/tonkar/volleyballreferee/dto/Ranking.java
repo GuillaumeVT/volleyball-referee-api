@@ -65,10 +65,8 @@ public class Ranking implements Comparable<Ranking> {
 
         if (setsDiff > 0) {
             this.matchesFor++;
-            this.matchesAgainst--;
             this.matchesDiff++;
         } else {
-            this.matchesFor--;
             this.matchesAgainst++;
             this.matchesDiff--;
         }
