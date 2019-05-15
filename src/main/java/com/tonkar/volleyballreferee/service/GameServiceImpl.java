@@ -3,6 +3,7 @@ package com.tonkar.volleyballreferee.service;
 import com.tonkar.volleyballreferee.dao.GameDao;
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.GameDescription;
+import com.tonkar.volleyballreferee.dto.Ranking;
 import com.tonkar.volleyballreferee.entity.Set;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.generated.ExcelDivisionWriter;
@@ -125,6 +126,14 @@ public class GameServiceImpl implements GameService {
     public FileWrapper getScoreSheet(UUID gameId) throws NotFoundException {
         Game game = getGame(gameId);
         return ScoreSheetWriter.writeGame(game);
+    }
+
+    @Override
+    public List<Ranking> listRankingsInDivision(UUID leagueId, String divisionName) {
+        List<Game> games = gameRepository.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName, GameStatus.COMPLETED);
+        Rankings rankings = new Rankings();
+        games.forEach(rankings::addGame);
+        return rankings.list();
     }
 
     @Override

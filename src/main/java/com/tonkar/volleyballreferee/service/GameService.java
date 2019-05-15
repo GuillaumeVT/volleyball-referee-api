@@ -2,10 +2,8 @@ package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.GameDescription;
-import com.tonkar.volleyballreferee.entity.FileWrapper;
-import com.tonkar.volleyballreferee.entity.Game;
-import com.tonkar.volleyballreferee.entity.GameStatus;
-import com.tonkar.volleyballreferee.entity.Set;
+import com.tonkar.volleyballreferee.dto.Ranking;
+import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
 
@@ -47,6 +45,8 @@ public interface GameService {
     Game getGame(UUID gameId) throws NotFoundException;
 
     FileWrapper getScoreSheet(UUID gameId) throws NotFoundException;
+
+    List<Ranking> listRankingsInDivision(UUID leagueId, String divisionName);
 
     // User only
 

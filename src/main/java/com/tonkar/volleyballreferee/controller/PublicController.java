@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.GameDescription;
+import com.tonkar.volleyballreferee.dto.Ranking;
 import com.tonkar.volleyballreferee.dto.Statistics;
 import com.tonkar.volleyballreferee.dto.TeamDescription;
 import com.tonkar.volleyballreferee.entity.*;
@@ -162,6 +163,11 @@ public class PublicController {
     @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/team/{teamId}", produces = {"application/json"})
     public ResponseEntity<List<GameDescription>> listGamesOfTeamInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName, @PathVariable("teamId") UUID teamId) {
         return new ResponseEntity<>(gameService.listGamesOfTeamInDivision(leagueId, divisionName, teamId), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/rankings", produces = {"application/json"})
+    public ResponseEntity<List<Ranking>> listRankingsInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
+        return new ResponseEntity<>(gameService.listRankingsInDivision(leagueId, divisionName), HttpStatus.OK);
     }
 
     @GetMapping(value = "/teams/league/{leagueId}", produces = {"application/json"})
