@@ -8,16 +8,12 @@ import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.service.GameService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,23 +49,6 @@ public class GameController {
     @GetMapping(value = "/league/{leagueId}", produces = {"application/json"})
     public ResponseEntity<List<GameDescription>> listGamesInLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
         return new ResponseEntity<>(gameService.listGamesInLeague(user.getId(), leagueId), HttpStatus.OK);
-    }
-
-    @GetMapping("/league/{leagueId}/division/{divisionName}/excel")
-    public ResponseEntity<?> listGamesInDivisionExcel(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
-        try {
-            FileWrapper excelDivision = gameService.listGamesInDivisionExcel(user.getId(), leagueId, divisionName);
-            ByteArrayResource resource = new ByteArrayResource(excelDivision.getData());
-            return ResponseEntity
-                    .ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + excelDivision.getFilename())
-                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                    .contentLength(excelDivision.getData().length)
-                    .body(resource);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
     @GetMapping(value = "/{gameId}", produces = {"application/json"})

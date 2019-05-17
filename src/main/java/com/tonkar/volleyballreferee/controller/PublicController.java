@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -168,6 +169,23 @@ public class PublicController {
     @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/rankings", produces = {"application/json"})
     public ResponseEntity<List<Ranking>> listRankingsInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
         return new ResponseEntity<>(gameService.listRankingsInDivision(leagueId, divisionName), HttpStatus.OK);
+    }
+
+    @GetMapping("/games/league/{leagueId}/division/{divisionName}/excel")
+    public ResponseEntity<?> listGamesInDivisionExcel(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
+        try {
+            FileWrapper excelDivision = gameService.listGamesInDivisionExcel(leagueId, divisionName);
+            ByteArrayResource resource = new ByteArrayResource(excelDivision.getData());
+            return ResponseEntity
+                    .ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + excelDivision.getFilename())
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .contentLength(excelDivision.getData().length)
+                    .body(resource);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping(value = "/teams/league/{leagueId}", produces = {"application/json"})

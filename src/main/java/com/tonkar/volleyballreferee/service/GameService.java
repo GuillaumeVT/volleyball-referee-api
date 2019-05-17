@@ -46,6 +46,8 @@ public interface GameService {
 
     FileWrapper getScoreSheet(UUID gameId) throws NotFoundException;
 
+    FileWrapper listGamesInDivisionExcel(UUID leagueId, String divisionName) throws IOException;
+
     List<Ranking> listRankingsInDivision(UUID leagueId, String divisionName);
 
     // User only
@@ -59,8 +61,6 @@ public interface GameService {
     List<GameDescription> listCompletedGames(String userId);
 
     List<GameDescription> listGamesInLeague(String userId, UUID leagueId);
-
-    FileWrapper listGamesInDivisionExcel(String userId, UUID leagueId, String divisionName) throws IOException;
 
     Game getGame(String userId, UUID gameId) throws NotFoundException;
 

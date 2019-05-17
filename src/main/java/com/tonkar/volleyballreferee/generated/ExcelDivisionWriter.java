@@ -65,12 +65,21 @@ public class ExcelDivisionWriter {
         DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
         formatter.setTimeZone(TimeZone.getDefault());
 
-        XSSFSheet sheet = workbook.createSheet(divisionName + " - Matches");
+        String[] gamesHeader = { "Date", "Team", "Total Sets", "Set 1", "Set 2", "Set 3", "Set 4", "Set 5", "Total Points" };
 
-        int rowIndex = 0;
+        XSSFSheet sheet = workbook.createSheet(divisionName + " - Matches");
+        XSSFRow row = sheet.createRow(0);
+
+        for (int index = 0; index < gamesHeader.length; index++) {
+            XSSFCell cell = row.createCell(index);
+            cell.setCellValue(gamesHeader[index]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowIndex = 1;
 
         for (Game game : games) {
-            XSSFRow row = sheet.createRow(rowIndex);
+            row = sheet.createRow(rowIndex);
 
             XSSFCell cell = row.createCell(0);
             cell.setCellValue(formatter.format(game.getScheduledAt()));
@@ -113,13 +122,20 @@ public class ExcelDivisionWriter {
             columnIndex++;
         }
 
+        while (columnIndex < 8) {
+            XSSFCell cell = row.createCell(columnIndex);
+            cell.setCellValue(0);
+            cell.setCellStyle(TeamType.HOME.equals(teamType) ? homeDefaultStyle : guestDefaultStyle);
+            columnIndex++;
+        }
+
         XSSFCell cell = row.createCell(columnIndex);
         cell.setCellValue(total);
         cell.setCellStyle(TeamType.HOME.equals(teamType) ? homePointStyle : guestPointStyle);
     }
 
     private void createRankingsExcelSheet(List<Game> games) {
-        String[] rankingsHeader = { "Team", "Matches For", "Matches Against", "Matches Diff", "Sets For", "Sets Against", "Sets Diff", "Points For", "Points Against", "Points Diff" };
+        String[] rankingsHeader = { "Team", "Matches Played", "Matches Won", "Matches Lost", "Matches Diff", "Sets Won", "Sets Lost", "Sets Diff", "Points Won", "Points Lost", "Points Diff" };
 
         XSSFSheet sheet = workbook.createSheet(divisionName + " - Rankings");
         XSSFRow row = sheet.createRow(0);
@@ -137,44 +153,49 @@ public class ExcelDivisionWriter {
 
         for (Ranking ranking : rankings.list()) {
             row = sheet.createRow(rowIndex);
+            int columnIndex = 0;
 
-            XSSFCell cell = row.createCell(0);
+            XSSFCell cell = row.createCell(columnIndex++);
             cell.setCellValue(ranking.getTeamName());
             cell.setCellStyle(createExcelTeamStyle(ranking.getTeamColor()));
 
-            cell = row.createCell(1);
+            cell = row.createCell(columnIndex++);
+            cell.setCellValue(ranking.getMatchesFor() + ranking.getMatchesAgainst());
+            cell.setCellStyle(matchStyle);
+
+            cell = row.createCell(columnIndex++);
             cell.setCellValue(ranking.getMatchesFor());
             cell.setCellStyle(matchStyle);
 
-            cell = row.createCell(2);
+            cell = row.createCell(columnIndex++);
             cell.setCellValue(ranking.getMatchesAgainst());
             cell.setCellStyle(matchStyle);
 
-            cell = row.createCell(3);
+            cell = row.createCell(columnIndex++);
             cell.setCellValue(ranking.getMatchesDiff());
             cell.setCellStyle(matchStyle);
 
-            cell = row.createCell(4);
+            cell = row.createCell(columnIndex++);
             cell.setCellValue(ranking.getSetsFor());
             cell.setCellStyle(setStyle);
 
-            cell = row.createCell(5);
+            cell = row.createCell(columnIndex++);
             cell.setCellValue(ranking.getSetsAgainst());
             cell.setCellStyle(setStyle);
 
-            cell = row.createCell(6);
+            cell = row.createCell(columnIndex++);
             cell.setCellValue(ranking.getSetsDiff());
             cell.setCellStyle(setStyle);
 
-            cell = row.createCell(7);
+            cell = row.createCell(columnIndex++);
             cell.setCellValue(ranking.getPointsFor());
             cell.setCellStyle(pointStyle);
 
-            cell = row.createCell(8);
+            cell = row.createCell(columnIndex++);
             cell.setCellValue(ranking.getPointsAgainst());
             cell.setCellStyle(pointStyle);
 
-            cell = row.createCell(9);
+            cell = row.createCell(columnIndex++);
             cell.setCellValue(ranking.getPointsDiff());
             cell.setCellStyle(pointStyle);
 

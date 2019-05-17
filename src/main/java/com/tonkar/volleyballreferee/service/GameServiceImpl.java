@@ -129,6 +129,12 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public FileWrapper listGamesInDivisionExcel(UUID leagueId, String divisionName) throws IOException {
+        List<Game> games = gameRepository.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName, GameStatus.COMPLETED);
+        return ExcelDivisionWriter.writeExcelDivision(divisionName, games);
+    }
+
+    @Override
     public List<Ranking> listRankingsInDivision(UUID leagueId, String divisionName) {
         List<Game> games = gameRepository.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName, GameStatus.COMPLETED);
         Rankings rankings = new Rankings();
@@ -159,12 +165,6 @@ public class GameServiceImpl implements GameService {
     @Override
     public List<GameDescription> listGamesInLeague(String userId, UUID leagueId) {
         return gameDao.listGamesInLeague(userId, leagueId);
-    }
-
-    @Override
-    public FileWrapper listGamesInDivisionExcel(String userId, UUID leagueId, String divisionName) throws IOException {
-        List<Game> games = gameRepository.findByCreatedByAndLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(userId, leagueId, divisionName, GameStatus.COMPLETED);
-        return ExcelDivisionWriter.writeExcelDivision(divisionName, games);
     }
 
     @Override

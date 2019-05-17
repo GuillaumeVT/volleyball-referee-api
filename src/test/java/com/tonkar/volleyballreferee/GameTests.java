@@ -75,9 +75,6 @@ public class GameTests extends VbrTests {
 
         gameResponse = restTemplate.exchange(urlOf("/api/v3/games"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidAuth), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
-
-        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/league/" + UUID.randomUUID() + "/division/div/excel"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidAuth), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
     }
 
     @Test
@@ -314,7 +311,7 @@ public class GameTests extends VbrTests {
 
         // Download excel file for division
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/league/" + leagueId + "/division/" + game.getLeague().getDivision() + "/excel"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/api/v3/public/games/league/" + leagueId + "/division/" + game.getLeague().getDivision() + "/excel"), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // Count games in league
