@@ -24,12 +24,6 @@ import java.util.*;
 public class GameServiceImpl implements GameService {
 
     @Autowired
-    private TeamService teamService;
-
-    @Autowired
-    private RulesService rulesService;
-
-    @Autowired
     private LeagueService leagueService;
 
     @Autowired
@@ -260,26 +254,8 @@ public class GameServiceImpl implements GameService {
             }
             gameRepository.save(game);
 
-            createTeamsAndRulesAndLeaguesIfNeeded(userId, game);
+            createOrUpdateLeagueIfNeeded(userId, game);
         }
-    }
-
-    private void createTeamsAndRulesAndLeaguesIfNeeded(String userId, Game game) {
-        if (!GameType.TIME.equals(game.getKind())) {
-            if (UsageType.NORMAL.equals(game.getUsage())) {
-                try {
-                    teamService.createTeam(userId, game.getHomeTeam());
-                } catch (ConflictException e) { /* already exists */ }
-                try {
-                    teamService.createTeam(userId, game.getGuestTeam());
-                } catch (ConflictException e) { /* already exists */ }
-            }
-            try {
-                rulesService.createRules(userId, game.getRules());
-            } catch (ConflictException e) { /* already exists */ }
-        }
-
-        createOrUpdateLeagueIfNeeded(userId, game);
     }
 
     private void createOrUpdateLeagueIfNeeded(String userId, Game game) {
