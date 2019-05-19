@@ -42,8 +42,8 @@ public class GameDao {
             .and("homeTeam.name").as("homeTeamName")
             .and("guestTeam._id").as("guestTeamId")
             .and("guestTeam.name").as("guestTeamName")
-            .and("hSets").as("hSets")
-            .and("gSets").as("gSets")
+            .and("homeSets").as("homeSets")
+            .and("guestSets").as("guestSets")
             .and("rules._id").as("rulesId")
             .and("rules.name").as("rulesName")
             .and("score").as("score");
