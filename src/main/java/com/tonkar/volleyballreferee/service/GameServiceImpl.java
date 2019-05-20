@@ -164,7 +164,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public Game getGame(String userId, UUID gameId) throws NotFoundException {
         return gameRepository
-                .findByIdAndCreatedBy(gameId, userId)
+                .findByIdAndAllowedUser(gameId, userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find game %s for user %s", gameId, userId)));
     }
 
@@ -198,9 +198,7 @@ public class GameServiceImpl implements GameService {
             } else if (optRules.isEmpty()) {
                 throw new NotFoundException(String.format("Could not find matching rules %s for user %s", gameDescription.getRulesId(), userId));
             } else {
-                Optional<League> optLeague = gameDescription.getLeagueId() == null
-                        ? Optional.empty()
-                        : leagueRepository.findByIdAndCreatedBy(gameDescription.getLeagueId(), userId);
+                SelectedLeague league = findOrCreateLeague(userId, gameDescription);
 
                 Game game = new Game();
 
@@ -216,7 +214,7 @@ public class GameServiceImpl implements GameService {
                 game.setUsage(gameDescription.getUsage());
                 game.setStatus(GameStatus.SCHEDULED);
                 game.setIndexed(gameDescription.isIndexed());
-                optLeague.ifPresent(league -> game.setLeague(buildSelectedLeague(league, gameDescription.getDivisionName())));
+                game.setLeague(league);
                 game.setHomeTeam(optHTeam.get());
                 game.setGuestTeam(optGTeam.get());
                 game.setHomeSets(0);
@@ -258,32 +256,6 @@ public class GameServiceImpl implements GameService {
         }
     }
 
-    private void createOrUpdateLeagueIfNeeded(String userId, Game game) {
-        if (game.getLeague() != null && !GameType.TIME.equals(game.getKind())) {
-            try {
-                leagueService.updateDivisions(userId, game.getLeague().getId());
-            } catch (NotFoundException e) {
-                /* does not exist */
-                SelectedLeague selectedLeague = game.getLeague();
-                League league = new League();
-                league.setId(selectedLeague.getId());
-                league.setCreatedBy(userId);
-                league.setCreatedAt(selectedLeague.getCreatedAt());
-                league.setUpdatedAt(selectedLeague.getUpdatedAt());
-                league.setKind(selectedLeague.getKind());
-                league.setName(selectedLeague.getName());
-                league.setDivisions(new ArrayList<>());
-                league.getDivisions().add(selectedLeague.getDivision());
-
-                try {
-                    leagueService.createLeague(userId, league);
-                } catch (ConflictException e2) {
-                    /* already exists */
-                }
-            }
-        }
-    }
-
     @Override
     public void updateGame(String userId, GameDescription gameDescription) throws ConflictException, NotFoundException {
         Optional<Game> optSavedGame = gameRepository.findByIdAndAllowedUserAndStatus(gameDescription.getId(), userId, GameStatus.SCHEDULED);
@@ -308,9 +280,7 @@ public class GameServiceImpl implements GameService {
             } else if (optRules.isEmpty()) {
                 throw new NotFoundException(String.format("Could not find matching rules %s for user %s", gameDescription.getRulesId(), userId));
             } else {
-                Optional<League> optLeague = gameDescription.getLeagueId() == null
-                        ? Optional.empty()
-                        : leagueRepository.findByIdAndCreatedBy(gameDescription.getLeagueId(), userId);
+                SelectedLeague league = findOrCreateLeague(userId, gameDescription);
 
                 savedGame.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
                 savedGame.setScheduledAt(gameDescription.getScheduledAt());
@@ -319,7 +289,7 @@ public class GameServiceImpl implements GameService {
                 savedGame.setGender(gameDescription.getGender());
                 savedGame.setUsage(gameDescription.getUsage());
                 savedGame.setIndexed(gameDescription.isIndexed());
-                optLeague.ifPresent(league -> savedGame.setLeague(buildSelectedLeague(league, gameDescription.getDivisionName())));
+                savedGame.setLeague(league);
                 savedGame.setHomeTeam(optHTeam.get());
                 savedGame.setGuestTeam(optGTeam.get());
                 savedGame.setHomeSets(0);
@@ -373,6 +343,7 @@ public class GameServiceImpl implements GameService {
         if (setIndex > 0 && setIndex <= savedGame.getSets().size()) {
             savedGame.getSets().set(setIndex - 1, set);
             savedGame.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            savedGame.setScore(buildScore(savedGame));
             gameRepository.save(savedGame);
         } else {
             throw new NotFoundException(String.format("Could not find set %d of game %s for user %s", setIndex, savedGame.getId(), userId));
@@ -419,6 +390,67 @@ public class GameServiceImpl implements GameService {
 
     private long epochDateNDaysAgo(int daysAgo) {
         return  System.currentTimeMillis() - (daysAgo * 86400000L);
+    }
+
+    private SelectedLeague findOrCreateLeague(String userId, GameDescription gameDescription) {
+        SelectedLeague selectedLeague = null;
+
+        if (!GameType.TIME.equals(gameDescription.getKind()) && gameDescription.getLeagueId() != null
+                && gameDescription.getLeagueName() != null && !gameDescription.getLeagueName().isBlank()
+                && gameDescription.getDivisionName() != null && !gameDescription.getDivisionName().isBlank()) {
+            Optional<League> optLeague = leagueRepository.findByIdAndCreatedBy(gameDescription.getLeagueId(), userId);
+            League league;
+
+            if (optLeague.isPresent()) {
+                league = optLeague.get();
+            } else {
+                league = new League();
+                league.setId(gameDescription.getLeagueId());
+                league.setCreatedBy(userId);
+                league.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+                league.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+                league.setKind(gameDescription.getKind());
+                league.setName(gameDescription.getLeagueName());
+                league.setDivisions(new ArrayList<>());
+                league.getDivisions().add(gameDescription.getDivisionName());
+
+                try {
+                    leagueService.createLeague(userId, league);
+                } catch (ConflictException e) {
+                    /* already exists */
+                }
+            }
+
+            selectedLeague = buildSelectedLeague(league, gameDescription.getDivisionName());
+        }
+
+        return selectedLeague;
+    }
+
+    private void createOrUpdateLeagueIfNeeded(String userId, Game game) {
+        if (game.getLeague() != null && !GameType.TIME.equals(game.getKind())) {
+            try {
+                leagueService.updateDivisions(userId, game.getLeague().getId());
+            } catch (NotFoundException e) {
+                /* does not exist */
+                SelectedLeague selectedLeague = game.getLeague();
+                League league = new League();
+                league.setId(selectedLeague.getId());
+                league.setCreatedBy(userId);
+                league.setCreatedAt(selectedLeague.getCreatedAt());
+                league.setUpdatedAt(selectedLeague.getUpdatedAt());
+                league.setKind(selectedLeague.getKind());
+                league.setName(selectedLeague.getName());
+                league.setDivisions(new ArrayList<>());
+                league.getDivisions().add(selectedLeague.getDivision());
+
+                try {
+                    leagueService.createLeague(userId, league);
+                } catch (ConflictException e2) {
+                    /* already exists */
+                }
+            }
+        }
     }
 
     private SelectedLeague buildSelectedLeague(League league, String divisionName) {

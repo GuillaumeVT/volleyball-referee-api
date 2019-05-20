@@ -498,7 +498,7 @@ public class GameTests extends VbrTests {
         assertEquals(HttpStatus.OK, getGameResponse.getStatusCode());
 
         getGameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + gameDescription.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUser2Auth), Game.class);
-        assertEquals(HttpStatus.NOT_FOUND, getGameResponse.getStatusCode());
+        assertEquals(HttpStatus.OK, getGameResponse.getStatusCode());
     }
 
     @Test
