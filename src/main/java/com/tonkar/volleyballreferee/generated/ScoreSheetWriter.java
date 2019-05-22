@@ -32,7 +32,8 @@ public class ScoreSheetWriter {
         String homeTeam = game.getHomeTeam().getName();
         String guestTeam = game.getGuestTeam().getName();
 
-        String filename = String.format(Locale.getDefault(), "%s_%s_%s.html", homeTeam, guestTeam, date);
+        String filename = String.format(Locale.getDefault(), "%s__%s__%s.html", homeTeam, guestTeam, date);
+        filename = filename.replaceAll("[\\s|\\?\\*<:>\\+\\[\\]/\\']", "_");
         ScoreSheetWriter scoreSheetWriter = new ScoreSheetWriter(game, filename);
 
         switch (game.getKind()) {

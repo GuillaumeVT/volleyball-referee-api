@@ -58,6 +58,7 @@ public class ExcelDivisionWriter {
         workbook.write(byteArrayOutputStream);
 
         String filename = String.format(Locale.getDefault(), "%s.xlsx", divisionName);
+        filename = filename.replaceAll("[\\s|\\?\\*<:>\\+\\[\\]/\\']", "_");
         return new FileWrapper(filename, byteArrayOutputStream.toByteArray());
     }
 
