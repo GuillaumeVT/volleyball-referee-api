@@ -14,6 +14,8 @@ public interface GameRepository extends MongoRepository<Game, UUID> {
 
     List<Game> findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(UUID leagueId, String divisionName, GameStatus status);
 
+    Optional<Game> findByIdAndCreatedByAndStatusNot(UUID id, String userId, GameStatus status);
+
     @Query("{ '$and': [ { 'id': ?0 }, { '$or': [ { 'createdBy': ?1 }, { 'refereedBy': ?1 } ] } ] }")
     Optional<Game> findByIdAndAllowedUser(UUID id, String userId);
 

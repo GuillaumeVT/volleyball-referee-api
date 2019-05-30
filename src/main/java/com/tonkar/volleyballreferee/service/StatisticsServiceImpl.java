@@ -3,6 +3,7 @@ package com.tonkar.volleyballreferee.service;
 import com.tonkar.volleyballreferee.dto.Statistics;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.Team;
+import com.tonkar.volleyballreferee.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -41,8 +42,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public Statistics getStatistics(String userId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
+    public Statistics getStatistics(User user) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(user.getId()));
         ProjectionOperation projectionOperation = Aggregation.project("kind");
         GroupOperation groupOperation = Aggregation
                 .group("kind")

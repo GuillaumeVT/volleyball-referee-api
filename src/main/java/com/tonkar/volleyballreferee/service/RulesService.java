@@ -4,6 +4,7 @@ import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.RulesDescription;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
+import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
 
@@ -12,21 +13,21 @@ import java.util.UUID;
 
 public interface RulesService {
 
-    List<RulesDescription> listRules(String userId);
+    List<RulesDescription> listRules(User user);
 
-    List<RulesDescription> listRulesOfKind(String userId, GameType kind);
+    List<RulesDescription> listRulesOfKind(User user, GameType kind);
 
-    Rules getRules(String userId, UUID rulesId) throws NotFoundException;
+    Rules getRules(User user, UUID rulesId) throws NotFoundException;
 
     RulesDescription getDefaultRules(GameType kind);
 
-    Count getNumberOfRules(String userId);
+    Count getNumberOfRules(User user);
 
-    void createRules(String userId, Rules rules) throws ConflictException;
+    void createRules(User user, Rules rules) throws ConflictException;
 
-    void updateRules(String userId, Rules rules) throws NotFoundException;
+    void updateRules(User user, Rules rules) throws NotFoundException;
 
-    void deleteRules(String userId, UUID rulesId) throws ConflictException;
+    void deleteRules(User user, UUID rulesId) throws ConflictException;
 
-    void deleteAllRules(String userId);
+    void deleteAllRules(User user);
 }

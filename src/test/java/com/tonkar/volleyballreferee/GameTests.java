@@ -464,12 +464,29 @@ public class GameTests extends VbrTests {
         gameResponse = restTemplate.exchange(urlOf("/api/v3/games/full"), HttpMethod.PUT, payloadWithAuth(testUser1Auth, game), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
+        // Update referee
+
+        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + game.getId() + "/referee/" + testUser1Id), HttpMethod.PATCH, emptyPayloadWithAuth(testUser2Auth), String.class);
+        assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
+
+        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + game.getId() + "/referee/" + testUser1Id), HttpMethod.PATCH, emptyPayloadWithAuth(testUser1Auth), String.class);
+        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+
+        ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + gameDescription.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUser2Auth), Game.class);
+        assertEquals(HttpStatus.NOT_FOUND, getGameResponse.getStatusCode());
+
+        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + game.getId() + "/referee/" + testUser2Id), HttpMethod.PATCH, emptyPayloadWithAuth(testUser1Auth), String.class);
+        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+
         // Update game by referee
 
         game.setStatus(GameStatus.COMPLETED);
 
         gameResponse = restTemplate.exchange(urlOf("/api/v3/games/full"), HttpMethod.PUT, payloadWithAuth(testUser2Auth, game), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+
+        gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + game.getId() + "/referee/" + testUser1Id), HttpMethod.PATCH, emptyPayloadWithAuth(testUser1Auth), String.class);
+        assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
 
         // List completed games
 
@@ -494,7 +511,7 @@ public class GameTests extends VbrTests {
         gameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + game.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUser2Auth), String.class);
         assertEquals(HttpStatus.NO_CONTENT, gameResponse.getStatusCode());
 
-        ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + gameDescription.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), Game.class);
+        getGameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + gameDescription.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUser1Auth), Game.class);
         assertEquals(HttpStatus.OK, getGameResponse.getStatusCode());
 
         getGameResponse = restTemplate.exchange(urlOf("/api/v3/games/" + gameDescription.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUser2Auth), Game.class);

@@ -7,6 +7,7 @@ import com.tonkar.volleyballreferee.dto.LeagueDescription;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
+import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.repository.GameRepository;
@@ -42,57 +43,57 @@ public class LeagueServiceImpl implements LeagueService {
     }
 
     @Override
-    public List<LeagueDescription> listLeagues(String userId) {
-        return leagueDao.listLeagues(userId);
+    public List<LeagueDescription> listLeagues(User user) {
+        return leagueDao.listLeagues(user.getId());
     }
 
     @Override
-    public List<LeagueDescription> listLeaguesOfKind(String userId, GameType kind) {
-        return leagueDao.listLeaguesOfKind(userId, kind);
+    public List<LeagueDescription> listLeaguesOfKind(User user, GameType kind) {
+        return leagueDao.listLeaguesOfKind(user.getId(), kind);
     }
 
     @Override
-    public League getLeague(String userId, UUID leagueId) throws NotFoundException {
+    public League getLeague(User user, UUID leagueId) throws NotFoundException {
         return leagueRepository
-                .findByIdAndCreatedBy(leagueId, userId)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find league %s for user %s", leagueId, userId)));
+                .findByIdAndCreatedBy(leagueId, user.getId())
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find league %s for user %s", leagueId, user.getId())));
     }
 
     @Override
-    public Count getNumberOfLeagues(String userId) {
-        return new Count(leagueRepository.countByCreatedBy(userId));
+    public Count getNumberOfLeagues(User user) {
+        return new Count(leagueRepository.countByCreatedBy(user.getId()));
     }
 
     @Override
-    public void createLeague(String userId, League league) throws ConflictException {
+    public void createLeague(User user, League league) throws ConflictException {
         if (leagueRepository.existsById(league.getId())) {
-            throw new ConflictException(String.format("Could not create league %s for user %s because it already exists", league.getId(), userId));
-        } else if (leagueRepository.existsByCreatedByAndNameAndKind(userId, league.getName(), league.getKind())) {
-            throw new ConflictException(String.format("Could not create league %s %s for user %s because it already exists", league.getName(), league.getKind(), userId));
+            throw new ConflictException(String.format("Could not create league %s for user %s because it already exists", league.getId(), user.getId()));
+        } else if (leagueRepository.existsByCreatedByAndNameAndKind(user.getId(), league.getName(), league.getKind())) {
+            throw new ConflictException(String.format("Could not create league %s %s for user %s because it already exists", league.getName(), league.getKind(), user.getId()));
         } else {
-            league.setCreatedBy(userId);
+            league.setCreatedBy(user.getId());
             league.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             leagueRepository.save(league);
         }
     }
 
     @Override
-    public void updateDivisions(String userId, UUID leagueId) throws NotFoundException {
+    public void updateDivisions(User user, UUID leagueId) throws NotFoundException {
         League savedLeague = leagueRepository
-                .findByIdAndCreatedBy(leagueId, userId)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find league %s for user %s", leagueId, userId)));
+                .findByIdAndCreatedBy(leagueId, user.getId())
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find league %s for user %s", leagueId, user.getId())));
 
-        savedLeague.setDivisions(gameDao.listDivisionsInLeague(userId, savedLeague.getId()));
+        savedLeague.setDivisions(gameDao.listDivisionsInLeague(user.getId(), savedLeague.getId()));
         savedLeague.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         leagueRepository.save(savedLeague);
     }
 
     @Override
-    public void deleteLeague(String userId, UUID leagueId) throws ConflictException {
-        if (gameRepository.existsByCreatedByAndLeagueIdAndStatus(userId, leagueId, GameStatus.SCHEDULED)) {
-            throw new ConflictException(String.format("Could not delete league %s for user %s because it is used in a game", leagueId, userId));
+    public void deleteLeague(User user, UUID leagueId) throws ConflictException {
+        if (gameRepository.existsByCreatedByAndLeagueIdAndStatus(user.getId(), leagueId, GameStatus.SCHEDULED)) {
+            throw new ConflictException(String.format("Could not delete league %s for user %s because it is used in a game", leagueId, user.getId()));
         } else {
-            leagueRepository.deleteByIdAndCreatedBy(leagueId, userId);
+            leagueRepository.deleteByIdAndCreatedBy(leagueId, user.getId());
         }
     }
 

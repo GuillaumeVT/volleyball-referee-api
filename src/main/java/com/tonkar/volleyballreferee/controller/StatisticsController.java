@@ -24,6 +24,6 @@ public class StatisticsController {
 
     @GetMapping(value = "", produces = {"application/json"})
     public ResponseEntity<Statistics> getStatistics(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(statisticsService.getStatistics(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(statisticsService.getStatistics(user), HttpStatus.OK);
     }
 }

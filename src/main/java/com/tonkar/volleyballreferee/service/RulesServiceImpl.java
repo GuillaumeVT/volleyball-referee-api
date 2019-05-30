@@ -6,6 +6,7 @@ import com.tonkar.volleyballreferee.dto.RulesDescription;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
+import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.repository.GameRepository;
@@ -33,20 +34,20 @@ public class RulesServiceImpl implements RulesService {
     private GameRepository gameRepository;
 
     @Override
-    public List<RulesDescription> listRules(String userId) {
-        return rulesDao.listRules(userId);
+    public List<RulesDescription> listRules(User user) {
+        return rulesDao.listRules(user.getId());
     }
 
     @Override
-    public List<RulesDescription> listRulesOfKind(String userId, GameType kind) {
-        return rulesDao.listRulesOfKind(userId, kind);
+    public List<RulesDescription> listRulesOfKind(User user, GameType kind) {
+        return rulesDao.listRulesOfKind(user.getId(), kind);
     }
 
     @Override
-    public Rules getRules(String userId, UUID rulesId) throws NotFoundException {
+    public Rules getRules(User user, UUID rulesId) throws NotFoundException {
         return rulesRepository
-                .findByIdAndCreatedBy(rulesId, userId)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find rules %s for user %s", rulesId, userId)));
+                .findByIdAndCreatedBy(rulesId, user.getId())
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find rules %s for user %s", rulesId, user.getId())));
     }
 
     @Override
@@ -80,30 +81,30 @@ public class RulesServiceImpl implements RulesService {
     }
 
     @Override
-    public Count getNumberOfRules(String userId) {
-        return new Count(rulesRepository.countByCreatedBy(userId));
+    public Count getNumberOfRules(User user) {
+        return new Count(rulesRepository.countByCreatedBy(user.getId()));
     }
 
     @Override
-    public void createRules(String userId, Rules rules) throws ConflictException {
+    public void createRules(User user, Rules rules) throws ConflictException {
         if (Rules.getDefaultRules(rules.getId(), rules.getKind()).isPresent()) {
-            throw new ConflictException(String.format("Could not create rules %s for user %s because they are default rules", rules.getId(), userId));
+            throw new ConflictException(String.format("Could not create rules %s for user %s because they are default rules", rules.getId(), user.getId()));
         } else if (rulesRepository.existsById(rules.getId())) {
-            throw new ConflictException(String.format("Could not create rules %s for user %s because they already exist", rules.getId(), userId));
-        } else if (rulesRepository.existsByCreatedByAndNameAndKind(userId, rules.getName(), rules.getKind())) {
-            throw new ConflictException(String.format("Could not create rules %s %s for user %s because they already exist", rules.getName(), rules.getKind(), userId));
+            throw new ConflictException(String.format("Could not create rules %s for user %s because they already exist", rules.getId(), user.getId()));
+        } else if (rulesRepository.existsByCreatedByAndNameAndKind(user.getId(), rules.getName(), rules.getKind())) {
+            throw new ConflictException(String.format("Could not create rules %s %s for user %s because they already exist", rules.getName(), rules.getKind(), user.getId()));
         } else {
-            rules.setCreatedBy(userId);
+            rules.setCreatedBy(user.getId());
             rules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             rulesRepository.save(rules);
         }
     }
 
     @Override
-    public void updateRules(String userId, Rules rules) throws NotFoundException {
+    public void updateRules(User user, Rules rules) throws NotFoundException {
         Rules savedRules = rulesRepository
-                .findByIdAndCreatedBy(rules.getId(), userId)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find rules %s %s for user %s", rules.getName(), rules.getKind(), userId)));
+                .findByIdAndCreatedBy(rules.getId(), user.getId())
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find rules %s %s for user %s", rules.getName(), rules.getKind(), user.getId())));
 
         savedRules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         savedRules.setSetsPerGame(rules.getSetsPerGame());
@@ -127,22 +128,22 @@ public class RulesServiceImpl implements RulesService {
         savedRules.setCustomConsecutiveServesPerPlayer(rules.getCustomConsecutiveServesPerPlayer());
         rulesRepository.save(savedRules);
 
-        rulesDao.updateScheduledGamesWithRules(userId, savedRules);
+        rulesDao.updateScheduledGamesWithRules(user.getId(), savedRules);
     }
 
     @Override
-    public void deleteRules(String userId, UUID rulesId) throws ConflictException {
-        if (gameRepository.existsByCreatedByAndRules_IdAndStatus(userId, rulesId, GameStatus.SCHEDULED)) {
-            throw new ConflictException(String.format("Could not delete rules %s for user %s because they are used in a game", rulesId, userId));
+    public void deleteRules(User user, UUID rulesId) throws ConflictException {
+        if (gameRepository.existsByCreatedByAndRules_IdAndStatus(user.getId(), rulesId, GameStatus.SCHEDULED)) {
+            throw new ConflictException(String.format("Could not delete rules %s for user %s because they are used in a game", rulesId, user.getId()));
         } else {
-            rulesRepository.deleteByIdAndCreatedBy(rulesId, userId);
+            rulesRepository.deleteByIdAndCreatedBy(rulesId, user.getId());
         }
     }
 
     @Override
-    public void deleteAllRules(String userId) {
-        rulesRepository.findByCreatedByOrderByNameAsc(userId).forEach(rules -> {
-            if (!gameRepository.existsByCreatedByAndRules_IdAndStatus(userId, rules.getId(), GameStatus.SCHEDULED)) {
+    public void deleteAllRules(User user) {
+        rulesRepository.findByCreatedByOrderByNameAsc(user.getId()).forEach(rules -> {
+            if (!gameRepository.existsByCreatedByAndRules_IdAndStatus(user.getId(), rules.getId(), GameStatus.SCHEDULED)) {
                 rulesRepository.delete(rules);
             }
         });

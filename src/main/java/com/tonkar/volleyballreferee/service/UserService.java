@@ -16,21 +16,21 @@ public interface UserService {
 
     void createUser(User user) throws ConflictException;
 
-    void deleteUser(String userId);
+    void deleteUser(User user);
 
-    Count getNumberOfFriendRequestsReceivedBy(String receiverId);
+    Count getNumberOfFriendRequestsReceivedBy(User user);
 
-    List<FriendRequest> listFriendRequestsSentBy(String senderId);
+    List<FriendRequest> listFriendRequestsSentBy(User user);
 
-    List<FriendRequest> listFriendRequestsReceivedBy(String receiverId);
+    List<FriendRequest> listFriendRequestsReceivedBy(User user);
 
     FriendsAndRequests listFriendsAndRequests(User user);
 
-    void sendFriendRequest(String senderId, String receiverPseudo) throws ConflictException, NotFoundException;
+    void sendFriendRequest(User user, String receiverPseudo) throws ConflictException, NotFoundException;
 
-    void acceptFriendRequest(String userId, UUID friendRequestId) throws ConflictException, NotFoundException;
+    void acceptFriendRequest(User user, UUID friendRequestId) throws ConflictException, NotFoundException;
 
-    void rejectFriendRequest(String userId, UUID friendRequestId);
+    void rejectFriendRequest(User user, UUID friendRequestId);
 
-    void removeFriend(String userId, String friendId) throws NotFoundException;
+    void removeFriend(User user, String friendId) throws NotFoundException;
 }

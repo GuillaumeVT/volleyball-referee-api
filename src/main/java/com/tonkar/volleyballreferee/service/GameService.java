@@ -52,37 +52,39 @@ public interface GameService {
 
     // User only
 
-    List<GameDescription> listGames(String userId);
+    List<GameDescription> listGames(User user);
 
-    List<GameDescription> listGamesWithStatus(String userId, GameStatus status);
+    List<GameDescription> listGamesWithStatus(User user, GameStatus status);
 
-    List<GameDescription> listAvailableGames(String userId);
+    List<GameDescription> listAvailableGames(User user);
 
-    List<GameDescription> listCompletedGames(String userId);
+    List<GameDescription> listCompletedGames(User user);
 
-    List<GameDescription> listGamesInLeague(String userId, UUID leagueId);
+    List<GameDescription> listGamesInLeague(User user, UUID leagueId);
 
-    Game getGame(String userId, UUID gameId) throws NotFoundException;
+    Game getGame(User user, UUID gameId) throws NotFoundException;
 
-    Count getNumberOfGames(String userId);
+    Count getNumberOfGames(User user);
 
-    Count getNumberOfGamesInLeague(String userId, UUID leagueId);
+    Count getNumberOfGamesInLeague(User user, UUID leagueId);
 
-    void createGame(String userId, GameDescription gameDescription) throws ConflictException, NotFoundException;
+    void createGame(User user, GameDescription gameDescription) throws ConflictException, NotFoundException;
 
-    void createGame(String userId, Game game) throws ConflictException, NotFoundException;
+    void createGame(User user, Game game) throws ConflictException, NotFoundException;
 
-    void updateGame(String userId, GameDescription gameDescription) throws ConflictException, NotFoundException;
+    void updateGame(User user, GameDescription gameDescription) throws ConflictException, NotFoundException;
 
-    void updateGame(String userId, Game game) throws NotFoundException;
+    void updateGame(User user, Game game) throws NotFoundException;
 
-    void updateSet(String userId, UUID gameId, int setIndex, Set set) throws NotFoundException;
+    void updateSet(User user, UUID gameId, int setIndex, Set set) throws NotFoundException;
 
-    void setIndexed(String userId, UUID gameId, boolean indexed) throws NotFoundException;
+    void setIndexed(User user, UUID gameId, boolean indexed) throws NotFoundException;
 
-    void deleteGame(String userId, UUID gameId);
+    void setReferee(User user, UUID gameId, String refereeUserId) throws NotFoundException;
 
-    void deleteAllGames(String userId);
+    void deleteGame(User user, UUID gameId);
+
+    void deleteAllGames(User user);
 
     void deleteOldLiveGames(int daysAgo);
 

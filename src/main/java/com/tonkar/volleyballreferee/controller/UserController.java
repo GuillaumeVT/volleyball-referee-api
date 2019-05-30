@@ -27,29 +27,29 @@ public class UserController {
     private UserService userService;
 
     @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<com.tonkar.volleyballreferee.entity.User> getUser(@AuthenticationPrincipal User user) {
+    public ResponseEntity<User> getUser(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @DeleteMapping(value = "", produces = {"application/json"})
     public ResponseEntity<String> deleteUser(@AuthenticationPrincipal User user) {
-        userService.deleteUser(user.getId());
+        userService.deleteUser(user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping(value = "/friends/requested", produces = {"application/json"})
     public ResponseEntity<List<FriendRequest>> listFriendRequestsSentBy(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(userService.listFriendRequestsSentBy(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(userService.listFriendRequestsSentBy(user), HttpStatus.OK);
     }
 
     @GetMapping(value = "/friends/received", produces = {"application/json"})
     public ResponseEntity<List<FriendRequest>> listFriendRequestsReceivedBy(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(userService.listFriendRequestsReceivedBy(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(userService.listFriendRequestsReceivedBy(user), HttpStatus.OK);
     }
 
     @GetMapping(value = "/friends/received/count", produces = {"application/json"})
     public ResponseEntity<Count> getNumberOfFriendRequestsReceivedBy(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(userService.getNumberOfFriendRequestsReceivedBy(user.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getNumberOfFriendRequestsReceivedBy(user), HttpStatus.OK);
     }
 
     @GetMapping(value = "/friends", produces = {"application/json"})
@@ -60,7 +60,7 @@ public class UserController {
     @PostMapping(value = "/friends/request/{receiverPseudo}", produces = {"application/json"})
     public ResponseEntity<String> sendFriendRequest(@AuthenticationPrincipal User user, @PathVariable("receiverPseudo") String receiverPseudo) {
         try {
-            userService.sendFriendRequest(user.getId(), receiverPseudo);
+            userService.sendFriendRequest(user, receiverPseudo);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (ConflictException e) {
             log.error(e.getMessage(), e);
@@ -74,7 +74,7 @@ public class UserController {
     @PostMapping(value = "/friends/accept/{id}", produces = {"application/json"})
     public ResponseEntity<String> acceptFriendRequest(@AuthenticationPrincipal User user, @PathVariable("id") UUID id) {
         try {
-            userService.acceptFriendRequest(user.getId(), id);
+            userService.acceptFriendRequest(user, id);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (ConflictException e) {
             log.error(e.getMessage(), e);
@@ -87,14 +87,14 @@ public class UserController {
 
     @PostMapping(value = "/friends/reject/{id}", produces = {"application/json"})
     public ResponseEntity<String> rejectFriendRequest(@AuthenticationPrincipal User user, @PathVariable("id") UUID id) {
-        userService.rejectFriendRequest(user.getId(), id);
+        userService.rejectFriendRequest(user, id);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @DeleteMapping(value = "/friends/remove/{friendId}", produces = {"application/json"})
     public ResponseEntity<String> removeFriend(@AuthenticationPrincipal User user, @PathVariable("friendId") String friendId) {
         try {
-            userService.removeFriend(user.getId(), friendId);
+            userService.removeFriend(user, friendId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);

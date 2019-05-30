@@ -53,28 +53,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(String userId) {
-        userRepository.findByFriend(userId).forEach(user -> {
-            user.getFriends().removeIf(friend -> friend.getId().equals(userId));
+    public void deleteUser(User user) {
+        userRepository.findByFriend(user.getId()).forEach(u -> {
+            u.getFriends().removeIf(friend -> friend.getId().equals(user.getId()));
             userRepository.save(user);
         });
-        userRepository.deleteById(userId);
-        log.info(String.format("Deleted user with id %s", userId));
+        userRepository.deleteById(user.getId());
+        log.info(String.format("Deleted user with id %s", user.getId()));
     }
 
     @Override
-    public Count getNumberOfFriendRequestsReceivedBy(String receiverId) {
-        return new Count(friendRequestRepository.countByReceiverId(receiverId));
+    public Count getNumberOfFriendRequestsReceivedBy(User user) {
+        return new Count(friendRequestRepository.countByReceiverId(user.getId()));
     }
 
     @Override
-    public List<FriendRequest> listFriendRequestsSentBy(String senderId) {
-        return friendRequestRepository.findBySenderId(senderId);
+    public List<FriendRequest> listFriendRequestsSentBy(User user) {
+        return friendRequestRepository.findBySenderId(user.getId());
     }
 
     @Override
-    public List<FriendRequest> listFriendRequestsReceivedBy(String receiverId) {
-        return friendRequestRepository.findByReceiverId(receiverId);
+    public List<FriendRequest> listFriendRequestsReceivedBy(User user) {
+        return friendRequestRepository.findByReceiverId(user.getId());
     }
 
     @Override
@@ -89,21 +89,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void sendFriendRequest(String senderId, String receiverPseudo) throws ConflictException, NotFoundException {
-        User senderUser = getUser(senderId);
+    public void sendFriendRequest(User user, String receiverPseudo) throws ConflictException, NotFoundException {
         User receiverUser = getUserByPseudo(receiverPseudo);
 
-        if (senderUser.getId().equals(receiverUser.getId())) {
-            throw new ConflictException(String.format("%s cannot be friend with himself", senderUser.getId()));
-        } else if (userRepository.areFriends(senderUser.getId(), receiverUser.getId())) {
-            throw new ConflictException(String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
-        } else if (friendRequestRepository.existsBySenderIdAndReceiverId(senderUser.getId(), receiverUser.getId())) {
-            throw new ConflictException(String.format("Found an existing friend request from %s to %s", senderUser.getId(), receiverUser.getId()));
+        if (user.getId().equals(receiverUser.getId())) {
+            throw new ConflictException(String.format("%s cannot be friend with himself", user.getId()));
+        } else if (userRepository.areFriends(user.getId(), receiverUser.getId())) {
+            throw new ConflictException(String.format("%s and %s are already friends", user.getId(), receiverUser.getId()));
+        } else if (friendRequestRepository.existsBySenderIdAndReceiverId(user.getId(), receiverUser.getId())) {
+            throw new ConflictException(String.format("Found an existing friend request from %s to %s", user.getId(), receiverUser.getId()));
         } else {
             FriendRequest friendRequest = new FriendRequest();
             friendRequest.setId(UUID.randomUUID());
-            friendRequest.setSenderId(senderUser.getId());
-            friendRequest.setSenderPseudo(senderUser.getPseudo());
+            friendRequest.setSenderId(user.getId());
+            friendRequest.setSenderPseudo(user.getPseudo());
             friendRequest.setReceiverId(receiverUser.getId());
             friendRequest.setReceiverPseudo(receiverUser.getPseudo());
             friendRequestRepository.save(friendRequest);
@@ -111,10 +110,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void acceptFriendRequest(String userId, UUID friendRequestId) throws ConflictException, NotFoundException {
+    public void acceptFriendRequest(User user, UUID friendRequestId) throws ConflictException, NotFoundException {
         FriendRequest friendRequest = friendRequestRepository
-                .findByIdAndReceiverId(friendRequestId, userId)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find friend request %s with receiver %s", friendRequestId, userId)));
+                .findByIdAndReceiverId(friendRequestId, user.getId())
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find friend request %s with receiver %s", friendRequestId, user.getId())));
 
         User senderUser = getUser(friendRequest.getSenderId());
         User receiverUser = getUser(friendRequest.getReceiverId());
@@ -134,14 +133,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void rejectFriendRequest(String userId, UUID friendRequestId) {
-        friendRequestRepository.deleteByIdAndReceiverId(friendRequestId, userId);
+    public void rejectFriendRequest(User user, UUID friendRequestId) {
+        friendRequestRepository.deleteByIdAndReceiverId(friendRequestId, user.getId());
     }
 
     @Override
-    public void removeFriend(String userId, String friendId) throws NotFoundException {
-        if (userRepository.areFriends(userId, friendId)) {
-            User user = getUser(userId);
+    public void removeFriend(User user, String friendId) throws NotFoundException {
+        if (userRepository.areFriends(user.getId(), friendId)) {
             User friendUser = getUser(friendId);
 
             user.getFriends().removeIf(friend -> friend.getId().equals(friendUser.getId()));
@@ -151,7 +149,7 @@ public class UserServiceImpl implements UserService {
             userRepository.save(friendUser);
             log.info(String.format("%s and %s are no longer friends", user.getId(), friendUser.getId()));
         } else {
-            throw new NotFoundException(String.format("%s and %s are not friends", userId, friendId));
+            throw new NotFoundException(String.format("%s and %s are not friends", user.getId(), friendId));
         }
     }
 }

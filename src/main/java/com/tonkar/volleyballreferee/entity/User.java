@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @NoArgsConstructor @Getter @Setter
 @Document(collection="users")
@@ -62,6 +63,13 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public Optional<Friend> getFriend(String friendId) {
+        return friends
+                .stream()
+                .filter(f -> f.getId().equals(friendId))
+                .findFirst();
     }
 
     @AllArgsConstructor @NoArgsConstructor @Getter @Setter

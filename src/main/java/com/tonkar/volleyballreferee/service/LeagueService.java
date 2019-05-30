@@ -4,6 +4,7 @@ import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.LeagueDescription;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
+import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
 
@@ -18,18 +19,18 @@ public interface LeagueService {
 
     // User only
 
-    List<LeagueDescription> listLeagues(String userId);
+    List<LeagueDescription> listLeagues(User user);
 
-    List<LeagueDescription> listLeaguesOfKind(String userId, GameType kind);
+    List<LeagueDescription> listLeaguesOfKind(User user, GameType kind);
 
-    League getLeague(String userId, UUID leagueId) throws NotFoundException;
+    League getLeague(User user, UUID leagueId) throws NotFoundException;
 
-    Count getNumberOfLeagues(String userId);
+    Count getNumberOfLeagues(User user);
 
-    void createLeague(String userId, League league) throws ConflictException;
+    void createLeague(User user, League league) throws ConflictException;
 
-    void updateDivisions(String userId, UUID leagueId) throws NotFoundException;
+    void updateDivisions(User user, UUID leagueId) throws NotFoundException;
 
-    void deleteLeague(String userId, UUID leagueId) throws ConflictException;
+    void deleteLeague(User user, UUID leagueId) throws ConflictException;
 
 }
