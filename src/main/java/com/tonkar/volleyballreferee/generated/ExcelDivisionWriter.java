@@ -19,7 +19,7 @@ import java.util.TimeZone;
 
 public class ExcelDivisionWriter {
 
-    private String        divisionName;
+    private List<Game>    games;
     private XSSFWorkbook  workbook;
     private XSSFCellStyle headerStyle;
     private XSSFCellStyle matchStyle;
@@ -32,9 +32,9 @@ public class ExcelDivisionWriter {
     private XSSFCellStyle homePointStyle;
     private XSSFCellStyle guestPointStyle;
 
-    private ExcelDivisionWriter(String divisionName, XSSFWorkbook workbook) {
-        this.divisionName = divisionName;
-        this.workbook = workbook;
+    private ExcelDivisionWriter(List<Game> games) {
+        this.games = games;
+        this.workbook =new XSSFWorkbook();
         this.headerStyle = createExcelBorderedStyle("#e4e4e4");
         this.matchStyle = createExcelBorderedStyle("#F0E68C");
         this.setStyle = createExcelBorderedStyle("#ADD8E6");
@@ -47,28 +47,30 @@ public class ExcelDivisionWriter {
         this.guestPointStyle = createExcelBorderedStyle("#E9967A", TeamType.GUEST);
     }
 
-    public static FileWrapper writeExcelDivision(String divisionName, List<Game> games) throws IOException {
-        XSSFWorkbook workbook = new XSSFWorkbook();
+    private XSSFWorkbook getWorkbook() {
+        return workbook;
+    }
 
-        ExcelDivisionWriter excelDivisionWriter = new ExcelDivisionWriter(divisionName, workbook);
-        excelDivisionWriter.createMatchesExcelSheet(games);
-        excelDivisionWriter.createRankingsExcelSheet(games);
+    public static FileWrapper writeExcelDivision(String divisionName, List<Game> games) throws IOException {
+        ExcelDivisionWriter excelDivisionWriter = new ExcelDivisionWriter(games);
+        excelDivisionWriter.createMatchesExcelSheet();
+        excelDivisionWriter.createRankingsExcelSheet();
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        workbook.write(byteArrayOutputStream);
+        excelDivisionWriter.getWorkbook().write(byteArrayOutputStream);
 
         String filename = String.format(Locale.getDefault(), "%s.xlsx", divisionName);
         filename = filename.replaceAll("[\\s|\\?\\*<:>\\+\\[\\]/\\']", "_");
         return new FileWrapper(filename, byteArrayOutputStream.toByteArray());
     }
 
-    private void createMatchesExcelSheet(List<Game> games) {
+    private void createMatchesExcelSheet() {
         DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
         formatter.setTimeZone(TimeZone.getDefault());
 
         String[] gamesHeader = { "Date", "Team", "Total Sets", "Set 1", "Set 2", "Set 3", "Set 4", "Set 5", "Total Points" };
 
-        XSSFSheet sheet = workbook.createSheet(divisionName + " - Matches");
+        XSSFSheet sheet = workbook.createSheet("Matches");
         XSSFRow row = sheet.createRow(0);
 
         for (int index = 0; index < gamesHeader.length; index++) {
@@ -135,10 +137,10 @@ public class ExcelDivisionWriter {
         cell.setCellStyle(TeamType.HOME.equals(teamType) ? homePointStyle : guestPointStyle);
     }
 
-    private void createRankingsExcelSheet(List<Game> games) {
+    private void createRankingsExcelSheet() {
         String[] rankingsHeader = { "Team", "Matches Played", "Matches Won", "Matches Lost", "Matches Diff", "Sets Won", "Sets Lost", "Sets Diff", "Points Won", "Points Lost", "Points Diff" };
 
-        XSSFSheet sheet = workbook.createSheet(divisionName + " - Rankings");
+        XSSFSheet sheet = workbook.createSheet("Rankings");
         XSSFRow row = sheet.createRow(0);
 
         for (int index = 0; index < rankingsHeader.length; index++) {
