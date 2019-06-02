@@ -1,13 +1,18 @@
 package com.tonkar.volleyballreferee.exception;
 
+import java.util.List;
+
 public class NotFoundException extends Exception {
 
     public NotFoundException(String message) {
         super(message);
-    }
-
-    public NotFoundException(String message, Throwable cause) {
-        super(message, cause);
+        setStackTrace(
+                List.of(getStackTrace())
+                        .stream()
+                        .filter(stackTraceElement -> stackTraceElement.toString().startsWith("com.tonkar"))
+                        .limit(10)
+                        .toArray(StackTraceElement[]::new)
+        );
     }
 
 }
