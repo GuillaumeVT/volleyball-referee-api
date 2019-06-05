@@ -2,6 +2,7 @@ package com.tonkar.volleyballreferee.repository;
 
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.GameStatus;
+import org.springframework.data.mongodb.repository.CountQuery;
 import org.springframework.data.mongodb.repository.ExistsQuery;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -35,6 +36,9 @@ public interface GameRepository extends MongoRepository<Game, UUID> {
     long countByCreatedBy(String userId);
 
     long countByCreatedByAndLeagueId(String userId, UUID leagueId);
+
+    @CountQuery("{ '$and': [ { '$or': [ { 'createdBy': ?0 }, { 'refereedBy': ?0 } ] } , { 'status': { $ne: ?1 } } ] }")
+    long countByAllowedUserAndStatusNot(String userId, GameStatus status);
 
     void deleteByCreatedBy(String userId);
 

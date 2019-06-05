@@ -71,6 +71,11 @@ public class GameController {
         return new ResponseEntity<>(gameService.getNumberOfGamesInLeague(user, leagueId), HttpStatus.OK);
     }
 
+    @GetMapping(value = "/available/count", produces = {"application/json"})
+    public ResponseEntity<Count> getNumberOfAvailableGames(@AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(gameService.getNumberOfAvailableGames(user), HttpStatus.OK);
+    }
+
     @PostMapping(value = "", produces = {"application/json"})
     public ResponseEntity<String> createGame(@AuthenticationPrincipal User user, @Valid @RequestBody GameDescription gameDescription) {
         try {

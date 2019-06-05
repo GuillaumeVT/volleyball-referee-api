@@ -179,6 +179,11 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public Count getNumberOfAvailableGames(User user) {
+        return new Count(gameRepository.countByAllowedUserAndStatusNot(user.getId(), GameStatus.COMPLETED));
+    }
+
+    @Override
     public void createGame(User user, GameDescription gameDescription) throws ConflictException, NotFoundException {
         if (gameRepository.existsById(gameDescription.getId())) {
             throw new ConflictException(String.format("Could not create game %s for user %s because it already exists", gameDescription.getId(), user.getId()));

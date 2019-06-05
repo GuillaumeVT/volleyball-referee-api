@@ -68,6 +68,8 @@ public interface GameService {
 
     Count getNumberOfGamesInLeague(User user, UUID leagueId);
 
+    Count getNumberOfAvailableGames(User user);
+
     void createGame(User user, GameDescription gameDescription) throws ConflictException, NotFoundException;
 
     void createGame(User user, Game game) throws ConflictException, NotFoundException;
