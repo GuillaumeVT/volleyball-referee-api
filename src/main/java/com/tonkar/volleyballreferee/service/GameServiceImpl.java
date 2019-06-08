@@ -391,7 +391,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void deleteAllGames(User user) {
-        gameRepository.deleteByCreatedBy(user.getId());
+        gameRepository.deleteByCreatedByAndStatus(user.getId(), GameStatus.COMPLETED);
     }
 
     @Override

@@ -40,7 +40,7 @@ public interface GameRepository extends MongoRepository<Game, UUID> {
     @CountQuery("{ '$and': [ { '$or': [ { 'createdBy': ?0 }, { 'refereedBy': ?0 } ] } , { 'status': { $ne: ?1 } } ] }")
     long countByAllowedUserAndStatusNot(String userId, GameStatus status);
 
-    void deleteByCreatedBy(String userId);
+    void deleteByCreatedByAndStatus(String userId, GameStatus status);
 
     void deleteByIdAndCreatedBy(UUID id, String userId);
 
