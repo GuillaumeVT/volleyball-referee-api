@@ -52,22 +52,12 @@ public class RulesServiceImpl implements RulesService {
 
     @Override
     public RulesDescription getDefaultRules(GameType kind) {
-        final Rules rules;
-
-        switch (kind) {
-            case INDOOR:
-                rules = Rules.OFFICIAL_INDOOR_RULES;
-                break;
-            case INDOOR_4X4:
-                rules = Rules.DEFAULT_INDOOR_4X4_RULES;
-                break;
-            case BEACH:
-                rules = Rules.OFFICIAL_BEACH_RULES;
-                break;
-            default:
-                rules = null;
-                break;
-        }
+        final Rules rules = switch (kind) {
+            case INDOOR -> Rules.OFFICIAL_INDOOR_RULES;
+            case INDOOR_4X4 -> Rules.DEFAULT_INDOOR_4X4_RULES;
+            case BEACH -> Rules.OFFICIAL_BEACH_RULES;
+            default -> null;
+        };
 
         RulesDescription rulesDescription = new RulesDescription();
         rulesDescription.setId(rules.getId());

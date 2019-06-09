@@ -17,12 +17,19 @@ apply plugin: 'io.spring.dependency-management'
 
 group = 'com.tonkar'
 version = '3.0'
-sourceCompatibility = 1.11
+sourceCompatibility = 1.12
 
 repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile).each {
+    it.options.compilerArgs.add('--enable-preview')
+}
+
+test {
+    jvmArgs(['--enable-preview'])
+}
 
 dependencies {
     compile 'org.springframework.boot:spring-boot-starter'

@@ -37,18 +37,10 @@ public class ScoreSheetWriter {
         ScoreSheetWriter scoreSheetWriter = new ScoreSheetWriter(game, filename);
 
         switch (game.getKind()) {
-            case INDOOR:
-                scoreSheetWriter.writeRecordedIndoorGame();
-                break;
-            case BEACH:
-                scoreSheetWriter.writeRecordedBeachGame();
-                break;
-            case INDOOR_4X4:
-                scoreSheetWriter.writeRecordedIndoor4x4Game();
-                break;
-            case TIME:
-                scoreSheetWriter.writeRecordedTimeGame();
-                break;
+            case INDOOR -> scoreSheetWriter.writeRecordedIndoorGame();
+            case BEACH -> scoreSheetWriter.writeRecordedBeachGame();
+            case INDOOR_4X4 -> scoreSheetWriter.writeRecordedIndoor4x4Game();
+            case TIME -> scoreSheetWriter.writeRecordedTimeGame();
         }
 
         return new FileWrapper(filename, scoreSheetWriter.getScoreSheet());
@@ -471,31 +463,14 @@ public class ScoreSheetWriter {
     }
 
     private String getSanctionImageClass(String sanctionType) {
-        String imageClass;
-
-        switch (sanctionType) {
-            case "Y":
-                imageClass = "yellow-card-image";
-                break;
-            case "R":
-                imageClass = "red-card-image";
-                break;
-            case "RE":
-                imageClass = "expulsion-card-image";
-                break;
-            case "RD":
-                imageClass = "disqualification-card-image";
-                break;
-            case "DW":
-                imageClass = "delay-warning-image";
-                break;
-            case "DP":
-            default:
-                imageClass = "delay-penalty-image";
-                break;
-        }
-
-        return imageClass;
+        return switch (sanctionType) {
+            case "Y" -> "yellow-card-image";
+            case "R" -> "red-card-image";
+            case "RE" -> "expulsion-card-image";
+            case "RD" -> "disqualification-card-image";
+            case "DW" -> "delay-warning-image";
+            default -> "delay-penalty-image";
+        };
     }
 
     private Element createRecordedLadder(int setIndex) {

@@ -50,15 +50,9 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
             optUserId = Optional.of(optUserToken.get().getId());
         } else {
             switch (authProvider) {
-                case FACEBOOK:
-                    optUserId = getUserIdWithFacebook(idToken);
-                    break;
-                case GOOGLE:
-                    optUserId = getUserIdWithGoogle(idToken);
-                    break;
-                default:
-                    optUserId = Optional.empty();
-                    break;
+                case FACEBOOK -> optUserId = getUserIdWithFacebook(idToken);
+                case GOOGLE -> optUserId = getUserIdWithGoogle(idToken);
+                default -> optUserId = Optional.empty();
             }
         }
 
