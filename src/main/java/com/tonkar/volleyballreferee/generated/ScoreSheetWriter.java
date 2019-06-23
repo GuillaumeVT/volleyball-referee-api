@@ -40,7 +40,6 @@ public class ScoreSheetWriter {
             case INDOOR -> scoreSheetWriter.writeRecordedIndoorGame();
             case BEACH -> scoreSheetWriter.writeRecordedBeachGame();
             case INDOOR_4X4 -> scoreSheetWriter.writeRecordedIndoor4x4Game();
-            case TIME -> scoreSheetWriter.writeRecordedTimeGame();
         }
 
         return new FileWrapper(filename, scoreSheetWriter.getScoreSheet());
@@ -669,45 +668,6 @@ public class ScoreSheetWriter {
         if (hScore1 > 0 && gScore1 > 0) {
             setInfoLine2Div.appendChild(createCellSpan(String.valueOf(gScore1), true, false));
         }
-
-        setInfoDiv.appendChild(setInfoLine1Div);
-        setInfoDiv.appendChild(setInfoLine2Div);
-
-        return setInfoDiv;
-    }
-
-    private void writeRecordedTimeGame() {
-        body.appendChild(createRecordedGameHeader());
-
-        for (int setIndex = 0; setIndex < game.getSets().size(); setIndex++) {
-            Element cardDiv = new Element("div");
-            cardDiv.addClass("div-card").addClass("spacing-before");
-            cardDiv.attr("id", String.format("div-set-%d", (1 + setIndex)));
-            cardDiv.appendChild(createRecordedTimeSetHeader(setIndex));
-            cardDiv.appendChild(createRecordedLadder(setIndex));
-
-            body.appendChild(cardDiv);
-        }
-    }
-
-    private Element createRecordedTimeSetHeader(int setIndex) {
-        Element setInfoDiv = new Element("div");
-
-        Element setInfoLine1Div = new Element("div");
-        setInfoLine1Div.addClass("div-grid-set-info");
-
-        Element setInfoLine2Div = new Element("div");
-        setInfoLine2Div.addClass("div-grid-set-info");
-
-        Element indexSpan = createCellSpan(String.format(Locale.getDefault(), "Set %d", (setIndex + 1)), true, false);
-        indexSpan.addClass((game.getSets().get(setIndex).getHomePoints() > game.getSets().get(setIndex).getGuestPoints()) ? "vbr-home-team" : "vbr-guest-team");
-        setInfoLine1Div.appendChild(indexSpan);
-
-        int duration = (int) Math.ceil(game.getSets().get(setIndex).getDuration() / 60000.0);
-        setInfoLine2Div.appendChild(createCellSpan(String.format(Locale.getDefault(), "%d min", duration), true, false));
-
-        setInfoLine1Div.appendChild(createCellSpan(String.valueOf(game.getSets().get(setIndex).getHomePoints()), true, false));
-        setInfoLine2Div.appendChild(createCellSpan(String.valueOf(game.getSets().get(setIndex).getGuestPoints()), true, false));
 
         setInfoDiv.appendChild(setInfoLine1Div);
         setInfoDiv.appendChild(setInfoLine2Div);

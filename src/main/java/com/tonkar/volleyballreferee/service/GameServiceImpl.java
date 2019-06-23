@@ -421,7 +421,7 @@ public class GameServiceImpl implements GameService {
     private SelectedLeague findOrCreateLeague(User user, GameDescription gameDescription) {
         SelectedLeague selectedLeague = null;
 
-        if (!GameType.TIME.equals(gameDescription.getKind()) && gameDescription.getLeagueId() != null
+        if (gameDescription.getLeagueId() != null
                 && gameDescription.getLeagueName() != null && !gameDescription.getLeagueName().isBlank()
                 && gameDescription.getDivisionName() != null && !gameDescription.getDivisionName().isBlank()) {
             Optional<League> optLeague = leagueRepository.findByIdAndCreatedBy(gameDescription.getLeagueId(), user.getId());
@@ -454,7 +454,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private void createOrUpdateLeagueIfNeeded(User user, Game game) {
-        if (game.getLeague() != null && !GameType.TIME.equals(game.getKind())) {
+        if (game.getLeague() != null) {
             try {
                 leagueService.updateDivisions(user, game.getLeague().getId());
             } catch (NotFoundException e) {
