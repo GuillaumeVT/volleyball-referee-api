@@ -46,10 +46,10 @@ public class VbrTests {
     String testMail2;
 
     @Value("${vbr.android.app.purchase.pseudo1}")
-    String testPseudo1;
+    String testUserPseudo1;
 
     @Value("${vbr.android.app.purchase.pseudo2}")
-    String testPseudo2;
+    String testUserPseudo2;
 
     @Value("${vbr.android.app.purchase.token1}")
     String testPurchaseToken1;
@@ -80,7 +80,7 @@ public class VbrTests {
     void createUser1() {
         User user = new User();
         user.setId(UUID.randomUUID().toString());
-        user.setPseudo(testPseudo1);
+        user.setPseudo(testUserPseudo1);
         user.setEmail(testMail1);
         user.setPassword(testPassword);
         user.setPurchaseToken(testPurchaseToken1);
@@ -100,7 +100,7 @@ public class VbrTests {
     void createUser2() {
         User user = new User();
         user.setId(UUID.randomUUID().toString());
-        user.setPseudo(testPseudo2);
+        user.setPseudo(testUserPseudo2);
         user.setEmail(testMail2);
         user.setPassword(testPassword);
         user.setPurchaseToken(testPurchaseToken2);

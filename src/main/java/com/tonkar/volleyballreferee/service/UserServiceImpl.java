@@ -82,6 +82,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> getUserFromToken(String token) {
+        Optional<Claims> optionalClaims = parseToken(token);
+        Optional<User> optionalUser;
+
+        if (optionalClaims.isPresent()) {
+            Claims claims = optionalClaims.get();
+            if (claims.getExpiration().toInstant().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC))) {
+                optionalUser = userRepository.findById(claims.getSubject());
+            } else {
+                optionalUser = Optional.empty();
+            }
+        } else {
+            optionalUser = Optional.empty();
+        }
+
+        return optionalUser;
+    }
+
+    @Override
+    public UserSummary getUserFromPurchaseToken(String purchaseToken) throws NotFoundException {
+        return userRepository
+                .findByPurchaseToken(purchaseToken)
+                .map(user -> new UserSummary(user.getId(), user.getPseudo(), user.getEmail()))
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find purchase token %s", purchaseToken)));
+    }
+
+    @Override
     public UserToken createUser(User user) throws UnauthorizedException, ForbiddenException, ConflictException, NotFoundException, BadRequestException {
         if (userRepository.existsByPurchaseToken(user.getPurchaseToken())) {
             throw new ConflictException(String.format("Found an existing user with purchase token %s", user.getPurchaseToken()));
@@ -153,25 +180,6 @@ public class UserServiceImpl implements UserService {
             addFailedAuthentication(user);
             throw new UnauthorizedException(String.format("Invalid password for user %s", userEmail));
         }
-    }
-
-    @Override
-    public Optional<User> getUserFromToken(String token) {
-        Optional<Claims> optionalClaims = parseToken(token);
-        Optional<User> optionalUser;
-
-        if (optionalClaims.isPresent()) {
-            Claims claims = optionalClaims.get();
-            if (claims.getExpiration().toInstant().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC))) {
-                optionalUser = userRepository.findById(claims.getSubject());
-            } else {
-                optionalUser = Optional.empty();
-            }
-        } else {
-            optionalUser = Optional.empty();
-        }
-
-        return optionalUser;
     }
 
     @Override

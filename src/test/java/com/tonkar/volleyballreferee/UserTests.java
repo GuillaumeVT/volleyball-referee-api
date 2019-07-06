@@ -63,6 +63,12 @@ public class UserTests extends VbrTests {
 
     @Test
     public void testManageUsers() {
+        ResponseEntity<String> responseStr = restTemplate.exchange(urlOf(String.format("/api/v3.1/public/users/%s", "Invalid purchase token")), HttpMethod.GET, null, String.class);
+        assertEquals(HttpStatus.NOT_FOUND, responseStr.getStatusCode());
+
+        responseStr = restTemplate.exchange(urlOf(String.format("/api/v3.1/public/users/%s", testPurchaseToken1)), HttpMethod.GET, null, String.class);
+        assertEquals(HttpStatus.NOT_FOUND, responseStr.getStatusCode());
+
         // Invalid purchase token
 
         User user = new User();
@@ -81,7 +87,7 @@ public class UserTests extends VbrTests {
 
         // Invalid email address
 
-        user.setPseudo(testPseudo1);
+        user.setPseudo(testUserPseudo1);
         user.setEmail("invalidemail.com");
         user.setPassword(testPassword);
         user.setPurchaseToken(testPurchaseToken1);
@@ -100,6 +106,12 @@ public class UserTests extends VbrTests {
         testUserToken1 = response.getBody().getToken();
         testUser1 = response.getBody().getUser();
 
+        // Get user from purchase token
+
+        ResponseEntity<UserSummary> userResponse = restTemplate.exchange(urlOf(String.format("/api/v3.1/public/users/%s", testPurchaseToken1)), HttpMethod.GET, null, UserSummary.class);
+        assertEquals(HttpStatus.OK, userResponse.getStatusCode());
+        assertEquals(testUserPseudo1, userResponse.getBody().getPseudo());
+
         // User already exists
 
         response = restTemplate.postForEntity(urlOf("/api/v3.1/public/users"), payloadWithoutAuth(user), UserToken.class);
@@ -109,7 +121,7 @@ public class UserTests extends VbrTests {
 
         user = new User();
         user.setId(UUID.randomUUID().toString());
-        user.setPseudo(testPseudo1);
+        user.setPseudo(testUserPseudo1);
         user.setEmail(testMail2);
         user.setPassword(testPassword);
         user.setPurchaseToken(testPurchaseToken2);
@@ -123,7 +135,7 @@ public class UserTests extends VbrTests {
 
         // User email is taken
 
-        user.setPseudo(testPseudo2);
+        user.setPseudo(testUserPseudo2);
         user.setEmail(testMail1);
 
         response = restTemplate.postForEntity(urlOf("/api/v3.1/public/users"), payloadWithoutAuth(user), UserToken.class);
@@ -154,7 +166,7 @@ public class UserTests extends VbrTests {
 
         // Recover user password
 
-        ResponseEntity<String> responseStr = restTemplate.postForEntity(urlOf(String.format("/api/v3.1/public/users/password/recover/%s", testUser1.getEmail())), emptyPayloadWithoutAuth(), String.class);
+        responseStr = restTemplate.postForEntity(urlOf(String.format("/api/v3.1/public/users/password/recover/%s", testUser1.getEmail())), emptyPayloadWithoutAuth(), String.class);
         assertEquals(HttpStatus.OK, responseStr.getStatusCode());
 
         PasswordReset passwordReset = passwordResetRepository

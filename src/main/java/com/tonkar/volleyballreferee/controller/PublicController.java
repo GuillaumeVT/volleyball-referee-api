@@ -49,6 +49,16 @@ public class PublicController {
     @Autowired
     private UserService userService;
 
+    @GetMapping(value = "/users/{purchaseToken}", produces = {"application/json"})
+    public ResponseEntity<UserSummary> getUserFromPurchaseToken(@PathVariable("purchaseToken") @NotBlank String purchaseToken) {
+        try {
+            return new ResponseEntity<>(userService.getUserFromPurchaseToken(purchaseToken), HttpStatus.OK);
+        } catch (NotFoundException e) {
+            log.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PostMapping(value = "/users", produces = {"application/json"})
     public ResponseEntity<UserToken> createUser(@Valid @RequestBody User user) {
         try {
@@ -88,7 +98,7 @@ public class PublicController {
     }
 
     @PostMapping(value = "/users/password/recover/{userEmail}", produces = {"application/json"})
-    public ResponseEntity<String> initiatePasswordReset(@PathVariable("userEmail") @Email @NotNull String userEmail) {
+    public ResponseEntity<String> initiatePasswordReset(@PathVariable("userEmail") @Email @NotBlank String userEmail) {
         try {
             userService.initiatePasswordReset(userEmail);
             return new ResponseEntity<>(HttpStatus.OK);

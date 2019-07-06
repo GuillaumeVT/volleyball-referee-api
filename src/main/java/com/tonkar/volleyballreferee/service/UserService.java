@@ -1,9 +1,6 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.FriendsAndRequests;
-import com.tonkar.volleyballreferee.dto.UserToken;
-import com.tonkar.volleyballreferee.dto.UserPasswordUpdate;
+import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.*;
@@ -16,11 +13,13 @@ public interface UserService {
 
     User getUser(String userId) throws NotFoundException;
 
+    Optional<User> getUserFromToken(String token);
+
+    UserSummary getUserFromPurchaseToken(String purchaseToken) throws NotFoundException;
+
     UserToken createUser(User user) throws UnauthorizedException, ForbiddenException, ConflictException, NotFoundException, BadRequestException;
 
     UserToken signInUser(String userEmail, String userPassword) throws NotFoundException, UnauthorizedException, ForbiddenException;
-
-    Optional<User> getUserFromToken(String token);
 
     Count getNumberOfFriendRequestsReceivedBy(User user);
 
