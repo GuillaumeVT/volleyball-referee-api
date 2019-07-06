@@ -2,10 +2,11 @@ package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.FriendsAndRequests;
+import com.tonkar.volleyballreferee.dto.UserToken;
+import com.tonkar.volleyballreferee.dto.UserPasswordUpdate;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.exception.ConflictException;
-import com.tonkar.volleyballreferee.exception.NotFoundException;
+import com.tonkar.volleyballreferee.exception.*;
 import com.tonkar.volleyballreferee.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v3/users")
+@RequestMapping("/api/v3.1/users")
 @CrossOrigin("*")
 @Slf4j
 public class UserController {
@@ -26,15 +28,26 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<User> getUser(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(user, HttpStatus.OK);
-    }
-
-    @DeleteMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> deleteUser(@AuthenticationPrincipal User user) {
-        userService.deleteUser(user);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @PostMapping(value = "/password", produces = {"application/json"})
+    public ResponseEntity<UserToken> updateUserPassword(@AuthenticationPrincipal User user, @Valid @RequestBody UserPasswordUpdate userPasswordUpdate) {
+        try {
+            return new ResponseEntity<>(userService.updateUserPassword(user, userPasswordUpdate), HttpStatus.OK);
+        } catch (UnauthorizedException e) {
+            log.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } catch (ForbiddenException e) {
+            log.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        } catch (BadRequestException e) {
+            log.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (ConflictException e) {
+            log.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        } catch (NotFoundException e) {
+            log.error(e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping(value = "/friends/requested", produces = {"application/json"})

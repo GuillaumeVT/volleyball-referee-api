@@ -1,6 +1,6 @@
 package com.tonkar.volleyballreferee.dao;
 
-import com.tonkar.volleyballreferee.dto.RulesDescription;
+import com.tonkar.volleyballreferee.dto.RulesSummary;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
@@ -22,7 +22,7 @@ import java.util.List;
 @Repository
 public class RulesDao {
 
-    private static ProjectionOperation sRulesDescriptionProjection = Aggregation.project()
+    private final static ProjectionOperation sRulesSummaryProjection = Aggregation.project()
             .and("_id").as("_id")
             .and("createdBy").as("createdBy")
             .and("createdAt").as("createdAt")
@@ -33,18 +33,18 @@ public class RulesDao {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public List<RulesDescription> listRules(String userId) {
+    public List<RulesSummary> listRules(String userId) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
-        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sRulesDescriptionProjection, sortOperation),
-                mongoTemplate.getCollectionName(Rules.class), RulesDescription.class).getMappedResults();
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sRulesSummaryProjection, sortOperation),
+                mongoTemplate.getCollectionName(Rules.class), RulesSummary.class).getMappedResults();
     }
 
-    public List<RulesDescription> listRulesOfKind(String userId, GameType kind) {
+    public List<RulesSummary> listRulesOfKind(String userId, GameType kind) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("kind").is(kind));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
-        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sRulesDescriptionProjection, sortOperation),
-                mongoTemplate.getCollectionName(Rules.class), RulesDescription.class).getMappedResults();
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sRulesSummaryProjection, sortOperation),
+                mongoTemplate.getCollectionName(Rules.class), RulesSummary.class).getMappedResults();
     }
 
     public void updateScheduledGamesWithRules(String userId, Rules rules) {

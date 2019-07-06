@@ -1,6 +1,6 @@
 package com.tonkar.volleyballreferee.dao;
 
-import com.tonkar.volleyballreferee.dto.TeamDescription;
+import com.tonkar.volleyballreferee.dto.TeamSummary;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @Repository
 public class TeamDao {
 
-    private static ProjectionOperation sTeamDescriptionProjection = Aggregation.project()
+    private final static ProjectionOperation sTeamSummaryProjection = Aggregation.project()
             .and("_id").as("_id")
             .and("createdBy").as("createdBy")
             .and("createdAt").as("createdAt")
@@ -36,25 +36,25 @@ public class TeamDao {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public List<TeamDescription> listTeams(String userId) {
+    public List<TeamSummary> listTeams(String userId) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
-        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sTeamDescriptionProjection, sortOperation),
-                mongoTemplate.getCollectionName(Team.class), TeamDescription.class).getMappedResults();
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation),
+                mongoTemplate.getCollectionName(Team.class), TeamSummary.class).getMappedResults();
     }
 
-    public List<TeamDescription> listTeamsOfKind(String userId, GameType kind) {
+    public List<TeamSummary> listTeamsOfKind(String userId, GameType kind) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("kind").is(kind));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
-        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sTeamDescriptionProjection, sortOperation),
-                mongoTemplate.getCollectionName(Team.class), TeamDescription.class).getMappedResults();
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation),
+                mongoTemplate.getCollectionName(Team.class), TeamSummary.class).getMappedResults();
     }
 
-    public List<TeamDescription> listTeamsWithIds(Set<UUID> teamIds) {
+    public List<TeamSummary> listTeamsWithIds(Set<UUID> teamIds) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("_id").in(teamIds));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
-        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sTeamDescriptionProjection, sortOperation),
-                mongoTemplate.getCollectionName(Team.class), TeamDescription.class).getMappedResults();
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation),
+                mongoTemplate.getCollectionName(Team.class), TeamSummary.class).getMappedResults();
     }
 
     public void updateScheduledGamesWithHomeTeam(String userId, Team team) {

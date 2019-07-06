@@ -2,21 +2,25 @@ package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.FriendsAndRequests;
+import com.tonkar.volleyballreferee.dto.UserToken;
+import com.tonkar.volleyballreferee.dto.UserPasswordUpdate;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.exception.ConflictException;
-import com.tonkar.volleyballreferee.exception.NotFoundException;
+import com.tonkar.volleyballreferee.exception.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface UserService {
 
     User getUser(String userId) throws NotFoundException;
 
-    void createUser(User user) throws ConflictException;
+    UserToken createUser(User user) throws UnauthorizedException, ForbiddenException, ConflictException, NotFoundException, BadRequestException;
 
-    void deleteUser(User user);
+    UserToken signInUser(String userEmail, String userPassword) throws NotFoundException, UnauthorizedException, ForbiddenException;
+
+    Optional<User> getUserFromToken(String token);
 
     Count getNumberOfFriendRequestsReceivedBy(User user);
 
@@ -33,4 +37,15 @@ public interface UserService {
     void rejectFriendRequest(User user, UUID friendRequestId);
 
     void removeFriend(User user, String friendId) throws NotFoundException;
+
+    UserToken updateUserPassword(User user, UserPasswordUpdate userPasswordUpdate) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException, ForbiddenException;
+
+    void initiatePasswordReset(String userEmail) throws NotFoundException;
+
+    String followPasswordReset(UUID passwordResetId) throws NotFoundException;
+
+    UserToken resetPassword(UUID passwordResetId, String userPassword) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException, ForbiddenException;
+
+    void purgeOldPasswordResets(int days);
+
 }

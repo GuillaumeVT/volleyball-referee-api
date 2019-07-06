@@ -16,21 +16,22 @@ import java.text.DateFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExcelDivisionWriter {
 
-    private List<Game>    games;
-    private XSSFWorkbook  workbook;
-    private XSSFCellStyle headerStyle;
-    private XSSFCellStyle matchStyle;
-    private XSSFCellStyle setStyle;
-    private XSSFCellStyle pointStyle;
-    private XSSFCellStyle homeDefaultStyle;
-    private XSSFCellStyle guestDefaultStyle;
-    private XSSFCellStyle homeSetStyle;
-    private XSSFCellStyle guestSetStyle;
-    private XSSFCellStyle homePointStyle;
-    private XSSFCellStyle guestPointStyle;
+    private final List<Game>    games;
+    private final XSSFWorkbook  workbook;
+    private final XSSFCellStyle headerStyle;
+    private final XSSFCellStyle matchStyle;
+    private final XSSFCellStyle setStyle;
+    private final XSSFCellStyle pointStyle;
+    private final XSSFCellStyle homeDefaultStyle;
+    private final XSSFCellStyle guestDefaultStyle;
+    private final XSSFCellStyle homeSetStyle;
+    private final XSSFCellStyle guestSetStyle;
+    private final XSSFCellStyle homePointStyle;
+    private final XSSFCellStyle guestPointStyle;
 
     private ExcelDivisionWriter(List<Game> games) {
         this.games = games;
@@ -156,49 +157,49 @@ public class ExcelDivisionWriter {
 
         for (Ranking ranking : rankings.list()) {
             row = sheet.createRow(rowIndex);
-            int columnIndex = 0;
+            AtomicInteger columnIndex = new AtomicInteger(0);
 
-            XSSFCell cell = row.createCell(columnIndex++);
+            XSSFCell cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getTeamName());
             cell.setCellStyle(createExcelTeamStyle(ranking.getTeamColor()));
 
-            cell = row.createCell(columnIndex++);
+            cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getMatchesFor() + ranking.getMatchesAgainst());
             cell.setCellStyle(matchStyle);
 
-            cell = row.createCell(columnIndex++);
+            cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getMatchesFor());
             cell.setCellStyle(matchStyle);
 
-            cell = row.createCell(columnIndex++);
+            cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getMatchesAgainst());
             cell.setCellStyle(matchStyle);
 
-            cell = row.createCell(columnIndex++);
+            cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getMatchesDiff());
             cell.setCellStyle(matchStyle);
 
-            cell = row.createCell(columnIndex++);
+            cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getSetsFor());
             cell.setCellStyle(setStyle);
 
-            cell = row.createCell(columnIndex++);
+            cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getSetsAgainst());
             cell.setCellStyle(setStyle);
 
-            cell = row.createCell(columnIndex++);
+            cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getSetsDiff());
             cell.setCellStyle(setStyle);
 
-            cell = row.createCell(columnIndex++);
+            cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getPointsFor());
             cell.setCellStyle(pointStyle);
 
-            cell = row.createCell(columnIndex++);
+            cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getPointsAgainst());
             cell.setCellStyle(pointStyle);
 
-            cell = row.createCell(columnIndex++);
+            cell = row.createCell(columnIndex.getAndIncrement());
             cell.setCellValue(ranking.getPointsDiff());
             cell.setCellStyle(pointStyle);
 

@@ -1,7 +1,7 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.RulesDescription;
+import com.tonkar.volleyballreferee.dto.RulesSummary;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
 import com.tonkar.volleyballreferee.entity.User;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v3/rules")
+@RequestMapping("/api/v3.1/rules")
 @CrossOrigin("*")
 @Slf4j
 public class RulesController {
@@ -29,12 +29,12 @@ public class RulesController {
     private RulesService rulesService;
 
     @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<List<RulesDescription>> listRules(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<RulesSummary>> listRules(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(rulesService.listRules(user), HttpStatus.OK);
     }
 
     @GetMapping(value = "/kind/{kind}", produces = {"application/json"})
-    public ResponseEntity<List<RulesDescription>> listRulesOfKind(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
+    public ResponseEntity<List<RulesSummary>> listRulesOfKind(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
         return new ResponseEntity<>(rulesService.listRulesOfKind(user, kind), HttpStatus.OK);
     }
 
@@ -49,7 +49,7 @@ public class RulesController {
     }
 
     @GetMapping(value = "/default/kind/{kind}", produces = {"application/json"})
-    public ResponseEntity<RulesDescription> getDefaultRules(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
+    public ResponseEntity<RulesSummary> getDefaultRules(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
         return new ResponseEntity<>(rulesService.getDefaultRules(kind), HttpStatus.OK);
     }
 

@@ -106,7 +106,6 @@ public class Rules {
             case INDOOR -> OFFICIAL_INDOOR_RULES.getId().equals(rulesId) ? Optional.of(OFFICIAL_INDOOR_RULES) : Optional.empty();
             case BEACH -> OFFICIAL_BEACH_RULES.getId().equals(rulesId) ? Optional.of(OFFICIAL_BEACH_RULES) : Optional.empty();
             case INDOOR_4X4 -> DEFAULT_INDOOR_4X4_RULES.getId().equals(rulesId) ? Optional.of(DEFAULT_INDOOR_4X4_RULES) : Optional.empty();
-            default -> Optional.empty();
         };
     }
 

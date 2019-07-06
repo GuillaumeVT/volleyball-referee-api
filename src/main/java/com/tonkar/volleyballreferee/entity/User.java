@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -22,22 +23,27 @@ public class User implements UserDetails {
 
     @Id
     @NotBlank
-    private String       id;
+    private String               id;
     @NotBlank
-    private String       pseudo;
+    private String               pseudo;
+    @Email
+    @NotBlank
+    private String               email;
+    @NotBlank
+    private String               password;
+    @NotBlank
+    private String               purchaseToken;
     @NotNull
-    private List<Friend> friends;
+    private List<Friend>         friends;
+    private long                 createdAt;
+    private long                 lastLoginAt;
+    private FailedAuthentication failedAuthentication;
 
     public static String VBR_USER_ID = "01022018@vbr";
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new ArrayList<>();
-    }
-
-    @Override
-    public String getPassword() {
-        return "";
     }
 
     @Override
@@ -79,6 +85,14 @@ public class User implements UserDetails {
         private String id;
         @NotBlank
         private String pseudo;
+
+    }
+
+    @AllArgsConstructor @NoArgsConstructor @Getter @Setter
+    public static class FailedAuthentication {
+
+        private int  attempts;
+        private long resetsAt;
 
     }
 

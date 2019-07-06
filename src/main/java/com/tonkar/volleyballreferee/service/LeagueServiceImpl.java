@@ -3,7 +3,7 @@ package com.tonkar.volleyballreferee.service;
 import com.tonkar.volleyballreferee.dao.GameDao;
 import com.tonkar.volleyballreferee.dao.LeagueDao;
 import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.LeagueDescription;
+import com.tonkar.volleyballreferee.dto.LeagueSummary;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
@@ -43,12 +43,12 @@ public class LeagueServiceImpl implements LeagueService {
     }
 
     @Override
-    public List<LeagueDescription> listLeagues(User user) {
+    public List<LeagueSummary> listLeagues(User user) {
         return leagueDao.listLeagues(user.getId());
     }
 
     @Override
-    public List<LeagueDescription> listLeaguesOfKind(User user, GameType kind) {
+    public List<LeagueSummary> listLeaguesOfKind(User user, GameType kind) {
         return leagueDao.listLeaguesOfKind(user.getId(), kind);
     }
 

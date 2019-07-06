@@ -1,5 +1,6 @@
 package com.tonkar.volleyballreferee.entity;
 
+import com.tonkar.volleyballreferee.dto.LeagueSummary;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -108,11 +109,11 @@ public class Game {
         return TeamType.HOME.equals(teamType) ? getHomeTeam().getLiberoColor() : getGuestTeam().getLiberoColor();
     }
 
-    public List<Player> getPlayers(TeamType teamType) {
+    public List<Team.Player> getPlayers(TeamType teamType) {
         return TeamType.HOME.equals(teamType) ? getHomeTeam().getPlayers() : getGuestTeam().getPlayers();
     }
 
-    public List<Player> getLiberos(TeamType teamType) {
+    public List<Team.Player> getLiberos(TeamType teamType) {
         return TeamType.HOME.equals(teamType) ? getHomeTeam().getLiberos() : getGuestTeam().getLiberos();
     }
 
@@ -124,12 +125,12 @@ public class Game {
         return TeamType.HOME.equals(teamType) ? getHomeTeam().getCaptain() : getGuestTeam().getCaptain();
     }
 
-    public List<Substitution> getSubstitutions(TeamType teamType, int setIndex) {
+    public List<Set.Substitution> getSubstitutions(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
         return TeamType.HOME.equals(teamType) ? set.getHomeSubstitutions() : set.getGuestSubstitutions();
     }
 
-    public List<Timeout> getCalledTimeouts(TeamType teamType, int setIndex) {
+    public List<Set.Timeout> getCalledTimeouts(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
         return TeamType.HOME.equals(teamType) ? set.getHomeCalledTimeouts() : set.getGuestCalledTimeouts();
     }
@@ -139,8 +140,28 @@ public class Game {
         return allSanctions.stream().filter(sanction -> sanction.getSet() == setIndex).collect(Collectors.toList());
     }
 
-    public Court getStartingLineup(TeamType teamType, int setIndex) {
+    public Set.Court getStartingLineup(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
         return TeamType.HOME.equals(teamType) ? set.getHomeStartingPlayers() : set.getGuestStartingPlayers();
+    }
+
+    @NoArgsConstructor @Getter @Setter
+    public static class Sanction {
+
+        @NotBlank
+        private String card;
+        private int    num;
+        private int    set;
+        private int    homePoints;
+        private int    guestPoints;
+
+    }
+
+    @NoArgsConstructor @Getter @Setter
+    public static class SelectedLeague extends LeagueSummary {
+
+        @NotBlank
+        private String division;
+
     }
 }

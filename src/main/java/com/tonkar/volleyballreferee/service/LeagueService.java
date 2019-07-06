@@ -1,7 +1,7 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.LeagueDescription;
+import com.tonkar.volleyballreferee.dto.LeagueSummary;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
 import com.tonkar.volleyballreferee.entity.User;
@@ -19,9 +19,9 @@ public interface LeagueService {
 
     // User only
 
-    List<LeagueDescription> listLeagues(User user);
+    List<LeagueSummary> listLeagues(User user);
 
-    List<LeagueDescription> listLeaguesOfKind(User user, GameType kind);
+    List<LeagueSummary> listLeaguesOfKind(User user, GameType kind);
 
     League getLeague(User user, UUID leagueId) throws NotFoundException;
 

@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.1.5.RELEASE'
+        springBootVersion = '2.1.6.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -32,18 +32,25 @@ test {
 }
 
 dependencies {
-    compile 'org.springframework.boot:spring-boot-starter'
-    compile 'org.springframework.boot:spring-boot-starter-logging'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-logging'
     compile('org.springframework.boot:spring-boot-starter-web') {
         exclude module: "spring-boot-starter-tomcat"
     }
-    compile 'org.springframework.boot:spring-boot-starter-undertow'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
     compile 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    compile 'org.jsoup:jsoup:1.12.1'
-    compile 'org.springframework.boot:spring-boot-starter-security'
-    compile 'com.google.api-client:google-api-client:1.29.2'
-    compile 'org.apache.poi:poi-ooxml:4.1.0'
-    compileOnly 'org.projectlombok:lombok:1.18.8'
-    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.12.1'
+    compile group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
+    // Security
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-security'
+    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+    compile group: 'com.github.ulisesbocchio', name: 'jasypt-spring-boot-starter', version: '2.1.1'
+    compile group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: 'v3-rev95-1.25.0'
+    // Excel
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.0'
+    // Misc
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

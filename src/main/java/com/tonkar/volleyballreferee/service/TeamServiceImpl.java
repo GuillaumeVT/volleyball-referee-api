@@ -3,7 +3,7 @@ package com.tonkar.volleyballreferee.service;
 import com.tonkar.volleyballreferee.dao.GameDao;
 import com.tonkar.volleyballreferee.dao.TeamDao;
 import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.TeamDescription;
+import com.tonkar.volleyballreferee.dto.TeamSummary;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Team;
@@ -38,36 +38,36 @@ public class TeamServiceImpl implements TeamService {
     private GameDao gameDao;
 
     @Override
-    public List<TeamDescription> listTeamsOfLeague(UUID leagueId) {
+    public List<TeamSummary> listTeamsOfLeague(UUID leagueId) {
         Set<UUID> teamIds = new TreeSet<>();
 
-        gameDao.listGamesInLeague(leagueId).forEach(gameDescription -> {
-            teamIds.add(gameDescription.getHomeTeamId());
-            teamIds.add(gameDescription.getGuestTeamId());
+        gameDao.listGamesInLeague(leagueId).forEach(game -> {
+            teamIds.add(game.getHomeTeamId());
+            teamIds.add(game.getGuestTeamId());
         });
 
         return teamDao.listTeamsWithIds(teamIds);
     }
 
     @Override
-    public List<TeamDescription> listTeamsOfDivision(UUID leagueId, String divisionName) {
+    public List<TeamSummary> listTeamsOfDivision(UUID leagueId, String divisionName) {
         Set<UUID> teamIds = new TreeSet<>();
 
-        gameDao.listGamesInDivision(leagueId, divisionName).forEach(gameDescription -> {
-            teamIds.add(gameDescription.getHomeTeamId());
-            teamIds.add(gameDescription.getGuestTeamId());
+        gameDao.listGamesInDivision(leagueId, divisionName).forEach(game -> {
+            teamIds.add(game.getHomeTeamId());
+            teamIds.add(game.getGuestTeamId());
         });
 
         return teamDao.listTeamsWithIds(teamIds);
     }
 
     @Override
-    public List<TeamDescription> listTeams(User user) {
+    public List<TeamSummary> listTeams(User user) {
         return teamDao.listTeams(user.getId());
     }
 
     @Override
-    public List<TeamDescription> listTeamsOfKind(User user, GameType kind) {
+    public List<TeamSummary> listTeamsOfKind(User user, GameType kind) {
         return teamDao.listTeamsOfKind(user.getId(), kind);
     }
 

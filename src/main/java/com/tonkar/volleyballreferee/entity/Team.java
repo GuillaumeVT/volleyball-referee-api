@@ -1,5 +1,6 @@
 package com.tonkar.volleyballreferee.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -38,4 +39,12 @@ public class Team {
     private List<Player> liberos;
     private int          captain;
 
+    @NoArgsConstructor @AllArgsConstructor
+    @Getter @Setter
+    public static class Player {
+
+        private int    num;
+        private String name;
+
+    }
 }

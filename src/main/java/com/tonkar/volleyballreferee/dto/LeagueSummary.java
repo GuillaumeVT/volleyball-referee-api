@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @NoArgsConstructor @Getter @Setter
-public class LeagueDescription {
+public class LeagueSummary {
 
     @NotNull
     private UUID     id;

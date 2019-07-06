@@ -106,7 +106,7 @@ public class ScoreSheetWriter {
         Element infoDiv = new Element("div");
         infoDiv.addClass("div-grid-info");
 
-        SelectedLeague selectedLeague = game.getLeague();
+        Game.SelectedLeague selectedLeague = game.getLeague();
         String league = selectedLeague == null ? "" : selectedLeague.getName() + " / " + selectedLeague.getDivision();
 
         infoDiv.appendChild(createCellSpan(league, true, false));
@@ -305,7 +305,7 @@ public class ScoreSheetWriter {
         Element lineupDiv = new Element("div");
         lineupDiv.addClass("div-grid-lineup").addClass("border");
 
-        Court lineup = game.getStartingLineup(teamType, setIndex);
+        Set.Court lineup = game.getStartingLineup(teamType, setIndex);
 
         lineupDiv.appendChild(createCellSpan("IV", false, false));
         lineupDiv.appendChild(createCellSpan("III", false, false));
@@ -351,7 +351,7 @@ public class ScoreSheetWriter {
         return substitutionsDiv;
     }
 
-    private Element createSubstitutionDiv(TeamType teamType, Substitution substitution) {
+    private Element createSubstitutionDiv(TeamType teamType, Set.Substitution substitution) {
         Element substitutionDiv = new Element("div");
         substitutionDiv.addClass("div-grid-substitution");
 
@@ -391,7 +391,7 @@ public class ScoreSheetWriter {
         return timeoutsDiv;
     }
 
-    private Element createTimeoutDiv(TeamType teamType, Timeout timeout) {
+    private Element createTimeoutDiv(TeamType teamType, Set.Timeout timeout) {
         Element timeoutDiv = new Element("div");
         timeoutDiv.addClass("div-grid-timeout");
 
@@ -444,7 +444,7 @@ public class ScoreSheetWriter {
         return sanctionsDiv;
     }
 
-    private Element createSanctionDiv(TeamType teamType, Sanction sanction) {
+    private Element createSanctionDiv(TeamType teamType, Game.Sanction sanction) {
         Element sanctionDiv = new Element("div");
         sanctionDiv.addClass("div-grid-sanction");
 
@@ -574,7 +574,7 @@ public class ScoreSheetWriter {
         Element lineupDiv = new Element("div");
         lineupDiv.addClass("div-grid-lineup").addClass("border");
 
-        Court lineup = game.getStartingLineup(teamType, setIndex);
+        Set.Court lineup = game.getStartingLineup(teamType, setIndex);
 
         lineupDiv.appendChild(createCellSpan("IV", false, false));
         lineupDiv.appendChild(createCellSpan("III", false, false));

@@ -46,4 +46,37 @@ public class Set {
     public int getPoints(TeamType teamType) {
         return TeamType.HOME.equals(teamType) ? homePoints : guestPoints;
     }
+
+    @NoArgsConstructor @Getter @Setter
+    public static class Court {
+
+        private int p1;
+        private int p2;
+        private int p3;
+        private int p4;
+        private int p5;
+        private int p6;
+
+        boolean isFilled() {
+            return p1 > 0 && p2 > 0 && p3 > 0 && p4 > 0 && p5 > 0 && p6 > 0;
+        }
+    }
+
+    @NoArgsConstructor @Getter @Setter
+    public static class Substitution {
+
+        private int playerIn;
+        private int playerOut;
+        private int homePoints;
+        private int guestPoints;
+
+    }
+
+    @NoArgsConstructor @Getter @Setter
+    public static class Timeout {
+
+        private int homePoints;
+        private int guestPoints;
+
+    }
 }

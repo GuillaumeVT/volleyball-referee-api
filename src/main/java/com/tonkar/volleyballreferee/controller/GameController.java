@@ -1,7 +1,7 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.GameDescription;
+import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v3/games")
+@RequestMapping("/api/v3.1/games")
 @CrossOrigin("*")
 @Slf4j
 public class GameController {
@@ -27,27 +27,27 @@ public class GameController {
     private GameService gameService;
 
     @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<List<GameDescription>> listGames(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<GameSummary>> listGames(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(gameService.listGames(user), HttpStatus.OK);
     }
 
     @GetMapping(value = "/status/{status}", produces = {"application/json"})
-    public ResponseEntity<List<GameDescription>> listGamesWithStatus(@AuthenticationPrincipal User user, @PathVariable("status") GameStatus status) {
+    public ResponseEntity<List<GameSummary>> listGamesWithStatus(@AuthenticationPrincipal User user, @PathVariable("status") GameStatus status) {
         return new ResponseEntity<>(gameService.listGamesWithStatus(user, status), HttpStatus.OK);
     }
 
     @GetMapping(value = "/available", produces = {"application/json"})
-    public ResponseEntity<List<GameDescription>> listAvailableGames(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<GameSummary>> listAvailableGames(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(gameService.listAvailableGames(user), HttpStatus.OK);
     }
 
     @GetMapping(value = "/completed", produces = {"application/json"})
-    public ResponseEntity<List<GameDescription>> listCompletedGames(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<GameSummary>> listCompletedGames(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(gameService.listCompletedGames(user), HttpStatus.OK);
     }
 
     @GetMapping(value = "/league/{leagueId}", produces = {"application/json"})
-    public ResponseEntity<List<GameDescription>> listGamesInLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
+    public ResponseEntity<List<GameSummary>> listGamesInLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
         return new ResponseEntity<>(gameService.listGamesInLeague(user, leagueId), HttpStatus.OK);
     }
 
@@ -77,9 +77,9 @@ public class GameController {
     }
 
     @PostMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> createGame(@AuthenticationPrincipal User user, @Valid @RequestBody GameDescription gameDescription) {
+    public ResponseEntity<String> createGame(@AuthenticationPrincipal User user, @Valid @RequestBody GameSummary gameSummary) {
         try {
-            gameService.createGame(user, gameDescription);
+            gameService.createGame(user, gameSummary);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (ConflictException e) {
             log.error(e.getMessage(), e);
@@ -105,9 +105,9 @@ public class GameController {
     }
 
     @PutMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> updateGame(@AuthenticationPrincipal User user, @Valid @RequestBody GameDescription gameDescription) {
+    public ResponseEntity<String> updateGame(@AuthenticationPrincipal User user, @Valid @RequestBody GameSummary gameSummary) {
         try {
-            gameService.updateGame(user, gameDescription);
+            gameService.updateGame(user, gameSummary);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (ConflictException e) {
             log.error(e.getMessage(), e);

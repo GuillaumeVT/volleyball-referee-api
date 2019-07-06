@@ -1,6 +1,5 @@
 package com.tonkar.volleyballreferee.security;
 
-import com.tonkar.volleyballreferee.service.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,19 +22,13 @@ final class TokenAuthenticationFilter extends AbstractAuthenticationProcessingFi
     @Override
     public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response) {
         final String tokenParam = Optional.ofNullable(request.getHeader("Authorization")).orElse(request.getParameter("not-found"));
-        final String authProviderParam = Optional.ofNullable(request.getHeader("AuthenticationProvider")).orElse(request.getParameter("not-found"));
 
         final String token = Optional.ofNullable(tokenParam)
                 .map(value -> value.replace("Bearer", ""))
                 .map(String::trim)
                 .orElseThrow(() -> new BadCredentialsException("Could not find the authentication token"));
 
-        final AuthenticationProvider authProvider = Optional.ofNullable(authProviderParam)
-                .map(String::toUpperCase)
-                .map(AuthenticationProvider::valueOf)
-                .orElseThrow(() -> new BadCredentialsException("Could not find the authentication provider"));
-
-        final Authentication authentication = new UsernamePasswordAuthenticationToken(authProvider, token);
+        final Authentication authentication = new UsernamePasswordAuthenticationToken("", token);
         return getAuthenticationManager().authenticate(authentication);
     }
 

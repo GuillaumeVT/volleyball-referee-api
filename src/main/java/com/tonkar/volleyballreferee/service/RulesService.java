@@ -1,7 +1,7 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.RulesDescription;
+import com.tonkar.volleyballreferee.dto.RulesSummary;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
 import com.tonkar.volleyballreferee.entity.User;
@@ -13,13 +13,13 @@ import java.util.UUID;
 
 public interface RulesService {
 
-    List<RulesDescription> listRules(User user);
+    List<RulesSummary> listRules(User user);
 
-    List<RulesDescription> listRulesOfKind(User user, GameType kind);
+    List<RulesSummary> listRulesOfKind(User user, GameType kind);
 
     Rules getRules(User user, UUID rulesId) throws NotFoundException;
 
-    RulesDescription getDefaultRules(GameType kind);
+    RulesSummary getDefaultRules(GameType kind);
 
     Count getNumberOfRules(User user);
 

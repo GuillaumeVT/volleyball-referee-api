@@ -2,7 +2,7 @@ package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dao.RulesDao;
 import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.RulesDescription;
+import com.tonkar.volleyballreferee.dto.RulesSummary;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
@@ -34,12 +34,12 @@ public class RulesServiceImpl implements RulesService {
     private GameRepository gameRepository;
 
     @Override
-    public List<RulesDescription> listRules(User user) {
+    public List<RulesSummary> listRules(User user) {
         return rulesDao.listRules(user.getId());
     }
 
     @Override
-    public List<RulesDescription> listRulesOfKind(User user, GameType kind) {
+    public List<RulesSummary> listRulesOfKind(User user, GameType kind) {
         return rulesDao.listRulesOfKind(user.getId(), kind);
     }
 
@@ -51,23 +51,22 @@ public class RulesServiceImpl implements RulesService {
     }
 
     @Override
-    public RulesDescription getDefaultRules(GameType kind) {
+    public RulesSummary getDefaultRules(GameType kind) {
         final Rules rules = switch (kind) {
             case INDOOR -> Rules.OFFICIAL_INDOOR_RULES;
             case INDOOR_4X4 -> Rules.DEFAULT_INDOOR_4X4_RULES;
             case BEACH -> Rules.OFFICIAL_BEACH_RULES;
-            default -> null;
         };
 
-        RulesDescription rulesDescription = new RulesDescription();
-        rulesDescription.setId(rules.getId());
-        rulesDescription.setCreatedBy(rules.getCreatedBy());
-        rulesDescription.setCreatedAt(rules.getCreatedAt());
-        rulesDescription.setUpdatedAt(rules.getUpdatedAt());
-        rulesDescription.setKind(rules.getKind());
-        rulesDescription.setName(rules.getName());
+        RulesSummary rulesSummary = new RulesSummary();
+        rulesSummary.setId(rules.getId());
+        rulesSummary.setCreatedBy(rules.getCreatedBy());
+        rulesSummary.setCreatedAt(rules.getCreatedAt());
+        rulesSummary.setUpdatedAt(rules.getUpdatedAt());
+        rulesSummary.setKind(rules.getKind());
+        rulesSummary.setName(rules.getName());
 
-        return rulesDescription;
+        return rulesSummary;
     }
 
     @Override

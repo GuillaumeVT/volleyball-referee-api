@@ -1,6 +1,6 @@
 package com.tonkar.volleyballreferee.dao;
 
-import com.tonkar.volleyballreferee.dto.LeagueDescription;
+import com.tonkar.volleyballreferee.dto.LeagueSummary;
 import com.tonkar.volleyballreferee.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -17,7 +17,7 @@ import java.util.List;
 @Repository
 public class LeagueDao {
 
-    private static ProjectionOperation sLeagueDescriptionProjection = Aggregation.project()
+    private final static ProjectionOperation sLeagueSummaryProjection = Aggregation.project()
             .and("_id").as("_id")
             .and("createdBy").as("createdBy")
             .and("createdAt").as("createdAt")
@@ -28,17 +28,17 @@ public class LeagueDao {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public List<LeagueDescription> listLeagues(String userId) {
+    public List<LeagueSummary> listLeagues(String userId) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
-        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sLeagueDescriptionProjection, sortOperation),
-                mongoTemplate.getCollectionName(League.class), LeagueDescription.class).getMappedResults();
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sLeagueSummaryProjection, sortOperation),
+                mongoTemplate.getCollectionName(League.class), LeagueSummary.class).getMappedResults();
     }
 
-    public List<LeagueDescription> listLeaguesOfKind(String userId, GameType kind) {
+    public List<LeagueSummary> listLeaguesOfKind(String userId, GameType kind) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("kind").is(kind));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
-        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sLeagueDescriptionProjection, sortOperation),
-                mongoTemplate.getCollectionName(League.class), LeagueDescription.class).getMappedResults();
+        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sLeagueSummaryProjection, sortOperation),
+                mongoTemplate.getCollectionName(League.class), LeagueSummary.class).getMappedResults();
     }
 }

@@ -1,7 +1,7 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.LeagueDescription;
+import com.tonkar.volleyballreferee.dto.LeagueSummary;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
 import com.tonkar.volleyballreferee.entity.User;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v3/leagues")
+@RequestMapping("/api/v3.1/leagues")
 @CrossOrigin("*")
 @Slf4j
 public class LeagueController {
@@ -29,12 +29,12 @@ public class LeagueController {
     private LeagueService leagueService;
 
     @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<List<LeagueDescription>> listLeagues(@AuthenticationPrincipal User user) {
+    public ResponseEntity<List<LeagueSummary>> listLeagues(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(leagueService.listLeagues(user), HttpStatus.OK);
     }
 
     @GetMapping(value = "/kind/{kind}", produces = {"application/json"})
-    public ResponseEntity<List<LeagueDescription>> listTeamsOfKind(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
+    public ResponseEntity<List<LeagueSummary>> listTeamsOfKind(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
         return new ResponseEntity<>(leagueService.listLeaguesOfKind(user, kind), HttpStatus.OK);
     }
 

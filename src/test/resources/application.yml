@@ -1,9 +1,29 @@
 spring.profiles: test
-spring.data.mongodb.uri: mongodb://vbr_test_user:vbr@localhost:27017/vbr_test
+spring.data.mongodb:
+  password: ENC(eF+K2NgdLQdGTNEW5oiUrA==)
+  uri: mongodb://vbr_test_user:${spring.data.mongodb.password}@localhost:27017/vbr_test
 
 logging:
   config: classpath:logback-spring.xml
 
 vbr:
-  auth:
-    signUpKey: 161adaea-90a1-46b7-be28-b27c0837aea8
+  jwt:
+    key: ENC(61+qX0NxnVL6TDZKee6tynWGK/AjWmUHe9jKauufWiJek7ysSZjlyTtB/n7Jl6BRInWDYWevrDxzVO91pK18yWn5XYdnWp93ibaDN6xovgqDBqMarlJ8Wx0ynhntx3SFKvWZgYQGh31N2jIEI8m8HKaiNuBWE+UqtOefrjBXle4BPLR0965xUjvpKtG6uGZQbUazvsTJLEqF0SxQB6sd8Zk3NmnnORD/1TcTOFKPT7TlfagjtzxIYAom/xS333be+2SC12CcottVa296mUijqAuDWQwKFYCJKIXtsyMG/vtgTo7+E2kIR4sXE0micl6mnV19OMGCXoPqQOb6sabNyYVlyO4wPN32AhSgXNWSyYSXBEoSlQkbGTJjV1c940fugYIl9kfmVwbpyyAcVMVX2pG7As56MqozYVMHT98CF54kl6v9WDHDt8Dv7EYuDEoj3mlIeB0NAB+2xLaBltIhQQ==)
+  web:
+    domain: "https://localhost:4200"
+    color: "#1f4294"
+  android:
+    app:
+      packageName: "com.tonkar.volleyballreferee"
+      purchase:
+        credential: "/opt/VolleyballReferee-587e8e90786e.json"
+        sku: "vbr_web_premium"
+        mail1: "vbr.app.team@gmail.com"
+        pseudo1: "VBR1"
+        token1: ENC(NvmlHER8yFts7wMegqjWgiv1bdH6JCDrVsChvaZRkzlNcqXzcjffNsoXTWrfEzKDL2CTkNhbBB/bRqTYDyWSOUpT+nXBIiCtFY3tZybD1UnFA/492A17TPKv+fDIjTG1uOg5FHWvgih7fBosfjpYC5Gh/mLQ3eW0Qm5YxvIW96VHadVqeLNxN3J2lwDDFk/mHF0SVyPs/0EOSDki+xNc5eDt3cktCKN3yHTNbVAxPQQ=)
+        mail2: "vbr.app.test@gmail.com"
+        pseudo2: "VBR2"
+        token2: ENC(hJq9vvpmdWw4qFxX7uqcIYdHXZi7EdE8+8/vwKy0EpLWFyG2S7WTQnAeILfJsUXZmmb8uHGqy9cgK9WOIWJEkaAmIRWSAfUkkn9Ec+b/Ph7GwumJ5phKZ6Ub/2GxBpHYeA4qj+tS7XtwYdi9AS4Mcp4ZQmtWt9nDClvSytRhQZcpnUCcycJYBrbKYfbNKwulPI81DEwM4+chvpuhN1lFlqsZLkVKArMCLS6iCEbhOQ0=)
+  mail:
+    user: "noreply.vbr.app@gmail.com"
+    password: ENC(5NUOfoSKyZLHp7mDZPetAoZ1PFnPPbCbcWBDAHBe3yo=)
