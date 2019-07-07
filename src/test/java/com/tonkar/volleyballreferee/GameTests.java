@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee;
 
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.GameIngredients;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.entity.*;
 import org.junit.Test;
@@ -382,6 +383,11 @@ public class GameTests extends VbrTests {
 
         friendResponse = restTemplate.exchange(urlOf(String.format("/api/v3.1/users/friends/accept/%s", friendRequestId)), HttpMethod.POST, emptyPayloadWithAuth(testUserToken2), String.class);
         assertEquals(HttpStatus.CREATED, friendResponse.getStatusCode());
+
+        // Get ingredients
+
+        ResponseEntity<GameIngredients> ingredientsResponse = restTemplate.exchange(urlOf(String.format("/api/v3.1/games/ingredients/%s", gameSummary.getKind())), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), GameIngredients.class);
+        assertEquals(HttpStatus.OK, ingredientsResponse.getStatusCode());
 
         // Create game
 

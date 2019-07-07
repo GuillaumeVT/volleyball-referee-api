@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.GameIngredients;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.dto.Ranking;
 import com.tonkar.volleyballreferee.entity.*;
@@ -63,6 +64,8 @@ public interface GameService {
     List<GameSummary> listGamesInLeague(User user, UUID leagueId);
 
     Game getGame(User user, UUID gameId) throws NotFoundException;
+
+    GameIngredients getGameIngredientsOfKind(User user, GameType kind);
 
     Count getNumberOfGames(User user);
 

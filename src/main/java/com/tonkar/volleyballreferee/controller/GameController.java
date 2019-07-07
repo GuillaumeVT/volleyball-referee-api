@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.GameIngredients;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.exception.ConflictException;
@@ -59,6 +60,11 @@ public class GameController {
             log.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping(value = "/ingredients/{kind}", produces = {"application/json"})
+    public ResponseEntity<GameIngredients> getGameIngredientsOfKind(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
+        return new ResponseEntity<>(gameService.getGameIngredientsOfKind(user, kind), HttpStatus.OK);
     }
 
     @GetMapping(value = "/count", produces = {"application/json"})

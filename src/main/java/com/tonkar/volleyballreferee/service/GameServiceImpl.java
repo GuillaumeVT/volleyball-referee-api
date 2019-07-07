@@ -2,6 +2,7 @@ package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dao.GameDao;
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.GameIngredients;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.dto.Ranking;
 import com.tonkar.volleyballreferee.entity.Set;
@@ -25,6 +26,12 @@ public class GameServiceImpl implements GameService {
 
     @Autowired
     private LeagueService leagueService;
+
+    @Autowired
+    private TeamService teamService;
+
+    @Autowired
+    private RulesService rulesService;
 
     @Autowired
     private GameRepository gameRepository;
@@ -166,6 +173,17 @@ public class GameServiceImpl implements GameService {
         return gameRepository
                 .findByIdAndAllowedUser(gameId, user.getId())
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find game %s for user %s", gameId, user.getId())));
+    }
+
+    @Override
+    public GameIngredients getGameIngredientsOfKind(User user, GameType kind) {
+        GameIngredients gameIngredients = new GameIngredients(kind);
+        gameIngredients.setFriends(user.getFriends());
+        gameIngredients.setDefaultRules(rulesService.getDefaultRules(kind));
+        gameIngredients.setRules(rulesService.listRulesOfKind(user, kind));
+        gameIngredients.setTeams(teamService.listTeamsOfKind(user, kind));
+        gameIngredients.setLeagues(leagueService.listLeaguesOfKind(user, kind));
+        return gameIngredients;
     }
 
     @Override
