@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +32,6 @@ public class User implements UserDetails {
     private String               password;
     @NotBlank
     private String               purchaseToken;
-    @NotNull
     private List<Friend>         friends;
     private long                 createdAt;
     private long                 lastLoginAt;
