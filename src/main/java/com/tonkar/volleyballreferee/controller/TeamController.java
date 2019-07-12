@@ -13,13 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
+@Validated
 @RequestMapping("/api/v3.1/teams")
 @CrossOrigin("*")
 @Slf4j
@@ -54,7 +57,7 @@ public class TeamController {
     }
 
     @PostMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> createTeam(@AuthenticationPrincipal User user, @Valid @RequestBody Team team) {
+    public ResponseEntity<String> createTeam(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Team team) {
         try {
             teamService.createTeam(user, team);
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -65,7 +68,7 @@ public class TeamController {
     }
 
     @PutMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> updateTeam(@AuthenticationPrincipal User user, @Valid @RequestBody Team team) {
+    public ResponseEntity<String> updateTeam(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Team team) {
         try {
             teamService.updateTeam(user, team);
             return new ResponseEntity<>(HttpStatus.OK);

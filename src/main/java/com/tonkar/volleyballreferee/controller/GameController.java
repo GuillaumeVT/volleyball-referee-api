@@ -12,13 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
+@Validated
 @RequestMapping("/api/v3.1/games")
 @CrossOrigin("*")
 @Slf4j
@@ -83,7 +88,7 @@ public class GameController {
     }
 
     @PostMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> createGame(@AuthenticationPrincipal User user, @Valid @RequestBody GameSummary gameSummary) {
+    public ResponseEntity<String> createGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody GameSummary gameSummary) {
         try {
             gameService.createGame(user, gameSummary);
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -97,7 +102,7 @@ public class GameController {
     }
 
     @PostMapping(value = "/full", produces = {"application/json"})
-    public ResponseEntity<String> createGame(@AuthenticationPrincipal User user, @Valid @RequestBody Game game) {
+    public ResponseEntity<String> createGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Game game) {
         try {
             gameService.createGame(user, game);
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -111,7 +116,7 @@ public class GameController {
     }
 
     @PutMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> updateGame(@AuthenticationPrincipal User user, @Valid @RequestBody GameSummary gameSummary) {
+    public ResponseEntity<String> updateGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody GameSummary gameSummary) {
         try {
             gameService.updateGame(user, gameSummary);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -125,7 +130,7 @@ public class GameController {
     }
 
     @PutMapping(value = "/full", produces = {"application/json"})
-    public ResponseEntity<String> updateGame(@AuthenticationPrincipal User user, @Valid @RequestBody Game game) {
+    public ResponseEntity<String> updateGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Game game) {
         try {
             gameService.updateGame(user, game);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -136,7 +141,7 @@ public class GameController {
     }
 
     @PatchMapping(value = "/{gameId}/set/{setIndex}", produces = {"application/json"})
-    public ResponseEntity<String> updateSet(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId, @PathVariable("setIndex") int setIndex, @Valid @RequestBody Set set) {
+    public ResponseEntity<String> updateSet(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId, @PathVariable("setIndex") @Positive int setIndex, @Valid @NotNull @RequestBody Set set) {
         try {
             gameService.updateSet(user, gameId, setIndex, set);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -158,7 +163,7 @@ public class GameController {
     }
 
     @PatchMapping(value = "/{gameId}/referee/{refereeUserId}", produces = {"application/json"})
-    public ResponseEntity<String> setReferee(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId, @PathVariable("refereeUserId") String refereeUserId) {
+    public ResponseEntity<String> setReferee(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId, @PathVariable("refereeUserId") @NotBlank String refereeUserId) {
         try {
             gameService.setReferee(user, gameId, refereeUserId);
             return new ResponseEntity<>(HttpStatus.OK);

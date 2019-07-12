@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@Validated
 @RequestMapping("/api/v3.1/public")
 @CrossOrigin("*")
 @Slf4j
@@ -60,7 +62,7 @@ public class PublicController {
     }
 
     @PostMapping(value = "/users", produces = {"application/json"})
-    public ResponseEntity<UserToken> createUser(@Valid @RequestBody User user) {
+    public ResponseEntity<UserToken> createUser(@Valid @NotNull @RequestBody User user) {
         try {
             return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
         } catch (UnauthorizedException e) {
@@ -82,7 +84,7 @@ public class PublicController {
     }
 
     @PostMapping(value = "/users/token", produces = {"application/json"})
-    public ResponseEntity<UserToken> signInUser(@Valid @RequestBody EmailCredentials emailCredentials) {
+    public ResponseEntity<UserToken> signInUser(@Valid @NotNull @RequestBody EmailCredentials emailCredentials) {
         try {
             return new ResponseEntity<>(userService.signInUser(emailCredentials.getUserEmail(), emailCredentials.getUserPassword()), HttpStatus.OK);
         } catch (UnauthorizedException e) {
@@ -109,7 +111,7 @@ public class PublicController {
     }
 
     @GetMapping(value = "/users/password/follow/{passwordResetId}", produces = {"application/json"})
-    public ResponseEntity<String> followPasswordReset(@PathVariable("passwordResetId") @NotNull UUID passwordResetId) {
+    public ResponseEntity<String> followPasswordReset(@PathVariable("passwordResetId") UUID passwordResetId) {
         try {
             String redirectUrl = userService.followPasswordReset(passwordResetId);
 
@@ -127,7 +129,7 @@ public class PublicController {
     }
 
     @PostMapping(value = "/users/password/reset/{passwordResetId}", produces = {"application/json"})
-    public ResponseEntity<UserToken> resetPassword(@PathVariable("passwordResetId") @NotNull UUID passwordResetId, @Valid @RequestBody UserPassword userPassword) {
+    public ResponseEntity<UserToken> resetPassword(@PathVariable("passwordResetId") UUID passwordResetId, @Valid @NotNull @RequestBody UserPassword userPassword) {
         try {
             return new ResponseEntity<>(userService.resetPassword(passwordResetId, userPassword.getUserPassword()), HttpStatus.OK);
         } catch (BadRequestException e) {

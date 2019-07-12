@@ -13,13 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
+@Validated
 @RequestMapping("/api/v3.1/rules")
 @CrossOrigin("*")
 @Slf4j
@@ -59,7 +62,7 @@ public class RulesController {
     }
 
     @PostMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> createRules(@AuthenticationPrincipal User user, @Valid @RequestBody Rules rules) {
+    public ResponseEntity<String> createRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules) {
         try {
             rulesService.createRules(user, rules);
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -70,7 +73,7 @@ public class RulesController {
     }
 
     @PutMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> updateRules(@AuthenticationPrincipal User user, @Valid @RequestBody Rules rules) {
+    public ResponseEntity<String> updateRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules) {
         try {
             rulesService.updateRules(user, rules);
             return new ResponseEntity<>(HttpStatus.OK);

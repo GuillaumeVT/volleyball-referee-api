@@ -13,13 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
+@Validated
 @RequestMapping("/api/v3.1/users")
 @CrossOrigin("*")
 @Slf4j
@@ -29,7 +32,7 @@ public class UserController {
     private UserService userService;
 
     @PatchMapping(value = "/password", produces = {"application/json"})
-    public ResponseEntity<UserToken> updateUserPassword(@AuthenticationPrincipal User user, @Valid @RequestBody UserPasswordUpdate userPasswordUpdate) {
+    public ResponseEntity<UserToken> updateUserPassword(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody UserPasswordUpdate userPasswordUpdate) {
         try {
             return new ResponseEntity<>(userService.updateUserPassword(user, userPasswordUpdate), HttpStatus.OK);
         } catch (UnauthorizedException e) {
