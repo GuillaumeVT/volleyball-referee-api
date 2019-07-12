@@ -153,13 +153,13 @@ public class UserTests extends VbrTests {
 
         // Update user password
 
-        response = restTemplate.postForEntity(urlOf("/api/v3.1/users/password"), payloadWithAuth(testUserToken1, new UserPasswordUpdate(testPassword, "Invalid password")), UserToken.class);
+        response = restTemplate.exchange(urlOf("/api/v3.1/users/password"), HttpMethod.PATCH, payloadWithAuth(testUserToken1, new UserPasswordUpdate(testPassword, "Invalid password")), UserToken.class);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
-        response = restTemplate.postForEntity(urlOf("/api/v3.1/users/password"), payloadWithAuth(testUserToken1, new UserPasswordUpdate("Invalid password", "NewPassword5678-")), UserToken.class);
+        response = restTemplate.exchange(urlOf("/api/v3.1/users/password"), HttpMethod.PATCH, payloadWithAuth(testUserToken1, new UserPasswordUpdate("Invalid password", "NewPassword5678-")), UserToken.class);
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 
-        response = restTemplate.postForEntity(urlOf("/api/v3.1/users/password"), payloadWithAuth(testUserToken1, new UserPasswordUpdate(testPassword, "NewPassword5678-")), UserToken.class);
+        response = restTemplate.exchange(urlOf("/api/v3.1/users/password"), HttpMethod.PATCH, payloadWithAuth(testUserToken1, new UserPasswordUpdate(testPassword, "NewPassword5678-")), UserToken.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody().getToken());
         assertNotNull(response.getBody().getUser());

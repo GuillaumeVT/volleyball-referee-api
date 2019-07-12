@@ -28,7 +28,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(value = "/password", produces = {"application/json"})
+    @PatchMapping(value = "/password", produces = {"application/json"})
     public ResponseEntity<UserToken> updateUserPassword(@AuthenticationPrincipal User user, @Valid @RequestBody UserPasswordUpdate userPasswordUpdate) {
         try {
             return new ResponseEntity<>(userService.updateUserPassword(user, userPasswordUpdate), HttpStatus.OK);
