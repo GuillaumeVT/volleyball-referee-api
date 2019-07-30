@@ -66,19 +66,19 @@ public class Game {
         return TeamType.HOME.equals(teamType) ? homeTeam : guestTeam;
     }
 
-    public boolean isStartingLineupConfirmed(int setIndex) {
+    public boolean isStartingLineupConfirmed(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
-        return set.getHomeStartingPlayers().isFilled() && set.getGuestStartingPlayers().isFilled();
+        return TeamType.HOME.equals(teamType) ? set.getHomeStartingPlayers().isFilled() : set.getGuestStartingPlayers().isFilled();
     }
 
-    public boolean hasSubstitutions(int setIndex) {
+    public boolean hasSubstitutions(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
-        return !set.getHomeSubstitutions().isEmpty() || !set.getGuestSubstitutions().isEmpty();
+        return TeamType.HOME.equals(teamType) ? !set.getHomeSubstitutions().isEmpty() : !set.getGuestSubstitutions().isEmpty();
     }
 
-    public boolean hasTimeouts(int setIndex) {
+    public boolean hasTimeouts(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
-        return !set.getHomeCalledTimeouts().isEmpty() || !set.getGuestCalledTimeouts().isEmpty();
+        return TeamType.HOME.equals(teamType) ? !set.getHomeCalledTimeouts().isEmpty() : !set.getGuestCalledTimeouts().isEmpty();
     }
 
     public boolean hasSanctions(int setIndex) {
