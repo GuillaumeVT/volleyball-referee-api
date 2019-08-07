@@ -171,8 +171,14 @@ public class ScoreSheetWriter {
         Element teamDiv = new Element("div");
         teamDiv.addClass("div-grid-team");
 
-        game.getPlayers(teamType).forEach(player -> teamDiv.appendChild(createPlayerSpan(teamType, player.getNum(), false)));
-        game.getLiberos(teamType).forEach(player -> teamDiv.appendChild(createPlayerSpan(teamType, player.getNum(), true)));
+        game.getPlayers(teamType).forEach(player -> {
+            teamDiv.appendChild(createPlayerSpan(teamType, player.getNum(), false));
+            teamDiv.appendChild(createCellSpan(player.getName(), false, false));
+        });
+        game.getLiberos(teamType).forEach(player -> {
+            teamDiv.appendChild(createPlayerSpan(teamType, player.getNum(), true));
+            teamDiv.appendChild(createCellSpan(player.getName(), false, false));
+        });
 
         return teamDiv;
     }
@@ -831,12 +837,12 @@ public class ScoreSheetWriter {
                 "    }\n" +
                 "    .div-grid-team {\n" +
                 "      display: grid;\n" +
-                "      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;\n" +
+                "      grid-template-columns: 1fr 8fr;\n" +
                 "      grid-auto-rows: 1fr;\n" +
                 "      align-items: center;\n" +
-                "      align-content: center;\n" +
-                "      justify-content: center;\n" +
-                "      margin-right: 34px;\n" +
+                "      align-content: start;\n" +
+                "      justify-content: start;\n" +
+                "      justify-items: start;\n" +
                 "    }\n" +
                 "    .div-grid-set-info {\n" +
                 "      display: grid;\n" +
