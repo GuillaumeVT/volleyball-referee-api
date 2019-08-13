@@ -1,8 +1,9 @@
+spring.profiles: test
+
 jasypt:
   encryptor:
     password: ${JASYPT_KEY:}
 
-spring.profiles: test
 spring.data.mongodb:
   password: ENC(eF+K2NgdLQdGTNEW5oiUrA==)
   uri: mongodb://vbr_test_user:${spring.data.mongodb.password}@localhost:27017/vbr_test
