@@ -1,3 +1,7 @@
+jasypt:
+  encryptor:
+    password: ${JASYPT_KEY:}
+
 spring.profiles: integration
 spring.data.mongodb:
   password: ENC(smAct7mQ5ae02WuN9xTVvw==)

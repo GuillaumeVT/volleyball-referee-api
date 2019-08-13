@@ -1,3 +1,7 @@
+jasypt:
+  encryptor:
+    password: ${JASYPT_KEY:}
+
 spring.profiles: test
 spring.data.mongodb:
   password: ENC(eF+K2NgdLQdGTNEW5oiUrA==)

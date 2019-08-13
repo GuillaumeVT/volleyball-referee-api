@@ -27,10 +27,6 @@ import static org.junit.Assert.assertNotNull;
 @ActiveProfiles("test")
 public class VbrTests {
 
-    static {
-        System.setProperty("jasypt.encryptor.password", System.getenv("JASYPT_KEY"));
-    }
-
     @LocalServerPort
     private int port;
 
