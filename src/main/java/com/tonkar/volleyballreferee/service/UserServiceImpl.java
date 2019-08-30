@@ -169,13 +169,9 @@ public class UserServiceImpl implements UserService {
         }
 
         if (passwordEncoder.matches(userPassword, user.getPassword())) {
-            String token = buildToken(user);
+            UserToken userToken = buildToken(user);
             userSignedIn(user);
-            return UserToken
-                    .builder()
-                    .user(new UserSummary(user.getId(), user.getPseudo(), user.getEmail()))
-                    .token(token)
-                    .build();
+            return userToken;
         } else {
             addFailedAuthentication(user);
             throw new UnauthorizedException(String.format("Invalid password for user %s", userEmail));
@@ -353,15 +349,25 @@ public class UserServiceImpl implements UserService {
         return valid;
     }
 
-    private String buildToken(User user) {
-        return Jwts
+    private UserToken buildToken(User user) {
+        LocalDateTime iat = LocalDateTime.now();
+        LocalDateTime exp = iat.plusMonths(3L);
+
+        String token = Jwts
                 .builder()
                 .setIssuer(androidPackageName)
                 .setSubject(user.getId())
-                .setIssuedAt(Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC)))
-                .setExpiration(Date.from(LocalDateTime.now().plusMonths(3L).toInstant(ZoneOffset.UTC)))
+                .setIssuedAt(Date.from(iat.toInstant(ZoneOffset.UTC)))
+                .setExpiration(Date.from(exp.toInstant(ZoneOffset.UTC)))
                 .signWith(SignatureAlgorithm.HS256, jwtKey)
                 .compact();
+
+        return UserToken
+                .builder()
+                .user(new UserSummary(user.getId(), user.getPseudo(), user.getEmail()))
+                .token(token)
+                .tokenExpiry(Date.from(exp.toInstant(ZoneOffset.UTC)).getTime())
+                .build();
     }
 
     private Optional<Claims> parseToken(String token) {
