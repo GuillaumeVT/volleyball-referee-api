@@ -21,4 +21,6 @@ public interface RulesRepository extends MongoRepository<Rules, UUID> {
     long countByCreatedBy(String userId);
 
     void deleteByIdAndCreatedBy(UUID id, String userId);
+
+    void deleteByCreatedBy(String userId);
 }

@@ -17,4 +17,6 @@ public interface LeagueRepository extends MongoRepository<League, UUID> {
 
     void deleteByIdAndCreatedBy(UUID id, String userId);
 
+    void deleteByCreatedBy(String userId);
+
 }

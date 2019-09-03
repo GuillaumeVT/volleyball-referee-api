@@ -46,4 +46,6 @@ public interface GameRepository extends MongoRepository<Game, UUID> {
 
     void deleteByScheduledAtLessThanAndStatus(long scheduledAt, GameStatus status);
 
+    void deleteByCreatedBy(String userId);
+
 }

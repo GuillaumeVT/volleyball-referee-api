@@ -11,9 +11,7 @@ import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.PasswordReset;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.*;
-import com.tonkar.volleyballreferee.repository.FriendRequestRepository;
-import com.tonkar.volleyballreferee.repository.PasswordResetRepository;
-import com.tonkar.volleyballreferee.repository.UserRepository;
+import com.tonkar.volleyballreferee.repository.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -67,6 +65,18 @@ public class UserServiceImpl implements UserService {
 
     @Value("${vbr.jwt.key}")
     private String jwtKey;
+
+    @Autowired
+    private LeagueRepository leagueRepository;
+
+    @Autowired
+    private GameRepository gameRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
+
+    @Autowired
+    private RulesRepository rulesRepository;
 
     @Override
     public User getUser(String userId) throws NotFoundException {
@@ -468,5 +478,35 @@ public class UserServiceImpl implements UserService {
         if (maxNumberORepeatedCharacters > 3) {
             throw new BadRequestException(String.format("Password must contain at most %d repeating characters", 3));
         }
+    }
+
+    @Override
+    public void purgeRefundedUsers() {
+        try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
+            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
+            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
+            publisher.purchases().voidedpurchases().list(androidPackageName).execute().getVoidedPurchases().forEach(voidedPurchase ->
+                userRepository.findByPurchaseToken(voidedPurchase.getPurchaseToken()).ifPresent(this::deleteUser)
+            );
+        } catch (IOException | GeneralSecurityException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void deleteUser(User user) {
+        userRepository.findByFriend(user.getId()).forEach(friendUser -> {
+            friendUser.getFriends().removeIf(friend -> friend.getId().equals(user.getId()));
+            userRepository.save(friendUser);
+        });
+
+        rulesRepository.deleteByCreatedBy(user.getId());
+        teamRepository.deleteByCreatedBy(user.getId());
+        gameRepository.deleteByCreatedBy(user.getId());
+        leagueRepository.deleteByCreatedBy(user.getId());
+        userRepository.deleteById(user.getId());
+
+        log.info(String.format("Deleted user with id %s", user.getId()));
     }
 }

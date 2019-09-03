@@ -37,4 +37,10 @@ public class ScheduledTasks {
         userService.purgeOldPasswordResets(1);
     }
 
+    // Every day at 4:15am
+    @Scheduled(cron = "0 15 4 * * *")
+    public void purgeRefundedUsers() {
+        userService.purgeRefundedUsers();
+    }
+
 }

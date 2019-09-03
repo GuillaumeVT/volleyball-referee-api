@@ -22,4 +22,6 @@ public interface TeamRepository extends MongoRepository<Team, UUID> {
     long countByCreatedBy(String userId);
 
     void deleteByIdAndCreatedBy(UUID id, String userId);
+
+    void deleteByCreatedBy(String userId);
 }
