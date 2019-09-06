@@ -93,9 +93,10 @@ public class RulesServiceImpl implements RulesService {
     public void updateRules(User user, Rules rules) throws NotFoundException {
         Rules savedRules = rulesRepository
                 .findByIdAndCreatedBy(rules.getId(), user.getId())
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find rules %s %s for user %s", rules.getName(), rules.getKind(), user.getId())));
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find rules %s %s for user %s", rules.getId(), rules.getKind(), user.getId())));
 
         savedRules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        savedRules.setName(rules.getName());
         savedRules.setSetsPerGame(rules.getSetsPerGame());
         savedRules.setPointsPerSet(rules.getPointsPerSet());
         savedRules.setTieBreakInLastSet(rules.isTieBreakInLastSet());

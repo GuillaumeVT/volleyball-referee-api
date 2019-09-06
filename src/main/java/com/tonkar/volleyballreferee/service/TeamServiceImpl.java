@@ -100,9 +100,11 @@ public class TeamServiceImpl implements TeamService {
     public void updateTeam(User user, Team team) throws NotFoundException {
         Team savedTeam = teamRepository
                 .findByIdAndCreatedBy(team.getId(), user.getId())
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find team %s %s %s for user %s", team.getName(), team.getKind(), team.getGender(), user.getId())));
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find team %s %s %s for user %s", team.getId(), team.getKind(), team.getGender(), user.getId())));
 
         savedTeam.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        savedTeam.setName(team.getName());
+        savedTeam.setGender(team.getGender());
         savedTeam.setColor(team.getColor());
         savedTeam.setLiberoColor(team.getLiberoColor());
         savedTeam.setPlayers(team.getPlayers());
