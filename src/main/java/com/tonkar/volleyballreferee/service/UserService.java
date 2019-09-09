@@ -47,6 +47,6 @@ public interface UserService {
 
     void purgeOldPasswordResets(int days);
 
-    void purgeRefundedUsers();
+    void disableRefundedUsers();
 
 }

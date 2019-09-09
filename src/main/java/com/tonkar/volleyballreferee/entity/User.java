@@ -36,6 +36,7 @@ public class User implements UserDetails {
     private long                 createdAt;
     private long                 lastLoginAt;
     private FailedAuthentication failedAuthentication;
+    private boolean              enabled;
 
     public static String VBR_USER_ID = "01022018@vbr";
 
@@ -61,11 +62,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
         return true;
     }
 

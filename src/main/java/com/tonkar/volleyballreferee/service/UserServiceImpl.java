@@ -11,7 +11,9 @@ import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.PasswordReset;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.*;
-import com.tonkar.volleyballreferee.repository.*;
+import com.tonkar.volleyballreferee.repository.FriendRequestRepository;
+import com.tonkar.volleyballreferee.repository.PasswordResetRepository;
+import com.tonkar.volleyballreferee.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -65,18 +67,6 @@ public class UserServiceImpl implements UserService {
 
     @Value("${vbr.jwt.key}")
     private String jwtKey;
-
-    @Autowired
-    private LeagueRepository leagueRepository;
-
-    @Autowired
-    private GameRepository gameRepository;
-
-    @Autowired
-    private TeamRepository teamRepository;
-
-    @Autowired
-    private RulesRepository rulesRepository;
 
     @Override
     public User getUser(String userId) throws NotFoundException {
@@ -146,6 +136,7 @@ public class UserServiceImpl implements UserService {
             savedUser.setPurchaseToken(user.getPurchaseToken());
             savedUser.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             savedUser.setFailedAuthentication(new User.FailedAuthentication(0, LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()));
+            savedUser.setEnabled(true);
             userRepository.save(savedUser);
             log.info(String.format("Updated user with id %s and pseudo %s", savedUser.getId(), savedUser.getPseudo()));
             emailService.sendUserCreatedNotificationEmail(savedUser);
@@ -159,6 +150,7 @@ public class UserServiceImpl implements UserService {
             user.setFriends(new ArrayList<>());
             user.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             user.setFailedAuthentication(new User.FailedAuthentication(0, LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()));
+            user.setEnabled(true);
             userRepository.save(user);
             log.info(String.format("Created user with id %s and pseudo %s", user.getId(), user.getPseudo()));
             emailService.sendUserCreatedNotificationEmail(user);
@@ -481,32 +473,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void purgeRefundedUsers() {
+    public void disableRefundedUsers() {
         try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
             NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
             GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
             AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
             publisher.purchases().voidedpurchases().list(androidPackageName).execute().getVoidedPurchases().forEach(voidedPurchase ->
-                userRepository.findByPurchaseToken(voidedPurchase.getPurchaseToken()).ifPresent(this::deleteUser)
+                userRepository.findByPurchaseToken(voidedPurchase.getPurchaseToken()).ifPresent(user -> user.setEnabled(false))
             );
         } catch (IOException | GeneralSecurityException e) {
             log.error(e.getMessage());
         }
-    }
-
-    private void deleteUser(User user) {
-        userRepository.findByFriend(user.getId()).forEach(friendUser -> {
-            friendUser.getFriends().removeIf(friend -> friend.getId().equals(user.getId()));
-            userRepository.save(friendUser);
-        });
-
-        rulesRepository.deleteByCreatedBy(user.getId());
-        teamRepository.deleteByCreatedBy(user.getId());
-        gameRepository.deleteByCreatedBy(user.getId());
-        leagueRepository.deleteByCreatedBy(user.getId());
-        userRepository.deleteById(user.getId());
-
-        log.info(String.format("Deleted user with id %s", user.getId()));
     }
 }

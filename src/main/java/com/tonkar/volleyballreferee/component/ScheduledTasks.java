@@ -39,8 +39,8 @@ public class ScheduledTasks {
 
     // Every day at 4:15am
     @Scheduled(cron = "0 15 4 * * *")
-    public void purgeRefundedUsers() {
-        userService.purgeRefundedUsers();
+    public void disableRefundedUsers() {
+        userService.disableRefundedUsers();
     }
 
 }
