@@ -640,7 +640,7 @@ public class GameTests extends VbrTests {
 
     private Rules buildBeachRules() {
         return new Rules(UUID.randomUUID(), testUser1.getId(), System.currentTimeMillis(), System.currentTimeMillis(), "Test beach rules", GameType.BEACH,
-                3, 21, true, 15, true, true, true, 1, 30,
+                3, 21, true, 15, true, true, Rules.WIN_TERMINATION, true, 1, 30,
                 true, 30, true, 60,
                 Rules.FIVB_LIMITATION, 0, true, 7, 5, 9999);
     }

@@ -103,6 +103,7 @@ public class RulesServiceImpl implements RulesService {
         savedRules.setPointsInTieBreak(rules.getPointsInTieBreak());
         savedRules.setTwoPointsDifference(rules.isTwoPointsDifference());
         savedRules.setSanctions(rules.isSanctions());
+        savedRules.setMatchTermination(rules.getMatchTermination());
         savedRules.setTeamTimeouts(rules.isTeamTimeouts());
         savedRules.setTeamTimeoutsPerSet(rules.getTeamTimeoutsPerSet());
         savedRules.setTeamTimeoutDuration(rules.getTeamTimeoutDuration());

@@ -11,14 +11,19 @@ import javax.validation.constraints.NotNull;
 import java.util.Optional;
 import java.util.UUID;
 
-@Document(collection="rules")
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor
+@Getter
+@Setter
+@Document(collection = "rules")
 public class Rules {
 
-    public static final transient int FIVB_LIMITATION = 1;
+    public static final transient int FIVB_LIMITATION          = 1;
     public static final transient int ALTERNATIVE_LIMITATION_1 = 2;
     public static final transient int ALTERNATIVE_LIMITATION_2 = 3;
-    public static final transient int NO_LIMITATION = 4;
+    public static final transient int NO_LIMITATION            = 4;
+
+    public static final transient int WIN_TERMINATION      = 1;
+    public static final transient int ALL_SETS_TERMINATION = 2;
 
     @Id
     @NotNull
@@ -37,6 +42,7 @@ public class Rules {
     private int      pointsInTieBreak;
     private boolean  twoPointsDifference;
     private boolean  sanctions;
+    private int      matchTermination;
     private boolean  teamTimeouts;
     private int      teamTimeoutsPerSet;
     private int      teamTimeoutDuration;
@@ -52,7 +58,7 @@ public class Rules {
     private int      customConsecutiveServesPerPlayer;
 
     public Rules(UUID id, String createdBy, long createdAt, long updatedAt, String name, GameType kind, int setsPerGame, int pointsPerSet, boolean tieBreakInLastSet, int pointsInTieBreak, boolean twoPointsDifference, boolean sanctions,
-                 boolean teamTimeouts, int teamTimeoutsPerSet, int teamTimeoutDuration,
+                 int matchTermination, boolean teamTimeouts, int teamTimeoutsPerSet, int teamTimeoutDuration,
                  boolean technicalTimeouts, int technicalTimeoutDuration, boolean gameIntervals, int gameIntervalDuration,
                  int substitutionsLimitation, int teamSubstitutionsPerSet,
                  boolean beachCourtSwitches, int beachCourtSwitchFreq, int beachCourtSwitchFreqTieBreak, int customConsecutiveServesPerPlayer) {
@@ -68,6 +74,7 @@ public class Rules {
         this.pointsInTieBreak = pointsInTieBreak;
         this.twoPointsDifference = twoPointsDifference;
         this.sanctions = sanctions;
+        this.matchTermination = matchTermination;
         this.teamTimeouts = teamTimeouts;
         this.teamTimeoutsPerSet = teamTimeoutsPerSet;
         this.teamTimeoutDuration = teamTimeoutDuration;
@@ -87,17 +94,17 @@ public class Rules {
 
     public static final Rules OFFICIAL_INDOOR_RULES    = new Rules(UUID.fromString("efb06d97-264e-425d-b8ca-b499e3b63a95"),
             User.VBR_USER_ID, 0L, 0L, "FIVB indoor 6x6 rules", GameType.INDOOR,
-            5, 25, true, 15, true, true, true, 2, 30,
+            5, 25, true, 15, true, true, WIN_TERMINATION, true, 2, 30,
             true, 60, true, 180,
             FIVB_LIMITATION, 6, false, 0, 0, 9999);
     public static final Rules OFFICIAL_BEACH_RULES     = new Rules(UUID.fromString("cceb81c9-2201-4495-8a5e-e289a77e24bf"),
             User.VBR_USER_ID, 0L, 0L, "FIVB beach rules", GameType.BEACH,
-            3, 21, true, 15, true, true, true, 1, 30,
+            3, 21, true, 15, true, true, WIN_TERMINATION, true, 1, 30,
             true, 30, true, 60,
             FIVB_LIMITATION, 0, true, 7, 5, 9999);
     public static final Rules DEFAULT_INDOOR_4X4_RULES = new Rules(UUID.fromString("375dd005-08b6-45f8-a60f-7e04e1e5ba71"),
             User.VBR_USER_ID, 0L, 0L, "Default 4x4 rules", GameType.INDOOR_4X4,
-            5, 25, true, 15, true, true, true, 2, 30,
+            5, 25, true, 15, true, true, WIN_TERMINATION, true, 2, 30,
             true, 60, true, 180,
             NO_LIMITATION, 4, false, 0, 0, 9999);
 
@@ -117,3 +124,4 @@ public class Rules {
 
 
 }
+

@@ -56,7 +56,7 @@ public class RulesTests extends VbrTests {
         createUser1();
 
         Rules rules = new Rules(UUID.randomUUID(), testUser1.getId(), 0L, 0L, "Test rules", GameType.INDOOR,
-                5, 25, true, 15, true, true, true, 2, 30,
+                5, 25, true, 15, true, true, Rules.WIN_TERMINATION, true, 2, 30,
                 true, 60, true, 180,
                 Rules.NO_LIMITATION, 6, false, 0, 0, 9999);
         UUID rulesId = rules.getId();
