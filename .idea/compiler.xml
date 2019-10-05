@@ -4,5 +4,9 @@
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="sso-app.main" target="12" />
+      <module name="sso-app.test" target="12" />
+    </bytecodeTargetLevel>
   </component>
 </project>

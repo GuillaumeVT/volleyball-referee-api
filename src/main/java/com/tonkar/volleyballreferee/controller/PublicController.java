@@ -1,7 +1,10 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.*;
-import com.tonkar.volleyballreferee.entity.*;
+import com.tonkar.volleyballreferee.entity.FileWrapper;
+import com.tonkar.volleyballreferee.entity.Game;
+import com.tonkar.volleyballreferee.entity.League;
+import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.*;
 import com.tonkar.volleyballreferee.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -44,9 +47,6 @@ public class PublicController {
 
     @Autowired
     private LeagueService leagueService;
-
-    @Autowired
-    private MessageService messageService;
 
     @Autowired
     private UserService userService;
@@ -285,15 +285,6 @@ public class PublicController {
             return new ResponseEntity<>(leagueService.getLeague(leagueId), HttpStatus.OK);
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @GetMapping(value = "/messages", produces = {"application/json"})
-    public ResponseEntity<Message> getMessage() {
-        try {
-            return new ResponseEntity<>(messageService.getMessage(), HttpStatus.OK);
-        } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
