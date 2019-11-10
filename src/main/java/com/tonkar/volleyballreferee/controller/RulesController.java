@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.1/rules")
+@RequestMapping("/api/v3.2/rules")
 @CrossOrigin("*")
 @Slf4j
 public class RulesController {
@@ -32,13 +32,9 @@ public class RulesController {
     private RulesService rulesService;
 
     @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<List<RulesSummary>> listRules(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(rulesService.listRules(user), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/kind/{kind}", produces = {"application/json"})
-    public ResponseEntity<List<RulesSummary>> listRulesOfKind(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
-        return new ResponseEntity<>(rulesService.listRulesOfKind(user, kind), HttpStatus.OK);
+    public ResponseEntity<List<RulesSummary>> listRules(@AuthenticationPrincipal User user,
+                                                        @RequestParam(value = "kind", required = false) List<GameType> kinds) {
+        return new ResponseEntity<>(rulesService.listRules(user, kinds), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{rulesId}", produces = {"application/json"})

@@ -1,11 +1,11 @@
 plugins {
-    id 'org.springframework.boot' version '2.1.8.RELEASE'
+    id 'org.springframework.boot' version '2.2.0.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
 }
 
 group = 'com.tonkar'
-version = '3.1'
+version = '3.2'
 sourceCompatibility = '12'
 
 repositories {

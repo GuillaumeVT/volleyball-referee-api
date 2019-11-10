@@ -3,6 +3,7 @@ package com.tonkar.volleyballreferee.controller;
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.TeamSummary;
 import com.tonkar.volleyballreferee.entity.GameType;
+import com.tonkar.volleyballreferee.entity.GenderType;
 import com.tonkar.volleyballreferee.entity.Team;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.ConflictException;
@@ -10,6 +11,8 @@ import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.service.TeamService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,13 +20,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.1/teams")
+@RequestMapping("/api/v3.2/teams")
 @CrossOrigin("*")
 @Slf4j
 public class TeamController {
@@ -32,13 +37,12 @@ public class TeamController {
     private TeamService teamService;
 
     @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<List<TeamSummary>> listTeams(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(teamService.listTeams(user), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/kind/{kind}", produces = {"application/json"})
-    public ResponseEntity<List<TeamSummary>> listTeamsOfKind(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
-        return new ResponseEntity<>(teamService.listTeamsOfKind(user, kind), HttpStatus.OK);
+    public ResponseEntity<Page<TeamSummary>> listTeams(@AuthenticationPrincipal User user,
+                                                       @RequestParam(value = "kind", required = false) List<GameType> kinds,
+                                                       @RequestParam(value = "gender", required = false) List<GenderType> genders,
+                                                       @RequestParam("page") @Min(0) int page,
+                                                       @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(teamService.listTeams(user, kinds, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{teamId}", produces = {"application/json"})

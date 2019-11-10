@@ -68,7 +68,7 @@ public class Game {
 
     public boolean isStartingLineupConfirmed(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
-        return TeamType.HOME.equals(teamType) ? set.getHomeStartingPlayers().isFilled() : set.getGuestStartingPlayers().isFilled();
+        return TeamType.HOME.equals(teamType) ? set.getHomeStartingPlayers().isFilled(kind) : set.getGuestStartingPlayers().isFilled(kind);
     }
 
     public boolean hasSubstitutions(TeamType teamType, int setIndex) {

@@ -43,8 +43,8 @@ public class LeagueServiceImpl implements LeagueService {
     }
 
     @Override
-    public List<LeagueSummary> listLeagues(User user) {
-        return leagueDao.listLeagues(user.getId());
+    public List<LeagueSummary> listLeagues(User user, List<GameType> kinds) {
+        return leagueDao.listLeagues(user.getId(), kinds);
     }
 
     @Override

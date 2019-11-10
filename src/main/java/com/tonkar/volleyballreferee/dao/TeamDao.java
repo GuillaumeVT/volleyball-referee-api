@@ -1,17 +1,14 @@
 package com.tonkar.volleyballreferee.dao;
 
 import com.tonkar.volleyballreferee.dto.TeamSummary;
-import com.tonkar.volleyballreferee.entity.Game;
-import com.tonkar.volleyballreferee.entity.GameStatus;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.Team;
+import com.tonkar.volleyballreferee.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
-import org.springframework.data.mongodb.core.aggregation.SortOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -36,11 +33,17 @@ public class TeamDao {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public List<TeamSummary> listTeams(String userId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
+    public Page<TeamSummary> listTeams(String userId, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+        kinds = DaoUtils.computeKinds(kinds);
+        genders = DaoUtils.computeGenders(genders);
+
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("kind").in(kinds).and("gender").in(genders));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
-        return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation),
+        SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
+        LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
+        List<TeamSummary> teams = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Team.class), TeamSummary.class).getMappedResults();
+        return new PageImpl<>(teams, pageable, teams.size());
     }
 
     public List<TeamSummary> listTeamsOfKind(String userId, GameType kind) {

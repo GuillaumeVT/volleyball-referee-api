@@ -85,7 +85,7 @@ public class VbrTests {
         user.setLastLoginAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         user.setFailedAuthentication(new User.FailedAuthentication());
 
-        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/api/v3.1/public/users"), payloadWithoutAuth(user), UserToken.class);
+        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/api/v3.2/public/users"), payloadWithoutAuth(user), UserToken.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody().getToken());
         assertNotNull(response.getBody().getUser());
@@ -105,7 +105,7 @@ public class VbrTests {
         user.setLastLoginAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         user.setFailedAuthentication(new User.FailedAuthentication());
 
-        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/api/v3.1/public/users"), payloadWithoutAuth(user), UserToken.class);
+        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/api/v3.2/public/users"), payloadWithoutAuth(user), UserToken.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody().getToken());
         assertNotNull(response.getBody().getUser());

@@ -57,8 +57,13 @@ public class Set {
         private int p5;
         private int p6;
 
-        boolean isFilled() {
-            return p1 > 0 && p2 > 0 && p3 > 0 && p4 > 0 && p5 > 0 && p6 > 0;
+        public boolean isFilled(GameType kind) {
+            return switch (kind) {
+                case INDOOR -> p1 >= 0 && p2 >= 0 && p3 >= 0 && p4 >= 0 && p5 >= 0 && p6 >= 0;
+                case INDOOR_4X4 -> p1 >= 0 && p2 >= 0 && p3 >= 0 && p4 >= 0;
+                case SNOW -> p1 >= 0 && p2 >= 0 && p3 >= 0;
+                default -> true;
+            };
         }
     }
 

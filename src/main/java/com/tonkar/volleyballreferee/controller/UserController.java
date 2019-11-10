@@ -2,8 +2,8 @@ package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.FriendsAndRequests;
-import com.tonkar.volleyballreferee.dto.UserToken;
 import com.tonkar.volleyballreferee.dto.UserPasswordUpdate;
+import com.tonkar.volleyballreferee.dto.UserToken;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.*;
@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.1/users")
+@RequestMapping("/api/v3.2/users")
 @CrossOrigin("*")
 @Slf4j
 public class UserController {

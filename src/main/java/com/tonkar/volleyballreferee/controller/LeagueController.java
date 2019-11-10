@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.1/leagues")
+@RequestMapping("/api/v3.2/leagues")
 @CrossOrigin("*")
 @Slf4j
 public class LeagueController {
@@ -32,13 +32,9 @@ public class LeagueController {
     private LeagueService leagueService;
 
     @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<List<LeagueSummary>> listLeagues(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(leagueService.listLeagues(user), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/kind/{kind}", produces = {"application/json"})
-    public ResponseEntity<List<LeagueSummary>> listTeamsOfKind(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
-        return new ResponseEntity<>(leagueService.listLeaguesOfKind(user, kind), HttpStatus.OK);
+    public ResponseEntity<List<LeagueSummary>> listLeagues(@AuthenticationPrincipal User user,
+                                                           @RequestParam(value = "kind", required = false) List<GameType> kinds) {
+        return new ResponseEntity<>(leagueService.listLeagues(user, kinds), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{leagueId}", produces = {"application/json"})

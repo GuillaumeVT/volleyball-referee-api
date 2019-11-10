@@ -5,21 +5,25 @@ import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.GameIngredients;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.dto.Ranking;
-import com.tonkar.volleyballreferee.entity.Set;
 import com.tonkar.volleyballreferee.entity.*;
-import com.tonkar.volleyballreferee.generated.ExcelDivisionWriter;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
-import com.tonkar.volleyballreferee.repository.*;
+import com.tonkar.volleyballreferee.generated.ExcelDivisionWriter;
 import com.tonkar.volleyballreferee.generated.ScoreSheetWriter;
+import com.tonkar.volleyballreferee.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -52,28 +56,28 @@ public class GameServiceImpl implements GameService {
     private UserRepository userRepository;
 
     @Override
-    public List<GameSummary> listLiveGames() {
-        return gameDao.listLiveGames();
+    public Page<GameSummary> listLiveGames(List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+        return gameDao.listLiveGames(kinds, genders, pageable);
     }
 
     @Override
-    public List<GameSummary> listGamesMatchingToken(String token) {
-        return gameDao.listGamesMatchingToken(token);
+    public Page<GameSummary> listGamesMatchingToken(String token, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+        return gameDao.listGamesMatchingToken(token, statuses, kinds, genders, pageable);
     }
 
     @Override
-    public List<GameSummary> listGamesWithScheduleDate(LocalDate date) {
-        return gameDao.listGamesWithScheduleDate(date);
+    public Page<GameSummary> listGamesWithScheduleDate(LocalDate date, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+        return gameDao.listGamesWithScheduleDate(date, statuses, kinds, genders, pageable);
     }
 
     @Override
-    public List<GameSummary> listGamesInLeague(UUID leagueId) {
-        return gameDao.listGamesInLeague(leagueId);
+    public Page<GameSummary> listGamesInLeague(UUID leagueId, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable) {
+        return gameDao.listGamesInLeague(leagueId, statuses, genders, pageable);
     }
 
     @Override
-    public List<GameSummary> listGamesOfTeamInLeague(UUID leagueId, UUID teamId) {
-        return gameDao.listGamesOfTeamInLeague(leagueId, teamId);
+    public Page<GameSummary> listGamesOfTeamInLeague(UUID leagueId, UUID teamId, List<GameStatus> statuses, Pageable pageable) {
+        return gameDao.listGamesOfTeamInLeague(leagueId, teamId, statuses, pageable);
     }
 
     @Override
@@ -92,13 +96,13 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<GameSummary> listGamesInDivision(UUID leagueId, String divisionName) {
-        return gameDao.listGamesInDivision(leagueId, divisionName);
+    public Page<GameSummary> listGamesInDivision(UUID leagueId, String divisionName, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable) {
+        return gameDao.listGamesInDivision(leagueId, divisionName, statuses, genders, pageable);
     }
 
     @Override
-    public List<GameSummary> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId) {
-        return gameDao.listGamesOfTeamInDivision(leagueId, divisionName, teamId);
+    public Page<GameSummary> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId, List<GameStatus> statuses, Pageable pageable) {
+        return gameDao.listGamesOfTeamInDivision(leagueId, divisionName, teamId, statuses, pageable);
     }
 
     @Override
@@ -144,13 +148,8 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<GameSummary> listGames(User user) {
-        return gameDao.listGames(user.getId());
-    }
-
-    @Override
-    public List<GameSummary> listGamesWithStatus(User user, GameStatus status) {
-        return gameDao.listGamesWithStatus(user.getId(), status);
+    public Page<GameSummary> listGames(User user, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+        return gameDao.listGames(user.getId(), statuses, kinds, genders, pageable);
     }
 
     @Override
@@ -159,13 +158,13 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<GameSummary> listCompletedGames(User user) {
-        return gameDao.listCompletedGames(user.getId());
+    public Page<GameSummary> listCompletedGames(User user, Pageable pageable) {
+        return gameDao.listCompletedGames(user.getId(), pageable);
     }
 
     @Override
-    public List<GameSummary> listGamesInLeague(User user, UUID leagueId) {
-        return gameDao.listGamesInLeague(user.getId(), leagueId);
+    public Page<GameSummary> listGamesInLeague(User user, UUID leagueId, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable) {
+        return gameDao.listGamesInLeague(user.getId(), leagueId, statuses, genders, pageable);
     }
 
     @Override
@@ -433,7 +432,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private long epochDateNDaysAgo(int daysAgo) {
-        return  System.currentTimeMillis() - (daysAgo * 86400000L);
+        return System.currentTimeMillis() - (daysAgo * 86400000L);
     }
 
     private Game.SelectedLeague findOrCreateLeague(User user, GameSummary gameSummary) {

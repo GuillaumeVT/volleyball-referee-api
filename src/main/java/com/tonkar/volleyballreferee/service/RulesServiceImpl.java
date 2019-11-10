@@ -34,8 +34,8 @@ public class RulesServiceImpl implements RulesService {
     private GameRepository gameRepository;
 
     @Override
-    public List<RulesSummary> listRules(User user) {
-        return rulesDao.listRules(user.getId());
+    public List<RulesSummary> listRules(User user, List<GameType> kinds) {
+        return rulesDao.listRules(user.getId(), kinds);
     }
 
     @Override
@@ -56,6 +56,7 @@ public class RulesServiceImpl implements RulesService {
             case INDOOR -> Rules.OFFICIAL_INDOOR_RULES;
             case INDOOR_4X4 -> Rules.DEFAULT_INDOOR_4X4_RULES;
             case BEACH -> Rules.OFFICIAL_BEACH_RULES;
+            case SNOW -> Rules.OFFICIAL_SNOW_RULES;
         };
 
         RulesSummary rulesSummary = new RulesSummary();

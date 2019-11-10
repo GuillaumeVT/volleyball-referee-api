@@ -76,7 +76,7 @@ public class EmailServiceImpl implements EmailService {
         String content = "You requested to reset your password. Please click on the link below to continue.";
         contentHtmlCell.appendText(content);
 
-        String passwordResetUrl = String.format("%s/api/v3.1/public/users/password/follow/%s", webDomain, passwordResetId);
+        String passwordResetUrl = String.format("%s/api/v3.2/public/users/password/follow/%s", webDomain, passwordResetId);
         appendLink(mainHtmlCell, "RESET PASSWORD", passwordResetUrl);
 
         String footer = "The content of this email is confidential and intended for the recipient specified in message only. Do not reply to this email. Please do not print this email unless it is necessary. Every unprinted email helps the environment.";

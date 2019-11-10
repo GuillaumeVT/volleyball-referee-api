@@ -19,7 +19,7 @@ public interface LeagueService {
 
     // User only
 
-    List<LeagueSummary> listLeagues(User user);
+    List<LeagueSummary> listLeagues(User user, List<GameType> kinds);
 
     List<LeagueSummary> listLeaguesOfKind(User user, GameType kind);
 

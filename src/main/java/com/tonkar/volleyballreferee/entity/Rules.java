@@ -107,12 +107,18 @@ public class Rules {
             5, 25, true, 15, true, true, WIN_TERMINATION, true, 2, 30,
             true, 60, true, 180,
             NO_LIMITATION, 4, false, 0, 0, 9999);
+    public static final Rules OFFICIAL_SNOW_RULES     = new Rules(UUID.fromString("ff03b7e2-f794-4d32-9e6c-a046f75eafa5"),
+            User.VBR_USER_ID, 0L, 0L, "FIVB snow rules", GameType.SNOW,
+            3, 15, false, 15, true, true, WIN_TERMINATION, true, 1, 30,
+            false, 30, true, 60,
+            NO_LIMITATION, 2, true, 5, 5, 9999);
 
     public static Optional<Rules> getDefaultRules(UUID rulesId, GameType kind) {
         return switch (kind) {
             case INDOOR -> OFFICIAL_INDOOR_RULES.getId().equals(rulesId) ? Optional.of(OFFICIAL_INDOOR_RULES) : Optional.empty();
             case BEACH -> OFFICIAL_BEACH_RULES.getId().equals(rulesId) ? Optional.of(OFFICIAL_BEACH_RULES) : Optional.empty();
             case INDOOR_4X4 -> DEFAULT_INDOOR_4X4_RULES.getId().equals(rulesId) ? Optional.of(DEFAULT_INDOOR_4X4_RULES) : Optional.empty();
+            case SNOW -> OFFICIAL_SNOW_RULES.getId().equals(rulesId) ? Optional.of(OFFICIAL_SNOW_RULES) : Optional.empty();
         };
     }
 

@@ -1,15 +1,14 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.*;
-import com.tonkar.volleyballreferee.entity.FileWrapper;
-import com.tonkar.volleyballreferee.entity.Game;
-import com.tonkar.volleyballreferee.entity.League;
-import com.tonkar.volleyballreferee.entity.User;
+import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.exception.*;
 import com.tonkar.volleyballreferee.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,10 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -31,7 +27,7 @@ import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.1/public")
+@RequestMapping("/api/v3.2/public")
 @CrossOrigin("*")
 @Slf4j
 public class PublicController {
@@ -183,23 +179,40 @@ public class PublicController {
     }
 
     @GetMapping(value = "/games/live", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listLiveGames() {
-        return new ResponseEntity<>(gameService.listLiveGames(), HttpStatus.OK);
+    public ResponseEntity<Page<GameSummary>> listLiveGames(@RequestParam(value = "kind", required = false) List<GameType> kinds,
+                                                           @RequestParam(value = "gender", required = false) List<GenderType> genders,
+                                                           @RequestParam("page") @Min(0) int page,
+                                                           @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(gameService.listLiveGames(kinds, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/games/token/{token}", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listGamesMatchingToken(@PathVariable("token") @NotBlank @Size(min = 3) String token) {
-        return new ResponseEntity<>(gameService.listGamesMatchingToken(token), HttpStatus.OK);
+    public ResponseEntity<Page<GameSummary>> listGamesMatchingToken(@PathVariable("token") @NotBlank @Size(min = 3) String token,
+                                                                    @RequestParam(value = "status", required = false) List<GameStatus> statuses,
+                                                                    @RequestParam(value = "kind", required = false) List<GameType> kinds,
+                                                                    @RequestParam(value = "gender", required = false) List<GenderType> genders,
+                                                                    @RequestParam("page") @Min(0) int page,
+                                                                    @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(gameService.listGamesMatchingToken(token, statuses, kinds, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/games/date/{date}", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listGamesWithScheduleDate(@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return new ResponseEntity<>(gameService.listGamesWithScheduleDate(date), HttpStatus.OK);
+    public ResponseEntity<Page<GameSummary>> listGamesWithScheduleDate(@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                                                       @RequestParam(value = "status", required = false) List<GameStatus> statuses,
+                                                                       @RequestParam(value = "kind", required = false) List<GameType> kinds,
+                                                                       @RequestParam(value = "gender", required = false) List<GenderType> genders,
+                                                                       @RequestParam("page") @Min(0) int page,
+                                                                       @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(gameService.listGamesWithScheduleDate(date, statuses, kinds, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/games/league/{leagueId}", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listGamesInLeague(@PathVariable("leagueId") UUID leagueId) {
-        return new ResponseEntity<>(gameService.listGamesInLeague(leagueId), HttpStatus.OK);
+    public ResponseEntity<Page<GameSummary>> listGamesInLeague(@PathVariable("leagueId") UUID leagueId,
+                                                               @RequestParam(value = "status", required = false) List<GameStatus> statuses,
+                                                               @RequestParam(value = "gender", required = false) List<GenderType> genders,
+                                                               @RequestParam("page") @Min(0) int page,
+                                                               @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(gameService.listGamesInLeague(leagueId, statuses, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/games/league/{leagueId}/live", produces = {"application/json"})
@@ -218,13 +231,22 @@ public class PublicController {
     }
 
     @GetMapping(value = "/games/league/{leagueId}/team/{teamId}", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listGamesOfTeamInLeague(@PathVariable("leagueId") UUID leagueId, @PathVariable("teamId") UUID teamId) {
-        return new ResponseEntity<>(gameService.listGamesOfTeamInLeague(leagueId, teamId), HttpStatus.OK);
+    public ResponseEntity<Page<GameSummary>> listGamesOfTeamInLeague(@PathVariable("leagueId") UUID leagueId,
+                                                                     @PathVariable("teamId") UUID teamId,
+                                                                     @RequestParam(value = "status", required = false) List<GameStatus> statuses,
+                                                                     @RequestParam("page") @Min(0) int page,
+                                                                     @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(gameService.listGamesOfTeamInLeague(leagueId, teamId, statuses, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listGamesInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
-        return new ResponseEntity<>(gameService.listGamesInDivision(leagueId, divisionName), HttpStatus.OK);
+    public ResponseEntity<Page<GameSummary>> listGamesInDivision(@PathVariable("leagueId") UUID leagueId,
+                                                                 @PathVariable("divisionName") String divisionName,
+                                                                 @RequestParam(value = "status", required = false) List<GameStatus> statuses,
+                                                                 @RequestParam(value = "gender", required = false) List<GenderType> genders,
+                                                                 @RequestParam("page") @Min(0) int page,
+                                                                 @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(gameService.listGamesInDivision(leagueId, divisionName, statuses, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/live", produces = {"application/json"})
@@ -243,8 +265,13 @@ public class PublicController {
     }
 
     @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/team/{teamId}", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listGamesOfTeamInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName, @PathVariable("teamId") UUID teamId) {
-        return new ResponseEntity<>(gameService.listGamesOfTeamInDivision(leagueId, divisionName, teamId), HttpStatus.OK);
+    public ResponseEntity<Page<GameSummary>> listGamesOfTeamInDivision(@PathVariable("leagueId") UUID leagueId,
+                                                                       @PathVariable("divisionName") String divisionName,
+                                                                       @PathVariable("teamId") UUID teamId,
+                                                                       @RequestParam(value = "status", required = false) List<GameStatus> statuses,
+                                                                       @RequestParam("page") @Min(0) int page,
+                                                                       @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(gameService.listGamesOfTeamInDivision(leagueId, divisionName, teamId, statuses, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/rankings", produces = {"application/json"})

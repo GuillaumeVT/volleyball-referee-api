@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface RulesService {
 
-    List<RulesSummary> listRules(User user);
+    List<RulesSummary> listRules(User user, List<GameType> kinds);
 
     List<RulesSummary> listRulesOfKind(User user, GameType kind);
 

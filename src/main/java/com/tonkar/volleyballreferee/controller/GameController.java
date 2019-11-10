@@ -9,6 +9,8 @@ import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.service.GameService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,15 +18,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.*;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.1/games")
+@RequestMapping("/api/v3.2/games")
 @CrossOrigin("*")
 @Slf4j
 public class GameController {
@@ -33,13 +33,13 @@ public class GameController {
     private GameService gameService;
 
     @GetMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listGames(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(gameService.listGames(user), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/status/{status}", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listGamesWithStatus(@AuthenticationPrincipal User user, @PathVariable("status") GameStatus status) {
-        return new ResponseEntity<>(gameService.listGamesWithStatus(user, status), HttpStatus.OK);
+    public ResponseEntity<Page<GameSummary>> listGames(@AuthenticationPrincipal User user,
+                                                       @RequestParam(value = "status", required = false) List<GameStatus> statuses,
+                                                       @RequestParam(value = "kind", required = false) List<GameType> kinds,
+                                                       @RequestParam(value = "gender", required = false) List<GenderType> genders,
+                                                       @RequestParam("page") @Min(0) int page,
+                                                       @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(gameService.listGames(user, statuses, kinds, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/available", produces = {"application/json"})
@@ -48,13 +48,20 @@ public class GameController {
     }
 
     @GetMapping(value = "/completed", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listCompletedGames(@AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(gameService.listCompletedGames(user), HttpStatus.OK);
+    public ResponseEntity<Page<GameSummary>> listCompletedGames(@AuthenticationPrincipal User user,
+                                                                @RequestParam("page") @Min(0) int page,
+                                                                @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(gameService.listCompletedGames(user, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/league/{leagueId}", produces = {"application/json"})
-    public ResponseEntity<List<GameSummary>> listGamesInLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
-        return new ResponseEntity<>(gameService.listGamesInLeague(user, leagueId), HttpStatus.OK);
+    public ResponseEntity<Page<GameSummary>> listGamesInLeague(@AuthenticationPrincipal User user,
+                                                               @PathVariable("leagueId") UUID leagueId,
+                                                               @RequestParam(value = "status", required = false) List<GameStatus> statuses,
+                                                               @RequestParam(value = "gender", required = false) List<GenderType> genders,
+                                                               @RequestParam("page") @Min(0) int page,
+                                                               @RequestParam("size") @Min(20) @Max(200) int size) {
+        return new ResponseEntity<>(gameService.listGamesInLeague(user, leagueId, statuses, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{gameId}", produces = {"application/json"})

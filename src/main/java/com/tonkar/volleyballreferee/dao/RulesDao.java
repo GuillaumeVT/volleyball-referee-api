@@ -33,8 +33,10 @@ public class RulesDao {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public List<RulesSummary> listRules(String userId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
+    public List<RulesSummary> listRules(String userId, List<GameType> kinds) {
+        kinds = DaoUtils.computeKinds(kinds);
+
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("kind").in(kinds));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sRulesSummaryProjection, sortOperation),
                 mongoTemplate.getCollectionName(Rules.class), RulesSummary.class).getMappedResults();

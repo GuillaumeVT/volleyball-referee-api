@@ -34,7 +34,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public SecurityConfiguration() {
         super();
 
-        publicUrls = new AntPathRequestMatcher("/api/v3.1/public/**");
+        publicUrls = new AntPathRequestMatcher("/api/v3.2/public/**");
         protectedUrls = new NegatedRequestMatcher(publicUrls);
     }
 

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.1/statistics")
+@RequestMapping("/api/v3.2/statistics")
 @CrossOrigin("*")
 @Slf4j
 public class StatisticsController {

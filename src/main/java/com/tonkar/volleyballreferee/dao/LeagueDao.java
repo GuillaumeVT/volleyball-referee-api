@@ -1,7 +1,8 @@
 package com.tonkar.volleyballreferee.dao;
 
 import com.tonkar.volleyballreferee.dto.LeagueSummary;
-import com.tonkar.volleyballreferee.entity.*;
+import com.tonkar.volleyballreferee.entity.GameType;
+import com.tonkar.volleyballreferee.entity.League;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -28,8 +29,10 @@ public class LeagueDao {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public List<LeagueSummary> listLeagues(String userId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
+    public List<LeagueSummary> listLeagues(String userId, List<GameType> kinds) {
+        kinds = DaoUtils.computeKinds(kinds);
+
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("kind").in(kinds));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sLeagueSummaryProjection, sortOperation),
                 mongoTemplate.getCollectionName(League.class), LeagueSummary.class).getMappedResults();

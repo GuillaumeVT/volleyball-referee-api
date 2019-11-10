@@ -4,15 +4,14 @@ import com.tonkar.volleyballreferee.dao.GameDao;
 import com.tonkar.volleyballreferee.dao.TeamDao;
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.TeamSummary;
-import com.tonkar.volleyballreferee.entity.GameStatus;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.Team;
-import com.tonkar.volleyballreferee.entity.User;
+import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.repository.GameRepository;
 import com.tonkar.volleyballreferee.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -62,8 +61,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<TeamSummary> listTeams(User user) {
-        return teamDao.listTeams(user.getId());
+    public Page<TeamSummary> listTeams(User user, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+        return teamDao.listTeams(user.getId(), kinds, genders, pageable);
     }
 
     @Override

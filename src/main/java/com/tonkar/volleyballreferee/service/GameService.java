@@ -7,6 +7,8 @@ import com.tonkar.volleyballreferee.dto.Ranking;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -17,15 +19,15 @@ public interface GameService {
 
     // Public
 
-    List<GameSummary> listLiveGames();
+    Page<GameSummary> listLiveGames(List<GameType> kinds, List<GenderType> genders, Pageable pageable);
 
-    List<GameSummary> listGamesMatchingToken(String token);
+    Page<GameSummary> listGamesMatchingToken(String token, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable);
 
-    List<GameSummary> listGamesWithScheduleDate(LocalDate date);
+    Page<GameSummary> listGamesWithScheduleDate(LocalDate date, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable);
 
-    List<GameSummary> listGamesInLeague(UUID leagueId);
+    Page<GameSummary> listGamesInLeague(UUID leagueId, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable);
 
-    List<GameSummary> listGamesOfTeamInLeague(UUID leagueId, UUID teamId);
+    Page<GameSummary> listGamesOfTeamInLeague(UUID leagueId, UUID teamId, List<GameStatus> statuses, Pageable pageable);
 
     List<GameSummary> listLiveGamesInLeague(UUID leagueId);
 
@@ -33,9 +35,9 @@ public interface GameService {
 
     List<GameSummary> listNext10GamesInLeague(UUID leagueId);
 
-    List<GameSummary> listGamesInDivision(UUID leagueId, String divisionName);
+    Page<GameSummary> listGamesInDivision(UUID leagueId, String divisionName, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable);
 
-    List<GameSummary> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId);
+    Page<GameSummary> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId, List<GameStatus> statuses, Pageable pageable);
 
     List<GameSummary> listLiveGamesInDivision(UUID leagueId, String divisionName);
 
@@ -53,15 +55,13 @@ public interface GameService {
 
     // User only
 
-    List<GameSummary> listGames(User user);
-
-    List<GameSummary> listGamesWithStatus(User user, GameStatus status);
+    Page<GameSummary> listGames(User user, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable);
 
     List<GameSummary> listAvailableGames(User user);
 
-    List<GameSummary> listCompletedGames(User user);
+    Page<GameSummary> listCompletedGames(User user, Pageable pageable);
 
-    List<GameSummary> listGamesInLeague(User user, UUID leagueId);
+    Page<GameSummary> listGamesInLeague(User user, UUID leagueId, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable);
 
     Game getGame(User user, UUID gameId) throws NotFoundException;
 
