@@ -412,6 +412,11 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public void deleteAllGamesInLeague(User user, UUID leagueId) {
+        gameRepository.deleteByCreatedByAndStatusAndLeague_Id(user.getId(), GameStatus.COMPLETED, leagueId);
+    }
+
+    @Override
     public void deleteOldLiveGames(int daysAgo) {
         gameRepository.deleteByScheduledAtLessThanAndStatus(epochDateNDaysAgo(daysAgo), GameStatus.LIVE);
     }

@@ -42,10 +42,11 @@ public interface GameRepository extends MongoRepository<Game, UUID> {
 
     void deleteByCreatedByAndStatus(String userId, GameStatus status);
 
+    void deleteByCreatedByAndStatusAndLeague_Id(String id, GameStatus status, UUID leagueId);
+
     void deleteByIdAndCreatedBy(UUID id, String userId);
 
     void deleteByScheduledAtLessThanAndStatus(long scheduledAt, GameStatus status);
 
     void deleteByCreatedBy(String userId);
-
 }

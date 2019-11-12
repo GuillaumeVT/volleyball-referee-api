@@ -91,8 +91,9 @@ public interface GameService {
 
     void deleteAllGames(User user);
 
+    void deleteAllGamesInLeague(User user, UUID leagueId);
+
     void deleteOldLiveGames(int daysAgo);
 
     void deleteOldScheduledGames(int daysAgo);
-
 }

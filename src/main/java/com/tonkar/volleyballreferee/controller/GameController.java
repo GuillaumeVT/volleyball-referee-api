@@ -192,4 +192,11 @@ public class GameController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @DeleteMapping(value = "/league/{leagueId}", produces = {"application/json"})
+    public ResponseEntity<String> deleteAllGamesInLeague(@AuthenticationPrincipal User user,
+                                                         @PathVariable("leagueId") UUID leagueId) {
+        gameService.deleteAllGamesInLeague(user, leagueId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 }
