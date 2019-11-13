@@ -37,13 +37,17 @@ public class TeamDao {
         kinds = DaoUtils.computeKinds(kinds);
         genders = DaoUtils.computeGenders(genders);
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("kind").in(kinds).and("gender").in(genders));
+        Criteria criteria = Criteria.where("createdBy").is(userId).and("kind").in(kinds).and("gender").in(genders);
+
+        long total = mongoTemplate.count(Query.query(criteria), Team.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<TeamSummary> teams = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Team.class), TeamSummary.class).getMappedResults();
-        return new PageImpl<>(teams, pageable, teams.size());
+        return new PageImpl<>(teams, pageable, total);
     }
 
     public List<TeamSummary> listTeamsOfKind(String userId, GameType kind) {

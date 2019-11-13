@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -60,13 +61,17 @@ public class GameDao {
         kinds = DaoUtils.computeKinds(kinds);
         genders = DaoUtils.computeGenders(genders);
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("status").is(GameStatus.LIVE).and("indexed").is(true).and("kind").in(kinds).and("gender").in(genders));
+        Criteria criteria = Criteria.where("status").is(GameStatus.LIVE).and("indexed").is(true).and("kind").in(kinds).and("gender").in(genders);
+
+        long total = mongoTemplate.count(Query.query(criteria), Game.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
-        return new PageImpl<>(games, pageable, games.size());
+        return new PageImpl<>(games, pageable, total);
     }
 
     public Page<GameSummary> listGamesMatchingToken(String token, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
@@ -74,18 +79,21 @@ public class GameDao {
         kinds = DaoUtils.computeKinds(kinds);
         genders = DaoUtils.computeGenders(genders);
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("indexed").is(true).and("status").in(statuses).and("kind").in(kinds).and("gender").in(genders).orOperator(
+        Criteria criteria = Criteria.where("indexed").is(true).and("status").in(statuses).and("kind").in(kinds).and("gender").in(genders).orOperator(
                 Criteria.where("homeTeam.name").regex(".*" + token + ".*", "i"),
                 Criteria.where("guestTeam.name").regex(".*" + token + ".*", "i"),
                 Criteria.where("league.name").regex(".*" + token + ".*", "i"),
-                Criteria.where("refereeName").regex(".*" + token + ".*", "i")
-        ));
+                Criteria.where("refereeName").regex(".*" + token + ".*", "i"));
+
+        long total = mongoTemplate.count(Query.query(criteria), Game.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
-        return new PageImpl<>(games, pageable, games.size());
+        return new PageImpl<>(games, pageable, total);
     }
 
     public Page<GameSummary> listGamesWithScheduleDate(LocalDate date, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
@@ -96,14 +104,18 @@ public class GameDao {
         long fromDate = date.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
         long toDate = date.atStartOfDay().plusDays(1L).toInstant(ZoneOffset.UTC).toEpochMilli();
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("indexed").is(true).and("status").in(statuses).and("kind").in(kinds).and("gender").in(genders)
-                .andOperator(Criteria.where("scheduledAt").gte(fromDate), Criteria.where("scheduledAt").lt(toDate)));
+        Criteria criteria = Criteria.where("indexed").is(true).and("status").in(statuses).and("kind").in(kinds).and("gender").in(genders)
+                .andOperator(Criteria.where("scheduledAt").gte(fromDate), Criteria.where("scheduledAt").lt(toDate));
+
+        long total = mongoTemplate.count(Query.query(criteria), Game.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
-        return new PageImpl<>(games, pageable, games.size());
+        return new PageImpl<>(games, pageable, total);
     }
 
     public List<GameSummary> listGamesInLeague(UUID leagueId) {
@@ -124,39 +136,51 @@ public class GameDao {
         statuses = DaoUtils.computeStatuses(statuses);
         genders = DaoUtils.computeGenders(genders);
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("status").in(statuses).and("gender").in(genders));
+        Criteria criteria = Criteria.where("league._id").is(leagueId).and("status").in(statuses).and("gender").in(genders);
+
+        long total = mongoTemplate.count(Query.query(criteria), Game.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
-        return new PageImpl<>(games, pageable, games.size());
+        return new PageImpl<>(games, pageable, total);
     }
 
     public Page<GameSummary> listGamesInDivision(UUID leagueId, String divisionName, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable) {
         statuses = DaoUtils.computeStatuses(statuses);
         genders = DaoUtils.computeGenders(genders);
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName).and("status").in(statuses).and("gender").in(genders));
+        Criteria criteria = Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName).and("status").in(statuses).and("gender").in(genders);
+
+        long total = mongoTemplate.count(Query.query(criteria), Game.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
-        return new PageImpl<>(games, pageable, games.size());
+        return new PageImpl<>(games, pageable, total);
     }
 
     public Page<GameSummary> listGamesOfTeamInLeague(UUID leagueId, UUID teamId, List<GameStatus> statuses, Pageable pageable) {
         statuses = DaoUtils.computeStatuses(statuses);
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("status").in(statuses)
-                .orOperator(Criteria.where("homeTeam._id").is(teamId), Criteria.where("guestTeam._id").is(teamId)));
+        Criteria criteria = Criteria.where("league._id").is(leagueId).and("status").in(statuses)
+                .orOperator(Criteria.where("homeTeam._id").is(teamId), Criteria.where("guestTeam._id").is(teamId));
+
+        long total = mongoTemplate.count(Query.query(criteria), Game.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
-        return new PageImpl<>(games, pageable, games.size());
+        return new PageImpl<>(games, pageable, total);
     }
 
     public List<GameSummary> listLiveGamesInLeague(UUID leagueId) {
@@ -185,16 +209,18 @@ public class GameDao {
     public Page<GameSummary> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId, List<GameStatus> statuses, Pageable pageable) {
         statuses = DaoUtils.computeStatuses(statuses);
 
-        MatchOperation matchOperation = Aggregation.match(
-                Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName).and("status").in(statuses)
-                        .orOperator(Criteria.where("homeTeam._id").is(teamId), Criteria.where("guestTeam._id").is(teamId))
-        );
+        Criteria criteria = Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName).and("status").in(statuses)
+                .orOperator(Criteria.where("homeTeam._id").is(teamId), Criteria.where("guestTeam._id").is(teamId));
+
+        long total = mongoTemplate.count(Query.query(criteria), Game.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
-        return new PageImpl<>(games, pageable, games.size());
+        return new PageImpl<>(games, pageable, total);
     }
 
     public List<GameSummary> listLiveGamesInDivision(UUID leagueId, String divisionName) {
@@ -225,13 +251,17 @@ public class GameDao {
         kinds = DaoUtils.computeKinds(kinds);
         genders = DaoUtils.computeGenders(genders);
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("status").in(statuses).and("kind").in(kinds).and("gender").in(genders));
+        Criteria criteria = Criteria.where("createdBy").is(userId).and("status").in(statuses).and("kind").in(kinds).and("gender").in(genders);
+
+        long total = mongoTemplate.count(Query.query(criteria), Game.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
-        return new PageImpl<>(games, pageable, games.size());
+        return new PageImpl<>(games, pageable, total);
     }
 
     public List<GameSummary> listAvailableGames(String userId) {
@@ -244,28 +274,35 @@ public class GameDao {
     }
 
     public Page<GameSummary> listCompletedGames(String userId, Pageable pageable) {
-        MatchOperation matchOperation = Aggregation.match(Criteria
-                .where("status").is(GameStatus.COMPLETED)
-                .orOperator(Criteria.where("createdBy").is(userId), Criteria.where("refereedBy").is(userId)));
+        Criteria criteria = Criteria.where("status").is(GameStatus.COMPLETED).orOperator(
+                Criteria.where("createdBy").is(userId), Criteria.where("refereedBy").is(userId));
+
+        long total = mongoTemplate.count(Query.query(criteria), Game.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
-        return new PageImpl<>(games, pageable, games.size());
+        return new PageImpl<>(games, pageable, total);
     }
 
     public Page<GameSummary> listGamesInLeague(String userId, UUID leagueId, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable) {
         statuses = DaoUtils.computeStatuses(statuses);
         genders = DaoUtils.computeGenders(genders);
 
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId).and("league._id").is(leagueId).and("status").in(statuses).and("gender").in(genders));
+        Criteria criteria = Criteria.where("createdBy").is(userId).and("league._id").is(leagueId).and("status").in(statuses).and("gender").in(genders);
+
+        long total = mongoTemplate.count(Query.query(criteria), Game.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
-        return new PageImpl<>(games, pageable, games.size());
+        return new PageImpl<>(games, pageable, total);
     }
 
     public List<String> listDivisionsInLeague(String userId, UUID leagueId) {
