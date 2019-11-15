@@ -733,7 +733,7 @@ public class ScoreSheetWriter {
 
         Element lineupsDiv = new Element("div");
         lineupsDiv.addClass("div-grid-h-g");
-        lineupsDiv.appendChild(createLineupDivSnow(TeamType.HOME, setIndex)).appendChild(createEmptyDiv()).appendChild(createLineupDiv4x4(TeamType.GUEST, setIndex));
+        lineupsDiv.appendChild(createLineupDivSnow(TeamType.HOME, setIndex)).appendChild(createEmptyDiv()).appendChild(createLineupDivSnow(TeamType.GUEST, setIndex));
         wrapperDiv.appendChild(lineupsDiv);
 
         return wrapperDiv;
