@@ -110,7 +110,7 @@ public class Rules {
     public static final Rules OFFICIAL_SNOW_RULES     = new Rules(UUID.fromString("ff03b7e2-f794-4d32-9e6c-a046f75eafa5"),
             User.VBR_USER_ID, 0L, 0L, "FIVB snow rules", GameType.SNOW,
             3, 15, false, 15, true, true, WIN_TERMINATION, true, 1, 30,
-            false, 30, true, 60,
+            false, 0, true, 60,
             NO_LIMITATION, 2, true, 5, 5, 9999);
 
     public static Optional<Rules> getDefaultRules(UUID rulesId, GameType kind) {
