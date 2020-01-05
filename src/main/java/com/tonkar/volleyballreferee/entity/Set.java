@@ -9,10 +9,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor
+@Getter
+@Setter
 public class Set {
-
     private long               duration;
+    private long               startTime;
+    private long               endTime;
     private int                homePoints;
     private int                guestPoints;
     private int                homeTimeouts;
@@ -41,15 +44,15 @@ public class Set {
     private List<Timeout>      homeCalledTimeouts;
     @NotNull
     private List<Timeout>      guestCalledTimeouts;
-    private long               remainingTime;
 
     public int getPoints(TeamType teamType) {
         return TeamType.HOME.equals(teamType) ? homePoints : guestPoints;
     }
 
-    @NoArgsConstructor @Getter @Setter
+    @NoArgsConstructor
+    @Getter
+    @Setter
     public static class Court {
-
         private int p1;
         private int p2;
         private int p3;
@@ -67,21 +70,21 @@ public class Set {
         }
     }
 
-    @NoArgsConstructor @Getter @Setter
+    @NoArgsConstructor
+    @Getter
+    @Setter
     public static class Substitution {
-
         private int playerIn;
         private int playerOut;
         private int homePoints;
         private int guestPoints;
-
     }
 
-    @NoArgsConstructor @Getter @Setter
+    @NoArgsConstructor
+    @Getter
+    @Setter
     public static class Timeout {
-
         private int homePoints;
         private int guestPoints;
-
     }
 }

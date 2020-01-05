@@ -130,7 +130,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public FileWrapper getScoreSheet(UUID gameId) throws NotFoundException {
         Game game = getGame(gameId);
-        return ScoreSheetWriter.writeGame(game);
+        return ScoreSheetWriter.createScoreSheet(game);
     }
 
     @Override
@@ -246,6 +246,8 @@ public class GameServiceImpl implements GameService {
                 game.setGuestCards(new ArrayList<>());
                 game.setRules(optRules.get());
                 game.setScore("");
+                game.setStartTime(0L);
+                game.setEndTime(0L);
 
                 gameRepository.save(game);
 
@@ -349,6 +351,8 @@ public class GameServiceImpl implements GameService {
             savedGame.setGuestCards(game.getGuestCards());
             savedGame.setRules(game.getRules());
             savedGame.setScore(buildScore(savedGame));
+            savedGame.setStartTime(game.getStartTime());
+            savedGame.setEndTime(game.getEndTime());
 
             gameRepository.save(savedGame);
         } else {

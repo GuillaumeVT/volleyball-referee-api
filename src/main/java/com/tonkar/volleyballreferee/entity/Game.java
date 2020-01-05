@@ -15,8 +15,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Document(collection="games")
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor
+@Getter
+@Setter
+@Document(collection = "games")
 public class Game {
 
     @Id
@@ -61,6 +63,8 @@ public class Game {
     private Rules          rules;
     @NotNull
     private String         score;
+    private long           startTime;
+    private long           endTime;
 
     public Team getTeam(TeamType teamType) {
         return TeamType.HOME.equals(teamType) ? homeTeam : guestTeam;
@@ -125,6 +129,11 @@ public class Game {
         return TeamType.HOME.equals(teamType) ? getHomeTeam().getCaptain() : getGuestTeam().getCaptain();
     }
 
+    public int getPoints(TeamType teamType, int setIndex) {
+        Set set = getSets().get(setIndex);
+        return set.getPoints(teamType);
+    }
+
     public List<Set.Substitution> getSubstitutions(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
         return TeamType.HOME.equals(teamType) ? set.getHomeSubstitutions() : set.getGuestSubstitutions();
@@ -145,23 +154,23 @@ public class Game {
         return TeamType.HOME.equals(teamType) ? set.getHomeStartingPlayers() : set.getGuestStartingPlayers();
     }
 
-    @NoArgsConstructor @Getter @Setter
+    @NoArgsConstructor
+    @Getter
+    @Setter
     public static class Sanction {
-
         @NotBlank
         private String card;
         private int    num;
         private int    set;
         private int    homePoints;
         private int    guestPoints;
-
     }
 
-    @NoArgsConstructor @Getter @Setter
+    @NoArgsConstructor
+    @Getter
+    @Setter
     public static class SelectedLeague extends LeagueSummary {
-
         @NotBlank
         private String division;
-
     }
 }
