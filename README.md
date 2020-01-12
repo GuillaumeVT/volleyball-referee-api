@@ -3,7 +3,7 @@
 Volleyball Referee API is a Spring Boot application, part of the [Volleyball Referee system][vbr], and providing REST endpoints.
 
 #### Manage your data
-- For 6x6, 4x4 and beach volleyball
+- For 6x6, 4x4, beach and snow volleyball
 - Leagues
 - Matches (scheduled, live and completed)
 - Teams
