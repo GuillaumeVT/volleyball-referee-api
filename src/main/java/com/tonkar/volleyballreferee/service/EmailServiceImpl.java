@@ -211,58 +211,33 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private String interactiveEmailHtmlSkeleton() {
-        return "<!doctype html>\n" +
-                "<html>\n" +
-                "  <head>\n" +
-                "    <meta charset=\"utf-8\">\n" +
-                "    <link rel=\"stylesheet\" type=\"text/css\">\n" +
-                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" +
-                "  </head>\n" +
-                "  <body style=\"background-color: #e4e4e4; font-family: sans-serif;\">\n" +
-                "    <table width=\"600px\" align=\"center\" style=\"width: 600px; padding: 8px; margin-left: auto; margin-right: auto; background-color: #fff;\">\n" +
-                "      <tbody>\n" +
-                "        <tr>\n" +
-                "          <td id=\"logo\" align=\"center\" style=\"text-align: center; padding: 24px 0px;\"></td>\n" +
-                "        </tr>\n" +
-                "        <tr>\n" +
-                "          <td id=\"title\" align=\"center\" style=\"text-align: center; font-size: 1.7em; font-weight: 500; padding: 24px 0px;\"></td>\n" +
-                "        </tr>\n" +
-                "        <tr>\n" +
-                "          <td id=\"content\" align=\"center\" style=\"text-align: center; font-size: 1em; padding: 24px 0px;\"></td>\n" +
-                "        </tr>\n" +
-                "        <tr>\n" +
-                "          <td id=\"link\" align=\"center\" style=\"text-align: center; font-size: 1.3em; padding: 24px 0px;\"></td>\n" +
-                "        </tr>\n" +
-                "      </tbody>\n" +
-                "    </table>\n" +
-                "  </body>\n" +
-                "</html>\n";
+        return """
+                <!doctype html>
+                <html>
+                  <head>
+                    <meta charset="utf-8">
+                    <link rel="stylesheet" type="text/css">
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                  </head>
+                  <body style="background-color: #e4e4e4; font-family: sans-serif;">
+                    <table width="600px" align="center" style="width: 600px; padding: 8px; margin-left: auto; margin-right: auto; background-color: #fff;">
+                      <tbody>
+                        <tr>
+                          <td id="logo" align="center" style="text-align: center; padding: 24px 0px;"></td>
+                        </tr>
+                        <tr>
+                          <td id="title" align="center" style="text-align: center; font-size: 1.7em; font-weight: 500; padding: 24px 0px;"></td>
+                        </tr>
+                        <tr>
+                          <td id="content" align="center" style="text-align: center; font-size: 1em; padding: 24px 0px;"></td>
+                        </tr>
+                        <tr>
+                          <td id="link" align="center" style="text-align: center; font-size: 1.3em; padding: 24px 0px;"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </body>
+                </html>
+                """;
     }
-
-    private String notificationEmailHtmlSkeleton() {
-        return "<!doctype html>\n" +
-                "<html>\n" +
-                "  <head>\n" +
-                "    <meta charset=\"utf-8\">\n" +
-                "    <link rel=\"stylesheet\" type=\"text/css\">\n" +
-                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" +
-                "  </head>\n" +
-                "  <body style=\"background-color: #e4e4e4; font-family: sans-serif;\">\n" +
-                "    <table width=\"600px\" align=\"center\" style=\"width: 600px; padding: 8px; margin-left: auto; margin-right: auto; background-color: #fff;\">\n" +
-                "      <tbody>\n" +
-                "        <tr>\n" +
-                "          <td id=\"logo\" align=\"center\" style=\"text-align: center; padding: 24px 0px;\"></td>\n" +
-                "        </tr>\n" +
-                "        <tr>\n" +
-                "          <td id=\"title\" align=\"center\" style=\"text-align: center; font-size: 1.7em; font-weight: 500; padding: 24px 0px;\"></td>\n" +
-                "        </tr>\n" +
-                "        <tr>\n" +
-                "          <td id=\"content\" align=\"center\" style=\"text-align: center; font-size: 1em; padding: 24px 0px;\"></td>\n" +
-                "        </tr>\n" +
-                "      </tbody>\n" +
-                "    </table>\n" +
-                "  </body>\n" +
-                "</html>\n";
-    }
-
 }
