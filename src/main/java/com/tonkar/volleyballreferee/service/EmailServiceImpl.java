@@ -35,23 +35,22 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendUserCreatedNotificationEmail(User user) {
-        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(notificationEmailHtmlSkeleton());
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(interactiveEmailHtmlSkeleton());
 
         org.jsoup.nodes.Element logoHtmlCell = email.getElementById("logo");
         org.jsoup.nodes.Element titleHtmlCell = email.getElementById("title");
         org.jsoup.nodes.Element contentHtmlCell = email.getElementById("content");
-        org.jsoup.nodes.Element footerHtmlCell = email.getElementById("footer");
+        org.jsoup.nodes.Element linkHtmlCell = email.getElementById("link");
 
         fillLogo(logoHtmlCell);
 
         String title = "Your Volleyball Referee account was successfully created";
         titleHtmlCell.appendText(title);
 
-        String content = String.format("Dear %s. You may now sign in to the Android app and to %s using your email address and your password.", user.getPseudo(), webDomain);
+        String content = String.format("Dear %s. You may now sign in with the Android app and the website using your email address and your password.", user.getPseudo());
         contentHtmlCell.appendText(content);
 
-        String footer = "The content of this email is confidential and intended for the recipient specified in message only. Do not reply to this email. Please do not print this email unless it is necessary. Every unprinted email helps the environment.";
-        footerHtmlCell.appendText(footer);
+        appendLink(linkHtmlCell, "VISIT WEBSITE", webDomain);
 
         Map<String, byte[]> imageAttachments = extractImages(email);
 
@@ -65,22 +64,18 @@ public class EmailServiceImpl implements EmailService {
         org.jsoup.nodes.Element logoHtmlCell = email.getElementById("logo");
         org.jsoup.nodes.Element titleHtmlCell = email.getElementById("title");
         org.jsoup.nodes.Element contentHtmlCell = email.getElementById("content");
-        org.jsoup.nodes.Element mainHtmlCell = email.getElementById("main");
-        org.jsoup.nodes.Element footerHtmlCell = email.getElementById("footer");
+        org.jsoup.nodes.Element linkHtmlCell = email.getElementById("link");
 
         fillLogo(logoHtmlCell);
 
         String title = "Reset your Volleyball Referee password";
         titleHtmlCell.appendText(title);
 
-        String content = "You requested to reset your password. Please click on the link below to continue.";
+        String content = "You requested to reset your password. Please follow this link to continue:";
         contentHtmlCell.appendText(content);
 
         String passwordResetUrl = String.format("%s/api/v3.2/public/users/password/follow/%s", webDomain, passwordResetId);
-        appendLink(mainHtmlCell, "RESET PASSWORD", passwordResetUrl);
-
-        String footer = "The content of this email is confidential and intended for the recipient specified in message only. Do not reply to this email. Please do not print this email unless it is necessary. Every unprinted email helps the environment.";
-        footerHtmlCell.appendText(footer);
+        appendLink(linkHtmlCell, "RESET PASSWORD", passwordResetUrl);
 
         Map<String, byte[]> imageAttachments = extractImages(email);
 
@@ -89,23 +84,23 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPasswordUpdatedNotificationEmail(User user) {
-        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(notificationEmailHtmlSkeleton());
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(interactiveEmailHtmlSkeleton());
 
         org.jsoup.nodes.Element logoHtmlCell = email.getElementById("logo");
         org.jsoup.nodes.Element titleHtmlCell = email.getElementById("title");
         org.jsoup.nodes.Element contentHtmlCell = email.getElementById("content");
-        org.jsoup.nodes.Element footerHtmlCell = email.getElementById("footer");
+        org.jsoup.nodes.Element linkHtmlCell = email.getElementById("link");
 
         fillLogo(logoHtmlCell);
 
         String title = "Your Volleyball Referee password was successfully changed";
         titleHtmlCell.appendText(title);
 
-        String content = String.format("If you did not make this request, please reset your password on %s/password-lost.", webDomain);
+        String content = "If you did not make this request, please follow this link to reset your password:";
         contentHtmlCell.appendText(content);
 
-        String footer = "The content of this email is confidential and intended for the recipient specified in message only. Do not reply to this email. Please do not print this email unless it is necessary. Every unprinted email helps the environment.";
-        footerHtmlCell.appendText(footer);
+        String passwordResetUrl = String.format("%s/password-lost", webDomain);
+        appendLink(linkHtmlCell, "RESET PASSWORD", passwordResetUrl);
 
         Map<String, byte[]> imageAttachments = extractImages(email);
 
@@ -127,7 +122,7 @@ public class EmailServiceImpl implements EmailService {
         org.jsoup.nodes.Element anchorElement = new org.jsoup.nodes.Element("a");
         anchorElement.attr("href", href);
         anchorElement.attr("style", String.format(
-                "color: %s; background-color: %s; text-decoration: none currentcolor solid; border-radius: 4px; padding: 16px;",
+                "color: %s; background-color: %s; text-decoration: none !important; border-radius: 4px; padding: 16px;",
                 getTextColor(webColor), webColor
         ));
         anchorElement.appendText(text);
@@ -227,19 +222,16 @@ public class EmailServiceImpl implements EmailService {
                 "    <table width=\"600px\" align=\"center\" style=\"width: 600px; padding: 8px; margin-left: auto; margin-right: auto; background-color: #fff;\">\n" +
                 "      <tbody>\n" +
                 "        <tr>\n" +
-                "          <td id=\"logo\" align=\"center\" style=\"text-align: center; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px\"></td>\n" +
+                "          <td id=\"logo\" align=\"center\" style=\"text-align: center; padding: 24px 0px;\"></td>\n" +
                 "        </tr>\n" +
                 "        <tr>\n" +
-                "          <td id=\"title\" align=\"center\" style=\"text-align: center; font-size: 1.3em; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px\"></td>\n" +
+                "          <td id=\"title\" align=\"center\" style=\"text-align: center; font-size: 1.7em; font-weight: 500; padding: 24px 0px;\"></td>\n" +
                 "        </tr>\n" +
                 "        <tr>\n" +
-                "          <td id=\"content\" align=\"center\" style=\"text-align: center; font-size: 1em; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px\"></td>\n" +
+                "          <td id=\"content\" align=\"center\" style=\"text-align: center; font-size: 1em; padding: 24px 0px;\"></td>\n" +
                 "        </tr>\n" +
                 "        <tr>\n" +
-                "          <td id=\"main\" align=\"center\" style=\"text-align: center; font-size: 1.3em; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px\"></td>\n" +
-                "        </tr>\n" +
-                "        <tr>\n" +
-                "          <td id=\"footer\" align=\"center\" style=\"text-align: center; font-size: 0.8em; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px\"></td>\n" +
+                "          <td id=\"link\" align=\"center\" style=\"text-align: center; font-size: 1.3em; padding: 24px 0px;\"></td>\n" +
                 "        </tr>\n" +
                 "      </tbody>\n" +
                 "    </table>\n" +
@@ -259,16 +251,13 @@ public class EmailServiceImpl implements EmailService {
                 "    <table width=\"600px\" align=\"center\" style=\"width: 600px; padding: 8px; margin-left: auto; margin-right: auto; background-color: #fff;\">\n" +
                 "      <tbody>\n" +
                 "        <tr>\n" +
-                "          <td id=\"logo\" align=\"center\" style=\"text-align: center; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px\"></td>\n" +
+                "          <td id=\"logo\" align=\"center\" style=\"text-align: center; padding: 24px 0px;\"></td>\n" +
                 "        </tr>\n" +
                 "        <tr>\n" +
-                "          <td id=\"title\" align=\"center\" style=\"text-align: center; font-size: 1.3em; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px\"></td>\n" +
+                "          <td id=\"title\" align=\"center\" style=\"text-align: center; font-size: 1.7em; font-weight: 500; padding: 24px 0px;\"></td>\n" +
                 "        </tr>\n" +
                 "        <tr>\n" +
-                "          <td id=\"content\" align=\"center\" style=\"text-align: center; font-size: 1em; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px\"></td>\n" +
-                "        </tr>\n" +
-                "        <tr>\n" +
-                "          <td id=\"footer\" align=\"center\" style=\"text-align: center; font-size: 0.8em; padding-left: 0px; padding-right: 0px; padding-top: 16px; padding-bottom: 16px\"></td>\n" +
+                "          <td id=\"content\" align=\"center\" style=\"text-align: center; font-size: 1em; padding: 24px 0px;\"></td>\n" +
                 "        </tr>\n" +
                 "      </tbody>\n" +
                 "    </table>\n" +

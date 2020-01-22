@@ -12,8 +12,10 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 
-@Document(collection="teams")
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor
+@Getter
+@Setter
+@Document(collection = "teams")
 public class Team {
 
     @Id
@@ -38,9 +40,12 @@ public class Team {
     @NotNull
     private List<Player> liberos;
     private int          captain;
+    private String       coach;
 
-    @NoArgsConstructor @AllArgsConstructor
-    @Getter @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Setter
     public static class Player {
 
         private int    num;
@@ -48,3 +53,6 @@ public class Team {
 
     }
 }
+
+
+

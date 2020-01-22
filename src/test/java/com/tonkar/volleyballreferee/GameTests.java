@@ -134,6 +134,9 @@ public class GameTests extends VbrTests {
         gameSummary.setRulesId(rules.getId());
         gameSummary.setRulesName(rules.getName());
         gameSummary.setScore("");
+        gameSummary.setReferee1Name("Referee 1");
+        gameSummary.setReferee2Name("Referee 2");
+        gameSummary.setScorerName("Scorer");
 
         // Create teams and rules
 
@@ -427,6 +430,9 @@ public class GameTests extends VbrTests {
         gameSummary.setRulesId(rules.getId());
         gameSummary.setRulesName(rules.getName());
         gameSummary.setScore("");
+        gameSummary.setReferee1Name("Referee 1");
+        gameSummary.setReferee2Name("Referee 2");
+        gameSummary.setScorerName("Scorer");
 
         // Create teams and rules
 

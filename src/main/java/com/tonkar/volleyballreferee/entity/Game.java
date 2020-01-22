@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -65,6 +64,9 @@ public class Game {
     private String         score;
     private long           startTime;
     private long           endTime;
+    private String         referee1Name;
+    private String         referee2Name;
+    private String         scorerName;
 
     public Team getTeam(TeamType teamType) {
         return TeamType.HOME.equals(teamType) ? homeTeam : guestTeam;
@@ -73,36 +75,6 @@ public class Game {
     public boolean isStartingLineupConfirmed(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
         return TeamType.HOME.equals(teamType) ? set.getHomeStartingPlayers().isFilled(kind) : set.getGuestStartingPlayers().isFilled(kind);
-    }
-
-    public boolean hasSubstitutions(TeamType teamType, int setIndex) {
-        Set set = getSets().get(setIndex);
-        return TeamType.HOME.equals(teamType) ? !set.getHomeSubstitutions().isEmpty() : !set.getGuestSubstitutions().isEmpty();
-    }
-
-    public boolean hasTimeouts(TeamType teamType, int setIndex) {
-        Set set = getSets().get(setIndex);
-        return TeamType.HOME.equals(teamType) ? !set.getHomeCalledTimeouts().isEmpty() : !set.getGuestCalledTimeouts().isEmpty();
-    }
-
-    public boolean hasSanctions(int setIndex) {
-        boolean found = false;
-
-        Iterator<Sanction> sanctionsIt = getHomeCards().iterator();
-
-        while (!found && sanctionsIt.hasNext()) {
-            Sanction sanction = sanctionsIt.next();
-            found = sanction.getSet() == setIndex;
-        }
-
-        sanctionsIt = getGuestCards().iterator();
-
-        while (!found && sanctionsIt.hasNext()) {
-            Sanction sanction = sanctionsIt.next();
-            found = sanction.getSet() == setIndex;
-        }
-
-        return found;
     }
 
     public String getTeamColor(TeamType teamType) {

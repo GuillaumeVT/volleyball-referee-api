@@ -11,9 +11,5 @@
         <module name="volleyball-referee-api.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="sso-app.main" target="12" />
-      <module name="sso-app.test" target="12" />
-    </bytecodeTargetLevel>
   </component>
 </project>

@@ -109,6 +109,7 @@ public class TeamServiceImpl implements TeamService {
         savedTeam.setPlayers(team.getPlayers());
         savedTeam.setLiberos(team.getLiberos());
         savedTeam.setCaptain(team.getCaptain());
+        savedTeam.setCoach(team.getCoach());
         teamRepository.save(savedTeam);
 
         updateScheduledGamesWithTeam(user, savedTeam);

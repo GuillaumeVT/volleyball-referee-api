@@ -12,7 +12,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor
+@Getter
+@Setter
 public class GameSummary {
 
     @NotNull
@@ -54,5 +56,8 @@ public class GameSummary {
     private String     rulesName;
     @NotNull
     private String     score;
+    private String     referee1Name;
+    private String     referee2Name;
+    private String     scorerName;
 
 }
