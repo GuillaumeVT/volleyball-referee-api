@@ -64,9 +64,9 @@ public class Game {
     private String         score;
     private long           startTime;
     private long           endTime;
-    private String         referee1Name;
-    private String         referee2Name;
-    private String         scorerName;
+    private String         referee1;
+    private String         referee2;
+    private String         scorer;
 
     public Team getTeam(TeamType teamType) {
         return TeamType.HOME.equals(teamType) ? homeTeam : guestTeam;

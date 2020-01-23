@@ -53,9 +53,9 @@ public class GameDao {
             .and("rules._id").as("rulesId")
             .and("rules.name").as("rulesName")
             .and("score").as("score")
-            .and("referee1Name").as("referee1Name")
-            .and("referee2Name").as("referee2Name")
-            .and("scorerName").as("scorerName");
+            .and("referee1").as("referee1Name")
+            .and("referee2").as("referee2Name")
+            .and("scorer").as("scorerName");
 
     @Autowired
     private MongoTemplate mongoTemplate;

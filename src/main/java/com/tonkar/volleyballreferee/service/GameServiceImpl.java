@@ -248,9 +248,9 @@ public class GameServiceImpl implements GameService {
                 game.setScore("");
                 game.setStartTime(0L);
                 game.setEndTime(0L);
-                game.setReferee1Name(gameSummary.getReferee1Name());
-                game.setReferee2Name(gameSummary.getReferee2Name());
-                game.setScorerName(gameSummary.getScorerName());
+                game.setReferee1(gameSummary.getReferee1Name());
+                game.setReferee2(gameSummary.getReferee2Name());
+                game.setScorer(gameSummary.getScorerName());
 
                 gameRepository.save(game);
 
@@ -326,9 +326,9 @@ public class GameServiceImpl implements GameService {
                 savedGame.setGuestCards(new ArrayList<>());
                 savedGame.setRules(optRules.get());
                 savedGame.setScore("");
-                savedGame.setReferee1Name(gameSummary.getReferee1Name());
-                savedGame.setReferee2Name(gameSummary.getReferee2Name());
-                savedGame.setScorerName(gameSummary.getScorerName());
+                savedGame.setReferee1(gameSummary.getReferee1Name());
+                savedGame.setReferee2(gameSummary.getReferee2Name());
+                savedGame.setScorer(gameSummary.getScorerName());
 
                 gameRepository.save(savedGame);
 
@@ -359,9 +359,9 @@ public class GameServiceImpl implements GameService {
             savedGame.setScore(buildScore(savedGame));
             savedGame.setStartTime(game.getStartTime());
             savedGame.setEndTime(game.getEndTime());
-            savedGame.setReferee1Name(game.getReferee1Name());
-            savedGame.setReferee2Name(game.getReferee2Name());
-            savedGame.setScorerName(game.getScorerName());
+            savedGame.setReferee1(game.getReferee1());
+            savedGame.setReferee2(game.getReferee2());
+            savedGame.setScorer(game.getScorer());
 
             gameRepository.save(savedGame);
         } else {
