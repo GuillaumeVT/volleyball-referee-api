@@ -28,36 +28,36 @@ public class TeamTests extends VbrTests {
 
         ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/teams"))
+                .fromUriString(urlOf("/teams"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         ResponseEntity<TestPageImpl<TeamSummary>> getTeamDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), pageType);
         assertEquals(HttpStatus.UNAUTHORIZED, getTeamDescrResponse.getStatusCode());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/teams"))
+                .fromUriString(urlOf("/teams"))
                 .queryParam("kind", GameType.INDOOR)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         getTeamDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), pageType);
         assertEquals(HttpStatus.UNAUTHORIZED, getTeamDescrResponse.getStatusCode());
 
-        ResponseEntity<Team> getTeamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Team.class);
+        ResponseEntity<Team> getTeamResponse = restTemplate.exchange(urlOf("/teams/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Team.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getTeamResponse.getStatusCode());
 
-        ResponseEntity<Count> getTeamCountResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
+        ResponseEntity<Count> getTeamCountResponse = restTemplate.exchange(urlOf("/teams/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getTeamCountResponse.getStatusCode());
 
-        ResponseEntity<String> teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, team), String.class);
+        ResponseEntity<String> teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, team), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, teamResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.PUT, payloadWithAuth(testUserInvalidToken, team), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.PUT, payloadWithAuth(testUserInvalidToken, team), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, teamResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, teamResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, teamResponse.getStatusCode());
     }
 
@@ -85,26 +85,26 @@ public class TeamTests extends VbrTests {
 
         // Team does not exist yet
 
-        ResponseEntity<Team> getTeamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/" + teamId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Team.class);
+        ResponseEntity<Team> getTeamResponse = restTemplate.exchange(urlOf("/teams/" + teamId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Team.class);
         assertEquals(HttpStatus.NOT_FOUND, getTeamResponse.getStatusCode());
 
-        ResponseEntity<String> teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.PUT, payloadWithAuth(testUserToken1, team), String.class);
+        ResponseEntity<String> teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.PUT, payloadWithAuth(testUserToken1, team), String.class);
         assertEquals(HttpStatus.NOT_FOUND, teamResponse.getStatusCode());
 
         // Create team
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), String.class);
         assertEquals(HttpStatus.CREATED, teamResponse.getStatusCode());
 
         // Team already exists
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), String.class);
         assertEquals(HttpStatus.CONFLICT, teamResponse.getStatusCode());
 
 
         team.setId(UUID.randomUUID());
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), String.class);
         assertEquals(HttpStatus.CONFLICT, teamResponse.getStatusCode());
 
         team.setId(teamId);
@@ -114,18 +114,18 @@ public class TeamTests extends VbrTests {
         team.setUpdatedAt(System.currentTimeMillis());
         team.setColor("#123456");
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.PUT, payloadWithAuth(testUserToken1, team), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.PUT, payloadWithAuth(testUserToken1, team), String.class);
         assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
 
         // Count teams
 
-        ResponseEntity<Count> getTeamCountResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Count.class);
+        ResponseEntity<Count> getTeamCountResponse = restTemplate.exchange(urlOf("/teams/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Count.class);
         assertEquals(HttpStatus.OK, getTeamCountResponse.getStatusCode());
         assertEquals(1L, getTeamCountResponse.getBody().getCount());
 
         // Get team
 
-        getTeamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/" + teamId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Team.class);
+        getTeamResponse = restTemplate.exchange(urlOf("/teams/" + teamId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Team.class);
         assertEquals(HttpStatus.OK, getTeamResponse.getStatusCode());
         assertEquals(team.getName(), getTeamResponse.getBody().getName());
 
@@ -133,7 +133,7 @@ public class TeamTests extends VbrTests {
 
         ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/teams"))
+                .fromUriString(urlOf("/teams"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         ResponseEntity<TestPageImpl<TeamSummary>> getTeamDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), pageType);
@@ -143,7 +143,7 @@ public class TeamTests extends VbrTests {
         // List all team of kind
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/teams"))
+                .fromUriString(urlOf("/teams"))
                 .queryParam("kind", GameType.BEACH)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
@@ -152,7 +152,7 @@ public class TeamTests extends VbrTests {
         assertEquals(1, getTeamDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/teams"))
+                .fromUriString(urlOf("/teams"))
                 .queryParam("kind", GameType.INDOOR_4X4)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
@@ -161,7 +161,7 @@ public class TeamTests extends VbrTests {
         assertEquals(0, getTeamDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/teams"))
+                .fromUriString(urlOf("/teams"))
                 .queryParam("kind", String.join(",", GameType.BEACH.toString(), GameType.INDOOR_4X4.toString()))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
@@ -172,7 +172,7 @@ public class TeamTests extends VbrTests {
         // List all team of gender
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/teams"))
+                .fromUriString(urlOf("/teams"))
                 .queryParam("gender", GenderType.LADIES)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
@@ -181,7 +181,7 @@ public class TeamTests extends VbrTests {
         assertEquals(1, getTeamDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/teams"))
+                .fromUriString(urlOf("/teams"))
                 .queryParam("gender", GenderType.GENTS)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
@@ -190,7 +190,7 @@ public class TeamTests extends VbrTests {
         assertEquals(0, getTeamDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/teams"))
+                .fromUriString(urlOf("/teams"))
                 .queryParam("kind", GameType.BEACH)
                 .queryParam("gender", String.join(",", GenderType.LADIES.toString(), GenderType.GENTS.toString()))
                 .queryParam("page", 0)
@@ -201,14 +201,14 @@ public class TeamTests extends VbrTests {
 
         // Delete team
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/" + teamId), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams/" + teamId), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/teams"))
+                .fromUriString(urlOf("/teams"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         getTeamDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), pageType);

@@ -90,11 +90,20 @@ public class LeagueServiceImpl implements LeagueService {
 
     @Override
     public void deleteLeague(User user, UUID leagueId) throws ConflictException {
-        if (gameRepository.existsByCreatedByAndLeagueIdAndStatus(user.getId(), leagueId, GameStatus.SCHEDULED)) {
+        if (gameRepository.existsByCreatedByAndLeague_IdAndStatus(user.getId(), leagueId, GameStatus.SCHEDULED)) {
             throw new ConflictException(String.format("Could not delete league %s for user %s because it is used in a game", leagueId, user.getId()));
         } else {
             leagueRepository.deleteByIdAndCreatedBy(leagueId, user.getId());
         }
+    }
+
+    @Override
+    public void deleteAllLeagues(User user) {
+        leagueDao.listLeagues(user.getId(), List.of(GameType.values())).forEach(leagueSummary -> {
+            if (!gameRepository.existsByCreatedByAndLeague_IdAndStatus(user.getId(), leagueSummary.getId(), GameStatus.SCHEDULED)) {
+                leagueRepository.deleteByIdAndCreatedBy(leagueSummary.getId(), user.getId());
+            }
+        });
     }
 
 }

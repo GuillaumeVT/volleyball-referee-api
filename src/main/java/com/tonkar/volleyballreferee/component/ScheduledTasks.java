@@ -1,7 +1,7 @@
 package com.tonkar.volleyballreferee.component;
 
-import com.tonkar.volleyballreferee.service.GameService;
-import com.tonkar.volleyballreferee.service.UserService;
+import com.tonkar.volleyballreferee.dao.UserDao;
+import com.tonkar.volleyballreferee.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,7 +15,19 @@ public class ScheduledTasks {
     private GameService gameService;
 
     @Autowired
+    private TeamService teamService;
+
+    @Autowired
+    private RulesService rulesService;
+
+    @Autowired
+    private LeagueService leagueService;
+
+    @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserDao userDao;
 
     // Every day at 4:00am
     @Scheduled(cron = "0 0 4 * * *")
@@ -39,8 +51,13 @@ public class ScheduledTasks {
 
     // Every day at 4:15am
     @Scheduled(cron = "0 15 4 * * *")
-    public void disableRefundedUsers() {
-        userService.disableRefundedUsers();
+    public void purgeOldCancelledAccounts() {
+        userDao.findUsersBySubscriptionExpiryBefore(6L).forEach(user -> {
+            gameService.deleteAllGames(user);
+            teamService.deleteAllTeams(user);
+            rulesService.deleteAllRules(user);
+            leagueService.deleteAllLeagues(user);
+        });
     }
 
 }

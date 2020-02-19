@@ -4,6 +4,10 @@ jasypt:
   encryptor:
     password: ${JASYPT_KEY:}
 
+server:
+  servlet:
+    context-path: "/api/v3.2"
+
 spring.data.mongodb:
   password: ENC(smAct7mQ5ae02WuN9xTVvw==)
   uri: mongodb://vbr_integ_user:${spring.data.mongodb.password}@localhost:27017/vbr_integ
@@ -17,9 +21,10 @@ vbr:
   android:
     app:
       packageName: "com.tonkar.volleyballreferee"
-      purchase:
+      billing:
         credential: "/opt/VolleyballReferee-587e8e90786e.json"
-        sku: "vbr_web_premium"
+        sku-purchase: "vbr_web_premium"
+        sku-subscription: "vbr_web_premium_sub"
   mail:
     user: "noreply.vbr.app@gmail.com"
     password: ENC(5NUOfoSKyZLHp7mDZPetAoZ1PFnPPbCbcWBDAHBe3yo=)
@@ -30,6 +35,10 @@ spring.profiles: production
 jasypt:
   encryptor:
     password: ${JASYPT_KEY:}
+
+server:
+  servlet:
+    context-path: "/api/v3.2"
 
 spring.data.mongodb:
   password: ENC(UhfmutqyR/vnOaf+7EugcA==)
@@ -44,9 +53,10 @@ vbr:
   android:
     app:
       packageName: "com.tonkar.volleyballreferee"
-      purchase:
+      billing:
         credential: "/opt/VolleyballReferee-587e8e90786e.json"
-        sku: "vbr_web_premium"
+        sku-purchase: "vbr_web_premium"
+        sku-subscription: "vbr_web_premium_sub"
   mail:
     user: "noreply.vbr.app@gmail.com"
     password: ENC(5NUOfoSKyZLHp7mDZPetAoZ1PFnPPbCbcWBDAHBe3yo=)

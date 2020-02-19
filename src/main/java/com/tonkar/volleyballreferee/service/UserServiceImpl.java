@@ -6,6 +6,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.AndroidPublisherScopes;
+import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
+import com.tonkar.volleyballreferee.dao.UserDao;
 import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.PasswordReset;
@@ -45,6 +47,9 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
+    private UserDao userDao;
+
+    @Autowired
     private FriendRequestRepository friendRequestRepository;
 
     @Autowired
@@ -59,10 +64,13 @@ public class UserServiceImpl implements UserService {
     @Value("${vbr.android.app.packageName}")
     private String androidPackageName;
 
-    @Value("${vbr.android.app.purchase.sku}")
-    private String androidSku;
+    @Value("${vbr.android.app.billing.sku-purchase}")
+    private String androidPurchaseSku;
 
-    @Value("${vbr.android.app.purchase.credential}")
+    @Value("${vbr.android.app.billing.sku-subscription}")
+    private String androidSubscriptionSku;
+
+    @Value("${vbr.android.app.billing.credential}")
     private String androidCredential;
 
     @Value("${vbr.jwt.key}")
@@ -102,10 +110,50 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserSummary getUserFromPurchaseToken(String purchaseToken) throws NotFoundException {
-        return userRepository
-                .findByPurchaseToken(purchaseToken)
-                .map(user -> new UserSummary(user.getId(), user.getPseudo(), user.getEmail()))
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find purchase token %s", purchaseToken)));
+        refreshSubscriptionPurchaseToken(purchaseToken);
+        return userDao
+                .findUserByPurchaseToken(purchaseToken)
+                .orElseThrow(() -> new NotFoundException(String.format("Could not find user for purchase token %s", purchaseToken)));
+    }
+
+    @Override
+    public void refreshSubscriptionPurchaseToken(String purchaseToken) {
+        try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
+            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
+            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
+            AndroidPublisher.Purchases.Subscriptions subscriptions = publisher.purchases().subscriptions();
+
+            // A subscription  may contain a linked purchase token which is the previous purchase token for this user.
+            // Browse this chain of purchase tokens to find the user and when found, update their purchase token and expiry
+            Optional<UserSummary> optionalUser = userDao.findUserByPurchaseToken(purchaseToken);
+            SubscriptionPurchase subscription = subscriptions.get(androidPackageName, androidSubscriptionSku, purchaseToken).execute();
+            final long subscriptionExpiryAt;
+
+            if (subscription.getAutoRenewing() && (subscription.getPaymentState() == 0)) {
+                subscriptionExpiryAt = subscription.getExpiryTimeMillis() + 604800000L; // Users have auto renew and the payment is pending, give 7 extra days of access
+            } else {
+                subscriptionExpiryAt = subscription.getExpiryTimeMillis();
+            }
+
+            String linkedPurchaseToken = purchaseToken;
+
+            while (optionalUser.isEmpty() && linkedPurchaseToken != null) {
+                SubscriptionPurchase linkedSubscription = subscriptions.get(androidPackageName, androidSubscriptionSku, linkedPurchaseToken).execute();
+                optionalUser = userDao.findUserByPurchaseToken(linkedPurchaseToken);
+                linkedPurchaseToken = linkedSubscription.getLinkedPurchaseToken();
+            }
+
+            // Store the latest purchase token and the subscription expiry date
+            optionalUser.ifPresent(userSummary -> {
+                log.info(String.format("Found the user %s from the linked purchase tokens, store new token %s with expiry %d", userSummary.getId(), purchaseToken, subscriptionExpiryAt));
+                userDao.updateSubscriptionPurchaseToken(userSummary.getId(), purchaseToken, subscriptionExpiryAt);
+            });
+
+        } catch (IOException | GeneralSecurityException e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Override
@@ -114,8 +162,12 @@ public class UserServiceImpl implements UserService {
             throw new ConflictException(String.format("Found an existing user with purchase token %s", user.getPurchaseToken()));
         }
 
-        if (!isValidPurchaseToken(user.getPurchaseToken())) {
-            throw new ForbiddenException(String.format("User with email %s provided an invalid purchase token %s", user.getEmail(), user.getPurchaseToken()));
+        SubscriptionPurchase subscription = getSubscriptionPurchase(user.getPurchaseToken());
+
+        if (subscription == null) {
+            if (!isValidPurchaseToken(user.getPurchaseToken())) {
+                throw new ForbiddenException(String.format("User with email %s provided an invalid purchase token %s", user.getEmail(), user.getPurchaseToken()));
+            }
         }
 
         String password = user.getPassword().trim();
@@ -128,20 +180,7 @@ public class UserServiceImpl implements UserService {
         boolean idExists = userRepository.existsById(user.getId());
         boolean pseudoExists = userRepository.existsByPseudo(user.getPseudo());
 
-        // Temporarily until everyone has migrated
-        if (idExists && pseudoExists && (user.getId().endsWith("@google") || user.getId().endsWith("@facebook"))) {
-            User savedUser = getUser(user.getId());
-            savedUser.setEmail(user.getEmail());
-            savedUser.setPassword(passwordEncoder.encode(password));
-            savedUser.setPurchaseToken(user.getPurchaseToken());
-            savedUser.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-            savedUser.setFailedAuthentication(new User.FailedAuthentication(0, LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()));
-            savedUser.setEnabled(true);
-            userRepository.save(savedUser);
-            log.info(String.format("Updated user with id %s and pseudo %s", savedUser.getId(), savedUser.getPseudo()));
-            emailService.sendUserCreatedNotificationEmail(savedUser);
-            return signInUser(savedUser.getEmail(), password);
-        } else if (idExists) {
+      if (idExists) {
             throw new ConflictException(String.format("Found an existing user with id %s", user.getId()));
         } else if (pseudoExists) {
             throw new ConflictException(String.format("Found an existing user with pseudo %s", user.getPseudo()));
@@ -151,6 +190,8 @@ public class UserServiceImpl implements UserService {
             user.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
             user.setFailedAuthentication(new User.FailedAuthentication(0, LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()));
             user.setEnabled(true);
+            user.setSubscription(subscription != null);
+            user.setSubscriptionExpiryAt(subscription == null ? 0L : subscription.getExpiryTimeMillis());
             userRepository.save(user);
             log.info(String.format("Created user with id %s and pseudo %s", user.getId(), user.getPseudo()));
             emailService.sendUserCreatedNotificationEmail(user);
@@ -168,6 +209,10 @@ public class UserServiceImpl implements UserService {
 
         if (isLocked(user)) {
             throw new ForbiddenException(String.format("Access is locked for user %s", user.getId()));
+        }
+
+        if (user.isSubscription() && LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli() > user.getSubscriptionExpiryAt()) {
+            throw new ForbiddenException(String.format("Subscription is expired for user %s", user.getId()));
         }
 
         if (passwordEncoder.matches(userPassword, user.getPassword())) {
@@ -334,6 +379,22 @@ public class UserServiceImpl implements UserService {
         passwordResetRepository.deleteByExpiresAtBefore(LocalDateTime.now(ZoneOffset.UTC).minusDays(days));
     }
 
+    private SubscriptionPurchase getSubscriptionPurchase(String purchaseToken) {
+        SubscriptionPurchase subscription = null;
+
+        try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
+            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
+            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
+            subscription = publisher.purchases().subscriptions().get(androidPackageName, androidSubscriptionSku, purchaseToken).execute();
+        } catch (IOException | GeneralSecurityException e) {
+            log.error(e.getMessage());
+        }
+
+        return subscription;
+    }
+
     private boolean isValidPurchaseToken(String purchaseToken) {
         boolean valid = false;
 
@@ -342,7 +403,7 @@ public class UserServiceImpl implements UserService {
             JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
             GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
             AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
-            publisher.purchases().products().get(androidPackageName, androidSku, purchaseToken).execute();
+            publisher.purchases().products().get(androidPackageName, androidPurchaseSku, purchaseToken).execute();
             valid = true;
         } catch (IOException | GeneralSecurityException e) {
             log.error(e.getMessage());
@@ -472,18 +533,4 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public void disableRefundedUsers() {
-        try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
-            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
-            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
-            publisher.purchases().voidedpurchases().list(androidPackageName).execute().getVoidedPurchases().forEach(voidedPurchase ->
-                userRepository.findByPurchaseToken(voidedPurchase.getPurchaseToken()).ifPresent(user -> user.setEnabled(false))
-            );
-        } catch (IOException | GeneralSecurityException e) {
-            log.error(e.getMessage());
-        }
-    }
 }

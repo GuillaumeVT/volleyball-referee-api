@@ -27,7 +27,6 @@ import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.2/public")
 @CrossOrigin("*")
 @Slf4j
 public class PublicController {
@@ -47,138 +46,68 @@ public class PublicController {
     @Autowired
     private UserService userService;
 
-    @GetMapping(value = "/users/{purchaseToken}", produces = {"application/json"})
-    public ResponseEntity<UserSummary> getUserFromPurchaseToken(@PathVariable("purchaseToken") @NotBlank String purchaseToken) {
-        try {
-            return new ResponseEntity<>(userService.getUserFromPurchaseToken(purchaseToken), HttpStatus.OK);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @GetMapping(value = "/public/users/{purchaseToken}", produces = {"application/json"})
+    public ResponseEntity<UserSummary> getUserFromPurchaseToken(@PathVariable("purchaseToken") @NotBlank String purchaseToken) throws NotFoundException {
+        return new ResponseEntity<>(userService.getUserFromPurchaseToken(purchaseToken), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/users", produces = {"application/json"})
-    public ResponseEntity<UserToken> createUser(@Valid @NotNull @RequestBody User user) {
-        try {
-            return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
-        } catch (UnauthorizedException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        } catch (ForbiddenException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        } catch (ConflictException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (BadRequestException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    @PostMapping(value = "/public/users", produces = {"application/json"})
+    public ResponseEntity<UserToken> createUser(@Valid @NotNull @RequestBody User user) throws NotFoundException, BadRequestException, ForbiddenException, UnauthorizedException, ConflictException {
+        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
     }
 
-    @PostMapping(value = "/users/token", produces = {"application/json"})
-    public ResponseEntity<UserToken> signInUser(@Valid @NotNull @RequestBody EmailCredentials emailCredentials) {
-        try {
-            return new ResponseEntity<>(userService.signInUser(emailCredentials.getUserEmail(), emailCredentials.getUserPassword()), HttpStatus.OK);
-        } catch (UnauthorizedException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        } catch (ForbiddenException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @PostMapping(value = "/public/users/token", produces = {"application/json"})
+    public ResponseEntity<UserToken> signInUser(@Valid @NotNull @RequestBody EmailCredentials emailCredentials) throws UnauthorizedException, NotFoundException, ForbiddenException {
+        return new ResponseEntity<>(userService.signInUser(emailCredentials.getUserEmail(), emailCredentials.getUserPassword()), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/users/password/recover/{userEmail}", produces = {"application/json"})
-    public ResponseEntity<String> initiatePasswordReset(@PathVariable("userEmail") @Email @NotBlank String userEmail) {
-        try {
-            userService.initiatePasswordReset(userEmail);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @PostMapping(value = "/public/users/password/recover/{userEmail}", produces = {"application/json"})
+    public ResponseEntity<Void> initiatePasswordReset(@PathVariable("userEmail") @Email @NotBlank String userEmail) throws NotFoundException {
+        userService.initiatePasswordReset(userEmail);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping(value = "/users/password/follow/{passwordResetId}", produces = {"application/json"})
-    public ResponseEntity<String> followPasswordReset(@PathVariable("passwordResetId") UUID passwordResetId) {
-        try {
-            String redirectUrl = userService.followPasswordReset(passwordResetId);
+    @GetMapping(value = "/public/users/password/follow/{passwordResetId}", produces = {"application/json"})
+    public ResponseEntity<String> followPasswordReset(@PathVariable("passwordResetId") UUID passwordResetId) throws NotFoundException {
+        String redirectUrl = userService.followPasswordReset(passwordResetId);
 
-            UriComponentsBuilder builder = UriComponentsBuilder
-                    .fromHttpUrl(redirectUrl)
-                    .queryParam("passwordResetId", passwordResetId);
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl(redirectUrl)
+                .queryParam("passwordResetId", passwordResetId);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Location", builder.toUriString());
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location", builder.toUriString());
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
-    @PostMapping(value = "/users/password/reset/{passwordResetId}", produces = {"application/json"})
-    public ResponseEntity<UserToken> resetPassword(@PathVariable("passwordResetId") UUID passwordResetId, @Valid @NotNull @RequestBody UserPassword userPassword) {
-        try {
-            return new ResponseEntity<>(userService.resetPassword(passwordResetId, userPassword.getUserPassword()), HttpStatus.OK);
-        } catch (BadRequestException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (ConflictException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (UnauthorizedException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        } catch (ForbiddenException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+    @PostMapping(value = "/public/users/password/reset/{passwordResetId}", produces = {"application/json"})
+    public ResponseEntity<UserToken> resetPassword(@PathVariable("passwordResetId") UUID passwordResetId, @Valid @NotNull @RequestBody UserPassword userPassword) throws UnauthorizedException, BadRequestException, ForbiddenException, NotFoundException, ConflictException {
+        return new ResponseEntity<>(userService.resetPassword(passwordResetId, userPassword.getUserPassword()), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/statistics", produces = {"application/json"})
+    @GetMapping(value = "/public/statistics", produces = {"application/json"})
     public ResponseEntity<Statistics> getStatistics() {
         return new ResponseEntity<>(statisticsService.getStatistics(), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/{gameId}", produces = {"application/json"})
-    public ResponseEntity<Game> getGame(@PathVariable("gameId") UUID gameId) {
-        try {
-            return new ResponseEntity<>(gameService.getGame(gameId), HttpStatus.OK);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @GetMapping(value = "/public/games/{gameId}", produces = {"application/json"})
+    public ResponseEntity<Game> getGame(@PathVariable("gameId") UUID gameId) throws NotFoundException {
+        return new ResponseEntity<>(gameService.getGame(gameId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/{gameId}/score-sheet")
-    public ResponseEntity<?> getScoreSheet(@PathVariable("gameId") UUID gameId) {
-        try {
-            FileWrapper scoreSheet = gameService.getScoreSheet(gameId);
-            ByteArrayResource resource = new ByteArrayResource(scoreSheet.getData());
-            return ResponseEntity
-                    .ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + scoreSheet.getFilename())
-                    .contentType(MediaType.TEXT_HTML)
-                    .contentLength(scoreSheet.getData().length)
-                    .body(resource);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @GetMapping(value = "/public/games/{gameId}/score-sheet")
+    public ResponseEntity<?> getScoreSheet(@PathVariable("gameId") UUID gameId) throws NotFoundException {
+        FileWrapper scoreSheet = gameService.getScoreSheet(gameId);
+        ByteArrayResource resource = new ByteArrayResource(scoreSheet.getData());
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + scoreSheet.getFilename())
+                .contentType(MediaType.TEXT_HTML)
+                .contentLength(scoreSheet.getData().length)
+                .body(resource);
     }
 
-    @GetMapping(value = "/games/live", produces = {"application/json"})
+    @GetMapping(value = "/public/games/live", produces = {"application/json"})
     public ResponseEntity<Page<GameSummary>> listLiveGames(@RequestParam(value = "kind", required = false) List<GameType> kinds,
                                                            @RequestParam(value = "gender", required = false) List<GenderType> genders,
                                                            @RequestParam("page") @Min(0) int page,
@@ -186,7 +115,7 @@ public class PublicController {
         return new ResponseEntity<>(gameService.listLiveGames(kinds, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/token/{token}", produces = {"application/json"})
+    @GetMapping(value = "/public/games/token/{token}", produces = {"application/json"})
     public ResponseEntity<Page<GameSummary>> listGamesMatchingToken(@PathVariable("token") @NotBlank @Size(min = 3) String token,
                                                                     @RequestParam(value = "status", required = false) List<GameStatus> statuses,
                                                                     @RequestParam(value = "kind", required = false) List<GameType> kinds,
@@ -196,7 +125,7 @@ public class PublicController {
         return new ResponseEntity<>(gameService.listGamesMatchingToken(token, statuses, kinds, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/date/{date}", produces = {"application/json"})
+    @GetMapping(value = "/public/games/date/{date}", produces = {"application/json"})
     public ResponseEntity<Page<GameSummary>> listGamesWithScheduleDate(@PathVariable("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                                                                        @RequestParam(value = "status", required = false) List<GameStatus> statuses,
                                                                        @RequestParam(value = "kind", required = false) List<GameType> kinds,
@@ -206,7 +135,7 @@ public class PublicController {
         return new ResponseEntity<>(gameService.listGamesWithScheduleDate(date, statuses, kinds, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}", produces = {"application/json"})
     public ResponseEntity<Page<GameSummary>> listGamesInLeague(@PathVariable("leagueId") UUID leagueId,
                                                                @RequestParam(value = "status", required = false) List<GameStatus> statuses,
                                                                @RequestParam(value = "gender", required = false) List<GenderType> genders,
@@ -215,22 +144,22 @@ public class PublicController {
         return new ResponseEntity<>(gameService.listGamesInLeague(leagueId, statuses, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}/live", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}/live", produces = {"application/json"})
     public ResponseEntity<List<GameSummary>> listLiveGamesInLeague(@PathVariable("leagueId") UUID leagueId) {
         return new ResponseEntity<>(gameService.listLiveGamesInLeague(leagueId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}/next-10", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}/next-10", produces = {"application/json"})
     public ResponseEntity<List<GameSummary>> listNext10GamesInLeague(@PathVariable("leagueId") UUID leagueId) {
         return new ResponseEntity<>(gameService.listNext10GamesInLeague(leagueId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}/last-10", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}/last-10", produces = {"application/json"})
     public ResponseEntity<List<GameSummary>> listLast10GamesInLeague(@PathVariable("leagueId") UUID leagueId) {
         return new ResponseEntity<>(gameService.listLast10GamesInLeague(leagueId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}/team/{teamId}", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}/team/{teamId}", produces = {"application/json"})
     public ResponseEntity<Page<GameSummary>> listGamesOfTeamInLeague(@PathVariable("leagueId") UUID leagueId,
                                                                      @PathVariable("teamId") UUID teamId,
                                                                      @RequestParam(value = "status", required = false) List<GameStatus> statuses,
@@ -239,7 +168,7 @@ public class PublicController {
         return new ResponseEntity<>(gameService.listGamesOfTeamInLeague(leagueId, teamId, statuses, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}/division/{divisionName}", produces = {"application/json"})
     public ResponseEntity<Page<GameSummary>> listGamesInDivision(@PathVariable("leagueId") UUID leagueId,
                                                                  @PathVariable("divisionName") String divisionName,
                                                                  @RequestParam(value = "status", required = false) List<GameStatus> statuses,
@@ -249,22 +178,22 @@ public class PublicController {
         return new ResponseEntity<>(gameService.listGamesInDivision(leagueId, divisionName, statuses, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/live", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}/division/{divisionName}/live", produces = {"application/json"})
     public ResponseEntity<List<GameSummary>> listLiveGamesInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
         return new ResponseEntity<>(gameService.listLiveGamesInDivision(leagueId, divisionName), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/next-10", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}/division/{divisionName}/next-10", produces = {"application/json"})
     public ResponseEntity<List<GameSummary>> listNext10GamesInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
         return new ResponseEntity<>(gameService.listNext10GamesInDivision(leagueId, divisionName), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/last-10", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}/division/{divisionName}/last-10", produces = {"application/json"})
     public ResponseEntity<List<GameSummary>> listLast10GamesInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
         return new ResponseEntity<>(gameService.listLast10GamesInDivision(leagueId, divisionName), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/team/{teamId}", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}/division/{divisionName}/team/{teamId}", produces = {"application/json"})
     public ResponseEntity<Page<GameSummary>> listGamesOfTeamInDivision(@PathVariable("leagueId") UUID leagueId,
                                                                        @PathVariable("divisionName") String divisionName,
                                                                        @PathVariable("teamId") UUID teamId,
@@ -274,46 +203,36 @@ public class PublicController {
         return new ResponseEntity<>(gameService.listGamesOfTeamInDivision(leagueId, divisionName, teamId, statuses, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/games/league/{leagueId}/division/{divisionName}/rankings", produces = {"application/json"})
+    @GetMapping(value = "/public/games/league/{leagueId}/division/{divisionName}/rankings", produces = {"application/json"})
     public ResponseEntity<List<Ranking>> listRankingsInDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
         return new ResponseEntity<>(gameService.listRankingsInDivision(leagueId, divisionName), HttpStatus.OK);
     }
 
-    @GetMapping("/games/league/{leagueId}/division/{divisionName}/excel")
-    public ResponseEntity<?> listGamesInDivisionExcel(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
-        try {
-            FileWrapper excelDivision = gameService.listGamesInDivisionExcel(leagueId, divisionName);
-            ByteArrayResource resource = new ByteArrayResource(excelDivision.getData());
-            return ResponseEntity
-                    .ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + excelDivision.getFilename())
-                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                    .contentLength(excelDivision.getData().length)
-                    .body(resource);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    @GetMapping("/public/games/league/{leagueId}/division/{divisionName}/excel")
+    public ResponseEntity<?> listGamesInDivisionExcel(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) throws IOException {
+        FileWrapper excelDivision = gameService.listGamesInDivisionExcel(leagueId, divisionName);
+        ByteArrayResource resource = new ByteArrayResource(excelDivision.getData());
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + excelDivision.getFilename())
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .contentLength(excelDivision.getData().length)
+                .body(resource);
     }
 
-    @GetMapping(value = "/teams/league/{leagueId}", produces = {"application/json"})
+    @GetMapping(value = "/public/teams/league/{leagueId}", produces = {"application/json"})
     public ResponseEntity<List<TeamSummary>> listTeamsOfLeague(@PathVariable("leagueId") UUID leagueId) {
         return new ResponseEntity<>(teamService.listTeamsOfLeague(leagueId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/teams/league/{leagueId}/division/{divisionName}", produces = {"application/json"})
+    @GetMapping(value = "/public/teams/league/{leagueId}/division/{divisionName}", produces = {"application/json"})
     public ResponseEntity<List<TeamSummary>> listTeamsOfDivision(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
         return new ResponseEntity<>(teamService.listTeamsOfDivision(leagueId, divisionName), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/leagues/{leagueId}", produces = {"application/json"})
-    public ResponseEntity<League> getLeague(@PathVariable("leagueId") UUID leagueId) {
-        try {
-            return new ResponseEntity<>(leagueService.getLeague(leagueId), HttpStatus.OK);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @GetMapping(value = "/public/leagues/{leagueId}", produces = {"application/json"})
+    public ResponseEntity<League> getLeague(@PathVariable("leagueId") UUID leagueId) throws NotFoundException {
+        return new ResponseEntity<>(leagueService.getLeague(leagueId), HttpStatus.OK);
     }
 
 }

@@ -11,12 +11,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.2/statistics")
 @CrossOrigin("*")
 @Slf4j
 public class StatisticsController {
@@ -24,7 +22,7 @@ public class StatisticsController {
     @Autowired
     private StatisticsService statisticsService;
 
-    @GetMapping(value = "", produces = {"application/json"})
+    @GetMapping(value = "/statistics", produces = {"application/json"})
     public ResponseEntity<Statistics> getStatistics(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(statisticsService.getStatistics(user), HttpStatus.OK);
     }

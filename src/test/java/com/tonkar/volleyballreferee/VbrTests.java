@@ -35,22 +35,25 @@ public class VbrTests {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    @Value("${vbr.android.app.purchase.mail1}")
+    @Value("${server.servlet.context-path}")
+    String contextPath;
+
+    @Value("${vbr.android.app.billing.mail1}")
     String testMail1;
 
-    @Value("${vbr.android.app.purchase.mail2}")
+    @Value("${vbr.android.app.billing.mail2}")
     String testMail2;
 
-    @Value("${vbr.android.app.purchase.pseudo1}")
+    @Value("${vbr.android.app.billing.pseudo1}")
     String testUserPseudo1;
 
-    @Value("${vbr.android.app.purchase.pseudo2}")
+    @Value("${vbr.android.app.billing.pseudo2}")
     String testUserPseudo2;
 
-    @Value("${vbr.android.app.purchase.token1}")
+    @Value("${vbr.android.app.billing.token1}")
     String testPurchaseToken1;
 
-    @Value("${vbr.android.app.purchase.token2}")
+    @Value("${vbr.android.app.billing.token2}")
     String testPurchaseToken2;
 
     String testUserToken1;
@@ -80,12 +83,13 @@ public class VbrTests {
         user.setEmail(testMail1);
         user.setPassword(testPassword);
         user.setPurchaseToken(testPurchaseToken1);
+        user.setSubscriptionExpiryAt(4133980799000L);
         user.setFriends(new ArrayList<>());
         user.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         user.setLastLoginAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         user.setFailedAuthentication(new User.FailedAuthentication());
 
-        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/api/v3.2/public/users"), payloadWithoutAuth(user), UserToken.class);
+        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), UserToken.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody().getToken());
         assertNotNull(response.getBody().getUser());
@@ -100,12 +104,13 @@ public class VbrTests {
         user.setEmail(testMail2);
         user.setPassword(testPassword);
         user.setPurchaseToken(testPurchaseToken2);
+        user.setSubscriptionExpiryAt(4133980799000L);
         user.setFriends(new ArrayList<>());
         user.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         user.setLastLoginAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         user.setFailedAuthentication(new User.FailedAuthentication());
 
-        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/api/v3.2/public/users"), payloadWithoutAuth(user), UserToken.class);
+        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), UserToken.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody().getToken());
         assertNotNull(response.getBody().getUser());
@@ -114,7 +119,7 @@ public class VbrTests {
     }
 
     String urlOf(String apiUrl) {
-        return "http://localhost:" + port + apiUrl;
+        return String.format("http://localhost:%d%s%s", port, contextPath, apiUrl);
     }
 
     private HttpHeaders headersWithAuth(String testUser) {

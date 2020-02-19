@@ -192,7 +192,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Count getNumberOfGamesInLeague(User user, UUID leagueId) {
-        return new Count(gameRepository.countByCreatedByAndLeagueId(user.getId(), leagueId));
+        return new Count(gameRepository.countByCreatedByAndLeague_Id(user.getId(), leagueId));
     }
 
     @Override
@@ -450,7 +450,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private long epochDateNDaysAgo(int daysAgo) {
-        return System.currentTimeMillis() - (daysAgo * 86400000L);
+        return LocalDateTime.now(ZoneOffset.UTC).minusDays(daysAgo).toEpochSecond(ZoneOffset.UTC) * 1000L;
     }
 
     private Game.SelectedLeague findOrCreateLeague(User user, GameSummary gameSummary) {

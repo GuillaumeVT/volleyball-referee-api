@@ -33,68 +33,68 @@ public class GameTests extends VbrTests {
         ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games"))
+                .fromUriString(urlOf("/games"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         ResponseEntity<TestPageImpl<GameSummary>> pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), pageType);
         assertEquals(HttpStatus.UNAUTHORIZED, pageGameDescrResponse.getStatusCode());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games"))
+                .fromUriString(urlOf("/games"))
                 .queryParam("status", GameStatus.COMPLETED)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), pageType);
         assertEquals(HttpStatus.UNAUTHORIZED, pageGameDescrResponse.getStatusCode());
 
-        ResponseEntity<List<GameSummary>> listGameDescrResponse = restTemplate.exchange(urlOf("/api/v3.2/games/available"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), listType);
+        ResponseEntity<List<GameSummary>> listGameDescrResponse = restTemplate.exchange(urlOf("/games/available"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), listType);
         assertEquals(HttpStatus.UNAUTHORIZED, listGameDescrResponse.getStatusCode());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games/completed"))
+                .fromUriString(urlOf("/games/completed"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), pageType);
         assertEquals(HttpStatus.UNAUTHORIZED, pageGameDescrResponse.getStatusCode());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games/league/" + UUID.randomUUID()))
+                .fromUriString(urlOf("/games/league/" + UUID.randomUUID()))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), pageType);
         assertEquals(HttpStatus.UNAUTHORIZED, pageGameDescrResponse.getStatusCode());
 
-        ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Game.class);
+        ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/games/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Game.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getGameResponse.getStatusCode());
 
-        ResponseEntity<Count> getGamesCountResponse = restTemplate.exchange(urlOf("/api/v3.2/games/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
+        ResponseEntity<Count> getGamesCountResponse = restTemplate.exchange(urlOf("/games/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getGamesCountResponse.getStatusCode());
 
-        getGamesCountResponse = restTemplate.exchange(urlOf("/api/v3.2/games/league" + UUID.randomUUID() + "/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
+        getGamesCountResponse = restTemplate.exchange(urlOf("/games/league" + UUID.randomUUID() + "/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getGamesCountResponse.getStatusCode());
 
-        ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, gameSummary), String.class);
+        ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/games"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, gameSummary), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/full"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, game), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/full"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, game), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games"), HttpMethod.PUT, payloadWithAuth(testUserInvalidToken, gameSummary), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games"), HttpMethod.PUT, payloadWithAuth(testUserInvalidToken, gameSummary), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/full"), HttpMethod.PUT, payloadWithAuth(testUserInvalidToken, game), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/full"), HttpMethod.PUT, payloadWithAuth(testUserInvalidToken, game), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + UUID.randomUUID() + "/set/2"), HttpMethod.PATCH, emptyPayloadWithAuth(testUserInvalidToken), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + UUID.randomUUID() + "/set/2"), HttpMethod.PATCH, emptyPayloadWithAuth(testUserInvalidToken), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + UUID.randomUUID() + "/indexed/true"), HttpMethod.PATCH, emptyPayloadWithAuth(testUserInvalidToken), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + UUID.randomUUID() + "/indexed/true"), HttpMethod.PATCH, emptyPayloadWithAuth(testUserInvalidToken), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, gameResponse.getStatusCode());
     }
 
@@ -140,33 +140,33 @@ public class GameTests extends VbrTests {
 
         // Create teams and rules
 
-        ResponseEntity<String> rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.POST, payloadWithAuth(testUserToken1, rules), String.class);
+        ResponseEntity<String> rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.POST, payloadWithAuth(testUserToken1, rules), String.class);
         assertEquals(HttpStatus.CREATED, rulesResponse.getStatusCode());
 
-        ResponseEntity<String> teamResponse =  restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team1), String.class);
+        ResponseEntity<String> teamResponse =  restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team1), String.class);
         assertEquals(HttpStatus.CREATED, teamResponse.getStatusCode());
 
-        teamResponse =  restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team2), String.class);
+        teamResponse =  restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team2), String.class);
         assertEquals(HttpStatus.CREATED, teamResponse.getStatusCode());
 
         // Game does not exist
 
-        ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + gameSummary.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Game.class);
+        ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/games/" + gameSummary.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Game.class);
         assertEquals(HttpStatus.NOT_FOUND, getGameResponse.getStatusCode());
 
-        ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games"), HttpMethod.PUT, payloadWithAuth(testUserToken1, gameSummary), String.class);
+        ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/games"), HttpMethod.PUT, payloadWithAuth(testUserToken1, gameSummary), String.class);
         assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
 
         // Create game
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games"), HttpMethod.POST, payloadWithAuth(testUserToken1, gameSummary), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games"), HttpMethod.POST, payloadWithAuth(testUserToken1, gameSummary), String.class);
         assertEquals(HttpStatus.CREATED, gameResponse.getStatusCode());
 
         // Update game
 
         gameSummary.setScheduledAt(System.currentTimeMillis());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games"), HttpMethod.PUT, payloadWithAuth(testUserToken1, gameSummary), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games"), HttpMethod.PUT, payloadWithAuth(testUserToken1, gameSummary), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // List all games
@@ -175,7 +175,7 @@ public class GameTests extends VbrTests {
         ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games"))
+                .fromUriString(urlOf("/games"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         ResponseEntity<TestPageImpl<GameSummary>> pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), pageType);
@@ -185,7 +185,7 @@ public class GameTests extends VbrTests {
         // List all games with status
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games"))
+                .fromUriString(urlOf("/games"))
                 .queryParam("status", GameStatus.SCHEDULED)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
@@ -194,7 +194,7 @@ public class GameTests extends VbrTests {
         assertEquals(1, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games"))
+                .fromUriString(urlOf("/games"))
                 .queryParam("status", GameStatus.LIVE)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
@@ -205,7 +205,7 @@ public class GameTests extends VbrTests {
         // List all games with status, kind, gender
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games"))
+                .fromUriString(urlOf("/games"))
                 .queryParam("status", GameStatus.SCHEDULED)
                 .queryParam("kind", GameType.INDOOR)
                 .queryParam("gender", GenderType.GENTS)
@@ -216,7 +216,7 @@ public class GameTests extends VbrTests {
         assertEquals(0, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games"))
+                .fromUriString(urlOf("/games"))
                 .queryParam("status", GameStatus.SCHEDULED)
                 .queryParam("kind", GameType.BEACH)
                 .queryParam("gender", GenderType.LADIES)
@@ -228,40 +228,40 @@ public class GameTests extends VbrTests {
 
         // List all available games
 
-        ResponseEntity<List<GameSummary>> listGameDescrResponse = restTemplate.exchange(urlOf("/api/v3.2/games/available"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), listType);
+        ResponseEntity<List<GameSummary>> listGameDescrResponse = restTemplate.exchange(urlOf("/games/available"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), listType);
         assertEquals(HttpStatus.OK, listGameDescrResponse.getStatusCode());
         assertEquals(1, listGameDescrResponse.getBody().size());
 
         // Get game
 
-        getGameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + gameSummary.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Game.class);
+        getGameResponse = restTemplate.exchange(urlOf("/games/" + gameSummary.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Game.class);
         assertEquals(HttpStatus.OK, getGameResponse.getStatusCode());
 
         // Teams and rules are used by a game
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/" + rules.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules/" + rules.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.CONFLICT, rulesResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/" + team1.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams/" + team1.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.CONFLICT, teamResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/" + team2.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams/" + team2.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.CONFLICT, teamResponse.getStatusCode());
 
         // Delete game
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + gameSummary.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + gameSummary.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.NO_CONTENT, gameResponse.getStatusCode());
 
         // Delete teams and rules
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/" + rules.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules/" + rules.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.NO_CONTENT, rulesResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/" + team1.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams/" + team1.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/api/v3.2/teams/" + team2.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams/" + team2.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
     }
 
@@ -305,32 +305,32 @@ public class GameTests extends VbrTests {
 
         // Game does not exist
 
-        ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/full"), HttpMethod.PUT, payloadWithAuth(testUserToken1, game), String.class);
+        ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/games/full"), HttpMethod.PUT, payloadWithAuth(testUserToken1, game), String.class);
         assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
 
         // Create game
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/full"), HttpMethod.POST, payloadWithAuth(testUserToken1, game), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/full"), HttpMethod.POST, payloadWithAuth(testUserToken1, game), String.class);
         assertEquals(HttpStatus.CREATED, gameResponse.getStatusCode());
 
         // Update set
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + game.getId() + "/set/1"), HttpMethod.PATCH, payloadWithAuth(testUserToken1, buildSet()), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + game.getId() + "/set/1"), HttpMethod.PATCH, payloadWithAuth(testUserToken1, buildSet()), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // Update indexed
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + game.getId() + "/indexed/false"), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken1), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + game.getId() + "/indexed/false"), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + game.getId() + "/indexed/true"), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken1), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + game.getId() + "/indexed/true"), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // Update game
 
         game.setStatus(GameStatus.COMPLETED);
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/full"), HttpMethod.PUT, payloadWithAuth(testUserToken1, game), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/full"), HttpMethod.PUT, payloadWithAuth(testUserToken1, game), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // Get games in league
@@ -339,7 +339,7 @@ public class GameTests extends VbrTests {
         ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games/league/" + leagueId))
+                .fromUriString(urlOf("/games/league/" + leagueId))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         ResponseEntity<TestPageImpl<GameSummary>> pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), pageType);
@@ -347,7 +347,7 @@ public class GameTests extends VbrTests {
         assertEquals(1, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/league/" + leagueId))
+                .fromUriString(urlOf("/public/games/league/" + leagueId))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), pageType);
@@ -357,7 +357,7 @@ public class GameTests extends VbrTests {
         // Get games in division
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/league/" + leagueId + "/division/" + game.getLeague().getDivision()))
+                .fromUriString(urlOf("/public/games/league/" + leagueId + "/division/" + game.getLeague().getDivision()))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), pageType);
@@ -365,7 +365,7 @@ public class GameTests extends VbrTests {
         assertEquals(1, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/league/" + leagueId + "/division/somediv"))
+                .fromUriString(urlOf("/public/games/league/" + leagueId + "/division/somediv"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), pageType);
@@ -374,22 +374,22 @@ public class GameTests extends VbrTests {
 
         // Download excel file for division
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/public/games/league/" + leagueId + "/division/" + game.getLeague().getDivision() + "/excel"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/public/games/league/" + leagueId + "/division/" + game.getLeague().getDivision() + "/excel"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // Count games in league
 
-        ResponseEntity<Count> getGameCountResponse = restTemplate.exchange(urlOf("/api/v3.2/games/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Count.class);
+        ResponseEntity<Count> getGameCountResponse = restTemplate.exchange(urlOf("/games/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Count.class);
         assertEquals(HttpStatus.OK, getGameCountResponse.getStatusCode());
         assertEquals(1L, getGameCountResponse.getBody().getCount());
 
-        getGameCountResponse = restTemplate.exchange(urlOf("/api/v3.2/games/league/" + leagueId + "/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Count.class);
+        getGameCountResponse = restTemplate.exchange(urlOf("/games/league/" + leagueId + "/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Count.class);
         assertEquals(HttpStatus.OK, getGameCountResponse.getStatusCode());
         assertEquals(1L, getGameCountResponse.getBody().getCount());
 
         // Delete game
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + game.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + game.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.NO_CONTENT, gameResponse.getStatusCode());
     }
 
@@ -436,54 +436,54 @@ public class GameTests extends VbrTests {
 
         // Create teams and rules
 
-        ResponseEntity<String> rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.POST, payloadWithAuth(testUserToken1, rules), String.class);
+        ResponseEntity<String> rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.POST, payloadWithAuth(testUserToken1, rules), String.class);
         assertEquals(HttpStatus.CREATED, rulesResponse.getStatusCode());
 
-        ResponseEntity<String> teamResponse =  restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team1), String.class);
+        ResponseEntity<String> teamResponse =  restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team1), String.class);
         assertEquals(HttpStatus.CREATED, teamResponse.getStatusCode());
 
-        teamResponse =  restTemplate.exchange(urlOf("/api/v3.2/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team2), String.class);
+        teamResponse =  restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team2), String.class);
         assertEquals(HttpStatus.CREATED, teamResponse.getStatusCode());
 
         // Can't create game when referee is not friend
 
-        ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games"), HttpMethod.POST, payloadWithAuth(testUserToken1, gameSummary), String.class);
+        ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/games"), HttpMethod.POST, payloadWithAuth(testUserToken1, gameSummary), String.class);
         assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
 
         // Friends
 
-        ResponseEntity<String> friendResponse = restTemplate.exchange(urlOf(String.format("/api/v3.2/users/friends/request/%s", testUser2.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), String.class);
+        ResponseEntity<String> friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser2.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.CREATED, friendResponse.getStatusCode());
 
         ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<FriendRequest>> getFriendsResponse = restTemplate.exchange(urlOf("/api/v3.2/users/friends/requested"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), typeReference);
+        ResponseEntity<List<FriendRequest>> getFriendsResponse = restTemplate.exchange(urlOf("/users/friends/requested"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), typeReference);
         assertEquals(HttpStatus.OK, getFriendsResponse.getStatusCode());
         assertEquals(1, getFriendsResponse.getBody().size());
 
         UUID friendRequestId =  getFriendsResponse.getBody().get(0).getId();
 
-        friendResponse = restTemplate.exchange(urlOf(String.format("/api/v3.2/users/friends/accept/%s", friendRequestId)), HttpMethod.POST, emptyPayloadWithAuth(testUserToken2), String.class);
+        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/accept/%s", friendRequestId)), HttpMethod.POST, emptyPayloadWithAuth(testUserToken2), String.class);
         assertEquals(HttpStatus.CREATED, friendResponse.getStatusCode());
 
         // Get ingredients
 
-        ResponseEntity<GameIngredients> ingredientsResponse = restTemplate.exchange(urlOf(String.format("/api/v3.2/games/ingredients/%s", gameSummary.getKind())), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), GameIngredients.class);
+        ResponseEntity<GameIngredients> ingredientsResponse = restTemplate.exchange(urlOf(String.format("/games/ingredients/%s", gameSummary.getKind())), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), GameIngredients.class);
         assertEquals(HttpStatus.OK, ingredientsResponse.getStatusCode());
 
         // Create game
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games"), HttpMethod.POST, payloadWithAuth(testUserToken1, gameSummary), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games"), HttpMethod.POST, payloadWithAuth(testUserToken1, gameSummary), String.class);
         assertEquals(HttpStatus.CREATED, gameResponse.getStatusCode());
 
         // List all available games for creator and referee
 
         ParameterizedTypeReference<List<GameSummary>> listType = new ParameterizedTypeReference<>() {};
 
-        ResponseEntity<List<GameSummary>> listGameDescrResponse = restTemplate.exchange(urlOf("/api/v3.2/games/available"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), listType);
+        ResponseEntity<List<GameSummary>> listGameDescrResponse = restTemplate.exchange(urlOf("/games/available"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), listType);
         assertEquals(HttpStatus.OK, listGameDescrResponse.getStatusCode());
         assertEquals(1, listGameDescrResponse.getBody().size());
 
-        listGameDescrResponse = restTemplate.exchange(urlOf("/api/v3.2/games/available"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken2), listType);
+        listGameDescrResponse = restTemplate.exchange(urlOf("/games/available"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken2), listType);
         assertEquals(HttpStatus.OK, listGameDescrResponse.getStatusCode());
         assertEquals(1, listGameDescrResponse.getBody().size());
 
@@ -515,38 +515,38 @@ public class GameTests extends VbrTests {
         game.setGuestCards(new ArrayList<>());
         game.setScore("");
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/full"), HttpMethod.PUT, payloadWithAuth(testUserToken1, game), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/full"), HttpMethod.PUT, payloadWithAuth(testUserToken1, game), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // Update referee
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + game.getId() + "/referee/" + testUser1.getId()), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken2), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + game.getId() + "/referee/" + testUser1.getId()), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken2), String.class);
         assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + game.getId() + "/referee/" + testUser1.getId()), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken1), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + game.getId() + "/referee/" + testUser1.getId()), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
-        ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + gameSummary.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken2), Game.class);
+        ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/games/" + gameSummary.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken2), Game.class);
         assertEquals(HttpStatus.NOT_FOUND, getGameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + game.getId() + "/referee/" + testUser2.getId()), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken1), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + game.getId() + "/referee/" + testUser2.getId()), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         // Update game by referee
 
         game.setStatus(GameStatus.COMPLETED);
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/full"), HttpMethod.PUT, payloadWithAuth(testUserToken2, game), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/full"), HttpMethod.PUT, payloadWithAuth(testUserToken2, game), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + game.getId() + "/referee/" + testUser1.getId()), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken1), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + game.getId() + "/referee/" + testUser1.getId()), HttpMethod.PATCH, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
 
         // List completed games
 
         ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games"))
+                .fromUriString(urlOf("/games"))
                 .queryParam("status", GameStatus.COMPLETED)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
@@ -555,7 +555,7 @@ public class GameTests extends VbrTests {
         assertEquals(1, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games"))
+                .fromUriString(urlOf("/games"))
                 .queryParam("status", GameStatus.COMPLETED)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
@@ -564,7 +564,7 @@ public class GameTests extends VbrTests {
         assertEquals(0, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games/completed"))
+                .fromUriString(urlOf("/games/completed"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), pageType);
@@ -572,7 +572,7 @@ public class GameTests extends VbrTests {
         assertEquals(1, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/games/completed"))
+                .fromUriString(urlOf("/games/completed"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken2), pageType);
@@ -581,13 +581,13 @@ public class GameTests extends VbrTests {
 
         // Referee cannot delete game of creator
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + game.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken2), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/" + game.getId()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken2), String.class);
         assertEquals(HttpStatus.NO_CONTENT, gameResponse.getStatusCode());
 
-        getGameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + gameSummary.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Game.class);
+        getGameResponse = restTemplate.exchange(urlOf("/games/" + gameSummary.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Game.class);
         assertEquals(HttpStatus.OK, getGameResponse.getStatusCode());
 
-        getGameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/" + gameSummary.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken2), Game.class);
+        getGameResponse = restTemplate.exchange(urlOf("/games/" + gameSummary.getId()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken2), Game.class);
         assertEquals(HttpStatus.OK, getGameResponse.getStatusCode());
     }
 
@@ -635,19 +635,19 @@ public class GameTests extends VbrTests {
 
         // Create game
 
-        ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/full"), HttpMethod.POST, payloadWithAuth(testUserToken1, game), String.class);
+        ResponseEntity<String> gameResponse = restTemplate.exchange(urlOf("/games/full"), HttpMethod.POST, payloadWithAuth(testUserToken1, game), String.class);
         assertEquals(HttpStatus.CREATED, gameResponse.getStatusCode());
 
         // Get game
 
-        ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/api/v3.2/public/games/" + game.getId()), HttpMethod.GET, emptyPayloadWithoutAuth(), Game.class);
+        ResponseEntity<Game> getGameResponse = restTemplate.exchange(urlOf("/public/games/" + game.getId()), HttpMethod.GET, emptyPayloadWithoutAuth(), Game.class);
         assertEquals(HttpStatus.OK, getGameResponse.getStatusCode());
 
         // List live games
 
         ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/live"))
+                .fromUriString(urlOf("/public/games/live"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         ResponseEntity<TestPageImpl<GameSummary>> pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -657,7 +657,7 @@ public class GameTests extends VbrTests {
         // Search not matching
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/token/notmatching"))
+                .fromUriString(urlOf("/public/games/token/notmatching"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -665,7 +665,7 @@ public class GameTests extends VbrTests {
         assertEquals(0, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/token/team1"))
+                .fromUriString(urlOf("/public/games/token/team1"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -675,7 +675,7 @@ public class GameTests extends VbrTests {
         // List by team search
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/token/tea"))
+                .fromUriString(urlOf("/public/games/token/tea"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -683,7 +683,7 @@ public class GameTests extends VbrTests {
         assertEquals(1, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/token/" + game.getHomeTeam().getName()))
+                .fromUriString(urlOf("/public/games/token/" + game.getHomeTeam().getName()))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -693,7 +693,7 @@ public class GameTests extends VbrTests {
         // List by referee search
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/token/vbr"))
+                .fromUriString(urlOf("/public/games/token/vbr"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -701,7 +701,7 @@ public class GameTests extends VbrTests {
         assertEquals(1, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/token/" + game.getRefereeName()))
+                .fromUriString(urlOf("/public/games/token/" + game.getRefereeName()))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -711,7 +711,7 @@ public class GameTests extends VbrTests {
         // List by league search
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/token/lea"))
+                .fromUriString(urlOf("/public/games/token/lea"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -721,7 +721,7 @@ public class GameTests extends VbrTests {
         // List by date search
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/date/" + LocalDate.now().format(DateTimeFormatter.ISO_DATE)))
+                .fromUriString(urlOf("/public/games/date/" + LocalDate.now().format(DateTimeFormatter.ISO_DATE)))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -729,7 +729,7 @@ public class GameTests extends VbrTests {
         assertEquals(1, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/date/" + LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE)))
+                .fromUriString(urlOf("/public/games/date/" + LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE)))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -737,7 +737,7 @@ public class GameTests extends VbrTests {
         assertEquals(0, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/date/" + LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_DATE)))
+                .fromUriString(urlOf("/public/games/date/" + LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_DATE)))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -748,11 +748,11 @@ public class GameTests extends VbrTests {
 
         game.setIndexed(false);
 
-        gameResponse = restTemplate.exchange(urlOf("/api/v3.2/games/full"), HttpMethod.PUT, payloadWithAuth(testUserToken1, game), String.class);
+        gameResponse = restTemplate.exchange(urlOf("/games/full"), HttpMethod.PUT, payloadWithAuth(testUserToken1, game), String.class);
         assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/token/vbr"))
+                .fromUriString(urlOf("/public/games/token/vbr"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -760,7 +760,7 @@ public class GameTests extends VbrTests {
         assertEquals(0, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/token/lea"))
+                .fromUriString(urlOf("/public/games/token/lea"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
@@ -768,7 +768,7 @@ public class GameTests extends VbrTests {
         assertEquals(0, pageGameDescrResponse.getBody().getTotalElements());
 
         uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/api/v3.2/public/games/date/" + LocalDate.now().format(DateTimeFormatter.ISO_DATE)))
+                .fromUriString(urlOf("/public/games/date/" + LocalDate.now().format(DateTimeFormatter.ISO_DATE)))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         pageGameDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);

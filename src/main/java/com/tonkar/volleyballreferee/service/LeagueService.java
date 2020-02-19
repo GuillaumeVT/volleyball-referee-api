@@ -33,4 +33,5 @@ public interface LeagueService {
 
     void deleteLeague(User user, UUID leagueId) throws ConflictException;
 
+    void deleteAllLeagues(User user);
 }

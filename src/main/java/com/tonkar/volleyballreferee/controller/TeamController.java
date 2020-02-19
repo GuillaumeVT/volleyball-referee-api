@@ -28,7 +28,6 @@ import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.2/teams")
 @CrossOrigin("*")
 @Slf4j
 public class TeamController {
@@ -36,7 +35,7 @@ public class TeamController {
     @Autowired
     private TeamService teamService;
 
-    @GetMapping(value = "", produces = {"application/json"})
+    @GetMapping(value = "/teams", produces = {"application/json"})
     public ResponseEntity<Page<TeamSummary>> listTeams(@AuthenticationPrincipal User user,
                                                        @RequestParam(value = "kind", required = false) List<GameType> kinds,
                                                        @RequestParam(value = "gender", required = false) List<GenderType> genders,
@@ -45,56 +44,36 @@ public class TeamController {
         return new ResponseEntity<>(teamService.listTeams(user, kinds, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{teamId}", produces = {"application/json"})
-    public ResponseEntity<Team> getTeam(@AuthenticationPrincipal User user, @PathVariable("teamId") UUID teamId) {
-        try {
-            return new ResponseEntity<>(teamService.getTeam(user, teamId), HttpStatus.OK);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @GetMapping(value = "/teams/{teamId}", produces = {"application/json"})
+    public ResponseEntity<Team> getTeam(@AuthenticationPrincipal User user, @PathVariable("teamId") UUID teamId) throws NotFoundException {
+        return new ResponseEntity<>(teamService.getTeam(user, teamId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/count", produces = {"application/json"})
+    @GetMapping(value = "/teams/count", produces = {"application/json"})
     public ResponseEntity<Count> getNumberOfTeams(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(teamService.getNumberOfTeams(user), HttpStatus.OK);
     }
 
-    @PostMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> createTeam(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Team team) {
-        try {
-            teamService.createTeam(user, team);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (ConflictException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
+    @PostMapping(value = "/teams", produces = {"application/json"})
+    public ResponseEntity<Void> createTeam(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Team team) throws ConflictException {
+        teamService.createTeam(user, team);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PutMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> updateTeam(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Team team) {
-        try {
-            teamService.updateTeam(user, team);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @PutMapping(value = "/teams", produces = {"application/json"})
+    public ResponseEntity<Void> updateTeam(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Team team) throws NotFoundException {
+        teamService.updateTeam(user, team);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/{teamId}", produces = {"application/json"})
-    public ResponseEntity<String> deleteTeam(@AuthenticationPrincipal User user, @PathVariable("teamId") UUID teamId) {
-        try {
-            teamService.deleteTeam(user, teamId);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (ConflictException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
+    @DeleteMapping(value = "/teams/{teamId}", produces = {"application/json"})
+    public ResponseEntity<Void> deleteTeam(@AuthenticationPrincipal User user, @PathVariable("teamId") UUID teamId) throws ConflictException {
+        teamService.deleteTeam(user, teamId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> deleteAllTeams(@AuthenticationPrincipal User user) {
+    @DeleteMapping(value = "/teams", produces = {"application/json"})
+    public ResponseEntity<Void> deleteAllTeams(@AuthenticationPrincipal User user) {
         teamService.deleteAllTeams(user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

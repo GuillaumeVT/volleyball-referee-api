@@ -31,11 +31,11 @@ public interface GameRepository extends MongoRepository<Game, UUID> {
     @ExistsQuery("{ '$and': [ { 'createdBy': ?0 }, { 'status': ?2 }, { '$or': [ { 'homeTeam.id': ?1 }, { 'guestTeam.id': ?1 } ] } ] }")
     boolean existsByCreatedByAndTeamAndStatus(String userId, UUID teamId, GameStatus status);
 
-    boolean existsByCreatedByAndLeagueIdAndStatus(String userId, UUID leagueId, GameStatus status);
+    boolean existsByCreatedByAndLeague_IdAndStatus(String userId, UUID leagueId, GameStatus status);
 
     long countByCreatedBy(String userId);
 
-    long countByCreatedByAndLeagueId(String userId, UUID leagueId);
+    long countByCreatedByAndLeague_Id(String userId, UUID leagueId);
 
     @CountQuery("{ '$and': [ { '$or': [ { 'createdBy': ?0 }, { 'refereedBy': ?0 } ] } , { 'status': { $ne: ?1 } } ] }")
     long countByAllowedUserAndStatusNot(String userId, GameStatus status);

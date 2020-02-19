@@ -24,32 +24,32 @@ public class RulesTests extends VbrTests {
     @Test
     public void testNotAuthenticated() {
         ParameterizedTypeReference<List<RulesSummary>> listType = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<RulesSummary>> getRulesDescrResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), listType);
+        ResponseEntity<List<RulesSummary>> getRulesDescrResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), listType);
         assertEquals(HttpStatus.UNAUTHORIZED, getRulesDescrResponse.getStatusCode());
 
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/api/v3.2/rules")).queryParam("kind", GameType.INDOOR);
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/rules")).queryParam("kind", GameType.INDOOR);
         getRulesDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), listType);
         assertEquals(HttpStatus.UNAUTHORIZED, getRulesDescrResponse.getStatusCode());
 
-        ResponseEntity<Rules> getRulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Rules.class);
+        ResponseEntity<Rules> getRulesResponse = restTemplate.exchange(urlOf("/rules/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Rules.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getRulesResponse.getStatusCode());
 
-        ResponseEntity<RulesSummary> getDefaultRulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/default/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), RulesSummary.class);
+        ResponseEntity<RulesSummary> getDefaultRulesResponse = restTemplate.exchange(urlOf("/rules/default/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), RulesSummary.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getDefaultRulesResponse.getStatusCode());
 
-        ResponseEntity<Count> getRulesCountResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
+        ResponseEntity<Count> getRulesCountResponse = restTemplate.exchange(urlOf("/rules/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
         assertEquals(HttpStatus.UNAUTHORIZED, getRulesCountResponse.getStatusCode());
 
-        ResponseEntity<String> rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, Rules.OFFICIAL_INDOOR_RULES), String.class);
+        ResponseEntity<String> rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, Rules.OFFICIAL_INDOOR_RULES), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, rulesResponse.getStatusCode());
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.PUT, payloadWithAuth(testUserInvalidToken, Rules.OFFICIAL_INDOOR_RULES), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.PUT, payloadWithAuth(testUserInvalidToken, Rules.OFFICIAL_INDOOR_RULES), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, rulesResponse.getStatusCode());
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, rulesResponse.getStatusCode());
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
         assertEquals(HttpStatus.UNAUTHORIZED, rulesResponse.getStatusCode());
     }
 
@@ -65,37 +65,37 @@ public class RulesTests extends VbrTests {
 
         // Rules don't exist yet
 
-        ResponseEntity<Rules> getRulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/" + rulesId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Rules.class);
+        ResponseEntity<Rules> getRulesResponse = restTemplate.exchange(urlOf("/rules/" + rulesId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Rules.class);
         assertEquals(HttpStatus.NOT_FOUND, getRulesResponse.getStatusCode());
 
-        ResponseEntity<String> rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.PUT, payloadWithAuth(testUserToken1, rules), String.class);
+        ResponseEntity<String> rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.PUT, payloadWithAuth(testUserToken1, rules), String.class);
         assertEquals(HttpStatus.NOT_FOUND, rulesResponse.getStatusCode());
 
         // Default rules
 
-        ResponseEntity<RulesSummary> getDefaultRulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/default/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), RulesSummary.class);
+        ResponseEntity<RulesSummary> getDefaultRulesResponse = restTemplate.exchange(urlOf("/rules/default/kind/" + GameType.INDOOR), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), RulesSummary.class);
         assertEquals(HttpStatus.OK, getDefaultRulesResponse.getStatusCode());
 
-        getDefaultRulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/default/kind/" + GameType.INDOOR_4X4), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), RulesSummary.class);
+        getDefaultRulesResponse = restTemplate.exchange(urlOf("/rules/default/kind/" + GameType.INDOOR_4X4), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), RulesSummary.class);
         assertEquals(HttpStatus.OK, getDefaultRulesResponse.getStatusCode());
 
-        getDefaultRulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/default/kind/" + GameType.BEACH), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), RulesSummary.class);
+        getDefaultRulesResponse = restTemplate.exchange(urlOf("/rules/default/kind/" + GameType.BEACH), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), RulesSummary.class);
         assertEquals(HttpStatus.OK, getDefaultRulesResponse.getStatusCode());
 
         // Create rules
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.POST, payloadWithAuth(testUserToken1, rules), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.POST, payloadWithAuth(testUserToken1, rules), String.class);
         assertEquals(HttpStatus.CREATED, rulesResponse.getStatusCode());
 
         // Rules already exist
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.POST, payloadWithAuth(testUserToken1, rules), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.POST, payloadWithAuth(testUserToken1, rules), String.class);
         assertEquals(HttpStatus.CONFLICT, rulesResponse.getStatusCode());
 
 
         rules.setId(UUID.randomUUID());
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.POST, payloadWithAuth(testUserToken1, rules), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.POST, payloadWithAuth(testUserToken1, rules), String.class);
         assertEquals(HttpStatus.CONFLICT, rulesResponse.getStatusCode());
 
         rules.setId(rulesId);
@@ -107,55 +107,55 @@ public class RulesTests extends VbrTests {
         rules.setBeachCourtSwitches(true);
         rules.setGameIntervalDuration(10);
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.PUT, payloadWithAuth(testUserToken1, rules), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.PUT, payloadWithAuth(testUserToken1, rules), String.class);
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
 
         // Count rules
 
-        ResponseEntity<Count> getRulesCountResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Count.class);
+        ResponseEntity<Count> getRulesCountResponse = restTemplate.exchange(urlOf("/rules/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Count.class);
         assertEquals(HttpStatus.OK, getRulesCountResponse.getStatusCode());
         assertEquals(1L, getRulesCountResponse.getBody().getCount());
 
         // Get rules
 
-        getRulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/" + rulesId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Rules.class);
+        getRulesResponse = restTemplate.exchange(urlOf("/rules/" + rulesId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Rules.class);
         assertEquals(HttpStatus.OK, getRulesResponse.getStatusCode());
         assertEquals(rules.getName(), getRulesResponse.getBody().getName());
 
         // List all rules
 
         ParameterizedTypeReference<List<RulesSummary>> listType = new ParameterizedTypeReference<>() {};
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/api/v3.2/rules"));
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/rules"));
         ResponseEntity<List<RulesSummary>> getRulesDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), listType);
         assertEquals(HttpStatus.OK, getRulesDescrResponse.getStatusCode());
         assertEquals(1, getRulesDescrResponse.getBody().size());
 
         // List all rules of kind
 
-        uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/api/v3.2/rules")).queryParam("kind", GameType.INDOOR);
+        uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/rules")).queryParam("kind", GameType.INDOOR);
         getRulesDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), listType);
         assertEquals(HttpStatus.OK, getRulesDescrResponse.getStatusCode());
         assertEquals(1, getRulesDescrResponse.getBody().size());
 
-        uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/api/v3.2/rules")).queryParam("kind", GameType.BEACH);
+        uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/rules")).queryParam("kind", GameType.BEACH);
         getRulesDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), listType);
         assertEquals(HttpStatus.OK, getRulesDescrResponse.getStatusCode());
         assertEquals(0, getRulesDescrResponse.getBody().size());
 
-        uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/api/v3.2/rules")).queryParam("kind", String.join(",", GameType.BEACH.toString(), GameType.INDOOR.toString()));
+        uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/rules")).queryParam("kind", String.join(",", GameType.BEACH.toString(), GameType.INDOOR.toString()));
         getRulesDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), listType);
         assertEquals(HttpStatus.OK, getRulesDescrResponse.getStatusCode());
         assertEquals(1, getRulesDescrResponse.getBody().size());
 
         // Delete rules
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules/" + rulesId), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules/" + rulesId), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.NO_CONTENT, rulesResponse.getStatusCode());
 
-        rulesResponse = restTemplate.exchange(urlOf("/api/v3.2/rules"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        rulesResponse = restTemplate.exchange(urlOf("/rules"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
         assertEquals(HttpStatus.NO_CONTENT, rulesResponse.getStatusCode());
 
-        uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/api/v3.2/rules"));
+        uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/rules"));
         getRulesDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), listType);
         assertEquals(HttpStatus.OK, getRulesDescrResponse.getStatusCode());
         assertEquals(0, getRulesDescrResponse.getBody().size());

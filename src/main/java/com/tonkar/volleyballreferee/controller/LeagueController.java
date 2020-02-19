@@ -23,7 +23,6 @@ import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.2/leagues")
 @CrossOrigin("*")
 @Slf4j
 public class LeagueController {
@@ -31,47 +30,38 @@ public class LeagueController {
     @Autowired
     private LeagueService leagueService;
 
-    @GetMapping(value = "", produces = {"application/json"})
+    @GetMapping(value = "/leagues", produces = {"application/json"})
     public ResponseEntity<List<LeagueSummary>> listLeagues(@AuthenticationPrincipal User user,
                                                            @RequestParam(value = "kind", required = false) List<GameType> kinds) {
         return new ResponseEntity<>(leagueService.listLeagues(user, kinds), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{leagueId}", produces = {"application/json"})
-    public ResponseEntity<League> getLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
-        try {
-            return new ResponseEntity<>(leagueService.getLeague(user, leagueId), HttpStatus.OK);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @GetMapping(value = "/leagues/{leagueId}", produces = {"application/json"})
+    public ResponseEntity<League> getLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) throws NotFoundException {
+        return new ResponseEntity<>(leagueService.getLeague(user, leagueId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/count", produces = {"application/json"})
+    @GetMapping(value = "/leagues/count", produces = {"application/json"})
     public ResponseEntity<Count> getNumberOfLeagues(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(leagueService.getNumberOfLeagues(user), HttpStatus.OK);
     }
 
-    @PostMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> createLeague(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody League league) {
-        try {
-            leagueService.createLeague(user, league);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (ConflictException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
+    @PostMapping(value = "/leagues", produces = {"application/json"})
+    public ResponseEntity<Void> createLeague(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody League league) throws ConflictException {
+        leagueService.createLeague(user, league);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @DeleteMapping(value = "/{leagueId}", produces = {"application/json"})
-    public ResponseEntity<String> deleteLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
-        try {
-            leagueService.deleteLeague(user, leagueId);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (ConflictException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
+    @DeleteMapping(value = "/leagues/{leagueId}", produces = {"application/json"})
+    public ResponseEntity<Void> deleteLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) throws ConflictException {
+        leagueService.deleteLeague(user, leagueId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping(value = "/leagues", produces = {"application/json"})
+    public ResponseEntity<Void> deleteAllLeagues(@AuthenticationPrincipal User user) {
+        leagueService.deleteAllLeagues(user);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

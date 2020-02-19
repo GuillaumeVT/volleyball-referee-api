@@ -23,7 +23,6 @@ import java.util.UUID;
 
 @RestController
 @Validated
-@RequestMapping("/api/v3.2/rules")
 @CrossOrigin("*")
 @Slf4j
 public class RulesController {
@@ -31,67 +30,47 @@ public class RulesController {
     @Autowired
     private RulesService rulesService;
 
-    @GetMapping(value = "", produces = {"application/json"})
+    @GetMapping(value = "/rules", produces = {"application/json"})
     public ResponseEntity<List<RulesSummary>> listRules(@AuthenticationPrincipal User user,
                                                         @RequestParam(value = "kind", required = false) List<GameType> kinds) {
         return new ResponseEntity<>(rulesService.listRules(user, kinds), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/{rulesId}", produces = {"application/json"})
-    public ResponseEntity<Rules> getRules(@AuthenticationPrincipal User user, @PathVariable("rulesId") UUID rulesId) {
-        try {
-            return new ResponseEntity<>(rulesService.getRules(user, rulesId), HttpStatus.OK);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @GetMapping(value = "/rules/{rulesId}", produces = {"application/json"})
+    public ResponseEntity<Rules> getRules(@AuthenticationPrincipal User user, @PathVariable("rulesId") UUID rulesId) throws NotFoundException {
+        return new ResponseEntity<>(rulesService.getRules(user, rulesId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/default/kind/{kind}", produces = {"application/json"})
+    @GetMapping(value = "/rules/default/kind/{kind}", produces = {"application/json"})
     public ResponseEntity<RulesSummary> getDefaultRules(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
         return new ResponseEntity<>(rulesService.getDefaultRules(kind), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/count", produces = {"application/json"})
+    @GetMapping(value = "/rules/count", produces = {"application/json"})
     public ResponseEntity<Count> getNumberOfRules(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(rulesService.getNumberOfRules(user), HttpStatus.OK);
     }
 
-    @PostMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> createRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules) {
-        try {
-            rulesService.createRules(user, rules);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (ConflictException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
+    @PostMapping(value = "/rules", produces = {"application/json"})
+    public ResponseEntity<Void> createRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules) throws ConflictException {
+        rulesService.createRules(user, rules);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PutMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> updateRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules) {
-        try {
-            rulesService.updateRules(user, rules);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    @PutMapping(value = "/rules", produces = {"application/json"})
+    public ResponseEntity<Void> updateRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules) throws NotFoundException {
+        rulesService.updateRules(user, rules);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping(value = "/{rulesId}", produces = {"application/json"})
-    public ResponseEntity<String> deleteRules(@AuthenticationPrincipal User user, @PathVariable("rulesId") UUID rulesId) {
-        try {
-            rulesService.deleteRules(user, rulesId);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (ConflictException e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
+    @DeleteMapping(value = "/rules/{rulesId}", produces = {"application/json"})
+    public ResponseEntity<Void> deleteRules(@AuthenticationPrincipal User user, @PathVariable("rulesId") UUID rulesId) throws ConflictException {
+        rulesService.deleteRules(user, rulesId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(value = "", produces = {"application/json"})
-    public ResponseEntity<String> deleteAllRules(@AuthenticationPrincipal User user) {
+    @DeleteMapping(value = "/rules", produces = {"application/json"})
+    public ResponseEntity<Void> deleteAllRules(@AuthenticationPrincipal User user) {
         rulesService.deleteAllRules(user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

@@ -11,13 +11,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-@NoArgsConstructor @Getter @Setter
-@Document(collection="users")
+@NoArgsConstructor
+@Getter
+@Setter
+@Document(collection = "users")
 public class User implements UserDetails {
 
     @Id
@@ -32,6 +36,8 @@ public class User implements UserDetails {
     private String               password;
     @NotBlank
     private String               purchaseToken;
+    private boolean              subscription;
+    private long                 subscriptionExpiryAt;
     private List<Friend>         friends;
     private long                 createdAt;
     private long                 lastLoginAt;
@@ -52,7 +58,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return !subscription || LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli() < subscriptionExpiryAt;
     }
 
     @Override
@@ -72,7 +78,10 @@ public class User implements UserDetails {
                 .findFirst();
     }
 
-    @AllArgsConstructor @NoArgsConstructor @Getter @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
     public static class Friend {
 
         @NotBlank
@@ -82,7 +91,10 @@ public class User implements UserDetails {
 
     }
 
-    @AllArgsConstructor @NoArgsConstructor @Getter @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
     public static class FailedAuthentication {
 
         private int  attempts;

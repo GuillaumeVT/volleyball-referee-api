@@ -17,6 +17,8 @@ public interface UserService {
 
     UserSummary getUserFromPurchaseToken(String purchaseToken) throws NotFoundException;
 
+    void refreshSubscriptionPurchaseToken(String purchaseToken);
+
     UserToken createUser(User user) throws UnauthorizedException, ForbiddenException, ConflictException, NotFoundException, BadRequestException;
 
     UserToken signInUser(String userEmail, String userPassword) throws NotFoundException, UnauthorizedException, ForbiddenException;
@@ -46,7 +48,5 @@ public interface UserService {
     UserToken resetPassword(UUID passwordResetId, String userPassword) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException, ForbiddenException;
 
     void purgeOldPasswordResets(int days);
-
-    void disableRefundedUsers();
 
 }
