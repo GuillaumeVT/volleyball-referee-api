@@ -3,6 +3,8 @@ spring.profiles: integration
 jasypt:
   encryptor:
     password: ${JASYPT_KEY:}
+    algorithm: PBEWithMD5AndDES
+    iv-generator-classname: org.jasypt.iv.NoIvGenerator
 
 server:
   servlet:
@@ -35,6 +37,8 @@ spring.profiles: production
 jasypt:
   encryptor:
     password: ${JASYPT_KEY:}
+    algorithm: PBEWithMD5AndDES
+    iv-generator-classname: org.jasypt.iv.NoIvGenerator
 
 server:
   servlet:

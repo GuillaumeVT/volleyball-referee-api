@@ -3,6 +3,8 @@ spring.profiles: test
 jasypt:
   encryptor:
     password: ${JASYPT_KEY:}
+    algorithm: PBEWithMD5AndDES
+    iv-generator-classname: org.jasypt.iv.NoIvGenerator
 
 server:
   servlet:

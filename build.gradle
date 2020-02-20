@@ -29,18 +29,18 @@ dependencies {
     }
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    implementation group: 'org.jsoup', name: 'jsoup', version: '1.12.1'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.12.2'
     implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
     // Security
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
-    implementation group: 'com.github.ulisesbocchio', name: 'jasypt-spring-boot-starter', version: '2.1.2'
+    implementation group: 'com.github.ulisesbocchio', name: 'jasypt-spring-boot-starter', version: '3.0.2'
     implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: 'v3-rev134-1.25.0'
     // Excel
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.1'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
     // Misc
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.10'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
