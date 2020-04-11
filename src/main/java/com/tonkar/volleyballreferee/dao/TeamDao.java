@@ -12,9 +12,11 @@ import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,6 +34,10 @@ public class TeamDao {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    public void save(Team team) {
+        mongoTemplate.save(team);
+    }
 
     public Page<TeamSummary> listTeams(String userId, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
         kinds = DaoUtils.computeKinds(kinds);
@@ -82,4 +88,41 @@ public class TeamDao {
         mongoTemplate.updateMulti(query, Update.update("guestTeam", team), mongoTemplate.getCollectionName(Game.class));
     }
 
+    public CloseableIterator<TeamSummary> findByCreatedByOrderByNameAsc(String userId) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
+        return mongoTemplate.aggregateStream(
+                Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation),
+                mongoTemplate.getCollectionName(Team.class), TeamSummary.class);
+    }
+
+    public Optional<Team> findByIdAndCreatedBy(UUID id, String userId) {
+        Query query = Query.query(Criteria.where("_id").is(id).and("createdBy").is(userId));
+        return Optional.ofNullable(mongoTemplate.findOne(query, Team.class));
+    }
+
+    public Optional<Team> findByIdAndCreatedByAndKind(UUID id, String userId, GameType kind) {
+        Query query = Query.query(Criteria.where("_id").is(id).and("createdBy").is(userId).and("kind").is(kind));
+        return Optional.ofNullable(mongoTemplate.findOne(query, Team.class));
+    }
+
+    public boolean existsById(UUID id) {
+        Query query = Query.query(Criteria.where("_id").is(id));
+        return mongoTemplate.exists(query, Team.class);
+    }
+
+    public boolean existsByCreatedByAndNameAndKindAndGender(String userId, String name, GameType kind, GenderType gender) {
+        Query query = Query.query(Criteria.where("createdBy").is(userId).and("name").is(name).and("kind").is(kind).and("gender").is(gender));
+        return mongoTemplate.exists(query, Team.class);
+    }
+
+    public long countByCreatedBy(String userId) {
+        Query query = Query.query(Criteria.where("createdBy").is(userId));
+        return mongoTemplate.count(query, Team.class);
+    }
+
+    public void deleteByIdAndCreatedBy(UUID id, String userId) {
+        Query query = Query.query(Criteria.where("_id").is(id).and("createdBy").is(userId));
+        mongoTemplate.remove(query, Team.class);
+    }
 }

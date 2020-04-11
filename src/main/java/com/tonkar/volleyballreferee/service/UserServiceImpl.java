@@ -7,15 +7,14 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.AndroidPublisherScopes;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
+import com.tonkar.volleyballreferee.dao.FriendRequestDao;
+import com.tonkar.volleyballreferee.dao.PasswordResetDao;
 import com.tonkar.volleyballreferee.dao.UserDao;
 import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.PasswordReset;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.*;
-import com.tonkar.volleyballreferee.repository.FriendRequestRepository;
-import com.tonkar.volleyballreferee.repository.PasswordResetRepository;
-import com.tonkar.volleyballreferee.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -44,16 +43,13 @@ public class UserServiceImpl implements UserService {
     private EmailService emailService;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private UserDao userDao;
 
     @Autowired
-    private FriendRequestRepository friendRequestRepository;
+    private FriendRequestDao friendRequestDao;
 
     @Autowired
-    private PasswordResetRepository passwordResetRepository;
+    private PasswordResetDao passwordResetDao;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -78,13 +74,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUser(String userId) throws NotFoundException {
-        return userRepository
+        return userDao
                 .findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find user %s", userId)));
     }
 
     private User getUserByPseudo(String pseudo) throws NotFoundException {
-        return userRepository
+        return userDao
                 .findByPseudo(pseudo)
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find user %s", pseudo)));
     }
@@ -97,7 +93,7 @@ public class UserServiceImpl implements UserService {
         if (optionalClaims.isPresent()) {
             Claims claims = optionalClaims.get();
             if (claims.getExpiration().toInstant().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC))) {
-                optionalUser = userRepository.findById(claims.getSubject());
+                optionalUser = userDao.findById(claims.getSubject());
             } else {
                 optionalUser = Optional.empty();
             }
@@ -158,7 +154,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserToken createUser(User user) throws UnauthorizedException, ForbiddenException, ConflictException, NotFoundException, BadRequestException {
-        if (userRepository.existsByPurchaseToken(user.getPurchaseToken())) {
+        if (userDao.existsByPurchaseToken(user.getPurchaseToken())) {
             throw new ConflictException(String.format("Found an existing user with purchase token %s", user.getPurchaseToken()));
         }
 
@@ -173,14 +169,14 @@ public class UserServiceImpl implements UserService {
         String password = user.getPassword().trim();
         validatePassword(password);
 
-        if (userRepository.existsByEmail(user.getEmail())) {
+        if (userDao.existsByEmail(user.getEmail())) {
             throw new ConflictException(String.format("Found an existing user with email %s", user.getEmail()));
         }
 
-        boolean idExists = userRepository.existsById(user.getId());
-        boolean pseudoExists = userRepository.existsByPseudo(user.getPseudo());
+        boolean idExists = userDao.existsById(user.getId());
+        boolean pseudoExists = userDao.existsByPseudo(user.getPseudo());
 
-      if (idExists) {
+        if (idExists) {
             throw new ConflictException(String.format("Found an existing user with id %s", user.getId()));
         } else if (pseudoExists) {
             throw new ConflictException(String.format("Found an existing user with pseudo %s", user.getPseudo()));
@@ -192,7 +188,7 @@ public class UserServiceImpl implements UserService {
             user.setEnabled(true);
             user.setSubscription(subscription != null);
             user.setSubscriptionExpiryAt(subscription == null ? 0L : subscription.getExpiryTimeMillis());
-            userRepository.save(user);
+            userDao.save(user);
             log.info(String.format("Created user with id %s and pseudo %s", user.getId(), user.getPseudo()));
             emailService.sendUserCreatedNotificationEmail(user);
             return signInUser(user.getEmail(), password);
@@ -203,7 +199,7 @@ public class UserServiceImpl implements UserService {
     public UserToken signInUser(String userEmail, String userPassword) throws NotFoundException, UnauthorizedException, ForbiddenException {
         userPassword = userPassword.trim();
 
-        User user = userRepository
+        User user = userDao
                 .findByEmail(userEmail)
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find user %s", userEmail)));
 
@@ -227,17 +223,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Count getNumberOfFriendRequestsReceivedBy(User user) {
-        return new Count(friendRequestRepository.countByReceiverId(user.getId()));
+        return new Count(friendRequestDao.countByReceiverId(user.getId()));
     }
 
     @Override
     public List<FriendRequest> listFriendRequestsSentBy(User user) {
-        return friendRequestRepository.findBySenderId(user.getId());
+        return friendRequestDao.findBySenderId(user.getId());
     }
 
     @Override
     public List<FriendRequest> listFriendRequestsReceivedBy(User user) {
-        return friendRequestRepository.findByReceiverId(user.getId());
+        return friendRequestDao.findByReceiverId(user.getId());
     }
 
     @Override
@@ -245,8 +241,8 @@ public class UserServiceImpl implements UserService {
         FriendsAndRequests friendsAndRequests = new FriendsAndRequests();
 
         friendsAndRequests.setFriends(user.getFriends());
-        friendsAndRequests.setReceivedFriendRequests(friendRequestRepository.findByReceiverId(user.getId()));
-        friendsAndRequests.setSentFriendRequests(friendRequestRepository.findBySenderId(user.getId()));
+        friendsAndRequests.setReceivedFriendRequests(friendRequestDao.findByReceiverId(user.getId()));
+        friendsAndRequests.setSentFriendRequests(friendRequestDao.findBySenderId(user.getId()));
 
         return friendsAndRequests;
     }
@@ -257,9 +253,9 @@ public class UserServiceImpl implements UserService {
 
         if (user.getId().equals(receiverUser.getId())) {
             throw new ConflictException(String.format("%s cannot be friend with himself", user.getId()));
-        } else if (userRepository.areFriends(user.getId(), receiverUser.getId())) {
+        } else if (userDao.areFriends(user.getId(), receiverUser.getId())) {
             throw new ConflictException(String.format("%s and %s are already friends", user.getId(), receiverUser.getId()));
-        } else if (friendRequestRepository.existsBySenderIdAndReceiverId(user.getId(), receiverUser.getId())) {
+        } else if (friendRequestDao.existsBySenderIdAndReceiverId(user.getId(), receiverUser.getId())) {
             throw new ConflictException(String.format("Found an existing friend request from %s to %s", user.getId(), receiverUser.getId()));
         } else {
             FriendRequest friendRequest = new FriendRequest();
@@ -268,49 +264,43 @@ public class UserServiceImpl implements UserService {
             friendRequest.setSenderPseudo(user.getPseudo());
             friendRequest.setReceiverId(receiverUser.getId());
             friendRequest.setReceiverPseudo(receiverUser.getPseudo());
-            friendRequestRepository.save(friendRequest);
+            friendRequestDao.save(friendRequest);
+            emailService.sendFriendRequestEmail(user, receiverUser);
         }
     }
 
     @Override
     public void acceptFriendRequest(User user, UUID friendRequestId) throws ConflictException, NotFoundException {
-        FriendRequest friendRequest = friendRequestRepository
+        FriendRequest friendRequest = friendRequestDao
                 .findByIdAndReceiverId(friendRequestId, user.getId())
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find friend request %s with receiver %s", friendRequestId, user.getId())));
 
         User senderUser = getUser(friendRequest.getSenderId());
         User receiverUser = getUser(friendRequest.getReceiverId());
 
-        if (userRepository.areFriends(senderUser.getId(), receiverUser.getId())) {
+        if (userDao.areFriends(friendRequest.getSenderId(), friendRequest.getReceiverId())) {
             throw new ConflictException(String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
         } else {
-            senderUser.getFriends().add(new User.Friend(receiverUser.getId(), receiverUser.getPseudo()));
-            receiverUser.getFriends().add(new User.Friend(senderUser.getId(), senderUser.getPseudo()));
-
-            userRepository.save(senderUser);
-            userRepository.save(receiverUser);
+            userDao.addFriend(senderUser.getId(), new User.Friend(receiverUser.getId(), receiverUser.getPseudo()));
+            userDao.addFriend(receiverUser.getId(), new User.Friend(senderUser.getId(), senderUser.getPseudo()));
             log.info(String.format("%s and %s are now friends", senderUser.getId(), receiverUser.getId()));
+            emailService.sendAcceptFriendRequestEmail(receiverUser, senderUser);
         }
 
-        friendRequestRepository.delete(friendRequest);
+        friendRequestDao.deleteById(friendRequest);
     }
 
     @Override
     public void rejectFriendRequest(User user, UUID friendRequestId) {
-        friendRequestRepository.deleteByIdAndReceiverId(friendRequestId, user.getId());
+        friendRequestDao.deleteByIdAndReceiverId(friendRequestId, user.getId());
     }
 
     @Override
     public void removeFriend(User user, String friendId) throws NotFoundException {
-        if (userRepository.areFriends(user.getId(), friendId)) {
-            User friendUser = getUser(friendId);
-
-            user.getFriends().removeIf(friend -> friend.getId().equals(friendUser.getId()));
-            friendUser.getFriends().removeIf(friend -> friend.getId().equals(user.getId()));
-
-            userRepository.save(user);
-            userRepository.save(friendUser);
-            log.info(String.format("%s and %s are no longer friends", user.getId(), friendUser.getId()));
+        if (userDao.areFriends(user.getId(), friendId)) {
+            userDao.removeFriend(user.getId(), friendId);
+            userDao.removeFriend(friendId, user.getId());
+            log.info(String.format("%s and %s are no longer friends", user.getId(), friendId));
         } else {
             throw new NotFoundException(String.format("%s and %s are not friends", user.getId(), friendId));
         }
@@ -331,7 +321,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void initiatePasswordReset(String userEmail) throws NotFoundException {
-        User user = userRepository
+        User user = userDao
                 .findByEmail(userEmail)
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find user %s", userEmail)));
 
@@ -342,13 +332,13 @@ public class UserServiceImpl implements UserService {
                 .createdAt(LocalDateTime.now(ZoneOffset.UTC))
                 .expiresAt(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(30L))
                 .build();
-        passwordResetRepository.save(passwordReset);
+        passwordResetDao.save(passwordReset);
         emailService.sendPasswordResetEmail(user.getEmail(), passwordReset.getId());
     }
 
     @Override
     public String followPasswordReset(UUID passwordResetId) throws NotFoundException {
-        PasswordReset passwordReset = passwordResetRepository
+        PasswordReset passwordReset = passwordResetDao
                 .findById(passwordResetId)
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find password reset %s", passwordResetId)));
 
@@ -361,7 +351,7 @@ public class UserServiceImpl implements UserService {
     public UserToken resetPassword(UUID passwordResetId, String userPassword) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException, ForbiddenException {
         userPassword = userPassword.trim();
 
-        PasswordReset passwordReset = passwordResetRepository
+        PasswordReset passwordReset = passwordResetDao
                 .findById(passwordResetId)
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find password reset %s", passwordResetId)));
 
@@ -369,14 +359,14 @@ public class UserServiceImpl implements UserService {
 
         updateUserPassword(userPassword, user);
 
-        passwordResetRepository.deleteById(passwordReset.getId());
+        passwordResetDao.delete(passwordReset);
 
         return signInUser(user.getEmail(), userPassword);
     }
 
     @Override
     public void purgeOldPasswordResets(int days) {
-        passwordResetRepository.deleteByExpiresAtBefore(LocalDateTime.now(ZoneOffset.UTC).minusDays(days));
+        passwordResetDao.deleteByExpiresAtBefore(LocalDateTime.now(ZoneOffset.UTC).minusDays(days));
     }
 
     private SubscriptionPurchase getSubscriptionPurchase(String purchaseToken) {
@@ -456,21 +446,21 @@ public class UserServiceImpl implements UserService {
     }
 
     private void userSignedIn(User user) {
-        user.setLastLoginAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-        user.getFailedAuthentication().setAttempts(0);
-        userRepository.save(user);
+        userDao.updateUserSignedIn(user.getId(), LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
     }
 
     private void addFailedAuthentication(User user) {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         LocalDateTime willResetAt = now.plusMinutes(30L);
+        User.FailedAuthentication failedAuthentication = user.getFailedAuthentication();
         if (now.isAfter(LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getFailedAuthentication().getResetsAt()), ZoneOffset.UTC))) {
             // Reset attempts
-            user.setFailedAuthentication(new User.FailedAuthentication(0, now.toInstant(ZoneOffset.UTC).toEpochMilli()));
+            failedAuthentication = new User.FailedAuthentication(0, now.toInstant(ZoneOffset.UTC).toEpochMilli());
         }
-        user.getFailedAuthentication().setAttempts(user.getFailedAuthentication().getAttempts() == 5 ? 5 : user.getFailedAuthentication().getAttempts() + 1);
-        user.getFailedAuthentication().setResetsAt(willResetAt.toInstant(ZoneOffset.UTC).toEpochMilli());
-        userRepository.save(user);
+
+        failedAuthentication.setAttempts(user.getFailedAuthentication().getAttempts() == 5 ? 5 : user.getFailedAuthentication().getAttempts() + 1);
+        failedAuthentication.setResetsAt(willResetAt.toInstant(ZoneOffset.UTC).toEpochMilli());
+        userDao.addFailedAuthentication(user.getId(), failedAuthentication);
     }
 
     private void updateUserPassword(String password, User user) throws BadRequestException, ConflictException {
@@ -478,12 +468,11 @@ public class UserServiceImpl implements UserService {
             throw new ConflictException("Provided password is the same as the previous");
         }
         validatePassword(password);
-        user.setPassword(passwordEncoder.encode(password));
-        userRepository.save(user);
+        userDao.updateUserPassword(user.getId(), passwordEncoder.encode(password));
         emailService.sendPasswordUpdatedNotificationEmail(user);
     }
 
-   private void validatePassword(String password) throws BadRequestException {
+    private void validatePassword(String password) throws BadRequestException {
         if (password.length() < 8) {
             throw new BadRequestException(String.format("Password must contain at least %d characters", 8));
         }

@@ -1,10 +1,10 @@
 package com.tonkar.volleyballreferee;
 
+import com.tonkar.volleyballreferee.dao.PasswordResetDao;
 import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.PasswordReset;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.repository.PasswordResetRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
 public class UserTests extends VbrTests {
 
     @Autowired
-    private PasswordResetRepository passwordResetRepository;
+    private PasswordResetDao passwordResetDao;
 
     @Test
     public void testNotAuthenticated() {
@@ -173,7 +173,7 @@ public class UserTests extends VbrTests {
         responseStr = restTemplate.postForEntity(urlOf(String.format("/public/users/password/recover/%s", testUser1.getEmail())), emptyPayloadWithoutAuth(), String.class);
         assertEquals(HttpStatus.OK, responseStr.getStatusCode());
 
-        PasswordReset passwordReset = passwordResetRepository
+        PasswordReset passwordReset = passwordResetDao
                 .findByUserId(testUser1.getId())
                 .orElseThrow(() -> new RuntimeException("This must not fail"));
 

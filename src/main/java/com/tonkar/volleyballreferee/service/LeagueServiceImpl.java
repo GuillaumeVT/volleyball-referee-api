@@ -10,8 +10,6 @@ import com.tonkar.volleyballreferee.entity.League;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
-import com.tonkar.volleyballreferee.repository.GameRepository;
-import com.tonkar.volleyballreferee.repository.LeagueRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +22,6 @@ import java.util.UUID;
 public class LeagueServiceImpl implements LeagueService {
 
     @Autowired
-    private LeagueRepository leagueRepository;
-
-    @Autowired
-    private GameRepository gameRepository;
-
-    @Autowired
     private LeagueDao leagueDao;
 
     @Autowired
@@ -37,7 +29,7 @@ public class LeagueServiceImpl implements LeagueService {
 
     @Override
     public League getLeague(UUID leagueId) throws NotFoundException {
-        return leagueRepository
+        return leagueDao
                 .findById(leagueId)
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find league %s", leagueId)));
     }
@@ -54,54 +46,54 @@ public class LeagueServiceImpl implements LeagueService {
 
     @Override
     public League getLeague(User user, UUID leagueId) throws NotFoundException {
-        return leagueRepository
+        return leagueDao
                 .findByIdAndCreatedBy(leagueId, user.getId())
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find league %s for user %s", leagueId, user.getId())));
     }
 
     @Override
     public Count getNumberOfLeagues(User user) {
-        return new Count(leagueRepository.countByCreatedBy(user.getId()));
+        return new Count(leagueDao.countByCreatedBy(user.getId()));
     }
 
     @Override
     public void createLeague(User user, League league) throws ConflictException {
-        if (leagueRepository.existsById(league.getId())) {
+        if (leagueDao.existsById(league.getId())) {
             throw new ConflictException(String.format("Could not create league %s for user %s because it already exists", league.getId(), user.getId()));
-        } else if (leagueRepository.existsByCreatedByAndNameAndKind(user.getId(), league.getName(), league.getKind())) {
+        } else if (leagueDao.existsByCreatedByAndNameAndKind(user.getId(), league.getName(), league.getKind())) {
             throw new ConflictException(String.format("Could not create league %s %s for user %s because it already exists", league.getName(), league.getKind(), user.getId()));
         } else {
             league.setCreatedBy(user.getId());
             league.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-            leagueRepository.save(league);
+            leagueDao.save(league);
         }
     }
 
     @Override
     public void updateDivisions(User user, UUID leagueId) throws NotFoundException {
-        League savedLeague = leagueRepository
+        League savedLeague = leagueDao
                 .findByIdAndCreatedBy(leagueId, user.getId())
                 .orElseThrow(() -> new NotFoundException(String.format("Could not find league %s for user %s", leagueId, user.getId())));
 
         savedLeague.setDivisions(gameDao.listDivisionsInLeague(user.getId(), savedLeague.getId()));
         savedLeague.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-        leagueRepository.save(savedLeague);
+        leagueDao.save(savedLeague);
     }
 
     @Override
     public void deleteLeague(User user, UUID leagueId) throws ConflictException {
-        if (gameRepository.existsByCreatedByAndLeague_IdAndStatus(user.getId(), leagueId, GameStatus.SCHEDULED)) {
+        if (gameDao.existsByCreatedByAndLeague_IdAndStatus(user.getId(), leagueId, GameStatus.SCHEDULED)) {
             throw new ConflictException(String.format("Could not delete league %s for user %s because it is used in a game", leagueId, user.getId()));
         } else {
-            leagueRepository.deleteByIdAndCreatedBy(leagueId, user.getId());
+            leagueDao.deleteByIdAndCreatedBy(leagueId, user.getId());
         }
     }
 
     @Override
     public void deleteAllLeagues(User user) {
         leagueDao.listLeagues(user.getId(), List.of(GameType.values())).forEach(leagueSummary -> {
-            if (!gameRepository.existsByCreatedByAndLeague_IdAndStatus(user.getId(), leagueSummary.getId(), GameStatus.SCHEDULED)) {
-                leagueRepository.deleteByIdAndCreatedBy(leagueSummary.getId(), user.getId());
+            if (!gameDao.existsByCreatedByAndLeague_IdAndStatus(user.getId(), leagueSummary.getId(), GameStatus.SCHEDULED)) {
+                leagueDao.deleteByIdAndCreatedBy(leagueSummary.getId(), user.getId());
             }
         });
     }

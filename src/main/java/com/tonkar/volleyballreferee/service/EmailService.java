@@ -13,4 +13,7 @@ public interface EmailService {
 
     void sendPasswordUpdatedNotificationEmail(User user);
 
+    void sendFriendRequestEmail(User senderUser, User receiverUser);
+
+    void sendAcceptFriendRequestEmail(User acceptingUser, User senderUser);
 }

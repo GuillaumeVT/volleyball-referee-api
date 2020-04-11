@@ -11,9 +11,12 @@ import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.aggregation.SortOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class LeagueDao {
@@ -43,5 +46,39 @@ public class LeagueDao {
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "name");
         return mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sLeagueSummaryProjection, sortOperation),
                 mongoTemplate.getCollectionName(League.class), LeagueSummary.class).getMappedResults();
+    }
+
+    public void save(League league) {
+        mongoTemplate.save(league);
+    }
+
+    public Optional<League> findById(UUID id) {
+        Query query = Query.query(Criteria.where("_id").is(id));
+        return Optional.ofNullable(mongoTemplate.findOne(query, League.class));
+    }
+
+    public Optional<League> findByIdAndCreatedBy(UUID id, String userId) {
+        Query query = Query.query(Criteria.where("_id").is(id).and("createdBy").is(userId));
+        return Optional.ofNullable(mongoTemplate.findOne(query, League.class));
+    }
+
+    public boolean existsById(UUID id) {
+        Query query = Query.query(Criteria.where("_id").is(id));
+        return mongoTemplate.exists(query, League.class);
+    }
+
+    public boolean existsByCreatedByAndNameAndKind(String userId, String name, GameType kind) {
+        Query query = Query.query(Criteria.where("createdBy").is(userId).and("name").is(name).and("kind").is(kind));
+        return mongoTemplate.exists(query, League.class);
+    }
+
+    public long countByCreatedBy(String userId) {
+        Query query = Query.query(Criteria.where("createdBy").is(userId));
+        return mongoTemplate.count(query, League.class);
+    }
+
+    public void deleteByIdAndCreatedBy(UUID id, String userId) {
+        Query query = Query.query(Criteria.where("_id").is(id).and("createdBy").is(userId));
+        mongoTemplate.remove(query, League.class);
     }
 }

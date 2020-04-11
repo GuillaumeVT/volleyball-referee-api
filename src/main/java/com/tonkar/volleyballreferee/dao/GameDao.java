@@ -1,5 +1,6 @@
 package com.tonkar.volleyballreferee.dao;
 
+import com.mongodb.client.result.UpdateResult;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.GameStatus;
@@ -17,11 +18,13 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -59,6 +62,10 @@ public class GameDao {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    public void save(Game game) {
+        mongoTemplate.save(game);
+    }
 
     public Page<GameSummary> listLiveGames(List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
         kinds = DaoUtils.computeKinds(kinds);
@@ -319,6 +326,135 @@ public class GameDao {
                 mongoTemplate.getCollectionName(Game.class), DivisionNameContainer.class).getMappedResults();
 
         return containers.stream().map(DivisionNameContainer::getDivisionName).sorted().collect(Collectors.toList());
+    }
+
+    public List<Game> findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(UUID leagueId, String divisionName, GameStatus status) {
+        Query query = Query
+                .query(Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName).and("status").is(status))
+                .with(Sort.by(Sort.Direction.ASC, "scheduledAt"));
+        return mongoTemplate.find(query, Game.class);
+    }
+
+    public Optional<Game> findById(UUID id) {
+        Query query = Query.query(Criteria.where("_id").is(id));
+        return Optional.ofNullable(mongoTemplate.findOne(query, Game.class));
+    }
+
+    public Optional<Game> findByIdAndCreatedByAndStatusNot(UUID id, String userId, GameStatus status) {
+        Query query = Query.query(Criteria.where("_id").is(id).and("createdBy").is(userId).and("status").ne(status));
+        return Optional.ofNullable(mongoTemplate.findOne(query, Game.class));
+    }
+
+    public Optional<Game> findByIdAndAllowedUser(UUID id, String userId) {
+        Query query = Query.query(
+                Criteria
+                        .where("_id").is(id)
+                        .andOperator(new Criteria().orOperator(
+                                Criteria.where("createdBy").is(userId),
+                                Criteria.where("refereedBy").is(userId))));
+        return Optional.ofNullable(mongoTemplate.findOne(query, Game.class));
+    }
+
+    public Optional<Game> findByIdAndAllowedUserAndStatus(UUID id, String userId, GameStatus status) {
+        Query query = Query.query(
+                Criteria
+                        .where("_id").is(id)
+                        .and("status").is(status)
+                        .andOperator(new Criteria().orOperator(
+                                Criteria.where("createdBy").is(userId),
+                                Criteria.where("refereedBy").is(userId))));
+        return Optional.ofNullable(mongoTemplate.findOne(query, Game.class));
+    }
+
+    public Optional<Game> findByIdAndAllowedUserAndStatusNot(UUID id, String userId, GameStatus status) {
+        Query query = Query.query(
+                Criteria
+                        .where("_id").is(id)
+                        .and("status").ne(status)
+                        .andOperator(new Criteria().orOperator(
+                                Criteria.where("createdBy").is(userId),
+                                Criteria.where("refereedBy").is(userId))));
+        return Optional.ofNullable(mongoTemplate.findOne(query, Game.class));
+    }
+
+    public boolean existsById(UUID id) {
+        Query query = Query.query(Criteria.where("_id").is(id));
+        return mongoTemplate.exists(query, Game.class);
+    }
+
+    public boolean existsByCreatedByAndRules_IdAndStatus(String userId, UUID rulesId, GameStatus status) {
+        Query query = Query.query(Criteria.where("createdBy").is(userId).and("status").is(status).and("rules._id").is(rulesId));
+        return mongoTemplate.exists(query, Game.class);
+    }
+
+    public boolean existsByCreatedByAndTeamAndStatus(String userId, UUID teamId, GameStatus status) {
+        Query query = Query.query(
+                Criteria
+                        .where("createdBy").is(userId)
+                        .and("status").is(status)
+                        .andOperator(new Criteria().orOperator(
+                                Criteria.where("homeTeam._id").is(teamId),
+                                Criteria.where("guestTeam._id").is(teamId))));
+        return mongoTemplate.exists(query, Game.class);
+    }
+
+    public boolean existsByCreatedByAndLeague_IdAndStatus(String userId, UUID leagueId, GameStatus status) {
+        Query query = Query.query(Criteria.where("createdBy").is(userId).and("status").is(status).and("league._id").is(leagueId));
+        return mongoTemplate.exists(query, Game.class);
+    }
+
+    public long countByCreatedBy(String userId) {
+        Query query = Query.query(Criteria.where("createdBy").is(userId));
+        return mongoTemplate.count(query, Game.class);
+    }
+
+    public long countByCreatedByAndLeague_Id(String userId, UUID leagueId) {
+        Query query = Query.query(Criteria.where("createdBy").is(userId).and("league._id").is(leagueId));
+        return mongoTemplate.count(query, Game.class);
+    }
+
+    public long countByAllowedUserAndStatusNot(String userId, GameStatus status) {
+        Query query = Query.query(
+                Criteria
+                        .where("status").ne(status)
+                        .andOperator(new Criteria().orOperator(
+                                Criteria.where("createdBy").is(userId),
+                                Criteria.where("refereedBy").is(userId))));
+        return mongoTemplate.count(query, Game.class);
+    }
+
+    public void deleteByCreatedByAndStatus(String userId, GameStatus status) {
+        Query query = Query.query(Criteria.where("createdBy").is(userId).and("status").is(status));
+        mongoTemplate.remove(query, Game.class);
+    }
+
+    public void deleteByCreatedByAndStatusAndLeague_Id(String userId, GameStatus status, UUID leagueId) {
+        Query query = Query.query(Criteria.where("createdBy").is(userId).and("status").is(status).and("league._id").is(leagueId));
+        mongoTemplate.remove(query, Game.class);
+    }
+
+    public void deleteByIdAndCreatedBy(UUID id, String userId) {
+        Query query = Query.query(Criteria.where("_id").is(id).and("createdBy").is(userId));
+        mongoTemplate.remove(query, Game.class);
+    }
+
+    public void deleteByScheduledAtLessThanAndStatus(long scheduledAt, GameStatus status) {
+        Query query = Query.query(Criteria.where("scheduledAt").lt(scheduledAt).and("status").is(status));
+        mongoTemplate.remove(query, Game.class);
+    }
+
+    public boolean updateReferee(UUID id, String refereedBy, String refereeName, long updatedAt) {
+        Query query = new Query(Criteria.where("_id").is(id));
+        Update update = new Update().set("refereedBy", refereedBy).set("refereeName", refereeName).set("updatedAt", updatedAt);
+        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, Game.class);
+        return updateResult.getModifiedCount() > 0;
+    }
+
+    public boolean updateIndexed(UUID id, boolean indexed, long updatedAt) {
+        Query query = new Query(Criteria.where("_id").is(id));
+        Update update = new Update().set("indexed", indexed).set("updatedAt", updatedAt);
+        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, Game.class);
+        return updateResult.getModifiedCount() > 0;
     }
 
     @NoArgsConstructor

@@ -52,9 +52,7 @@ public class EmailServiceImpl implements EmailService {
 
         appendLink(linkHtmlCell, "VISIT WEBSITE", webDomain);
 
-        Map<String, byte[]> imageAttachments = extractImages(email);
-
-        sendEmail(email.toString(), title, user.getEmail(), imageAttachments);
+        sendEmail(email, title, user.getEmail());
     }
 
     @Override
@@ -77,9 +75,7 @@ public class EmailServiceImpl implements EmailService {
         String passwordResetUrl = String.format("%s/api/v3.2/public/users/password/follow/%s", webDomain, passwordResetId);
         appendLink(linkHtmlCell, "RESET PASSWORD", passwordResetUrl);
 
-        Map<String, byte[]> imageAttachments = extractImages(email);
-
-        sendEmail(email.toString(), title, userEmail, imageAttachments);
+        sendEmail(email, title, userEmail);
     }
 
     @Override
@@ -102,9 +98,51 @@ public class EmailServiceImpl implements EmailService {
         String passwordResetUrl = String.format("%s/password-lost", webDomain);
         appendLink(linkHtmlCell, "RESET PASSWORD", passwordResetUrl);
 
-        Map<String, byte[]> imageAttachments = extractImages(email);
+        sendEmail(email, title, user.getEmail());
+    }
 
-        sendEmail(email.toString(), title, user.getEmail(), imageAttachments);
+    @Override
+    public void sendFriendRequestEmail(User senderUser, User receiverUser) {
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(interactiveEmailHtmlSkeleton());
+
+        org.jsoup.nodes.Element logoHtmlCell = email.getElementById("logo");
+        org.jsoup.nodes.Element titleHtmlCell = email.getElementById("title");
+        org.jsoup.nodes.Element contentHtmlCell = email.getElementById("content");
+        org.jsoup.nodes.Element linkHtmlCell = email.getElementById("link");
+
+        fillLogo(logoHtmlCell);
+
+        String title = String.format("The user %s wishes to be your colleague", senderUser.getPseudo());
+        titleHtmlCell.appendText(title);
+
+        String content = String.format("Dear %s. Colleagues are able to select each other to referee games. You may accept or reject this request from the Android app or from the website.", receiverUser.getPseudo());
+        contentHtmlCell.appendText(content);
+
+        appendLink(linkHtmlCell, "VISIT WEBSITE", webDomain);
+
+        sendEmail(email, title, receiverUser.getEmail());
+    }
+
+    @Override
+    public void sendAcceptFriendRequestEmail(User acceptingUser, User senderUser) {
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(interactiveEmailHtmlSkeleton());
+
+        org.jsoup.nodes.Element logoHtmlCell = email.getElementById("logo");
+        org.jsoup.nodes.Element titleHtmlCell = email.getElementById("title");
+        org.jsoup.nodes.Element contentHtmlCell = email.getElementById("content");
+        org.jsoup.nodes.Element linkHtmlCell = email.getElementById("link");
+
+        fillLogo(logoHtmlCell);
+
+        String title = String.format("The user %s is now your colleague", acceptingUser.getPseudo());
+        titleHtmlCell.appendText(title);
+
+        String content = String.format("Dear %s. You are now able to select %s to referee your games.", senderUser.getPseudo(), acceptingUser.getPseudo());
+        contentHtmlCell.appendText(content);
+
+        appendLink(linkHtmlCell, "VISIT WEBSITE", webDomain);
+
+        sendEmail(email, title, senderUser.getEmail());
     }
 
     private void fillLogo(org.jsoup.nodes.Element parentElement) {
@@ -163,7 +201,9 @@ public class EmailServiceImpl implements EmailService {
         return imageAttachments;
     }
 
-    private void sendEmail(String emailContent, String emailSubject, @Email String emailTo, Map<String, byte[]> imageAttachments) {
+    private void sendEmail(org.jsoup.nodes.Document email, String emailSubject, @Email String emailTo) {
+        Map<String, byte[]> imageAttachments = extractImages(email);
+
         try {
             Properties prop = new Properties();
             prop.put("mail.smtp.host", "smtp.gmail.com");
@@ -187,7 +227,7 @@ public class EmailServiceImpl implements EmailService {
             Multipart multipart = new MimeMultipart();
 
             MimeBodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setContent(emailContent, "text/html");
+            messageBodyPart.setContent(email.toString(), "text/html");
             messageBodyPart.setHeader("Content-Type", "text/html;charset=UTF-8");
             multipart.addBodyPart(messageBodyPart);
 
