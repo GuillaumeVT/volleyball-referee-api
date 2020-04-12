@@ -1,69 +1,32 @@
-spring.profiles: integration
-
-jasypt:
-  encryptor:
-    password: ${JASYPT_KEY:}
-    algorithm: PBEWithMD5AndDES
-    iv-generator-classname: org.jasypt.iv.NoIvGenerator
-
 server:
   servlet:
     context-path: "/api/v3.2"
 
-spring.data.mongodb:
-  password: ENC(smAct7mQ5ae02WuN9xTVvw==)
-  uri: mongodb://vbr_integ_user:${spring.data.mongodb.password}@localhost:27017/vbr_integ
+spring:
+  data:
+    mongodb:
+      host: ${VBR_DB_HOST:}
+      port: ${VBR_DB_PORT:}
+      database: ${VBR_DB:}
+      username: ${VBR_DB_USER:}
+      password: ${VBR_DB_PASSWORD:}
 
 vbr:
   jwt:
-    key: ENC(61+qX0NxnVL6TDZKee6tynWGK/AjWmUHe9jKauufWiJek7ysSZjlyTtB/n7Jl6BRInWDYWevrDxzVO91pK18yWn5XYdnWp93ibaDN6xovgqDBqMarlJ8Wx0ynhntx3SFKvWZgYQGh31N2jIEI8m8HKaiNuBWE+UqtOefrjBXle4BPLR0965xUjvpKtG6uGZQbUazvsTJLEqF0SxQB6sd8Zk3NmnnORD/1TcTOFKPT7TlfagjtzxIYAom/xS333be+2SC12CcottVa296mUijqAuDWQwKFYCJKIXtsyMG/vtgTo7+E2kIR4sXE0micl6mnV19OMGCXoPqQOb6sabNyYVlyO4wPN32AhSgXNWSyYSXBEoSlQkbGTJjV1c940fugYIl9kfmVwbpyyAcVMVX2pG7As56MqozYVMHT98CF54kl6v9WDHDt8Dv7EYuDEoj3mlIeB0NAB+2xLaBltIhQQ==)
+    key: ${VBR_JWT_KEY:}
   web:
-    domain: "https://localhost:4200"
-    color: "#1f4294"
+    domain: ${VBR_DOMAIN:}
+    color: ${VBR_COLOR:}
   android:
     app:
-      packageName: "com.tonkar.volleyballreferee"
+      packageName: ${VBR_ANDROID_PACKAGE:}
       billing:
-        credential: "/opt/VolleyballReferee-587e8e90786e.json"
-        sku-purchase: "vbr_web_premium"
-        sku-subscription: "vbr_web_premium_sub"
-  mail:
-    user: "noreply.vbr.app@gmail.com"
-    password: ENC(5NUOfoSKyZLHp7mDZPetAoZ1PFnPPbCbcWBDAHBe3yo=)
-
----
-spring.profiles: production
-
-jasypt:
-  encryptor:
-    password: ${JASYPT_KEY:}
-    algorithm: PBEWithMD5AndDES
-    iv-generator-classname: org.jasypt.iv.NoIvGenerator
-
-server:
-  servlet:
-    context-path: "/api/v3.2"
-
-spring.data.mongodb:
-  password: ENC(UhfmutqyR/vnOaf+7EugcA==)
-  uri: mongodb://vbr_user:${spring.data.mongodb.password}@localhost:27017/vbr
-
-vbr:
-  jwt:
-    key: ENC(61+qX0NxnVL6TDZKee6tynWGK/AjWmUHe9jKauufWiJek7ysSZjlyTtB/n7Jl6BRInWDYWevrDxzVO91pK18yWn5XYdnWp93ibaDN6xovgqDBqMarlJ8Wx0ynhntx3SFKvWZgYQGh31N2jIEI8m8HKaiNuBWE+UqtOefrjBXle4BPLR0965xUjvpKtG6uGZQbUazvsTJLEqF0SxQB6sd8Zk3NmnnORD/1TcTOFKPT7TlfagjtzxIYAom/xS333be+2SC12CcottVa296mUijqAuDWQwKFYCJKIXtsyMG/vtgTo7+E2kIR4sXE0micl6mnV19OMGCXoPqQOb6sabNyYVlyO4wPN32AhSgXNWSyYSXBEoSlQkbGTJjV1c940fugYIl9kfmVwbpyyAcVMVX2pG7As56MqozYVMHT98CF54kl6v9WDHDt8Dv7EYuDEoj3mlIeB0NAB+2xLaBltIhQQ==)
-  web:
-    domain: "https://www.volleyball-referee.com"
-    color: "#1f4294"
-  android:
-    app:
-      packageName: "com.tonkar.volleyballreferee"
-      billing:
-        credential: "/opt/VolleyballReferee-587e8e90786e.json"
-        sku-purchase: "vbr_web_premium"
-        sku-subscription: "vbr_web_premium_sub"
-  mail:
-    user: "noreply.vbr.app@gmail.com"
-    password: ENC(5NUOfoSKyZLHp7mDZPetAoZ1PFnPPbCbcWBDAHBe3yo=)
+        credential: ${VBR_ANDROID_BILLING_CREDENTIALS:}
+        sku-purchase: ${VBR_ANDROID_BILLING_PURCHASE_SKU:}
+        sku-subscription: ${VBR_ANDROID_BILLING_SUBSCRIPTION_SKU:}
+  email:
+    user: ${VBR_EMAIL_USER:}
+    password: ${VBR_EMAIL_PASSWORD:}
 
 logging:
   config: classpath:logback-spring.xml

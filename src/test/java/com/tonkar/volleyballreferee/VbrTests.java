@@ -38,22 +38,22 @@ public class VbrTests {
     @Value("${server.servlet.context-path}")
     String contextPath;
 
-    @Value("${vbr.android.app.billing.mail1}")
+    @Value("${test.user1.email}")
     String testMail1;
 
-    @Value("${vbr.android.app.billing.mail2}")
+    @Value("${test.user2.email}")
     String testMail2;
 
-    @Value("${vbr.android.app.billing.pseudo1}")
+    @Value("${test.user1.pseudo}")
     String testUserPseudo1;
 
-    @Value("${vbr.android.app.billing.pseudo2}")
+    @Value("${test.user2.pseudo}")
     String testUserPseudo2;
 
-    @Value("${vbr.android.app.billing.token1}")
+    @Value("${test.user1.purchase-token}")
     String testPurchaseToken1;
 
-    @Value("${vbr.android.app.billing.token2}")
+    @Value("${test.user2.purchase-token}")
     String testPurchaseToken2;
 
     String testUserToken1;

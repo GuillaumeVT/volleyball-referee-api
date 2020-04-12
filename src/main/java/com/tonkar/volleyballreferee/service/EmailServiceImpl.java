@@ -27,10 +27,10 @@ public class EmailServiceImpl implements EmailService {
     @Value("${vbr.web.color}")
     private String webColor;
 
-    @Value("${vbr.mail.user}")
+    @Value("${vbr.email.user}")
     private String mailUser;
 
-    @Value("${vbr.mail.password}")
+    @Value("${vbr.email.password}")
     private String mailPassword;
 
     @Override

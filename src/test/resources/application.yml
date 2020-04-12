@@ -1,42 +1,44 @@
 spring.profiles: test
 
-jasypt:
-  encryptor:
-    password: ${JASYPT_KEY:}
-    algorithm: PBEWithMD5AndDES
-    iv-generator-classname: org.jasypt.iv.NoIvGenerator
-
 server:
   servlet:
     context-path: "/api/v3.2"
 
-spring.data.mongodb:
-  password: ENC(eF+K2NgdLQdGTNEW5oiUrA==)
-  uri: mongodb://vbr_test_user:${spring.data.mongodb.password}@localhost:27017/vbr_test
+spring:
+  data:
+    mongodb:
+      host: ${TEST_VBR_DB_HOST:}
+      port: ${TEST_VBR_DB_PORT:}
+      database: ${TEST_VBR_DB:}
+      username: ${TEST_VBR_DB_USER:}
+      password: ${TEST_VBR_DB_PASSWORD:}
+
+vbr:
+  jwt:
+    key: ${TEST_VBR_JWT_KEY:}
+  web:
+    domain: ${TEST_VBR_DOMAIN:}
+    color: ${TEST_VBR_COLOR:}
+  android:
+    app:
+      packageName: ${TEST_VBR_ANDROID_PACKAGE:}
+      billing:
+        credential: ${TEST_VBR_ANDROID_BILLING_CREDENTIALS:}
+        sku-purchase: ${TEST_VBR_ANDROID_BILLING_PURCHASE_SKU:}
+        sku-subscription: ${TEST_VBR_ANDROID_BILLING_SUBSCRIPTION_SKU:}
+  email:
+    user: ${TEST_VBR_EMAIL_USER:}
+    password: ${TEST_VBR_EMAIL_PASSWORD:}
 
 logging:
   config: classpath:logback-spring.xml
 
-vbr:
-  jwt:
-    key: ENC(61+qX0NxnVL6TDZKee6tynWGK/AjWmUHe9jKauufWiJek7ysSZjlyTtB/n7Jl6BRInWDYWevrDxzVO91pK18yWn5XYdnWp93ibaDN6xovgqDBqMarlJ8Wx0ynhntx3SFKvWZgYQGh31N2jIEI8m8HKaiNuBWE+UqtOefrjBXle4BPLR0965xUjvpKtG6uGZQbUazvsTJLEqF0SxQB6sd8Zk3NmnnORD/1TcTOFKPT7TlfagjtzxIYAom/xS333be+2SC12CcottVa296mUijqAuDWQwKFYCJKIXtsyMG/vtgTo7+E2kIR4sXE0micl6mnV19OMGCXoPqQOb6sabNyYVlyO4wPN32AhSgXNWSyYSXBEoSlQkbGTJjV1c940fugYIl9kfmVwbpyyAcVMVX2pG7As56MqozYVMHT98CF54kl6v9WDHDt8Dv7EYuDEoj3mlIeB0NAB+2xLaBltIhQQ==)
-  web:
-    domain: "https://localhost:4200"
-    color: "#1f4294"
-  android:
-    app:
-      packageName: "com.tonkar.volleyballreferee"
-      billing:
-        credential: "/opt/VolleyballReferee-587e8e90786e.json"
-        sku-purchase: "vbr_web_premium"
-        sku-subscription: "vbr_web_premium_sub"
-        mail1: "vbr.app.team@gmail.com"
-        pseudo1: "VBR1"
-        token1: ENC(NvmlHER8yFts7wMegqjWgiv1bdH6JCDrVsChvaZRkzlNcqXzcjffNsoXTWrfEzKDL2CTkNhbBB/bRqTYDyWSOUpT+nXBIiCtFY3tZybD1UnFA/492A17TPKv+fDIjTG1uOg5FHWvgih7fBosfjpYC5Gh/mLQ3eW0Qm5YxvIW96VHadVqeLNxN3J2lwDDFk/mHF0SVyPs/0EOSDki+xNc5eDt3cktCKN3yHTNbVAxPQQ=)
-        mail2: "vbr.app.test@gmail.com"
-        pseudo2: "VBR2"
-        token2: ENC(hJq9vvpmdWw4qFxX7uqcIYdHXZi7EdE8+8/vwKy0EpLWFyG2S7WTQnAeILfJsUXZmmb8uHGqy9cgK9WOIWJEkaAmIRWSAfUkkn9Ec+b/Ph7GwumJ5phKZ6Ub/2GxBpHYeA4qj+tS7XtwYdi9AS4Mcp4ZQmtWt9nDClvSytRhQZcpnUCcycJYBrbKYfbNKwulPI81DEwM4+chvpuhN1lFlqsZLkVKArMCLS6iCEbhOQ0=)
-
-  mail:
-    user: "noreply.vbr.app@gmail.com"
-    password: ENC(5NUOfoSKyZLHp7mDZPetAoZ1PFnPPbCbcWBDAHBe3yo=)
+test:
+  user1:
+    email: ${TEST_VBR_USER_1_MAIL:}
+    pseudo: ${TEST_VBR_USER_1_PSEUDO:}
+    purchase-token: ${TEST_VBR_USER_1_TOKEN:}
+  user2:
+    email: ${TEST_VBR_USER_2_MAIL:}
+    pseudo: ${TEST_VBR_USER_2_PSEUDO:}
+    purchase-token: ${TEST_VBR_USER_2_TOKEN:}
