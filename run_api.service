@@ -3,6 +3,8 @@ Description=Volleyball Referee API
 
 [Service]
 ExecStart=/opt/run_api.sh
+Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
