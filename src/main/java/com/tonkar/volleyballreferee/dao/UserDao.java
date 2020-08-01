@@ -80,17 +80,17 @@ public class UserDao {
                 mongoTemplate.getCollectionName(User.class), UserSummary.class).getUniqueMappedResult());
     }
 
-    public void updateSubscriptionPurchaseToken(String id, String purchaseToken, long subscriptionExpiredAt) {
+    public void updateSubscriptionPurchaseToken(String id, String purchaseToken, long subscriptionExpiryAt) {
         Query query = Query.query(Criteria.where("_id").is(id));
         Update update = new Update();
-        update.set("purchaseToken", purchaseToken).set("subscriptionExpiredAt", subscriptionExpiredAt);
+        update.set("purchaseToken", purchaseToken).set("subscriptionExpiryAt", subscriptionExpiryAt);
         mongoTemplate.updateFirst(query, update, mongoTemplate.getCollectionName(User.class));
     }
 
     public List<User> findUsersBySubscriptionExpiryBefore(long monthsAgo) {
         long accountRemovalThresholdDate = LocalDateTime.now(ZoneOffset.UTC).minusMonths(monthsAgo).toEpochSecond(ZoneOffset.UTC) * 1000L;
         return mongoTemplate.find(
-                Query.query(Criteria.where("subscription").is(true).and("subscriptionExpiredAt").lt(accountRemovalThresholdDate)),
+                Query.query(Criteria.where("subscription").is(true).and("subscriptionExpiryAt").lt(accountRemovalThresholdDate)),
                 User.class);
     }
 
@@ -110,7 +110,7 @@ public class UserDao {
 
     public boolean updateUserPassword(String userId, String password) {
         Query query = new Query(Criteria.where("_id").is(userId));
-        Update update = new Update().set("password", password);
+        Update update = new Update().set("password", password).set("failedAuthentication.attempts", 0);
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class);
         return updateResult.getModifiedCount() > 0;
     }

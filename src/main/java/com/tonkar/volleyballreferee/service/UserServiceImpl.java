@@ -451,7 +451,7 @@ public class UserServiceImpl implements UserService {
 
     private void addFailedAuthentication(User user) {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-        LocalDateTime willResetAt = now.plusMinutes(30L);
+        LocalDateTime willResetAt = now.plusMinutes(20L);
         User.FailedAuthentication failedAuthentication = user.getFailedAuthentication();
         if (now.isAfter(LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getFailedAuthentication().getResetsAt()), ZoneOffset.UTC))) {
             // Reset attempts
