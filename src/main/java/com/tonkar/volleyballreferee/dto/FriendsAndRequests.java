@@ -8,9 +8,9 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter @Setter
+@Getter
+@Setter
 public class FriendsAndRequests {
-
     private List<User.Friend>   friends;
     private List<FriendRequest> receivedFriendRequests;
     private List<FriendRequest> sentFriendRequests;

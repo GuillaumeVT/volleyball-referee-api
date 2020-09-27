@@ -16,7 +16,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class GameSummary {
-
     @NotNull
     private UUID       id;
     @NotBlank
@@ -59,5 +58,4 @@ public class GameSummary {
     private String     referee1Name;
     private String     referee2Name;
     private String     scorerName;
-
 }

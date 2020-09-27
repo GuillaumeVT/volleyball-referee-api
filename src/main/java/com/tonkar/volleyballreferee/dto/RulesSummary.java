@@ -9,9 +9,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor
+@Getter
+@Setter
 public class RulesSummary {
-
     @NotNull
     private UUID     id;
     @NotBlank
@@ -22,5 +23,4 @@ public class RulesSummary {
     private String   name;
     @NotNull
     private GameType kind;
-
 }

@@ -8,9 +8,9 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter @Setter
+@Getter
+@Setter
 public class Statistics {
-
     private final List<Count> gameStatistics;
     private final List<Count> teamStatistics;
 
@@ -19,12 +19,12 @@ public class Statistics {
         this.teamStatistics = new ArrayList<>();
     }
 
-    @NoArgsConstructor @Getter @Setter
+    @NoArgsConstructor
+    @Getter
+    @Setter
     public static class Count {
-
         private GameType kind;
         private long     count;
-
     }
 
 }

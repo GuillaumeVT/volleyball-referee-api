@@ -68,10 +68,6 @@ public class Game {
     private String         referee2;
     private String         scorer;
 
-    public Team getTeam(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? homeTeam : guestTeam;
-    }
-
     public boolean isStartingLineupConfirmed(TeamType teamType, int setIndex) {
         Set set = getSets().get(setIndex);
         return TeamType.HOME.equals(teamType) ? set.getHomeStartingPlayers().isFilled(kind) : set.getGuestStartingPlayers().isFilled(kind);

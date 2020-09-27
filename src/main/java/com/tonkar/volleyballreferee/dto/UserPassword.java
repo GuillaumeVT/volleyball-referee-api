@@ -7,10 +7,11 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 
-@NoArgsConstructor @AllArgsConstructor @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class UserPassword {
-
     @NotBlank
     private String userPassword;
-
 }

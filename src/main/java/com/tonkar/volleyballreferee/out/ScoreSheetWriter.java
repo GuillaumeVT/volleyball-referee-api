@@ -1,4 +1,4 @@
-package com.tonkar.volleyballreferee.generated;
+package com.tonkar.volleyballreferee.out;
 
 import com.tonkar.volleyballreferee.entity.FileWrapper;
 import com.tonkar.volleyballreferee.entity.Game;
@@ -126,11 +126,16 @@ public class ScoreSheetWriter {
 
         homeSetsInfoDiv.appendChild(createCellSpan(String.valueOf(game.getHomeSets()), true, false));
 
+        int homePointsTotal = 0;
         int setIndex = 0;
         for (Set set : game.getSets()) {
-            homeSetsInfoDiv.appendChild(createSetCellAnchor(String.valueOf(set.getHomePoints()), setIndex));
+            int points = set.getHomePoints();
+            homePointsTotal += points;
+            homeSetsInfoDiv.appendChild(createSetCellAnchor(String.valueOf(points), setIndex));
             setIndex++;
         }
+
+        homeSetsInfoDiv.appendChild(createCellSpan(String.valueOf(homePointsTotal), true, false));
 
         cardDiv.appendChild(homeSetsInfoDiv);
 
@@ -143,11 +148,16 @@ public class ScoreSheetWriter {
 
         guestSetsInfoDiv.appendChild(createCellSpan(String.valueOf(game.getGuestSets()), true, false));
 
+        int guestPointsTotal = 0;
         setIndex = 0;
         for (Set set : game.getSets()) {
-            guestSetsInfoDiv.appendChild(createSetCellAnchor(String.valueOf(set.getGuestPoints()), setIndex));
+            int points = set.getGuestPoints();
+            guestPointsTotal += points;
+            guestSetsInfoDiv.appendChild(createSetCellAnchor(String.valueOf(points), setIndex));
             setIndex++;
         }
+
+        guestSetsInfoDiv.appendChild(createCellSpan(String.valueOf(guestPointsTotal), true, false));
 
         cardDiv.appendChild(guestSetsInfoDiv);
 
@@ -496,13 +506,15 @@ public class ScoreSheetWriter {
         Element ladderDiv = new Element("div");
         ladderDiv.addClass("div-flex-row");
 
+        ladderDiv.appendChild(createLadderItem("H".equals(game.getSets().get(setIndex).getFirstServing()) ? TeamType.HOME : TeamType.GUEST, "S."));
+
         for (String teamType : game.getSets().get(setIndex).getLadder()) {
             if ("H".equals(teamType)) {
                 homeScore++;
-                ladderDiv.appendChild(createLadderItem(TeamType.HOME, homeScore));
+                ladderDiv.appendChild(createLadderItem(TeamType.HOME, String.valueOf(homeScore)));
             } else {
                 guestScore++;
-                ladderDiv.appendChild(createLadderItem(TeamType.GUEST, guestScore));
+                ladderDiv.appendChild(createLadderItem(TeamType.GUEST, String.valueOf(guestScore)));
             }
         }
 
@@ -511,16 +523,16 @@ public class ScoreSheetWriter {
         return wrapperDiv;
     }
 
-    private Element createLadderItem(TeamType teamType, int score) {
+    private Element createLadderItem(TeamType teamType, String content) {
         Element ladderItemDiv = new Element("div");
         ladderItemDiv.addClass("div-flex-column").addClass("ladder-spacing");
 
         if (TeamType.HOME.equals(teamType)) {
-            ladderItemDiv.appendChild(createCellSpan(String.valueOf(score), false, true).addClass("vbr-home-team"));
+            ladderItemDiv.appendChild(createCellSpan(content, false, true).addClass("vbr-home-team"));
             ladderItemDiv.appendChild(createCellSpan(" ", false, true));
         } else {
             ladderItemDiv.appendChild(createCellSpan(" ", false, true));
-            ladderItemDiv.appendChild(createCellSpan(String.valueOf(score), false, true).addClass("vbr-guest-team"));
+            ladderItemDiv.appendChild(createCellSpan(content, false, true).addClass("vbr-guest-team"));
         }
 
         return ladderItemDiv;
@@ -849,7 +861,7 @@ public class ScoreSheetWriter {
                 "    }\n" +
                 "    .div-grid-sets-info {\n" +
                 "      display: grid;\n" +
-                "      grid-template-columns: 40fr 5fr 5fr 5fr 5fr 5fr 5fr 30fr;\n" +
+                "      grid-template-columns: 40fr 5fr 5fr 5fr 5fr 5fr 5fr 10fr 20fr;\n" +
                 "      grid-auto-rows: 1fr;\n" +
                 "      align-items: stretch;\n" +
                 "      align-content: center;\n" +

@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.dao;
 
 import com.mongodb.client.result.UpdateResult;
+import com.tonkar.volleyballreferee.dto.GameScore;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.GameStatus;
@@ -328,11 +329,26 @@ public class GameDao {
         return containers.stream().map(DivisionNameContainer::getDivisionName).sorted().collect(Collectors.toList());
     }
 
-    public List<Game> findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(UUID leagueId, String divisionName, GameStatus status) {
-        Query query = Query
-                .query(Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName).and("status").is(status))
-                .with(Sort.by(Sort.Direction.ASC, "scheduledAt"));
-        return mongoTemplate.find(query, Game.class);
+    public List<GameScore> findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(UUID leagueId, String divisionName, GameStatus status) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName).and("status").is(status));
+
+        ProjectionOperation projectionOperation = Aggregation.project()
+                .and("_id").as("_id")
+                .and("scheduledAt").as("scheduledAt")
+                .and("homeTeam.name").as("homeTeamName")
+                .and("guestTeam.name").as("guestTeamName")
+                .and("homeTeam.color").as("homeTeamColor")
+                .and("guestTeam.color").as("guestTeamColor")
+                .and("homeSets").as("homeSets")
+                .and("guestSets").as("guestSets")
+                .and("sets.homePoints").as("sets.homePoints")
+                .and("sets.guestPoints").as("sets.guestPoints");
+
+        SortOperation sortOperation = Aggregation.sort(Sort.by(Sort.Direction.ASC, "scheduledAt"));
+
+        return mongoTemplate
+                .aggregate(Aggregation.newAggregation(matchOperation, projectionOperation, sortOperation), mongoTemplate.getCollectionName(Game.class), GameScore.class)
+                .getMappedResults();
     }
 
     public Optional<Game> findById(UUID id) {

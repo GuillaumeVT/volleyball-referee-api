@@ -10,9 +10,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor
+@Getter
+@Setter
 public class TeamSummary {
-
     @NotNull
     private UUID       id;
     @NotBlank
@@ -25,5 +26,4 @@ public class TeamSummary {
     private GameType   kind;
     @NotNull
     private GenderType gender;
-
 }

@@ -9,9 +9,10 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor
+@Getter
+@Setter
 public class GameIngredients {
-
     private GameType            kind;
     private List<User.Friend>   friends;
     private RulesSummary        defaultRules;

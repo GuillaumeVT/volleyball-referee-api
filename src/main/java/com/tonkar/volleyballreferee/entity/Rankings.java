@@ -1,5 +1,6 @@
 package com.tonkar.volleyballreferee.entity;
 
+import com.tonkar.volleyballreferee.dto.GameScore;
 import com.tonkar.volleyballreferee.dto.Ranking;
 
 import java.util.HashMap;
@@ -15,22 +16,22 @@ public class Rankings {
         this.rankingMap = new HashMap<>();
     }
 
-    public void addGame(Game game) {
-        String teamName = game.getHomeTeam().getName();
+    public void addGame(GameScore game) {
+        String teamName = game.getHomeTeamName();
         Ranking ranking = rankingMap.get(teamName);
 
         if (ranking == null) {
-            ranking = new Ranking(teamName, game.getHomeTeam().getColor());
+            ranking = new Ranking(teamName, game.getHomeTeamColor());
             rankingMap.put(teamName, ranking);
         }
 
         ranking.addGame(TeamType.HOME, game);
 
-        teamName = game.getGuestTeam().getName();
+        teamName = game.getGuestTeamName();
         ranking = rankingMap.get(teamName);
 
         if (ranking == null) {
-            ranking = new Ranking(teamName, game.getGuestTeam().getColor());
+            ranking = new Ranking(teamName, game.getGuestTeamColor());
             rankingMap.put(teamName, ranking);
         }
 

@@ -8,9 +8,7 @@ import lombok.*;
 @Setter
 @Builder
 public class UserToken {
-
-    private String        token;
-    private long          tokenExpiry;
-    private UserSummary   user;
-
+    private String      token;
+    private long        tokenExpiry;
+    private UserSummary user;
 }

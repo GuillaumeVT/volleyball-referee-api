@@ -1,7 +1,5 @@
 package com.tonkar.volleyballreferee.dto;
 
-import com.tonkar.volleyballreferee.entity.Game;
-import com.tonkar.volleyballreferee.entity.Set;
 import com.tonkar.volleyballreferee.entity.TeamType;
 import lombok.Getter;
 
@@ -34,7 +32,7 @@ public class Ranking implements Comparable<Ranking> {
         this.pointsDiff = 0;
     }
 
-    public void addGame(TeamType teamType, Game game) {
+    public void addGame(TeamType teamType, GameScore game) {
         int setsDiff;
 
         if (TeamType.HOME.equals(teamType)) {
@@ -43,7 +41,7 @@ public class Ranking implements Comparable<Ranking> {
             this.setsAgainst += game.getGuestSets();
             this.setsDiff += setsDiff;
 
-            for (Set set : game.getSets()) {
+            for (SetSummary set : game.getSets()) {
                 int pointsDiff = set.getHomePoints() - set.getGuestPoints();
                 this.pointsFor += set.getHomePoints();
                 this.pointsAgainst += set.getGuestPoints();
@@ -55,7 +53,7 @@ public class Ranking implements Comparable<Ranking> {
             this.setsAgainst += game.getHomeSets();
             this.setsDiff += setsDiff;
 
-            for (Set set : game.getSets()) {
+            for (SetSummary set : game.getSets()) {
                 int pointsDiff = set.getGuestPoints() - set.getHomePoints();
                 this.pointsFor += set.getGuestPoints();
                 this.pointsAgainst += set.getHomePoints();

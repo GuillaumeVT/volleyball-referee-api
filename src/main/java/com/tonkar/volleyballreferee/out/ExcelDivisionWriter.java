@@ -1,7 +1,11 @@
-package com.tonkar.volleyballreferee.generated;
+package com.tonkar.volleyballreferee.out;
 
+import com.tonkar.volleyballreferee.dto.GameScore;
 import com.tonkar.volleyballreferee.dto.Ranking;
-import com.tonkar.volleyballreferee.entity.*;
+import com.tonkar.volleyballreferee.dto.SetSummary;
+import com.tonkar.volleyballreferee.entity.FileWrapper;
+import com.tonkar.volleyballreferee.entity.Rankings;
+import com.tonkar.volleyballreferee.entity.TeamType;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -20,20 +24,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExcelDivisionWriter {
 
-    private final List<Game>    games;
-    private final XSSFWorkbook  workbook;
-    private final XSSFCellStyle headerStyle;
-    private final XSSFCellStyle matchStyle;
-    private final XSSFCellStyle setStyle;
-    private final XSSFCellStyle pointStyle;
-    private final XSSFCellStyle homeDefaultStyle;
-    private final XSSFCellStyle guestDefaultStyle;
-    private final XSSFCellStyle homeSetStyle;
-    private final XSSFCellStyle guestSetStyle;
-    private final XSSFCellStyle homePointStyle;
-    private final XSSFCellStyle guestPointStyle;
+    private final List<GameScore> games;
+    private final XSSFWorkbook    workbook;
+    private final XSSFCellStyle   headerStyle;
+    private final XSSFCellStyle   matchStyle;
+    private final XSSFCellStyle   setStyle;
+    private final XSSFCellStyle   pointStyle;
+    private final XSSFCellStyle   homeDefaultStyle;
+    private final XSSFCellStyle   guestDefaultStyle;
+    private final XSSFCellStyle   homeSetStyle;
+    private final XSSFCellStyle   guestSetStyle;
+    private final XSSFCellStyle   homePointStyle;
+    private final XSSFCellStyle   guestPointStyle;
 
-    private ExcelDivisionWriter(List<Game> games) {
+    private ExcelDivisionWriter(List<GameScore> games) {
         this.games = games;
         this.workbook =new XSSFWorkbook();
         this.headerStyle = createExcelBorderedStyle("#e4e4e4");
@@ -52,7 +56,7 @@ public class ExcelDivisionWriter {
         return workbook;
     }
 
-    public static FileWrapper writeExcelDivision(String divisionName, List<Game> games) throws IOException {
+    public static FileWrapper writeExcelDivision(String divisionName, List<GameScore> games) throws IOException {
         ExcelDivisionWriter excelDivisionWriter = new ExcelDivisionWriter(games);
         excelDivisionWriter.createMatchesExcelSheet();
         excelDivisionWriter.createRankingsExcelSheet();
@@ -82,7 +86,7 @@ public class ExcelDivisionWriter {
 
         int rowIndex = 1;
 
-        for (Game game : games) {
+        for (GameScore game : games) {
             row = sheet.createRow(rowIndex);
 
             XSSFCell cell = row.createCell(0);
@@ -100,10 +104,10 @@ public class ExcelDivisionWriter {
         }
     }
 
-    private void createMatchExcelRow(XSSFRow row, TeamType teamType, Game game) {
+    private void createMatchExcelRow(XSSFRow row, TeamType teamType, GameScore game) {
         XSSFCell cell = row.createCell(1);
-        cell.setCellValue(game.getTeam(teamType).getName().trim());
-        cell.setCellStyle(createExcelTeamStyle(teamType, game.getTeam(teamType).getColor()));
+        cell.setCellValue(game.getTeamName(teamType).trim());
+        cell.setCellStyle(createExcelTeamStyle(teamType, game.getTeamColor(teamType)));
 
         cell = row.createCell(2);
         cell.setCellValue(TeamType.HOME.equals(teamType) ? game.getHomeSets() : game.getGuestSets());
@@ -112,24 +116,26 @@ public class ExcelDivisionWriter {
         createSetsExcelRow(row, teamType, game);
     }
 
-    private void createSetsExcelRow(XSSFRow row, TeamType teamType, Game game) {
+    private void createSetsExcelRow(XSSFRow row, TeamType teamType, GameScore game) {
         int columnIndex = 3;
 
         int total = 0;
 
-        for (Set set : game.getSets()) {
+        XSSFCellStyle style = TeamType.HOME.equals(teamType) ? homeDefaultStyle : guestDefaultStyle;
+
+        for (SetSummary set : game.getSets()) {
             int points = set.getPoints(teamType);
             total += points;
             XSSFCell cell = row.createCell(columnIndex);
             cell.setCellValue(points);
-            cell.setCellStyle(TeamType.HOME.equals(teamType) ? homeDefaultStyle : guestDefaultStyle);
+            cell.setCellStyle(style);
             columnIndex++;
         }
 
         while (columnIndex < 8) {
             XSSFCell cell = row.createCell(columnIndex);
             cell.setCellValue(0);
-            cell.setCellStyle(TeamType.HOME.equals(teamType) ? homeDefaultStyle : guestDefaultStyle);
+            cell.setCellStyle(style);
             columnIndex++;
         }
 

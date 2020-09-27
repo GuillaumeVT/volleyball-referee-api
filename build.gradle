@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.3.2.RELEASE'
+    id 'org.springframework.boot' version '2.3.4.RELEASE'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
 }
@@ -7,8 +7,8 @@ plugins {
 group = 'com.tonkar'
 version = '3.2'
 java {
-    sourceCompatibility = JavaVersion.VERSION_13
-    targetCompatibility = JavaVersion.VERSION_13
+    sourceCompatibility = JavaVersion.VERSION_15
+    targetCompatibility = JavaVersion.VERSION_15
 }
 
 repositories {
@@ -38,7 +38,7 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
-    implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: 'v3-rev134-1.25.0'
+    implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: 'v3-rev142-1.25.0'
     // Excel
     implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
     // Misc

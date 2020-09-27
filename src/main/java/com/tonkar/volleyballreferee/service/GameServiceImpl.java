@@ -1,15 +1,12 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dao.*;
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.GameIngredients;
-import com.tonkar.volleyballreferee.dto.GameSummary;
-import com.tonkar.volleyballreferee.dto.Ranking;
+import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.exception.ConflictException;
 import com.tonkar.volleyballreferee.exception.NotFoundException;
-import com.tonkar.volleyballreferee.generated.ExcelDivisionWriter;
-import com.tonkar.volleyballreferee.generated.ScoreSheetWriter;
+import com.tonkar.volleyballreferee.out.ExcelDivisionWriter;
+import com.tonkar.volleyballreferee.out.ScoreSheetWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -131,13 +128,13 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public FileWrapper listGamesInDivisionExcel(UUID leagueId, String divisionName) throws IOException {
-        List<Game> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName, GameStatus.COMPLETED);
+        List<GameScore> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName, GameStatus.COMPLETED);
         return ExcelDivisionWriter.writeExcelDivision(divisionName, games);
     }
 
     @Override
     public List<Ranking> listRankingsInDivision(UUID leagueId, String divisionName) {
-        List<Game> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName, GameStatus.COMPLETED);
+        List<GameScore> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName, GameStatus.COMPLETED);
         Rankings rankings = new Rankings();
         games.forEach(rankings::addGame);
         return rankings.list();
