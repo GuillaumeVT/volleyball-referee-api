@@ -1,9 +1,6 @@
 package com.tonkar.volleyballreferee.out;
 
-import com.tonkar.volleyballreferee.entity.FileWrapper;
-import com.tonkar.volleyballreferee.entity.Game;
-import com.tonkar.volleyballreferee.entity.Set;
-import com.tonkar.volleyballreferee.entity.TeamType;
+import com.tonkar.volleyballreferee.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -71,7 +68,7 @@ public class ScoreSheetWriter {
             Element cardDiv = new Element("div");
             cardDiv.addClass("div-card").addClass("spacing-before");
             if (setIndex %2 == 1
-                    || (setIndex == 0 && (game.getPlayers(TeamType.HOME).size() > 14 || game.getPlayers(TeamType.GUEST).size() > 14))
+                    || (setIndex == 0 && (game.getHomeTeam().getPlayers().size() > 14 || game.getGuestTeam().getPlayers().size() > 14))
                     || game.getSubstitutions(TeamType.HOME, setIndex).size() > 6
                     || game.getSubstitutions(TeamType.GUEST, setIndex).size() > 6
                     || (game.getPoints(TeamType.HOME, setIndex) + game.getPoints(TeamType.GUEST, setIndex) > 64)) {
@@ -182,11 +179,13 @@ public class ScoreSheetWriter {
         Element teamDiv = new Element("div");
         teamDiv.addClass("div-grid-team");
 
-        game.getPlayers(teamType).forEach(player -> {
+        Team team = game.getTeam(teamType);
+
+        team.getPlayers().forEach(player -> {
             teamDiv.appendChild(createPlayerSpan(teamType, player.getNum(), false));
             teamDiv.appendChild(createCellSpan(player.getName(), false, false));
         });
-        game.getLiberos(teamType).forEach(player -> {
+        team.getLiberos().forEach(player -> {
             teamDiv.appendChild(createPlayerSpan(teamType, player.getNum(), true));
             teamDiv.appendChild(createCellSpan(player.getName(), false, false));
         });
@@ -232,7 +231,7 @@ public class ScoreSheetWriter {
         if (isLibero) {
             playerSpan.addClass(TeamType.HOME.equals(teamType) ? "vbr-home-libero" : "vbr-guest-libero");
         } else {
-            if (game.getCaptain(teamType) == player) {
+            if (game.getTeam(teamType).getCaptain() == player) {
                 playerSpan.addClass(TeamType.HOME.equals(teamType) ? "vbr-home-captain" : "vbr-guest-captain");
             } else {
                 playerSpan.addClass(TeamType.HOME.equals(teamType) ? "vbr-home-team" : "vbr-guest-team");
@@ -421,7 +420,7 @@ public class ScoreSheetWriter {
                 TeamType.HOME.equals(teamType) ? timeout.getHomePoints() : timeout.getGuestPoints(),
                 TeamType.HOME.equals(teamType) ? timeout.getGuestPoints() : timeout.getHomePoints());
 
-        timeoutDiv.appendChild(createPlayerSpan(teamType, -1, false).addClass(getTimeoutImageClass(game.getTeamColor(teamType))));
+        timeoutDiv.appendChild(createPlayerSpan(teamType, -1, false).addClass(getTimeoutImageClass(game.getTeam(teamType).getColor())));
         timeoutDiv.appendChild(createCellSpan(score, false, false));
 
         return timeoutDiv;
@@ -558,7 +557,7 @@ public class ScoreSheetWriter {
             Element cardDiv = new Element("div");
             cardDiv.addClass("div-card").addClass("spacing-before");
             if (setIndex %2 == 1
-                    || (setIndex == 0 && (game.getPlayers(TeamType.HOME).size() > 14 || game.getPlayers(TeamType.GUEST).size() > 14))
+                    || (setIndex == 0 && (game.getHomeTeam().getPlayers().size() > 14 || game.getGuestTeam().getPlayers().size() > 14))
                     || game.getSubstitutions(TeamType.HOME, setIndex).size() > 6
                     || game.getSubstitutions(TeamType.GUEST, setIndex).size() > 6
                     || (game.getPoints(TeamType.HOME, setIndex) + game.getPoints(TeamType.GUEST, setIndex) > 64)) {
@@ -750,7 +749,7 @@ public class ScoreSheetWriter {
             base64Image = Base64.getEncoder().encodeToString(imageData);
         } catch (IOException e) {
             base64Image = "";
-            log.error(String.format("Could not encode the %s into base 64", imageFilename), e);
+            log.error(String.format("Could not encode %s into base 64", imageFilename));
         }
 
         return base64Image;
@@ -772,10 +771,12 @@ public class ScoreSheetWriter {
     }
 
     private String htmlSkeleton(String title) {
-        String homeTeamBackgroundColor = game.getTeamColor(TeamType.HOME);
-        String homeLiberoBackgroundColor = game.getLiberoColor(TeamType.HOME);
-        String guestTeamBackgroundColor = game.getTeamColor(TeamType.GUEST);
-        String guestLiberoBackgroundColor = game.getLiberoColor(TeamType.GUEST);
+        Team homeTeam = game.getHomeTeam();
+        Team guestTeam = game.getGuestTeam();
+        String homeTeamBackgroundColor = homeTeam.getColor();
+        String homeLiberoBackgroundColor = homeTeam.getLiberoColor();
+        String guestTeamBackgroundColor = guestTeam.getColor();
+        String guestLiberoBackgroundColor = guestTeam.getLiberoColor();
 
         if (homeTeamBackgroundColor.equals(guestTeamBackgroundColor)) {
             guestTeamBackgroundColor = "#d6d7d7";

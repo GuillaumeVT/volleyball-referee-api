@@ -32,44 +32,38 @@ public class UserTests extends VbrTests {
 
     @Test
     public void testNotAuthenticated() {
-        User user = new User();
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(urlOf("/users/friends"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ResponseEntity<String> postUserResponse = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), String.class);
-        assertNotEquals(HttpStatus.CREATED, postUserResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/users/friends/requested"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ResponseEntity<FriendsAndRequests> friendsAndRequestsResponse = restTemplate.exchange(urlOf("/users/friends"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), FriendsAndRequests.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, friendsAndRequestsResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/users/friends/received"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<FriendRequest>> getFriendsResponse = restTemplate.exchange(urlOf("/users/friends/requested"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), typeReference);
-        assertEquals(HttpStatus.UNAUTHORIZED, getFriendsResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/users/friends/received/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        getFriendsResponse = restTemplate.exchange(urlOf("/users/friends/received"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), typeReference);
-        assertEquals(HttpStatus.UNAUTHORIZED, getFriendsResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/users/friends/request/anyPseudo"), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ResponseEntity<Count> getFriendsCountResponse = restTemplate.exchange(urlOf("/users/friends/received/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, getFriendsCountResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/users/friends/accept/anyId"), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ResponseEntity<String> friendResponse = restTemplate.exchange(urlOf("/users/friends/request/anyPseudo"), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidToken), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, friendResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/users/friends/reject/anyId"), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        friendResponse = restTemplate.exchange(urlOf("/users/friends/accept/anyId"), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidToken), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, friendResponse.getStatusCode());
-
-        friendResponse = restTemplate.exchange(urlOf("/users/friends/reject/anyId"), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidToken), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, friendResponse.getStatusCode());
-
-        friendResponse = restTemplate.exchange(urlOf("/users/friends/remove/anyId"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, friendResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/users/friends/remove/anyId"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
     }
 
     @Test
     public void testManageUsers() {
-        ResponseEntity<String> responseStr = restTemplate.exchange(urlOf(String.format("/public/users/%s", "Invalid purchase token")), HttpMethod.GET, null, String.class);
-        assertEquals(HttpStatus.NOT_FOUND, responseStr.getStatusCode());
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(urlOf(String.format("/public/users/%s", "Invalid purchase token")), HttpMethod.GET, null, ErrorResponse.class);
+        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
 
-        responseStr = restTemplate.exchange(urlOf(String.format("/public/users/%s", testPurchaseToken1)), HttpMethod.GET, null, String.class);
-        assertEquals(HttpStatus.NOT_FOUND, responseStr.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf(String.format("/public/users/%s", testPurchaseToken1)), HttpMethod.GET, null, ErrorResponse.class);
+        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
 
         // Invalid purchase token
 
@@ -85,8 +79,8 @@ public class UserTests extends VbrTests {
         user.setLastLoginAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         user.setFailedAuthentication(new User.FailedAuthentication());
 
-        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), UserToken.class);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        errorResponse = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), ErrorResponse.class);
+        assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
 
         // Invalid email address
 
@@ -95,7 +89,7 @@ public class UserTests extends VbrTests {
         user.setPassword(testPassword);
         user.setPurchaseToken(testPurchaseToken1);
 
-        response = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), UserToken.class);
+        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), UserToken.class);
         assertNotEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Create user
@@ -117,8 +111,8 @@ public class UserTests extends VbrTests {
 
         // User already exists
 
-        response = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), UserToken.class);
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        errorResponse = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), ErrorResponse.class);
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
 
         // User pseudo is taken
 
@@ -134,21 +128,21 @@ public class UserTests extends VbrTests {
         user.setLastLoginAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         user.setFailedAuthentication(new User.FailedAuthentication());
 
-        response = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), UserToken.class);
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        errorResponse = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), ErrorResponse.class);
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
 
         // User email is taken
 
         user.setPseudo(testUserPseudo2);
         user.setEmail(testMail1);
 
-        response = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), UserToken.class);
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        errorResponse = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), ErrorResponse.class);
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
 
         // Sign in user
 
-        response = restTemplate.postForEntity(urlOf("/public/users/token"), payloadWithoutAuth(new EmailCredentials(testMail1, "Invalid password")), UserToken.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        errorResponse = restTemplate.postForEntity(urlOf("/public/users/token"), payloadWithoutAuth(new EmailCredentials(testMail1, "Invalid password")), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
         response = restTemplate.postForEntity(urlOf("/public/users/token"), payloadWithoutAuth(new EmailCredentials(testMail1, testPassword)), UserToken.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -157,11 +151,11 @@ public class UserTests extends VbrTests {
 
         // Update user password
 
-        response = restTemplate.exchange(urlOf("/users/password"), HttpMethod.PATCH, payloadWithAuth(testUserToken1, new UserPasswordUpdate(testPassword, "Invalid password")), UserToken.class);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/users/password"), HttpMethod.PATCH, payloadWithAuth(testUserToken1, new UserPasswordUpdate(testPassword, "Invalid password")), ErrorResponse.class);
+        assertEquals(HttpStatus.BAD_REQUEST, errorResponse.getStatusCode());
 
-        response = restTemplate.exchange(urlOf("/users/password"), HttpMethod.PATCH, payloadWithAuth(testUserToken1, new UserPasswordUpdate("Invalid password", "NewPassword5678-")), UserToken.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/users/password"), HttpMethod.PATCH, payloadWithAuth(testUserToken1, new UserPasswordUpdate("Invalid password", "NewPassword5678-")), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
         response = restTemplate.exchange(urlOf("/users/password"), HttpMethod.PATCH, payloadWithAuth(testUserToken1, new UserPasswordUpdate(testPassword, "NewPassword5678-")), UserToken.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -170,20 +164,20 @@ public class UserTests extends VbrTests {
 
         // Recover user password
 
-        responseStr = restTemplate.postForEntity(urlOf(String.format("/public/users/password/recover/%s", testUser1.getEmail())), emptyPayloadWithoutAuth(), String.class);
-        assertEquals(HttpStatus.OK, responseStr.getStatusCode());
+        errorResponse = restTemplate.postForEntity(urlOf(String.format("/public/users/password/recover/%s", testUser1.getEmail())), emptyPayloadWithoutAuth(), ErrorResponse.class);
+        assertEquals(HttpStatus.OK, errorResponse.getStatusCode());
 
         PasswordReset passwordReset = passwordResetDao
                 .findByUserId(testUser1.getId())
                 .orElseThrow(() -> new RuntimeException("This must not fail"));
 
-        responseStr = restTemplate.exchange(urlOf(String.format("/public/users/password/follow/%s", UUID.randomUUID())), HttpMethod.GET, null, String.class);
-        assertEquals(HttpStatus.NOT_FOUND, responseStr.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf(String.format("/public/users/password/follow/%s", UUID.randomUUID())), HttpMethod.GET, null, ErrorResponse.class);
+        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
 
-        responseStr = restTemplate.exchange(urlOf(String.format("/public/users/password/follow/%s", passwordReset.getId())), HttpMethod.GET, null, String.class);
-        assertEquals(HttpStatus.FOUND, responseStr.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf(String.format("/public/users/password/follow/%s", passwordReset.getId())), HttpMethod.GET, null, ErrorResponse.class);
+        assertEquals(HttpStatus.FOUND, errorResponse.getStatusCode());
 
-        List<String> location = responseStr.getHeaders().get("Location");
+        List<String> location = errorResponse.getHeaders().get("Location");
         assertNotNull(location);
         assertEquals(1, location.size());
 
@@ -191,8 +185,8 @@ public class UserTests extends VbrTests {
         assertEquals(1, parameters.get("passwordResetId").size());
         assertEquals(passwordReset.getId(), UUID.fromString(parameters.get("passwordResetId").get(0)));
 
-        response = restTemplate.postForEntity(urlOf(String.format("/public/users/password/reset/%s", passwordReset.getId())), payloadWithoutAuth(new UserPassword("notStrongEnough")), UserToken.class);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        errorResponse = restTemplate.postForEntity(urlOf(String.format("/public/users/password/reset/%s", passwordReset.getId())), payloadWithoutAuth(new UserPassword("notStrongEnough")), ErrorResponse.class);
+        assertEquals(HttpStatus.BAD_REQUEST, errorResponse.getStatusCode());
 
         response = restTemplate.postForEntity(urlOf(String.format("/public/users/password/reset/%s", passwordReset.getId())), payloadWithoutAuth(new UserPassword(testPassword)), UserToken.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -205,18 +199,18 @@ public class UserTests extends VbrTests {
 
         // Can't request friend with self
 
-        ResponseEntity<String> friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser1.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), String.class);
-        assertEquals(HttpStatus.CONFLICT, friendResponse.getStatusCode());
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser1.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
 
         // Request friend
 
-        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser2.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), String.class);
+        ResponseEntity<Void> friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser2.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), Void.class);
         assertEquals(HttpStatus.CREATED, friendResponse.getStatusCode());
 
         // Can't have 2+ same friend request at a time
 
-        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser2.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), String.class);
-        assertEquals(HttpStatus.CONFLICT, friendResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser2.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
 
         // Count received friend requests
 
@@ -257,7 +251,7 @@ public class UserTests extends VbrTests {
         // Reject friend request
 
         UUID friendRequestId =  getFriendsResponse.getBody().get(0).getId();
-        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/reject/%s", friendRequestId)), HttpMethod.POST, emptyPayloadWithAuth(testUserToken2), String.class);
+        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/reject/%s", friendRequestId)), HttpMethod.POST, emptyPayloadWithAuth(testUserToken2), Void.class);
         assertEquals(HttpStatus.CREATED, friendResponse.getStatusCode());
 
         getFriendsResponse = restTemplate.exchange(urlOf("/users/friends/received"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken2), typeReference);
@@ -270,7 +264,7 @@ public class UserTests extends VbrTests {
 
         // Request friend
 
-        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser2.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), String.class);
+        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser2.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), Void.class);
         assertEquals(HttpStatus.CREATED, friendResponse.getStatusCode());
 
         // Accept friend request
@@ -285,7 +279,7 @@ public class UserTests extends VbrTests {
 
         friendRequestId =  getFriendsResponse.getBody().get(0).getId();
 
-        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/accept/%s", friendRequestId)), HttpMethod.POST, emptyPayloadWithAuth(testUserToken2), String.class);
+        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/accept/%s", friendRequestId)), HttpMethod.POST, emptyPayloadWithAuth(testUserToken2), Void.class);
         assertEquals(HttpStatus.CREATED, friendResponse.getStatusCode());
 
         getFriendsResponse = restTemplate.exchange(urlOf("/users/friends/received"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken2), typeReference);
@@ -298,15 +292,15 @@ public class UserTests extends VbrTests {
 
         // Can't request when already friend
 
-        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser2.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), String.class);
-        assertEquals(HttpStatus.CONFLICT, friendResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf(String.format("/users/friends/request/%s", testUser2.getPseudo())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
 
         // Remove friend
 
-        friendResponse = restTemplate.exchange(urlOf("/users/friends/remove/anyId"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
-        assertEquals(HttpStatus.NOT_FOUND, friendResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/users/friends/remove/anyId"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
+        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
 
-        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/remove/%s", testUser2.getId())), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        friendResponse = restTemplate.exchange(urlOf(String.format("/users/friends/remove/%s", testUser2.getId())), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), Void.class);
         assertEquals(HttpStatus.NO_CONTENT, friendResponse.getStatusCode());
 
         friendsAndRequestsResponse = restTemplate.exchange(urlOf("/users/friends"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), FriendsAndRequests.class);

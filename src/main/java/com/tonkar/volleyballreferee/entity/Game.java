@@ -73,28 +73,12 @@ public class Game {
         return TeamType.HOME.equals(teamType) ? set.getHomeStartingPlayers().isFilled(kind) : set.getGuestStartingPlayers().isFilled(kind);
     }
 
-    public String getTeamColor(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? getHomeTeam().getColor() : getGuestTeam().getColor();
-    }
-
-    public String getLiberoColor(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? getHomeTeam().getLiberoColor() : getGuestTeam().getLiberoColor();
-    }
-
-    public List<Team.Player> getPlayers(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? getHomeTeam().getPlayers() : getGuestTeam().getPlayers();
-    }
-
-    public List<Team.Player> getLiberos(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? getHomeTeam().getLiberos() : getGuestTeam().getLiberos();
+    public Team getTeam(TeamType teamType) {
+        return TeamType.HOME.equals(teamType) ? getHomeTeam() : getGuestTeam();
     }
 
     public boolean isLibero(TeamType teamType, int player) {
-        return getLiberos(teamType).stream().anyMatch(libero -> libero.getNum() == player);
-    }
-
-    public int getCaptain(TeamType teamType) {
-        return TeamType.HOME.equals(teamType) ? getHomeTeam().getCaptain() : getGuestTeam().getCaptain();
+        return getTeam(teamType).getLiberos().stream().anyMatch(libero -> libero.getNum() == player);
     }
 
     public int getPoints(TeamType teamType, int setIndex) {

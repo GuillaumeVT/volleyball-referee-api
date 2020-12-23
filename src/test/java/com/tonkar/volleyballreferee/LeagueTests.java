@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee;
 
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.ErrorResponse;
 import com.tonkar.volleyballreferee.dto.LeagueSummary;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
@@ -26,25 +27,24 @@ public class LeagueTests extends VbrTests {
     public void testNotAuthenticated() {
         League league = new League();
 
-        ParameterizedTypeReference<List<LeagueSummary>> listType = new ParameterizedTypeReference<>() {};
-        ResponseEntity<List<LeagueSummary>> getLeaguesResponse = restTemplate.exchange(urlOf("/leagues"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), listType);
-        assertEquals(HttpStatus.UNAUTHORIZED, getLeaguesResponse.getStatusCode());
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(urlOf("/leagues"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(urlOf("/leagues")).queryParam("kind", GameType.INDOOR);
-        getLeaguesResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), listType);
-        assertEquals(HttpStatus.UNAUTHORIZED, getLeaguesResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ResponseEntity<League> getLeagueResponse = restTemplate.exchange(urlOf("/leagues/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), League.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, getLeagueResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/leagues/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ResponseEntity<Count> getLeagueCountResponse = restTemplate.exchange(urlOf("/leagues/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, getLeagueCountResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/leagues/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ResponseEntity<String> leagueResponse = restTemplate.exchange(urlOf("/leagues"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, league), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, leagueResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/leagues"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, league), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        leagueResponse = restTemplate.exchange(urlOf("/leagues/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, leagueResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/leagues/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
     }
 
     @Test
@@ -66,23 +66,23 @@ public class LeagueTests extends VbrTests {
 
         // League does not exist yet
 
-        ResponseEntity<League> getLeagueResponse = restTemplate.exchange(urlOf("/leagues/" + leagueId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), League.class);
-        assertEquals(HttpStatus.NOT_FOUND, getLeagueResponse.getStatusCode());
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(urlOf("/leagues/" + leagueId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
+        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
 
         // Create league
 
-        ResponseEntity<String> leagueResponse = restTemplate.exchange(urlOf("/leagues"), HttpMethod.POST, payloadWithAuth(testUserToken1, league), String.class);
+        ResponseEntity<Void> leagueResponse = restTemplate.exchange(urlOf("/leagues"), HttpMethod.POST, payloadWithAuth(testUserToken1, league), Void.class);
         assertEquals(HttpStatus.CREATED, leagueResponse.getStatusCode());
 
         // League already exists
 
-        leagueResponse = restTemplate.exchange(urlOf("/leagues"), HttpMethod.POST, payloadWithAuth(testUserToken1, league), String.class);
-        assertEquals(HttpStatus.CONFLICT, leagueResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/leagues"), HttpMethod.POST, payloadWithAuth(testUserToken1, league), ErrorResponse.class);
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
 
         league.setId(UUID.randomUUID());
 
-        leagueResponse = restTemplate.exchange(urlOf("/leagues"), HttpMethod.POST, payloadWithAuth(testUserToken1, league), String.class);
-        assertEquals(HttpStatus.CONFLICT, leagueResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/leagues"), HttpMethod.POST, payloadWithAuth(testUserToken1, league), ErrorResponse.class);
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
 
         league.setId(leagueId);
 
@@ -119,13 +119,13 @@ public class LeagueTests extends VbrTests {
 
         // Get league
 
-        getLeagueResponse = restTemplate.exchange(urlOf("/leagues/" + leagueId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), League.class);
+        ResponseEntity<League> getLeagueResponse = restTemplate.exchange(urlOf("/leagues/" + leagueId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), League.class);
         assertEquals(HttpStatus.OK, getLeagueResponse.getStatusCode());
         assertEquals(league.getName(), getLeagueResponse.getBody().getName());
 
         // Delete league
 
-        leagueResponse = restTemplate.exchange(urlOf("/leagues/" + leagueId), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        leagueResponse = restTemplate.exchange(urlOf("/leagues/" + leagueId), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), Void.class);
         assertEquals(HttpStatus.NO_CONTENT, leagueResponse.getStatusCode());
     }
 

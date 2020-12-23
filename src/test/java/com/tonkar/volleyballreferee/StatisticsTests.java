@@ -1,5 +1,6 @@
 package com.tonkar.volleyballreferee;
 
+import com.tonkar.volleyballreferee.dto.ErrorResponse;
 import com.tonkar.volleyballreferee.dto.Statistics;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,8 +16,8 @@ public class StatisticsTests extends VbrTests {
 
     @Test
     public void testNotAuthenticated() {
-        ResponseEntity<Statistics> getStatisticsResponse = restTemplate.exchange(urlOf("/statistics"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Statistics.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, getStatisticsResponse.getStatusCode());
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(urlOf("/statistics"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
     }
 
     @Test

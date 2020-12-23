@@ -1,6 +1,6 @@
 plugins {
     id 'org.springframework.boot' version '2.3.4.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
     id 'java'
 }
 
@@ -32,7 +32,7 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-mongodb'
-    implementation group: 'org.jsoup', name: 'jsoup', version: '1.12.2'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
     implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
     // Security
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
@@ -42,7 +42,7 @@ dependencies {
     // Excel
     implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
     // Misc
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.16'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.16'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 }

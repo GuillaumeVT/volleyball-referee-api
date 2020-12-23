@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee;
 
 import com.tonkar.volleyballreferee.dto.Count;
+import com.tonkar.volleyballreferee.dto.ErrorResponse;
 import com.tonkar.volleyballreferee.dto.TeamSummary;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.GenderType;
@@ -26,39 +27,38 @@ public class TeamTests extends VbrTests {
     public void testNotAuthenticated() {
         Team team = new Team();
 
-        ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
                 .fromUriString(urlOf("/teams"))
                 .queryParam("page", 0)
                 .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<TeamSummary>> getTeamDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), pageType);
-        assertEquals(HttpStatus.UNAUTHORIZED, getTeamDescrResponse.getStatusCode());
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
         uriBuilder = UriComponentsBuilder
                 .fromUriString(urlOf("/teams"))
                 .queryParam("kind", GameType.INDOOR)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
-        getTeamDescrResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), pageType);
-        assertEquals(HttpStatus.UNAUTHORIZED, getTeamDescrResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ResponseEntity<Team> getTeamResponse = restTemplate.exchange(urlOf("/teams/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Team.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, getTeamResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/teams/" + UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ResponseEntity<Count> getTeamCountResponse = restTemplate.exchange(urlOf("/teams/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), Count.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, getTeamCountResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/teams/count"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        ResponseEntity<String> teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, team), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, teamResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserInvalidToken, team), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.PUT, payloadWithAuth(testUserInvalidToken, team), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, teamResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.PUT, payloadWithAuth(testUserInvalidToken, team), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/teams/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, teamResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/teams/" + UUID.randomUUID()), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), String.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, teamResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
     }
 
     @Test
@@ -85,27 +85,27 @@ public class TeamTests extends VbrTests {
 
         // Team does not exist yet
 
-        ResponseEntity<Team> getTeamResponse = restTemplate.exchange(urlOf("/teams/" + teamId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Team.class);
-        assertEquals(HttpStatus.NOT_FOUND, getTeamResponse.getStatusCode());
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(urlOf("/teams/" + teamId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
+        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
 
-        ResponseEntity<String> teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.PUT, payloadWithAuth(testUserToken1, team), String.class);
-        assertEquals(HttpStatus.NOT_FOUND, teamResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.PUT, payloadWithAuth(testUserToken1, team), ErrorResponse.class);
+        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
 
         // Create team
 
-        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), String.class);
+        ResponseEntity<Void> teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), Void.class);
         assertEquals(HttpStatus.CREATED, teamResponse.getStatusCode());
 
         // Team already exists
 
-        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), String.class);
-        assertEquals(HttpStatus.CONFLICT, teamResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), ErrorResponse.class);
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
 
 
         team.setId(UUID.randomUUID());
 
-        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), String.class);
-        assertEquals(HttpStatus.CONFLICT, teamResponse.getStatusCode());
+        errorResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.POST, payloadWithAuth(testUserToken1, team), ErrorResponse.class);
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
 
         team.setId(teamId);
 
@@ -114,7 +114,7 @@ public class TeamTests extends VbrTests {
         team.setUpdatedAt(System.currentTimeMillis());
         team.setColor("#123456");
 
-        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.PUT, payloadWithAuth(testUserToken1, team), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.PUT, payloadWithAuth(testUserToken1, team), Void.class);
         assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
 
         // Count teams
@@ -125,7 +125,7 @@ public class TeamTests extends VbrTests {
 
         // Get team
 
-        getTeamResponse = restTemplate.exchange(urlOf("/teams/" + teamId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Team.class);
+        ResponseEntity<Team> getTeamResponse = restTemplate.exchange(urlOf("/teams/" + teamId), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Team.class);
         assertEquals(HttpStatus.OK, getTeamResponse.getStatusCode());
         assertEquals(team.getName(), getTeamResponse.getBody().getName());
 
@@ -201,10 +201,10 @@ public class TeamTests extends VbrTests {
 
         // Delete team
 
-        teamResponse = restTemplate.exchange(urlOf("/teams/" + teamId), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams/" + teamId), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), Void.class);
         assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
 
-        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), String.class);
+        teamResponse = restTemplate.exchange(urlOf("/teams"), HttpMethod.DELETE, emptyPayloadWithAuth(testUserToken1), Void.class);
         assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
 
         uriBuilder = UriComponentsBuilder

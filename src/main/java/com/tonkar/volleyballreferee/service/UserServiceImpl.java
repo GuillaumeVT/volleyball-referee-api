@@ -433,7 +433,7 @@ public class UserServiceImpl implements UserService {
                     .parseClaimsJws(token)
                     .getBody());
         } catch (JwtException e) {
-            log.error(String.format("Failed to parse token %s", token), e);
+            log.error(String.format("Failed to parse token %s", token));
             optionalClaims = Optional.empty();
         }
 
