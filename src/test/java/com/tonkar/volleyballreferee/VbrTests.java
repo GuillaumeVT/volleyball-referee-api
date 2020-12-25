@@ -3,7 +3,7 @@ package com.tonkar.volleyballreferee;
 import com.tonkar.volleyballreferee.dto.UserSummary;
 import com.tonkar.volleyballreferee.dto.UserToken;
 import com.tonkar.volleyballreferee.entity.*;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,8 +19,8 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:application.yml")
@@ -65,7 +65,7 @@ public class VbrTests {
 
     String testPassword = "Password1234+";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mongoTemplate.dropCollection(User.class);
         mongoTemplate.dropCollection(FriendRequest.class);
