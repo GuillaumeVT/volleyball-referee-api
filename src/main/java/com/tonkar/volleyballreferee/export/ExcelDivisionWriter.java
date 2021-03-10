@@ -1,4 +1,4 @@
-package com.tonkar.volleyballreferee.out;
+package com.tonkar.volleyballreferee.export;
 
 import com.tonkar.volleyballreferee.dto.GameScore;
 import com.tonkar.volleyballreferee.dto.Ranking;

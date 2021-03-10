@@ -1,4 +1,4 @@
-package com.tonkar.volleyballreferee;
+package com.tonkar.volleyballreferee.configuration;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
