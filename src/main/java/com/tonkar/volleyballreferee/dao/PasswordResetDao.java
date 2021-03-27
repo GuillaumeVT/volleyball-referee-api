@@ -1,6 +1,5 @@
 package com.tonkar.volleyballreferee.dao;
 
-import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.PasswordReset;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -28,7 +27,7 @@ public class PasswordResetDao {
 
     public void deleteByExpiresAtBefore(LocalDateTime dateTime) {
         Query query = Query.query(Criteria.where("expiresAt").lte(dateTime));
-        mongoTemplate.remove(query, FriendRequest.class);
+        mongoTemplate.remove(query, PasswordReset.class);
     }
 
     public Optional<PasswordReset> findById(UUID id) {

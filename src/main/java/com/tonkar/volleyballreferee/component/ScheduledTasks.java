@@ -51,13 +51,19 @@ public class ScheduledTasks {
 
     // Every day at 4:15am
     @Scheduled(cron = "0 15 4 * * *")
+    public void refreshInactiveAccounts() {
+        userDao.findUsersBySubscriptionExpiryBefore(3L).forEach(user -> userService.refreshSubscriptionPurchaseToken(user.getPurchaseToken()));
+    }
+
+    // Every day at 4:30am
+    @Scheduled(cron = "0 30 4 * * *")
     public void purgeOldCancelledAccounts() {
         userDao.findUsersBySubscriptionExpiryBefore(6L).forEach(user -> {
             gameService.deleteAllGames(user);
             teamService.deleteAllTeams(user);
             rulesService.deleteAllRules(user);
             leagueService.deleteAllLeagues(user);
+            userService.deleteUser(user);
         });
     }
-
 }

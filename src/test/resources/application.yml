@@ -12,6 +12,7 @@ spring:
       database: ${TEST_VBR_DB:}
       username: ${TEST_VBR_DB_USER:}
       password: ${TEST_VBR_DB_PASSWORD:}
+      #uuid-representation: standard
 
 vbr:
   jwt:

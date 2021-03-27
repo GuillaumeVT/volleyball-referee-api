@@ -49,4 +49,5 @@ public interface UserService {
 
     void purgeOldPasswordResets(int days);
 
+    void deleteUser(User user);
 }

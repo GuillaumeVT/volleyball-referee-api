@@ -169,30 +169,41 @@ public class UserServiceImpl implements UserService {
         String password = user.getPassword().trim();
         validatePassword(password);
 
-        if (userDao.existsByEmail(user.getEmail())) {
-            throw new ConflictException(String.format("Found an existing user with email %s", user.getEmail()));
-        }
+        Optional<User> optionalExistingUser = userDao.findByEmail(user.getEmail());
 
-        boolean idExists = userDao.existsById(user.getId());
-        boolean pseudoExists = userDao.existsByPseudo(user.getPseudo());
+        if (optionalExistingUser.isPresent()) {
+            User existingUser = optionalExistingUser.get();
 
-        if (idExists) {
-            throw new ConflictException(String.format("Found an existing user with id %s", user.getId()));
-        } else if (pseudoExists) {
-            throw new ConflictException(String.format("Found an existing user with pseudo %s", user.getPseudo()));
+            if (existingUser.isAccountNonExpired()) {
+                throw new ConflictException(String.format("Found an existing user with email %s", user.getEmail()));
+            } else {
+                user.setId(existingUser.getId());
+                user.setPseudo(existingUser.getPseudo());
+                user.setFriends(existingUser.getFriends());
+            }
         } else {
-            user.setPassword(passwordEncoder.encode(password));
-            user.setFriends(new ArrayList<>());
-            user.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-            user.setFailedAuthentication(new User.FailedAuthentication(0, LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()));
-            user.setEnabled(true);
-            user.setSubscription(subscription != null);
-            user.setSubscriptionExpiryAt(subscription == null ? 0L : subscription.getExpiryTimeMillis());
-            userDao.save(user);
-            log.info(String.format("Created user with id %s and pseudo %s", user.getId(), user.getPseudo()));
-            emailService.sendUserCreatedNotificationEmail(user);
-            return signInUser(user.getEmail(), password);
+            boolean idExists = userDao.existsById(user.getId());
+            boolean pseudoExists = userDao.existsByPseudo(user.getPseudo());
+
+            if (idExists) {
+                throw new ConflictException(String.format("Found an existing user with id %s", user.getId()));
+            } else if (pseudoExists) {
+                throw new ConflictException(String.format("Found an existing user with pseudo %s", user.getPseudo()));
+            } else {
+                user.setFriends(new ArrayList<>());
+                user.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            }
         }
+
+        user.setPassword(passwordEncoder.encode(password));
+        user.setFailedAuthentication(new User.FailedAuthentication(0, LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()));
+        user.setEnabled(true);
+        user.setSubscription(subscription != null);
+        user.setSubscriptionExpiryAt(subscription == null ? 0L : subscription.getExpiryTimeMillis());
+        userDao.save(user);
+        log.info(String.format("Created user with id %s and pseudo %s", user.getId(), user.getPseudo()));
+        emailService.sendUserCreatedNotificationEmail(user);
+        return signInUser(user.getEmail(), password);
     }
 
     @Override
@@ -367,6 +378,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void purgeOldPasswordResets(int days) {
         passwordResetDao.deleteByExpiresAtBefore(LocalDateTime.now(ZoneOffset.UTC).minusDays(days));
+    }
+
+    @Override
+    public void deleteUser(User user) {
+        user.getFriends().forEach(friend -> userDao.removeFriend(friend.getId(), user.getId()));
+        userDao.delete(user);
     }
 
     private SubscriptionPurchase getSubscriptionPurchase(String purchaseToken) {

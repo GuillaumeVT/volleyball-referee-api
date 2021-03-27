@@ -34,6 +34,10 @@ public class UserDao {
         mongoTemplate.save(user);
     }
 
+    public void delete(User user) {
+        mongoTemplate.remove(user);
+    }
+
     public boolean existsById(String id) {
         Query query = Query.query(Criteria.where("_id").is(id));
         return mongoTemplate.exists(query, User.class);
@@ -41,11 +45,6 @@ public class UserDao {
 
     public boolean existsByPseudo(String pseudo) {
         Query query = Query.query(Criteria.where("pseudo").is(pseudo));
-        return mongoTemplate.exists(query, User.class);
-    }
-
-    public boolean existsByEmail(String email) {
-        Query query = Query.query(Criteria.where("email").is(email));
         return mongoTemplate.exists(query, User.class);
     }
 
