@@ -5,8 +5,6 @@ import com.tonkar.volleyballreferee.dto.RulesSummary;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.exception.ConflictException;
-import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.service.RulesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +35,7 @@ public class RulesController {
     }
 
     @GetMapping(value = "/rules/{rulesId}", produces = {"application/json"})
-    public ResponseEntity<Rules> getRules(@AuthenticationPrincipal User user, @PathVariable("rulesId") UUID rulesId) throws NotFoundException {
+    public ResponseEntity<Rules> getRules(@AuthenticationPrincipal User user, @PathVariable("rulesId") UUID rulesId){
         return new ResponseEntity<>(rulesService.getRules(user, rulesId), HttpStatus.OK);
     }
 
@@ -52,19 +50,19 @@ public class RulesController {
     }
 
     @PostMapping(value = "/rules", produces = {"application/json"})
-    public ResponseEntity<Void> createRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules) throws ConflictException {
+    public ResponseEntity<Void> createRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules) {
         rulesService.createRules(user, rules);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/rules", produces = {"application/json"})
-    public ResponseEntity<Void> updateRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules) throws NotFoundException {
+    public ResponseEntity<Void> updateRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules){
         rulesService.updateRules(user, rules);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/rules/{rulesId}", produces = {"application/json"})
-    public ResponseEntity<Void> deleteRules(@AuthenticationPrincipal User user, @PathVariable("rulesId") UUID rulesId) throws ConflictException {
+    public ResponseEntity<Void> deleteRules(@AuthenticationPrincipal User user, @PathVariable("rulesId") UUID rulesId) {
         rulesService.deleteRules(user, rulesId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

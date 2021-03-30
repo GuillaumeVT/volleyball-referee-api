@@ -1,9 +1,9 @@
 package com.tonkar.volleyballreferee.service;
 
+import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
 import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.exception.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,17 +11,19 @@ import java.util.UUID;
 
 public interface UserService {
 
-    User getUser(String userId) throws NotFoundException;
+    User getUser(String userId);
 
     Optional<User> getUserFromToken(String token);
 
-    UserSummary getUserFromPurchaseToken(String purchaseToken) throws NotFoundException;
+    UserSummary getUserFromPurchaseToken(String purchaseToken);
 
     void refreshSubscriptionPurchaseToken(String purchaseToken);
 
-    UserToken createUser(User user) throws UnauthorizedException, ForbiddenException, ConflictException, NotFoundException, BadRequestException;
+    SubscriptionPurchase getUserSubscription(String purchaseToken);
 
-    UserToken signInUser(String userEmail, String userPassword) throws NotFoundException, UnauthorizedException, ForbiddenException;
+    UserToken createUser(User user);
+
+    UserToken signInUser(String userEmail, String userPassword);
 
     Count getNumberOfFriendRequestsReceivedBy(User user);
 
@@ -31,21 +33,21 @@ public interface UserService {
 
     FriendsAndRequests listFriendsAndRequests(User user);
 
-    void sendFriendRequest(User user, String receiverPseudo) throws ConflictException, NotFoundException;
+    void sendFriendRequest(User user, String receiverPseudo);
 
-    void acceptFriendRequest(User user, UUID friendRequestId) throws ConflictException, NotFoundException;
+    void acceptFriendRequest(User user, UUID friendRequestId);
 
     void rejectFriendRequest(User user, UUID friendRequestId);
 
-    void removeFriend(User user, String friendId) throws NotFoundException;
+    void removeFriend(User user, String friendId);
 
-    UserToken updateUserPassword(User user, UserPasswordUpdate userPasswordUpdate) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException, ForbiddenException;
+    UserToken updateUserPassword(User user, UserPasswordUpdate userPasswordUpdate);
 
-    void initiatePasswordReset(String userEmail) throws NotFoundException;
+    void initiatePasswordReset(String userEmail);
 
-    String followPasswordReset(UUID passwordResetId) throws NotFoundException;
+    String followPasswordReset(UUID passwordResetId);
 
-    UserToken resetPassword(UUID passwordResetId, String userPassword) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException, ForbiddenException;
+    UserToken resetPassword(UUID passwordResetId, String userPassword);
 
     void purgeOldPasswordResets(int days);
 

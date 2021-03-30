@@ -4,8 +4,6 @@ import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.GameIngredients;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.entity.*;
-import com.tonkar.volleyballreferee.exception.ConflictException;
-import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.service.GameService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +62,7 @@ public class GameController {
     }
 
     @GetMapping(value = "/games/{gameId}", produces = {"application/json"})
-    public ResponseEntity<Game> getGame(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId) throws NotFoundException {
+    public ResponseEntity<Game> getGame(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId) {
         return new ResponseEntity<>(gameService.getGame(user, gameId), HttpStatus.OK);
     }
 
@@ -89,43 +87,50 @@ public class GameController {
     }
 
     @PostMapping(value = "/games", produces = {"application/json"})
-    public ResponseEntity<Void> createGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody GameSummary gameSummary) throws ConflictException, NotFoundException {
+    public ResponseEntity<Void> createGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody GameSummary gameSummary) {
         gameService.createGame(user, gameSummary);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/games/full", produces = {"application/json"})
-    public ResponseEntity<Void> createGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Game game) throws ConflictException, NotFoundException {
+    public ResponseEntity<Void> createGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Game game) {
         gameService.createGame(user, game);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/games", produces = {"application/json"})
-    public ResponseEntity<Void> updateGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody GameSummary gameSummary) throws ConflictException, NotFoundException {
+    public ResponseEntity<Void> updateGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody GameSummary gameSummary) {
         gameService.updateGame(user, gameSummary);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping(value = "/games/full", produces = {"application/json"})
-    public ResponseEntity<Void> updateGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Game game) throws NotFoundException {
+    public ResponseEntity<Void> updateGame(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Game game) {
         gameService.updateGame(user, game);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping(value = "/games/{gameId}/set/{setIndex}", produces = {"application/json"})
-    public ResponseEntity<Void> updateSet(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId, @PathVariable("setIndex") @Positive int setIndex, @Valid @NotNull @RequestBody Set set) throws NotFoundException {
+    public ResponseEntity<Void> updateSet(@AuthenticationPrincipal User user,
+                                          @PathVariable("gameId") UUID gameId,
+                                          @PathVariable("setIndex") @Positive int setIndex,
+                                          @Valid @NotNull @RequestBody Set set) {
         gameService.updateSet(user, gameId, setIndex, set);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping(value = "/games/{gameId}/indexed/{indexed}", produces = {"application/json"})
-    public ResponseEntity<Void> setIndexed(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId, @PathVariable("indexed") boolean indexed) throws NotFoundException {
+    public ResponseEntity<Void> setIndexed(@AuthenticationPrincipal User user,
+                                           @PathVariable("gameId") UUID gameId,
+                                           @PathVariable("indexed") boolean indexed)  {
         gameService.setIndexed(user, gameId, indexed);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PatchMapping(value = "/games/{gameId}/referee/{refereeUserId}", produces = {"application/json"})
-    public ResponseEntity<Void> setReferee(@AuthenticationPrincipal User user, @PathVariable("gameId") UUID gameId, @PathVariable("refereeUserId") @NotBlank String refereeUserId) throws NotFoundException {
+    public ResponseEntity<Void> setReferee(@AuthenticationPrincipal User user,
+                                           @PathVariable("gameId") UUID gameId,
+                                           @PathVariable("refereeUserId") @NotBlank String refereeUserId) {
         gameService.setReferee(user, gameId, refereeUserId);
         return new ResponseEntity<>(HttpStatus.OK);
     }

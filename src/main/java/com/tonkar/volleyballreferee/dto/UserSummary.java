@@ -14,9 +14,10 @@ import javax.validation.constraints.NotBlank;
 @Setter
 public class UserSummary {
     @NotBlank
-    private String id;
+    private String  id;
     @NotBlank
-    private String pseudo;
+    private String  pseudo;
     @Email
-    private String email;
+    private String  email;
+    private boolean admin;
 }

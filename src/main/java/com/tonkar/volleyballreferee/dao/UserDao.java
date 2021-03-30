@@ -5,10 +5,12 @@ import com.mongodb.client.result.UpdateResult;
 import com.tonkar.volleyballreferee.dto.UserSummary;
 import com.tonkar.volleyballreferee.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -25,7 +27,8 @@ public class UserDao {
     private final static ProjectionOperation sUserSummaryProjection = Aggregation.project()
             .and("_id").as("_id")
             .and("pseudo").as("pseudo")
-            .and("email").as("email");
+            .and("email").as("email")
+            .and("admin").as("admin");
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -126,5 +129,29 @@ public class UserDao {
         Update update = new Update().pull("friends", new BasicDBObject("_id", friendId));
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class);
         return updateResult.getModifiedCount() > 0;
+    }
+
+    public Page<User> listUsers(String filter, Pageable pageable) {
+        Criteria criteria;
+
+        if (filter != null && filter.trim().length() > 0) {
+            criteria = Criteria.where("admin").is(false).orOperator(
+                    Criteria.where("pseudo").regex(".*" + filter + ".*", "i"),
+                    Criteria.where("email").regex(".*" + filter + ".*", "i"),
+                    Criteria.where("purchaseToken").regex(".*" + filter + ".*", "i")
+            );
+        } else {
+            criteria = Criteria.where("admin").is(false);
+        }
+
+        long total = mongoTemplate.count(Query.query(criteria), User.class);
+
+        MatchOperation matchOperation = Aggregation.match(criteria);
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, "pseudo");
+        SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
+        LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
+        List<User> users = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sortOperation, skipOperation, limitOperation),
+                mongoTemplate.getCollectionName(User.class), User.class).getMappedResults();
+        return new PageImpl<>(users, pageable, total);
     }
 }

@@ -5,8 +5,6 @@ import com.tonkar.volleyballreferee.dto.LeagueSummary;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.exception.ConflictException;
-import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.service.LeagueService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +35,7 @@ public class LeagueController {
     }
 
     @GetMapping(value = "/leagues/{leagueId}", produces = {"application/json"})
-    public ResponseEntity<League> getLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) throws NotFoundException {
+    public ResponseEntity<League> getLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId){
         return new ResponseEntity<>(leagueService.getLeague(user, leagueId), HttpStatus.OK);
     }
 
@@ -47,13 +45,13 @@ public class LeagueController {
     }
 
     @PostMapping(value = "/leagues", produces = {"application/json"})
-    public ResponseEntity<Void> createLeague(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody League league) throws ConflictException {
+    public ResponseEntity<Void> createLeague(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody League league) {
         leagueService.createLeague(user, league);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @DeleteMapping(value = "/leagues/{leagueId}", produces = {"application/json"})
-    public ResponseEntity<Void> deleteLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) throws ConflictException {
+    public ResponseEntity<Void> deleteLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
         leagueService.deleteLeague(user, leagueId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

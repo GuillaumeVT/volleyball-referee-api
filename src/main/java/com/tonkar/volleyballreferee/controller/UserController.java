@@ -6,7 +6,6 @@ import com.tonkar.volleyballreferee.dto.UserPasswordUpdate;
 import com.tonkar.volleyballreferee.dto.UserToken;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.exception.*;
 import com.tonkar.volleyballreferee.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ public class UserController {
     }
 
     @PatchMapping(value = "/users/password", produces = {"application/json"})
-    public ResponseEntity<UserToken> updateUserPassword(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody UserPasswordUpdate userPasswordUpdate) throws UnauthorizedException, BadRequestException, ForbiddenException, NotFoundException, ConflictException {
+    public ResponseEntity<UserToken> updateUserPassword(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody UserPasswordUpdate userPasswordUpdate) {
         return new ResponseEntity<>(userService.updateUserPassword(user, userPasswordUpdate), HttpStatus.OK);
     }
 
@@ -63,13 +62,13 @@ public class UserController {
     }
 
     @PostMapping(value = "/users/friends/request/{receiverPseudo}", produces = {"application/json"})
-    public ResponseEntity<Void> sendFriendRequest(@AuthenticationPrincipal User user, @PathVariable("receiverPseudo") String receiverPseudo) throws ConflictException, NotFoundException {
+    public ResponseEntity<Void> sendFriendRequest(@AuthenticationPrincipal User user, @PathVariable("receiverPseudo") String receiverPseudo) {
         userService.sendFriendRequest(user, receiverPseudo);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/users/friends/accept/{id}", produces = {"application/json"})
-    public ResponseEntity<Void> acceptFriendRequest(@AuthenticationPrincipal User user, @PathVariable("id") UUID id) throws ConflictException, NotFoundException {
+    public ResponseEntity<Void> acceptFriendRequest(@AuthenticationPrincipal User user, @PathVariable("id") UUID id) {
         userService.acceptFriendRequest(user, id);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -81,7 +80,7 @@ public class UserController {
     }
 
     @DeleteMapping(value = "/users/friends/remove/{friendId}", produces = {"application/json"})
-    public ResponseEntity<Void> removeFriend(@AuthenticationPrincipal User user, @PathVariable("friendId") String friendId) throws NotFoundException {
+    public ResponseEntity<Void> removeFriend(@AuthenticationPrincipal User user, @PathVariable("friendId") String friendId){
         userService.removeFriend(user, friendId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

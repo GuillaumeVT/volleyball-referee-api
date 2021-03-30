@@ -52,13 +52,16 @@ public class ScheduledTasks {
     // Every day at 4:15am
     @Scheduled(cron = "0 15 4 * * *")
     public void refreshInactiveAccounts() {
+        log.info("Refresh inactive accounts with subscription expiry older than 3 months");
         userDao.findUsersBySubscriptionExpiryBefore(3L).forEach(user -> userService.refreshSubscriptionPurchaseToken(user.getPurchaseToken()));
     }
 
     // Every day at 4:30am
     @Scheduled(cron = "0 30 4 * * *")
     public void purgeOldCancelledAccounts() {
+        log.info("Deleted cancelled accounts with subscription expiry older than 6 months");
         userDao.findUsersBySubscriptionExpiryBefore(6L).forEach(user -> {
+            log.info(String.format("Deleting user %s %s", user.getId(), user.getEmail()));
             gameService.deleteAllGames(user);
             teamService.deleteAllTeams(user);
             rulesService.deleteAllRules(user);

@@ -5,8 +5,6 @@ import com.tonkar.volleyballreferee.dto.GameIngredients;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.dto.Ranking;
 import com.tonkar.volleyballreferee.entity.*;
-import com.tonkar.volleyballreferee.exception.ConflictException;
-import com.tonkar.volleyballreferee.exception.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -45,9 +43,9 @@ public interface GameService {
 
     List<GameSummary> listNext10GamesInDivision(UUID leagueId, String divisionName);
 
-    Game getGame(UUID gameId) throws NotFoundException;
+    Game getGame(UUID gameId);
 
-    FileWrapper getScoreSheet(UUID gameId) throws NotFoundException;
+    FileWrapper getScoreSheet(UUID gameId);
 
     FileWrapper listGamesInDivisionExcel(UUID leagueId, String divisionName) throws IOException;
 
@@ -63,7 +61,7 @@ public interface GameService {
 
     Page<GameSummary> listGamesInLeague(User user, UUID leagueId, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable);
 
-    Game getGame(User user, UUID gameId) throws NotFoundException;
+    Game getGame(User user, UUID gameId);
 
     GameIngredients getGameIngredientsOfKind(User user, GameType kind);
 
@@ -73,19 +71,19 @@ public interface GameService {
 
     Count getNumberOfAvailableGames(User user);
 
-    void createGame(User user, GameSummary gameSummary) throws ConflictException, NotFoundException;
+    void createGame(User user, GameSummary gameSummary);
 
-    void createGame(User user, Game game) throws ConflictException, NotFoundException;
+    void createGame(User user, Game game);
 
-    void updateGame(User user, GameSummary gameSummary) throws ConflictException, NotFoundException;
+    void updateGame(User user, GameSummary gameSummary);
 
-    void updateGame(User user, Game game) throws NotFoundException;
+    void updateGame(User user, Game game);
 
-    void updateSet(User user, UUID gameId, int setIndex, Set set) throws NotFoundException;
+    void updateSet(User user, UUID gameId, int setIndex, Set set);
 
-    void setIndexed(User user, UUID gameId, boolean indexed) throws NotFoundException;
+    void setIndexed(User user, UUID gameId, boolean indexed);
 
-    void setReferee(User user, UUID gameId, String refereeUserId) throws NotFoundException;
+    void setReferee(User user, UUID gameId, String refereeUserId);
 
     void deleteGame(User user, UUID gameId);
 

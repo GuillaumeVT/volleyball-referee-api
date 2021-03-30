@@ -45,6 +45,7 @@ dependencies {
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo', version: '2.2.0'
 }
 
 test {

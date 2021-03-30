@@ -2,7 +2,6 @@ package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.*;
-import com.tonkar.volleyballreferee.exception.*;
 import com.tonkar.volleyballreferee.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,28 +46,28 @@ public class PublicController {
     private UserService userService;
 
     @GetMapping(value = "/public/users/{purchaseToken}", produces = {"application/json"})
-    public ResponseEntity<UserSummary> getUserFromPurchaseToken(@PathVariable("purchaseToken") @NotBlank String purchaseToken) throws NotFoundException {
+    public ResponseEntity<UserSummary> getUserFromPurchaseToken(@PathVariable("purchaseToken") @NotBlank String purchaseToken){
         return new ResponseEntity<>(userService.getUserFromPurchaseToken(purchaseToken), HttpStatus.OK);
     }
 
     @PostMapping(value = "/public/users", produces = {"application/json"})
-    public ResponseEntity<UserToken> createUser(@Valid @NotNull @RequestBody User user) throws NotFoundException, BadRequestException, ForbiddenException, UnauthorizedException, ConflictException {
+    public ResponseEntity<UserToken> createUser(@Valid @NotNull @RequestBody User user) {
         return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/public/users/token", produces = {"application/json"})
-    public ResponseEntity<UserToken> signInUser(@Valid @NotNull @RequestBody EmailCredentials emailCredentials) throws UnauthorizedException, NotFoundException, ForbiddenException {
+    public ResponseEntity<UserToken> signInUser(@Valid @NotNull @RequestBody EmailCredentials emailCredentials) {
         return new ResponseEntity<>(userService.signInUser(emailCredentials.getUserEmail(), emailCredentials.getUserPassword()), HttpStatus.OK);
     }
 
     @PostMapping(value = "/public/users/password/recover/{userEmail}", produces = {"application/json"})
-    public ResponseEntity<Void> initiatePasswordReset(@PathVariable("userEmail") @Email @NotBlank String userEmail) throws NotFoundException {
+    public ResponseEntity<Void> initiatePasswordReset(@PathVariable("userEmail") @Email @NotBlank String userEmail){
         userService.initiatePasswordReset(userEmail);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping(value = "/public/users/password/follow/{passwordResetId}", produces = {"application/json"})
-    public ResponseEntity<String> followPasswordReset(@PathVariable("passwordResetId") UUID passwordResetId) throws NotFoundException {
+    public ResponseEntity<String> followPasswordReset(@PathVariable("passwordResetId") UUID passwordResetId){
         String redirectUrl = userService.followPasswordReset(passwordResetId);
 
         UriComponentsBuilder builder = UriComponentsBuilder
@@ -81,7 +80,7 @@ public class PublicController {
     }
 
     @PostMapping(value = "/public/users/password/reset/{passwordResetId}", produces = {"application/json"})
-    public ResponseEntity<UserToken> resetPassword(@PathVariable("passwordResetId") UUID passwordResetId, @Valid @NotNull @RequestBody UserPassword userPassword) throws UnauthorizedException, BadRequestException, ForbiddenException, NotFoundException, ConflictException {
+    public ResponseEntity<UserToken> resetPassword(@PathVariable("passwordResetId") UUID passwordResetId, @Valid @NotNull @RequestBody UserPassword userPassword) {
         return new ResponseEntity<>(userService.resetPassword(passwordResetId, userPassword.getUserPassword()), HttpStatus.OK);
     }
 
@@ -91,12 +90,12 @@ public class PublicController {
     }
 
     @GetMapping(value = "/public/games/{gameId}", produces = {"application/json"})
-    public ResponseEntity<Game> getGame(@PathVariable("gameId") UUID gameId) throws NotFoundException {
+    public ResponseEntity<Game> getGame(@PathVariable("gameId") UUID gameId){
         return new ResponseEntity<>(gameService.getGame(gameId), HttpStatus.OK);
     }
 
     @GetMapping(value = "/public/games/{gameId}/score-sheet")
-    public ResponseEntity<?> getScoreSheet(@PathVariable("gameId") UUID gameId) throws NotFoundException {
+    public ResponseEntity<?> getScoreSheet(@PathVariable("gameId") UUID gameId){
         FileWrapper scoreSheet = gameService.getScoreSheet(gameId);
         ByteArrayResource resource = new ByteArrayResource(scoreSheet.getData());
         return ResponseEntity
@@ -231,7 +230,7 @@ public class PublicController {
     }
 
     @GetMapping(value = "/public/leagues/{leagueId}", produces = {"application/json"})
-    public ResponseEntity<League> getLeague(@PathVariable("leagueId") UUID leagueId) throws NotFoundException {
+    public ResponseEntity<League> getLeague(@PathVariable("leagueId") UUID leagueId){
         return new ResponseEntity<>(leagueService.getLeague(leagueId), HttpStatus.OK);
     }
 

@@ -6,8 +6,6 @@ import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.GenderType;
 import com.tonkar.volleyballreferee.entity.Team;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.exception.ConflictException;
-import com.tonkar.volleyballreferee.exception.NotFoundException;
 import com.tonkar.volleyballreferee.service.TeamService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +43,7 @@ public class TeamController {
     }
 
     @GetMapping(value = "/teams/{teamId}", produces = {"application/json"})
-    public ResponseEntity<Team> getTeam(@AuthenticationPrincipal User user, @PathVariable("teamId") UUID teamId) throws NotFoundException {
+    public ResponseEntity<Team> getTeam(@AuthenticationPrincipal User user, @PathVariable("teamId") UUID teamId){
         return new ResponseEntity<>(teamService.getTeam(user, teamId), HttpStatus.OK);
     }
 
@@ -55,19 +53,19 @@ public class TeamController {
     }
 
     @PostMapping(value = "/teams", produces = {"application/json"})
-    public ResponseEntity<Void> createTeam(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Team team) throws ConflictException {
+    public ResponseEntity<Void> createTeam(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Team team) {
         teamService.createTeam(user, team);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/teams", produces = {"application/json"})
-    public ResponseEntity<Void> updateTeam(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Team team) throws NotFoundException {
+    public ResponseEntity<Void> updateTeam(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Team team){
         teamService.updateTeam(user, team);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/teams/{teamId}", produces = {"application/json"})
-    public ResponseEntity<Void> deleteTeam(@AuthenticationPrincipal User user, @PathVariable("teamId") UUID teamId) throws ConflictException {
+    public ResponseEntity<Void> deleteTeam(@AuthenticationPrincipal User user, @PathVariable("teamId") UUID teamId) {
         teamService.deleteTeam(user, teamId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

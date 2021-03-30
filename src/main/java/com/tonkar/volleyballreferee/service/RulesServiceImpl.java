@@ -8,12 +8,12 @@ import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.exception.ConflictException;
-import com.tonkar.volleyballreferee.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.CloseableIterator;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -41,10 +41,10 @@ public class RulesServiceImpl implements RulesService {
     }
 
     @Override
-    public Rules getRules(User user, UUID rulesId) throws NotFoundException {
+    public Rules getRules(User user, UUID rulesId) {
         return rulesDao
                 .findByIdAndCreatedBy(rulesId, user.getId())
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find rules %s for user %s", rulesId, user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find rules %s for user %s", rulesId, user.getId())));
     }
 
     @Override
@@ -73,13 +73,13 @@ public class RulesServiceImpl implements RulesService {
     }
 
     @Override
-    public void createRules(User user, Rules rules) throws ConflictException {
+    public void createRules(User user, Rules rules) {
         if (Rules.getDefaultRules(rules.getId(), rules.getKind()).isPresent()) {
-            throw new ConflictException(String.format("Could not create rules %s for user %s because they are default rules", rules.getId(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create rules %s for user %s because they are default rules", rules.getId(), user.getId()));
         } else if (rulesDao.existsById(rules.getId())) {
-            throw new ConflictException(String.format("Could not create rules %s for user %s because they already exist", rules.getId(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create rules %s for user %s because they already exist", rules.getId(), user.getId()));
         } else if (rulesDao.existsByCreatedByAndNameAndKind(user.getId(), rules.getName(), rules.getKind())) {
-            throw new ConflictException(String.format("Could not create rules %s %s for user %s because they already exist", rules.getName(), rules.getKind(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create rules %s %s for user %s because they already exist", rules.getName(), rules.getKind(), user.getId()));
         } else {
             rules.setCreatedBy(user.getId());
             rules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
@@ -88,10 +88,10 @@ public class RulesServiceImpl implements RulesService {
     }
 
     @Override
-    public void updateRules(User user, Rules rules) throws NotFoundException {
+    public void updateRules(User user, Rules rules) {
         Rules savedRules = rulesDao
                 .findByIdAndCreatedBy(rules.getId(), user.getId())
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find rules %s %s for user %s", rules.getId(), rules.getKind(), user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find rules %s %s for user %s", rules.getId(), rules.getKind(), user.getId())));
 
         savedRules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         savedRules.setName(rules.getName());
@@ -121,9 +121,9 @@ public class RulesServiceImpl implements RulesService {
     }
 
     @Override
-    public void deleteRules(User user, UUID rulesId) throws ConflictException {
+    public void deleteRules(User user, UUID rulesId) {
         if (gameDao.existsByCreatedByAndRules_IdAndStatus(user.getId(), rulesId, GameStatus.SCHEDULED)) {
-            throw new ConflictException(String.format("Could not delete rules %s for user %s because they are used in a game", rulesId, user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not delete rules %s for user %s because they are used in a game", rulesId, user.getId()));
         } else {
             rulesDao.deleteByIdAndCreatedBy(rulesId, user.getId());
         }

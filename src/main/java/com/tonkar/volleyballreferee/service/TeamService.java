@@ -6,8 +6,6 @@ import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.GenderType;
 import com.tonkar.volleyballreferee.entity.Team;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.exception.ConflictException;
-import com.tonkar.volleyballreferee.exception.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,15 +26,15 @@ public interface TeamService {
 
     List<TeamSummary> listTeamsOfKind(User user, GameType kind);
 
-    Team getTeam(User user, UUID teamId) throws NotFoundException;
+    Team getTeam(User user, UUID teamId);
 
     Count getNumberOfTeams(User user);
 
-    void createTeam(User user, Team team) throws ConflictException;
+    void createTeam(User user, Team team);
 
-    void updateTeam(User user, Team team) throws NotFoundException;
+    void updateTeam(User user, Team team);
 
-    void deleteTeam(User user, UUID teamId) throws ConflictException;
+    void deleteTeam(User user, UUID teamId);
 
     void deleteAllTeams(User user);
 }

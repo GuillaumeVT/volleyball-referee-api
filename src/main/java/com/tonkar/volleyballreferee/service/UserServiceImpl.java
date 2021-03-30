@@ -14,7 +14,6 @@ import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.PasswordReset;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.exception.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -22,8 +21,10 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,16 +74,16 @@ public class UserServiceImpl implements UserService {
     private String jwtKey;
 
     @Override
-    public User getUser(String userId) throws NotFoundException {
+    public User getUser(String userId) {
         return userDao
                 .findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find user %s", userId)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user %s", userId)));
     }
 
-    private User getUserByPseudo(String pseudo) throws NotFoundException {
+    private User getUserByPseudo(String pseudo) {
         return userDao
                 .findByPseudo(pseudo)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find user %s", pseudo)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user %s", pseudo)));
     }
 
     @Override
@@ -105,11 +106,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserSummary getUserFromPurchaseToken(String purchaseToken) throws NotFoundException {
+    public UserSummary getUserFromPurchaseToken(String purchaseToken) {
         refreshSubscriptionPurchaseToken(purchaseToken);
         return userDao
                 .findUserByPurchaseToken(purchaseToken)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find user for purchase token %s", purchaseToken)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user for purchase token %s", purchaseToken)));
     }
 
     @Override
@@ -153,16 +154,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserToken createUser(User user) throws UnauthorizedException, ForbiddenException, ConflictException, NotFoundException, BadRequestException {
+    public SubscriptionPurchase getUserSubscription(String purchaseToken) {
+        try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
+            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
+            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
+            AndroidPublisher.Purchases.Subscriptions subscriptions = publisher.purchases().subscriptions();
+
+            return subscriptions.get(androidPackageName, androidSubscriptionSku, purchaseToken).execute();
+
+        } catch (IOException | GeneralSecurityException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the purchase token %s", purchaseToken));
+        }
+    }
+
+    @Override
+    public UserToken createUser(User user) {
         if (userDao.existsByPurchaseToken(user.getPurchaseToken())) {
-            throw new ConflictException(String.format("Found an existing user with purchase token %s", user.getPurchaseToken()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with purchase token %s", user.getPurchaseToken()));
         }
 
         SubscriptionPurchase subscription = getSubscriptionPurchase(user.getPurchaseToken());
 
         if (subscription == null) {
             if (!isValidPurchaseToken(user.getPurchaseToken())) {
-                throw new ForbiddenException(String.format("User with email %s provided an invalid purchase token %s", user.getEmail(), user.getPurchaseToken()));
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format("User with email %s provided an invalid purchase token %s", user.getEmail(), user.getPurchaseToken()));
             }
         }
 
@@ -175,7 +192,7 @@ public class UserServiceImpl implements UserService {
             User existingUser = optionalExistingUser.get();
 
             if (existingUser.isAccountNonExpired()) {
-                throw new ConflictException(String.format("Found an existing user with email %s", user.getEmail()));
+                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with email %s", user.getEmail()));
             } else {
                 user.setId(existingUser.getId());
                 user.setPseudo(existingUser.getPseudo());
@@ -186,9 +203,9 @@ public class UserServiceImpl implements UserService {
             boolean pseudoExists = userDao.existsByPseudo(user.getPseudo());
 
             if (idExists) {
-                throw new ConflictException(String.format("Found an existing user with id %s", user.getId()));
+                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with id %s", user.getId()));
             } else if (pseudoExists) {
-                throw new ConflictException(String.format("Found an existing user with pseudo %s", user.getPseudo()));
+                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with pseudo %s", user.getPseudo()));
             } else {
                 user.setFriends(new ArrayList<>());
                 user.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
@@ -198,6 +215,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(password));
         user.setFailedAuthentication(new User.FailedAuthentication(0, LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()));
         user.setEnabled(true);
+        user.setAdmin(false);
         user.setSubscription(subscription != null);
         user.setSubscriptionExpiryAt(subscription == null ? 0L : subscription.getExpiryTimeMillis());
         userDao.save(user);
@@ -207,19 +225,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserToken signInUser(String userEmail, String userPassword) throws NotFoundException, UnauthorizedException, ForbiddenException {
+    public UserToken signInUser(String userEmail, String userPassword) {
         userPassword = userPassword.trim();
 
         User user = userDao
                 .findByEmail(userEmail)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find user %s", userEmail)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user %s", userEmail)));
 
         if (isLocked(user)) {
-            throw new ForbiddenException(String.format("Access is locked for user %s", user.getId()));
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format("Access is locked for user %s", user.getId()));
         }
 
         if (user.isSubscription() && LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli() > user.getSubscriptionExpiryAt()) {
-            throw new ForbiddenException(String.format("Subscription is expired for user %s", user.getId()));
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format("Subscription is expired for user %s", user.getId()));
         }
 
         if (passwordEncoder.matches(userPassword, user.getPassword())) {
@@ -228,7 +246,7 @@ public class UserServiceImpl implements UserService {
             return userToken;
         } else {
             addFailedAuthentication(user);
-            throw new UnauthorizedException(String.format("Invalid password for user %s", userEmail));
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Invalid password for user %s", userEmail));
         }
     }
 
@@ -259,15 +277,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void sendFriendRequest(User user, String receiverPseudo) throws ConflictException, NotFoundException {
+    public void sendFriendRequest(User user, String receiverPseudo) {
         User receiverUser = getUserByPseudo(receiverPseudo);
 
         if (user.getId().equals(receiverUser.getId())) {
-            throw new ConflictException(String.format("%s cannot be friend with himself", user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("%s cannot be friend with himself", user.getId()));
         } else if (userDao.areFriends(user.getId(), receiverUser.getId())) {
-            throw new ConflictException(String.format("%s and %s are already friends", user.getId(), receiverUser.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("%s and %s are already friends", user.getId(), receiverUser.getId()));
         } else if (friendRequestDao.existsBySenderIdAndReceiverId(user.getId(), receiverUser.getId())) {
-            throw new ConflictException(String.format("Found an existing friend request from %s to %s", user.getId(), receiverUser.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing friend request from %s to %s", user.getId(), receiverUser.getId()));
         } else {
             FriendRequest friendRequest = new FriendRequest();
             friendRequest.setId(UUID.randomUUID());
@@ -281,16 +299,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void acceptFriendRequest(User user, UUID friendRequestId) throws ConflictException, NotFoundException {
+    public void acceptFriendRequest(User user, UUID friendRequestId) {
         FriendRequest friendRequest = friendRequestDao
                 .findByIdAndReceiverId(friendRequestId, user.getId())
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find friend request %s with receiver %s", friendRequestId, user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find friend request %s with receiver %s", friendRequestId, user.getId())));
 
         User senderUser = getUser(friendRequest.getSenderId());
         User receiverUser = getUser(friendRequest.getReceiverId());
 
         if (userDao.areFriends(friendRequest.getSenderId(), friendRequest.getReceiverId())) {
-            throw new ConflictException(String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
         } else {
             userDao.addFriend(senderUser.getId(), new User.Friend(receiverUser.getId(), receiverUser.getPseudo()));
             userDao.addFriend(receiverUser.getId(), new User.Friend(senderUser.getId(), senderUser.getPseudo()));
@@ -307,21 +325,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void removeFriend(User user, String friendId) throws NotFoundException {
+    public void removeFriend(User user, String friendId) {
         if (userDao.areFriends(user.getId(), friendId)) {
             userDao.removeFriend(user.getId(), friendId);
             userDao.removeFriend(friendId, user.getId());
             log.info(String.format("%s and %s are no longer friends", user.getId(), friendId));
         } else {
-            throw new NotFoundException(String.format("%s and %s are not friends", user.getId(), friendId));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("%s and %s are not friends", user.getId(), friendId));
         }
     }
 
     @Override
-    public UserToken updateUserPassword(User user, UserPasswordUpdate userPasswordUpdate) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException, ForbiddenException {
+    public UserToken updateUserPassword(User user, UserPasswordUpdate userPasswordUpdate) {
         if (!passwordEncoder.matches(userPasswordUpdate.getCurrentPassword(), user.getPassword())) {
             addFailedAuthentication(user);
-            throw new UnauthorizedException(String.format("Invalid password for user %s", user.getId()));
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Invalid password for user %s", user.getId()));
         }
 
         String newPassword = userPasswordUpdate.getNewPassword().trim();
@@ -331,10 +349,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void initiatePasswordReset(String userEmail) throws NotFoundException {
+    public void initiatePasswordReset(String userEmail) {
         User user = userDao
                 .findByEmail(userEmail)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find user %s", userEmail)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user %s", userEmail)));
 
         PasswordReset passwordReset = PasswordReset
                 .builder()
@@ -348,10 +366,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String followPasswordReset(UUID passwordResetId) throws NotFoundException {
+    public String followPasswordReset(UUID passwordResetId) {
         PasswordReset passwordReset = passwordResetDao
                 .findById(passwordResetId)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find password reset %s", passwordResetId)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find password reset %s", passwordResetId)));
 
         getUser(passwordReset.getUserId());
 
@@ -359,12 +377,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserToken resetPassword(UUID passwordResetId, String userPassword) throws BadRequestException, ConflictException, NotFoundException, UnauthorizedException, ForbiddenException {
+    public UserToken resetPassword(UUID passwordResetId, String userPassword) {
         userPassword = userPassword.trim();
 
         PasswordReset passwordReset = passwordResetDao
                 .findById(passwordResetId)
-                .orElseThrow(() -> new NotFoundException(String.format("Could not find password reset %s", passwordResetId)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find password reset %s", passwordResetId)));
 
         User user = getUser(passwordReset.getUserId());
 
@@ -434,7 +452,7 @@ public class UserServiceImpl implements UserService {
 
         return UserToken
                 .builder()
-                .user(new UserSummary(user.getId(), user.getPseudo(), user.getEmail()))
+                .user(new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin()))
                 .token(token)
                 .tokenExpiry(Date.from(exp.toInstant(ZoneOffset.UTC)).getTime())
                 .build();
@@ -480,18 +498,18 @@ public class UserServiceImpl implements UserService {
         userDao.addFailedAuthentication(user.getId(), failedAuthentication);
     }
 
-    private void updateUserPassword(String password, User user) throws BadRequestException, ConflictException {
+    private void updateUserPassword(String password, User user) {
         if (passwordEncoder.matches(password, user.getPassword())) {
-            throw new ConflictException("Provided password is the same as the previous");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Provided password is the same as the previous");
         }
         validatePassword(password);
         userDao.updateUserPassword(user.getId(), passwordEncoder.encode(password));
         emailService.sendPasswordUpdatedNotificationEmail(user);
     }
 
-    private void validatePassword(String password) throws BadRequestException {
+    private void validatePassword(String password) {
         if (password.length() < 8) {
-            throw new BadRequestException(String.format("Password must contain at least %d characters", 8));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Password must contain at least %d characters", 8));
         }
 
         int numberOfDigits = 0;
@@ -523,19 +541,19 @@ public class UserServiceImpl implements UserService {
         }
 
         if (numberOfDigits < 1) {
-            throw new BadRequestException(String.format("Password must contain at least %d digits", 1));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Password must contain at least %d digits", 1));
         }
 
         if (numberOfUppercaseCharacters < 1) {
-            throw new BadRequestException(String.format("Password must contain at least %d uppercase characters", 1));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Password must contain at least %d uppercase characters", 1));
         }
 
         if (numberOfSpecialCharacters < 1) {
-            throw new BadRequestException(String.format("Password must contain at least %d special characters", 1));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Password must contain at least %d special characters", 1));
         }
 
         if (maxNumberORepeatedCharacters > 3) {
-            throw new BadRequestException(String.format("Password must contain at most %d repeating characters", 3));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Password must contain at most %d repeating characters", 3));
         }
     }
 

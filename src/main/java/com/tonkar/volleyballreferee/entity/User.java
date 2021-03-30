@@ -1,5 +1,6 @@
 package com.tonkar.volleyballreferee.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,13 +8,13 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,6 @@ import java.util.Optional;
 @Setter
 @Document(collection = "users")
 public class User implements UserDetails {
-
     @Id
     @NotBlank
     private String               id;
@@ -43,34 +43,41 @@ public class User implements UserDetails {
     private long                 lastLoginAt;
     private FailedAuthentication failedAuthentication;
     private boolean              enabled;
+    private boolean              admin;
 
     public static String VBR_USER_ID = "01022018@vbr";
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new ArrayList<>();
+        return List.of(new SimpleGrantedAuthority(admin ? "ROLE_ADMIN" : "ROLE_USER"));
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return getPseudo();
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return !subscription || LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli() < subscriptionExpiryAt;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     public Optional<Friend> getFriend(String friendId) {
         return friends
                 .stream()
@@ -83,12 +90,10 @@ public class User implements UserDetails {
     @Getter
     @Setter
     public static class Friend {
-
         @NotBlank
         private String id;
         @NotBlank
         private String pseudo;
-
     }
 
     @AllArgsConstructor
@@ -96,10 +101,7 @@ public class User implements UserDetails {
     @Getter
     @Setter
     public static class FailedAuthentication {
-
         private int  attempts;
         private long resetsAt;
-
     }
-
 }
