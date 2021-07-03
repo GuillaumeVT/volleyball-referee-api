@@ -9,8 +9,8 @@ import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.GenderType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
+@RequiredArgsConstructor
 public class GameDao {
 
     private final static ProjectionOperation sGameSummaryProjection = Aggregation.project()
@@ -61,8 +62,7 @@ public class GameDao {
             .and("referee2").as("referee2Name")
             .and("scorer").as("scorerName");
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
 
     public void save(Game game) {
         mongoTemplate.save(game);

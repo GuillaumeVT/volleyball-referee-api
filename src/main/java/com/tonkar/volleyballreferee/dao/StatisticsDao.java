@@ -3,7 +3,7 @@ package com.tonkar.volleyballreferee.dao;
 import com.tonkar.volleyballreferee.dto.Statistics;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.Team;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.GroupOperation;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor
 public class StatisticsDao {
 
     private static final ProjectionOperation sStatisticsProjection = Aggregation.project("kind");
@@ -24,8 +25,7 @@ public class StatisticsDao {
             .first("kind").as("kind")
             .count().as("count");
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
 
     public List<Statistics.Count> findGameStatistics() {
         return mongoTemplate

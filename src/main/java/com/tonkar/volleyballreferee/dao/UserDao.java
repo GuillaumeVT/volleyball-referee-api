@@ -4,7 +4,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.result.UpdateResult;
 import com.tonkar.volleyballreferee.dto.UserSummary;
 import com.tonkar.volleyballreferee.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class UserDao {
 
     private final static ProjectionOperation sUserSummaryProjection = Aggregation.project()
@@ -30,8 +31,7 @@ public class UserDao {
             .and("email").as("email")
             .and("admin").as("admin");
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
 
     public void save(User user) {
         mongoTemplate.save(user);

@@ -1,33 +1,23 @@
-package com.tonkar.volleyballreferee.component;
+package com.tonkar.volleyballreferee.scheduling;
 
 import com.tonkar.volleyballreferee.dao.UserDao;
 import com.tonkar.volleyballreferee.service.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class ScheduledTasks {
 
-    @Autowired
-    private GameService gameService;
-
-    @Autowired
-    private TeamService teamService;
-
-    @Autowired
-    private RulesService rulesService;
-
-    @Autowired
-    private LeagueService leagueService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private UserDao userDao;
+    private final GameService   gameService;
+    private final TeamService   teamService;
+    private final RulesService  rulesService;
+    private final LeagueService leagueService;
+    private final UserService   userService;
+    private final UserDao       userDao;
 
     // Every day at 4:00am
     @Scheduled(cron = "0 0 4 * * *")

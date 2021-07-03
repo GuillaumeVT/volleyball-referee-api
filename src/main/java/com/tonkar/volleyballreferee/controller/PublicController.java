@@ -3,8 +3,7 @@ package com.tonkar.volleyballreferee.controller;
 import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.*;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,23 +26,14 @@ import java.util.UUID;
 @RestController
 @Validated
 @CrossOrigin("*")
-@Slf4j
+@RequiredArgsConstructor
 public class PublicController {
 
-    @Autowired
-    private StatisticsService statisticsService;
-
-    @Autowired
-    private GameService gameService;
-
-    @Autowired
-    private TeamService teamService;
-
-    @Autowired
-    private LeagueService leagueService;
-
-    @Autowired
-    private UserService userService;
+    private final StatisticsService statisticsService;
+    private final GameService       gameService;
+    private final TeamService       teamService;
+    private final LeagueService     leagueService;
+    private final UserService       userService;
 
     @GetMapping(value = "/public/users/{purchaseToken}", produces = {"application/json"})
     public ResponseEntity<UserSummary> getUserFromPurchaseToken(@PathVariable("purchaseToken") @NotBlank String purchaseToken){

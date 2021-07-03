@@ -21,26 +21,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 public class AdminTests extends VbrTests {
 
-    @Autowired
-    private AdminService adminService;
-
     @Test
     public void testNotAuthenticated() {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/admin/users"))
+                .fromUriString("/admin/users")
                 .queryParam("filter", testUserPseudo1)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
         assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        errorResponse = restTemplate.exchange(urlOf(String.format("/admin/users/%s/subscription", UUID.randomUUID())), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription", UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
         assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        errorResponse = restTemplate.exchange(urlOf(String.format("/admin/users/%s/subscription", UUID.randomUUID())), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription", UUID.randomUUID()), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
         assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
 
-        errorResponse = restTemplate.exchange(urlOf(String.format("/admin/users/%s/subscription/%s", UUID.randomUUID(), "token")), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription/%s", UUID.randomUUID(), "token"), HttpMethod.POST, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
         assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
     }
 
@@ -49,25 +46,25 @@ public class AdminTests extends VbrTests {
         createUser1();
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString(urlOf("/admin/users"))
+                .fromUriString("/admin/users")
                 .queryParam("filter", testUserPseudo1)
                 .queryParam("page", 0)
                 .queryParam("size", 20);
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
         assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
 
-        errorResponse = restTemplate.exchange(urlOf(String.format("/admin/users/%s/subscription", UUID.randomUUID())), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
+        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription", UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
         assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
 
-        errorResponse = restTemplate.exchange(urlOf(String.format("/admin/users/%s/subscription", UUID.randomUUID())), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
+        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription", UUID.randomUUID()), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
         assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
 
-        errorResponse = restTemplate.exchange(urlOf(String.format("/admin/users/%s/subscription/%s", UUID.randomUUID(), "token")), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
+        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription/%s", UUID.randomUUID(), "token"), HttpMethod.POST, emptyPayloadWithAuth(testUserToken1), ErrorResponse.class);
         assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
     }
 
     @Test
-    public void testListUsers() {
+    public void testListUsers(@Autowired AdminService adminService) {
         createUser1();
 
         Page<User> page = adminService.listUsers(null, PageRequest.of(0, 50));

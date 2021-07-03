@@ -2,7 +2,7 @@ package com.tonkar.volleyballreferee.dao;
 
 import com.tonkar.volleyballreferee.dto.TeamSummary;
 import com.tonkar.volleyballreferee.entity.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Repository
+@RequiredArgsConstructor
 public class TeamDao {
 
     private final static ProjectionOperation sTeamSummaryProjection = Aggregation.project()
@@ -32,8 +33,7 @@ public class TeamDao {
             .and("kind").as("kind")
             .and("gender").as("gender");
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
 
     public void save(Team team) {
         mongoTemplate.save(team);

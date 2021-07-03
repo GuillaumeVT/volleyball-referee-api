@@ -5,7 +5,7 @@ import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.export.ExcelDivisionWriter;
 import com.tonkar.volleyballreferee.export.ScoreSheetWriter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,31 +22,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
 
-    @Autowired
-    private LeagueService leagueService;
-
-    @Autowired
-    private TeamService teamService;
-
-    @Autowired
-    private RulesService rulesService;
-
-    @Autowired
-    private GameDao gameDao;
-
-    @Autowired
-    private TeamDao teamDao;
-
-    @Autowired
-    private RulesDao rulesDao;
-
-    @Autowired
-    private LeagueDao leagueDao;
-
-    @Autowired
-    private UserDao userDao;
+    private final LeagueService leagueService;
+    private final TeamService   teamService;
+    private final RulesService  rulesService;
+    private final GameDao       gameDao;
+    private final TeamDao       teamDao;
+    private final RulesDao      rulesDao;
+    private final LeagueDao     leagueDao;
+    private final UserDao       userDao;
 
     @Override
     public Page<GameSummary> listLiveGames(List<GameType> kinds, List<GenderType> genders, Pageable pageable) {

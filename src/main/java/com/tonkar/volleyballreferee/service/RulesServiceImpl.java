@@ -8,8 +8,7 @@ import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
 import com.tonkar.volleyballreferee.entity.User;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.util.CloseableIterator;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,14 +20,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Slf4j
+@RequiredArgsConstructor
 public class RulesServiceImpl implements RulesService {
 
-    @Autowired
-    private RulesDao rulesDao;
-
-    @Autowired
-    private GameDao gameDao;
+    private final RulesDao rulesDao;
+    private final GameDao  gameDao;
 
     @Override
     public List<RulesSummary> listRules(User user, List<GameType> kinds) {

@@ -18,8 +18,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,22 +38,14 @@ import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private UserDao userDao;
-
-    @Autowired
-    private FriendRequestDao friendRequestDao;
-
-    @Autowired
-    private PasswordResetDao passwordResetDao;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final EmailService     emailService;
+    private final UserDao          userDao;
+    private final FriendRequestDao friendRequestDao;
+    private final PasswordResetDao passwordResetDao;
+    private final PasswordEncoder  passwordEncoder;
 
     @Value("${vbr.web.domain}")
     private String webDomain;

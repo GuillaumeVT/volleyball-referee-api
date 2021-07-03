@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version '2.4.4'
-    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'org.springframework.boot' version '2.5.2'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
 
@@ -42,10 +42,10 @@ dependencies {
     // Excel
     implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.0.0'
     // Misc
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.18'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo', version: '2.2.0'
+    testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo', version: '3.0.0'
 }
 
 test {

@@ -16,7 +16,7 @@ public class StatisticsTests extends VbrTests {
 
     @Test
     public void testNotAuthenticated() {
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(urlOf("/statistics"), HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/statistics", HttpMethod.GET, emptyPayloadWithAuth(testUserInvalidToken), ErrorResponse.class);
         assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
     }
 
@@ -24,10 +24,10 @@ public class StatisticsTests extends VbrTests {
     public void testManageStatistics() {
         createUser1();
 
-        ResponseEntity<Statistics> getStatisticsResponse = restTemplate.exchange(urlOf("/statistics"), HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Statistics.class);
+        ResponseEntity<Statistics> getStatisticsResponse = restTemplate.exchange("/statistics", HttpMethod.GET, emptyPayloadWithAuth(testUserToken1), Statistics.class);
         assertEquals(HttpStatus.OK, getStatisticsResponse.getStatusCode());
 
-        getStatisticsResponse = restTemplate.exchange(urlOf("/public/statistics"), HttpMethod.GET, emptyPayloadWithoutAuth(), Statistics.class);
+        getStatisticsResponse = restTemplate.exchange("/public/statistics", HttpMethod.GET, emptyPayloadWithoutAuth(), Statistics.class);
         assertEquals(HttpStatus.OK, getStatisticsResponse.getStatusCode());
     }
 

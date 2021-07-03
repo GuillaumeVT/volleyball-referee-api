@@ -9,12 +9,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
+import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -27,15 +30,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:application.yml")
 @ActiveProfiles("test")
-public class VbrTests {
+class VbrTests {
 
     @LocalServerPort
     private int port;
 
-    final TestRestTemplate restTemplate = new TestRestTemplate();
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    protected TestRestTemplate restTemplate;
 
     @Value("${server.servlet.context-path}")
     String contextPath;
@@ -67,8 +67,16 @@ public class VbrTests {
 
     String testPassword = "Password1234+";
 
+    @PostConstruct
+    public void init() {
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder()
+                .rootUri(String.format("http://localhost:%d%s", port, contextPath))
+                .setReadTimeout(Duration.ofMillis(20000L));
+        restTemplate = new TestRestTemplate(restTemplateBuilder, null, null);
+    }
+
     @BeforeEach
-    public void setUp() {
+    public void setUp(@Autowired MongoTemplate mongoTemplate) {
         mongoTemplate.dropCollection(User.class);
         mongoTemplate.dropCollection(FriendRequest.class);
         mongoTemplate.dropCollection(Rules.class);
@@ -91,7 +99,7 @@ public class VbrTests {
         user.setLastLoginAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         user.setFailedAuthentication(new User.FailedAuthentication());
 
-        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), UserToken.class);
+        ResponseEntity<UserToken> response = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user), UserToken.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody().getToken());
         assertNotNull(response.getBody().getUser());
@@ -112,16 +120,12 @@ public class VbrTests {
         user.setLastLoginAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         user.setFailedAuthentication(new User.FailedAuthentication());
 
-        ResponseEntity<UserToken> response = restTemplate.postForEntity(urlOf("/public/users"), payloadWithoutAuth(user), UserToken.class);
+        ResponseEntity<UserToken> response = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user), UserToken.class);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody().getToken());
         assertNotNull(response.getBody().getUser());
         testUserToken2 = response.getBody().getToken();
         testUser2 = response.getBody().getUser();
-    }
-
-    String urlOf(String apiUrl) {
-        return String.format("http://localhost:%d%s%s", port, contextPath, apiUrl);
     }
 
     private HttpHeaders headersWithAuth(String testUser) {

@@ -3,7 +3,7 @@ package com.tonkar.volleyballreferee.dao;
 import com.tonkar.volleyballreferee.dto.LeagueSummary;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@RequiredArgsConstructor
 public class LeagueDao {
 
     private final static ProjectionOperation sLeagueSummaryProjection = Aggregation.project()
@@ -29,8 +30,7 @@ public class LeagueDao {
             .and("name").as("name")
             .and("kind").as("kind");
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
 
     public List<LeagueSummary> listLeagues(String userId, List<GameType> kinds) {
         kinds = DaoUtils.computeKinds(kinds);

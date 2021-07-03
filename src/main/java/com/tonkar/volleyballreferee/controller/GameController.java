@@ -5,8 +5,7 @@ import com.tonkar.volleyballreferee.dto.GameIngredients;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.GameService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -23,11 +22,10 @@ import java.util.UUID;
 @RestController
 @Validated
 @CrossOrigin("*")
-@Slf4j
+@RequiredArgsConstructor
 public class GameController {
 
-    @Autowired
-    private GameService gameService;
+    private final GameService gameService;
 
     @GetMapping(value = "/games", produces = {"application/json"})
     public ResponseEntity<Page<GameSummary>> listGames(@AuthenticationPrincipal User user,

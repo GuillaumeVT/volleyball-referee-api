@@ -7,8 +7,7 @@ import com.tonkar.volleyballreferee.dto.UserToken;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.service.UserService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,11 +23,10 @@ import java.util.UUID;
 @RestController
 @Validated
 @CrossOrigin("*")
-@Slf4j
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @PostMapping(value = "/users/{purchaseToken}", produces = {"application/json"})
     public ResponseEntity<Void> refreshSubscriptionPurchaseToken(@AuthenticationPrincipal User user, @PathVariable("purchaseToken") @NotBlank String purchaseToken) {

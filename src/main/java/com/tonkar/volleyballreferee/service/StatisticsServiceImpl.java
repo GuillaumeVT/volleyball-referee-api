@@ -3,16 +3,16 @@ package com.tonkar.volleyballreferee.service;
 import com.tonkar.volleyballreferee.dao.StatisticsDao;
 import com.tonkar.volleyballreferee.dto.Statistics;
 import com.tonkar.volleyballreferee.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
-    @Autowired
-    private StatisticsDao statisticsDao;
+    private final StatisticsDao statisticsDao;
 
     @Override
     public Statistics getStatistics() {

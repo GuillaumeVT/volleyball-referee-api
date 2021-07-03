@@ -3,8 +3,7 @@ package com.tonkar.volleyballreferee.controller;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.service.AdminService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -21,11 +20,10 @@ import javax.validation.constraints.NotBlank;
 @RestController
 @Validated
 @CrossOrigin("*")
-@Slf4j
+@RequiredArgsConstructor
 public class AdminController {
 
-    @Autowired
-    private AdminService adminService;
+    private final AdminService adminService;
 
     @RolesAllowed("ROLE_ADMIN")
     @GetMapping(value = "/admin/users", produces = {"application/json"})

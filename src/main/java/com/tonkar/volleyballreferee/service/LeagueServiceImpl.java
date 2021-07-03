@@ -8,7 +8,7 @@ import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
 import com.tonkar.volleyballreferee.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,13 +19,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class LeagueServiceImpl implements LeagueService {
 
-    @Autowired
-    private LeagueDao leagueDao;
-
-    @Autowired
-    private GameDao gameDao;
+    private final LeagueDao leagueDao;
+    private final GameDao   gameDao;
 
     @Override
     public League getLeague(UUID leagueId) {

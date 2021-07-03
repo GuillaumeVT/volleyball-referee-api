@@ -6,8 +6,7 @@ import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.service.LeagueService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,11 +21,10 @@ import java.util.UUID;
 @RestController
 @Validated
 @CrossOrigin("*")
-@Slf4j
+@RequiredArgsConstructor
 public class LeagueController {
 
-    @Autowired
-    private LeagueService leagueService;
+    private final LeagueService leagueService;
 
     @GetMapping(value = "/leagues", produces = {"application/json"})
     public ResponseEntity<List<LeagueSummary>> listLeagues(@AuthenticationPrincipal User user,

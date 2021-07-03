@@ -3,8 +3,7 @@ package com.tonkar.volleyballreferee.controller;
 import com.tonkar.volleyballreferee.dto.Statistics;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.service.StatisticsService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,11 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Validated
 @CrossOrigin("*")
-@Slf4j
+@RequiredArgsConstructor
 public class StatisticsController {
 
-    @Autowired
-    private StatisticsService statisticsService;
+    private final StatisticsService statisticsService;
 
     @GetMapping(value = "/statistics", produces = {"application/json"})
     public ResponseEntity<Statistics> getStatistics(@AuthenticationPrincipal User user) {

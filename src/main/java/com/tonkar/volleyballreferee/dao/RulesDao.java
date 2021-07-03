@@ -5,7 +5,7 @@ import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.Rules;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@RequiredArgsConstructor
 public class RulesDao {
 
     private final static ProjectionOperation sRulesSummaryProjection = Aggregation.project()
@@ -33,8 +34,7 @@ public class RulesDao {
             .and("name").as("name")
             .and("kind").as("kind");
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
 
     public void save(Rules rules) {
         mongoTemplate.save(rules);

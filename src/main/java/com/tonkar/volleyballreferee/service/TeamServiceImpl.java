@@ -5,7 +5,7 @@ import com.tonkar.volleyballreferee.dao.TeamDao;
 import com.tonkar.volleyballreferee.dto.Count;
 import com.tonkar.volleyballreferee.dto.TeamSummary;
 import com.tonkar.volleyballreferee.entity.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.CloseableIterator;
@@ -21,13 +21,11 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class TeamServiceImpl implements TeamService {
 
-    @Autowired
-    private TeamDao teamDao;
-
-    @Autowired
-    private GameDao gameDao;
+    private final TeamDao teamDao;
+    private final GameDao gameDao;
 
     @Override
     public List<TeamSummary> listTeamsOfLeague(UUID leagueId) {

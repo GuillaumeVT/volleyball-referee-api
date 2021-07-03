@@ -1,7 +1,7 @@
 package com.tonkar.volleyballreferee.dao;
 
 import com.tonkar.volleyballreferee.entity.PasswordReset;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -12,10 +12,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@RequiredArgsConstructor
 public class PasswordResetDao {
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
 
     public void save(PasswordReset passwordReset) {
         mongoTemplate.save(passwordReset);

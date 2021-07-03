@@ -3,19 +3,17 @@ package com.tonkar.volleyballreferee.service;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
 import com.tonkar.volleyballreferee.dao.UserDao;
 import com.tonkar.volleyballreferee.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AdminServiceImpl implements  AdminService {
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private UserDao userDao;
+    private final UserService userService;
+    private final UserDao     userDao;
 
     @Override
     public Page<User> listUsers(String filter, Pageable pageable) {

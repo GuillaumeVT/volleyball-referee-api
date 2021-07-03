@@ -1,8 +1,7 @@
 package com.tonkar.volleyballreferee.security;
 
 import com.tonkar.volleyballreferee.service.UserService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.AuthenticationException;
@@ -12,12 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Slf4j
 @Component
+@RequiredArgsConstructor
 final class TokenAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @Override
     protected void additionalAuthenticationChecks(UserDetails userDetails, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {}

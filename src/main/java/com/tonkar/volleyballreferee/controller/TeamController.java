@@ -7,8 +7,7 @@ import com.tonkar.volleyballreferee.entity.GenderType;
 import com.tonkar.volleyballreferee.entity.Team;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.service.TeamService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -27,11 +26,10 @@ import java.util.UUID;
 @RestController
 @Validated
 @CrossOrigin("*")
-@Slf4j
+@RequiredArgsConstructor
 public class TeamController {
 
-    @Autowired
-    private TeamService teamService;
+    private final TeamService teamService;
 
     @GetMapping(value = "/teams", produces = {"application/json"})
     public ResponseEntity<Page<TeamSummary>> listTeams(@AuthenticationPrincipal User user,
