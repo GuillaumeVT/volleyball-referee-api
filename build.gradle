@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.5.2'
+    id 'org.springframework.boot' version '2.5.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
@@ -32,7 +32,7 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-mongodb'
-    implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.1'
     implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
     // Security
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'

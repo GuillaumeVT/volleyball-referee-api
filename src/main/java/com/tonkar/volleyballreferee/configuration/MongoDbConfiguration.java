@@ -15,7 +15,7 @@ public class MongoDbConfiguration implements InitializingBean {
     private MappingMongoConverter mappingMongoConverter;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         mappingMongoConverter.setTypeMapper(new DefaultMongoTypeMapper(null));
         mappingMongoConverter.afterPropertiesSet();
     }

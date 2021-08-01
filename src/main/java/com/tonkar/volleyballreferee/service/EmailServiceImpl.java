@@ -34,7 +34,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendUserCreatedNotificationEmail(User user) {
-        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(interactiveEmailHtmlSkeleton());
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(EMAIL_HTML_SKELETON);
 
         org.jsoup.nodes.Element titleHtmlDiv = email.getElementById("title");
         org.jsoup.nodes.Element contentHtmlDiv = email.getElementById("content");
@@ -53,7 +53,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPasswordResetEmail(@Email String userEmail, UUID passwordResetId) {
-        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(interactiveEmailHtmlSkeleton());
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(EMAIL_HTML_SKELETON);
 
         org.jsoup.nodes.Element titleHtmlDiv = email.getElementById("title");
         org.jsoup.nodes.Element contentHtmlDiv = email.getElementById("content");
@@ -73,7 +73,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPasswordUpdatedNotificationEmail(User user) {
-        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(interactiveEmailHtmlSkeleton());
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(EMAIL_HTML_SKELETON);
 
         org.jsoup.nodes.Element titleHtmlDiv = email.getElementById("title");
         org.jsoup.nodes.Element contentHtmlDiv = email.getElementById("content");
@@ -93,7 +93,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendFriendRequestEmail(User senderUser, User receiverUser) {
-        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(interactiveEmailHtmlSkeleton());
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(EMAIL_HTML_SKELETON);
 
         org.jsoup.nodes.Element titleHtmlDiv = email.getElementById("title");
         org.jsoup.nodes.Element contentHtmlDiv = email.getElementById("content");
@@ -112,7 +112,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendAcceptFriendRequestEmail(User acceptingUser, User senderUser) {
-        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(interactiveEmailHtmlSkeleton());
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(EMAIL_HTML_SKELETON);
 
         org.jsoup.nodes.Element titleHtmlDiv = email.getElementById("title");
         org.jsoup.nodes.Element contentHtmlDiv = email.getElementById("content");
@@ -192,29 +192,27 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private String interactiveEmailHtmlSkeleton() {
-        return """
-                <!doctype html>
-                <html>
-                  <head>
-                    <meta charset="utf-8">
-                    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-                    <link rel="stylesheet" type="text/css">
-                    <meta name="viewport" content="width=device-width, initial-scale=1">
-                  </head>
-                  <body style="font-family: sans-serif;">
-                    <div style="width: 600px; margin-left: auto; margin-right: auto;">
-                      <div style="text-align: center; margin-left: 30px; margin-right: 30px; padding: 20px 30px 20px 30px;">
-                        <img src="https://www.volleyball-referee.com/favicon.ico" alt="logo" style="width: auto; height: 80px">
-                      </div>
-                      <div style="background-color: #e4e4e4; margin-left: 30px; margin-right: 30px;">
-                        <div id="title" style="text-align: center; font-size: 1.6em; font-weight: 700; padding: 20px 30px 20px 30px;"></div>
-                        <div id="content" style="text-align: center; font-size: 1em; padding: 20px 30px 20px 30px;"></div>
-                        <div id="link" style="text-align: center; font-size: 1em; padding: 20px 30px 20px 30px;"></div>
-                      </div>
-                    </div>
-                  </body>
-                </html>
-                """;
-    }
+    private static final String EMAIL_HTML_SKELETON = """
+            <!doctype html>
+            <html>
+              <head>
+                <meta charset="utf-8">
+                <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+                <link rel="stylesheet" type="text/css">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+              </head>
+              <body style="font-family: sans-serif;">
+                <div style="width: 600px; margin-left: auto; margin-right: auto;">
+                  <div style="text-align: center; margin-left: 30px; margin-right: 30px; padding: 20px 30px 20px 30px;">
+                    <img src="https://www.volleyball-referee.com/favicon.ico" alt="logo" style="width: auto; height: 80px">
+                  </div>
+                  <div style="background-color: #e4e4e4; margin-left: 30px; margin-right: 30px;">
+                    <div id="title" style="text-align: center; font-size: 1.6em; font-weight: 700; padding: 20px 30px 20px 30px;"></div>
+                    <div id="content" style="text-align: center; font-size: 1em; padding: 20px 30px 20px 30px;"></div>
+                    <div id="link" style="text-align: center; font-size: 1em; padding: 20px 30px 20px 30px;"></div>
+                  </div>
+                </div>
+              </body>
+            </html>
+            """;
 }
