@@ -231,11 +231,11 @@ public class ScoreSheetWriter {
         if (isLibero) {
             playerSpan.addClass(TeamType.HOME.equals(teamType) ? "vbr-home-libero" : "vbr-guest-libero");
         } else {
-            if (game.getTeam(teamType).getCaptain() == player) {
-                playerSpan.addClass(TeamType.HOME.equals(teamType) ? "vbr-home-captain" : "vbr-guest-captain");
-            } else {
-                playerSpan.addClass(TeamType.HOME.equals(teamType) ? "vbr-home-team" : "vbr-guest-team");
-            }
+            playerSpan.addClass(TeamType.HOME.equals(teamType) ? "vbr-home-team" : "vbr-guest-team");
+        }
+
+        if (game.getTeam(teamType).getCaptain() == player) {
+            playerSpan.addClass("vbr-captain");
         }
 
         return playerSpan;
@@ -808,14 +808,12 @@ public class ScoreSheetWriter {
                 "      margin-left: auto;\n" +
                 "      margin-right: auto;\n" +
                 "    }\n" +
+                "    .vbr-captain {\n" +
+                "      text-decoration: underline;\n" +
+                "    }\n" +
                 "    .vbr-home-team {\n" +
                 String.format("      color: %s;\n", homeTeamColor) +
                 String.format("      background-color: %s;\n", homeTeamBackgroundColor) +
-                "    }\n" +
-                "    .vbr-home-captain {\n" +
-                String.format("      color: %s;\n", homeTeamColor) +
-                String.format("      background-color: %s;\n", homeTeamBackgroundColor) +
-                "      text-decoration: underline;\n" +
                 "    }\n" +
                 "    .vbr-home-libero {\n" +
                 String.format("      color: %s;\n", homeLiberoColor) +
@@ -824,11 +822,6 @@ public class ScoreSheetWriter {
                 "    .vbr-guest-team {\n" +
                 String.format("      color: %s;\n", guestTeamColor) +
                 String.format("      background-color: %s;\n", guestTeamBackgroundColor) +
-                "    }\n" +
-                "    .vbr-guest-captain {\n" +
-                String.format("      color: %s;\n", guestTeamColor) +
-                String.format("      background-color: %s;\n", guestTeamBackgroundColor) +
-                "      text-decoration: underline;\n" +
                 "    }\n" +
                 "    .vbr-guest-libero {\n" +
                 String.format("      color: %s;\n", guestLiberoColor) +

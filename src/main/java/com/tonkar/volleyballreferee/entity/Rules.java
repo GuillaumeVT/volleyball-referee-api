@@ -95,7 +95,7 @@ public class Rules {
     public static final Rules OFFICIAL_INDOOR_RULES    = new Rules(UUID.fromString("efb06d97-264e-425d-b8ca-b499e3b63a95"),
             User.VBR_USER_ID, 0L, 0L, "FIVB indoor 6x6 rules", GameType.INDOOR,
             5, 25, true, 15, true, true, WIN_TERMINATION, true, 2, 30,
-            true, 60, true, 180,
+            false, 60, true, 180,
             FIVB_LIMITATION, 6, false, 0, 0, 9999);
     public static final Rules OFFICIAL_BEACH_RULES     = new Rules(UUID.fromString("cceb81c9-2201-4495-8a5e-e289a77e24bf"),
             User.VBR_USER_ID, 0L, 0L, "FIVB beach rules", GameType.BEACH,
