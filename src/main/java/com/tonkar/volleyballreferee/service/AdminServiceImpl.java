@@ -10,10 +10,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AdminServiceImpl implements  AdminService {
+public class AdminServiceImpl implements AdminService {
 
-    private final UserService userService;
-    private final UserDao     userDao;
+    private final UserService         userService;
+    private final SubscriptionService subscriptionService;
+    private final UserDao             userDao;
 
     @Override
     public Page<User> listUsers(String filter, Pageable pageable) {
@@ -23,18 +24,23 @@ public class AdminServiceImpl implements  AdminService {
     @Override
     public SubscriptionPurchase getUserSubscription(String userId) {
         User user = userService.getUser(userId);
-        return userService.getUserSubscription(user.getPurchaseToken());
+        return subscriptionService.getUserSubscription(user.getPurchaseToken());
     }
 
     @Override
     public void refreshUserSubscription(String userId) {
         User user = userService.getUser(userId);
-        userService.refreshSubscriptionPurchaseToken(user.getPurchaseToken());
+        if (user.isSubscription()) {
+            subscriptionService.refreshSubscriptionPurchaseToken(user.getPurchaseToken());
+        }
     }
 
     @Override
     public void updateUserSubscription(String userId, String purchaseToken) {
-        userDao.updateSubscriptionPurchaseToken(userId, purchaseToken, 0L);
-        userService.refreshSubscriptionPurchaseToken(purchaseToken);
+        User user = userService.getUser(userId);
+        if (user.isSubscription()) {
+            userDao.updateSubscriptionPurchaseToken(user.getId(), purchaseToken, 0L);
+            subscriptionService.refreshSubscriptionPurchaseToken(purchaseToken);
+        }
     }
 }

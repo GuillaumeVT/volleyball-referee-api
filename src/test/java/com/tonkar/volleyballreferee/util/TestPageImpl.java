@@ -1,4 +1,4 @@
-package com.tonkar.volleyballreferee;
+package com.tonkar.volleyballreferee.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.domain.*;

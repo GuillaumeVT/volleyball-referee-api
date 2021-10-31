@@ -1,17 +1,11 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.androidpublisher.AndroidPublisher;
-import com.google.api.services.androidpublisher.AndroidPublisherScopes;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
-import com.tonkar.volleyballreferee.dao.FriendRequestDao;
 import com.tonkar.volleyballreferee.dao.PasswordResetDao;
 import com.tonkar.volleyballreferee.dao.UserDao;
-import com.tonkar.volleyballreferee.dto.*;
-import com.tonkar.volleyballreferee.entity.FriendRequest;
+import com.tonkar.volleyballreferee.dto.UserPasswordUpdate;
+import com.tonkar.volleyballreferee.dto.UserSummary;
+import com.tonkar.volleyballreferee.dto.UserToken;
 import com.tonkar.volleyballreferee.entity.PasswordReset;
 import com.tonkar.volleyballreferee.entity.User;
 import io.jsonwebtoken.Claims;
@@ -26,41 +20,27 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final EmailService     emailService;
-    private final UserDao          userDao;
-    private final FriendRequestDao friendRequestDao;
-    private final PasswordResetDao passwordResetDao;
-    private final PasswordEncoder  passwordEncoder;
+    private final SubscriptionService subscriptionService;
+    private final EmailService        emailService;
+    private final UserDao             userDao;
+    private final PasswordResetDao    passwordResetDao;
+    private final PasswordEncoder     passwordEncoder;
 
     @Value("${vbr.web.domain}")
     private String webDomain;
-
-    @Value("${vbr.android.app.packageName}")
-    private String androidPackageName;
-
-    @Value("${vbr.android.app.billing.sku-purchase}")
-    private String androidPurchaseSku;
-
-    @Value("${vbr.android.app.billing.sku-subscription}")
-    private String androidSubscriptionSku;
-
-    @Value("${vbr.android.app.billing.credential}")
-    private String androidCredential;
 
     @Value("${vbr.jwt.key}")
     private String jwtKey;
@@ -70,12 +50,6 @@ public class UserServiceImpl implements UserService {
         return userDao
                 .findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user %s", userId)));
-    }
-
-    private User getUserByPseudo(String pseudo) {
-        return userDao
-                .findByPseudo(pseudo)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user %s", pseudo)));
     }
 
     @Override
@@ -99,66 +73,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserSummary getUserFromPurchaseToken(String purchaseToken) {
-        refreshSubscriptionPurchaseToken(purchaseToken);
+        subscriptionService.refreshSubscriptionPurchaseToken(purchaseToken);
         return userDao
                 .findUserByPurchaseToken(purchaseToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user for purchase token %s", purchaseToken)));
-    }
-
-    @Override
-    public void refreshSubscriptionPurchaseToken(String purchaseToken) {
-        try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
-            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
-            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
-            AndroidPublisher.Purchases.Subscriptions subscriptions = publisher.purchases().subscriptions();
-
-            // A subscription  may contain a linked purchase token which is the previous purchase token for this user.
-            // Browse this chain of purchase tokens to find the user and when found, update their purchase token and expiry
-            Optional<UserSummary> optionalUser = userDao.findUserByPurchaseToken(purchaseToken);
-            SubscriptionPurchase subscription = subscriptions.get(androidPackageName, androidSubscriptionSku, purchaseToken).execute();
-            final long subscriptionExpiryAt;
-
-            if (subscription.getAutoRenewing() && (subscription.getPaymentState() == 0)) {
-                subscriptionExpiryAt = subscription.getExpiryTimeMillis() + 604800000L; // Users have auto renew and the payment is pending, give 7 extra days of access
-            } else {
-                subscriptionExpiryAt = subscription.getExpiryTimeMillis();
-            }
-
-            String linkedPurchaseToken = purchaseToken;
-
-            while (optionalUser.isEmpty() && linkedPurchaseToken != null) {
-                SubscriptionPurchase linkedSubscription = subscriptions.get(androidPackageName, androidSubscriptionSku, linkedPurchaseToken).execute();
-                optionalUser = userDao.findUserByPurchaseToken(linkedPurchaseToken);
-                linkedPurchaseToken = linkedSubscription.getLinkedPurchaseToken();
-            }
-
-            // Store the latest purchase token and the subscription expiry date
-            optionalUser.ifPresent(userSummary -> {
-                log.info(String.format("Found the user %s from the linked purchase tokens, store new token %s with expiry %d", userSummary.getId(), purchaseToken, subscriptionExpiryAt));
-                userDao.updateSubscriptionPurchaseToken(userSummary.getId(), purchaseToken, subscriptionExpiryAt);
-            });
-
-        } catch (IOException | GeneralSecurityException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    @Override
-    public SubscriptionPurchase getUserSubscription(String purchaseToken) {
-        try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
-            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
-            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
-            AndroidPublisher.Purchases.Subscriptions subscriptions = publisher.purchases().subscriptions();
-
-            return subscriptions.get(androidPackageName, androidSubscriptionSku, purchaseToken).execute();
-
-        } catch (IOException | GeneralSecurityException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the purchase token %s", purchaseToken));
-        }
     }
 
     @Override
@@ -167,13 +85,7 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with purchase token %s", user.getPurchaseToken()));
         }
 
-        SubscriptionPurchase subscription = getSubscriptionPurchase(user.getPurchaseToken());
-
-        if (subscription == null) {
-            if (!isValidPurchaseToken(user.getPurchaseToken())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format("User with email %s provided an invalid purchase token %s", user.getEmail(), user.getPurchaseToken()));
-            }
-        }
+        SubscriptionPurchase subscription = subscriptionService.validatePurchaseToken(user.getPurchaseToken());
 
         String password = user.getPassword().trim();
         validatePassword(password);
@@ -243,91 +155,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Count getNumberOfFriendRequestsReceivedBy(User user) {
-        return new Count(friendRequestDao.countByReceiverId(user.getId()));
-    }
-
-    @Override
-    public List<FriendRequest> listFriendRequestsSentBy(User user) {
-        return friendRequestDao.findBySenderId(user.getId());
-    }
-
-    @Override
-    public List<FriendRequest> listFriendRequestsReceivedBy(User user) {
-        return friendRequestDao.findByReceiverId(user.getId());
-    }
-
-    @Override
-    public FriendsAndRequests listFriendsAndRequests(User user) {
-        FriendsAndRequests friendsAndRequests = new FriendsAndRequests();
-
-        friendsAndRequests.setFriends(user.getFriends());
-        friendsAndRequests.setReceivedFriendRequests(friendRequestDao.findByReceiverId(user.getId()));
-        friendsAndRequests.setSentFriendRequests(friendRequestDao.findBySenderId(user.getId()));
-
-        return friendsAndRequests;
-    }
-
-    @Override
-    public void sendFriendRequest(User user, String receiverPseudo) {
-        User receiverUser = getUserByPseudo(receiverPseudo);
-
-        if (user.getId().equals(receiverUser.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("%s cannot be friend with himself", user.getId()));
-        } else if (userDao.areFriends(user.getId(), receiverUser.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("%s and %s are already friends", user.getId(), receiverUser.getId()));
-        } else if (friendRequestDao.existsBySenderIdAndReceiverId(user.getId(), receiverUser.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing friend request from %s to %s", user.getId(), receiverUser.getId()));
-        } else {
-            FriendRequest friendRequest = new FriendRequest();
-            friendRequest.setId(UUID.randomUUID());
-            friendRequest.setSenderId(user.getId());
-            friendRequest.setSenderPseudo(user.getPseudo());
-            friendRequest.setReceiverId(receiverUser.getId());
-            friendRequest.setReceiverPseudo(receiverUser.getPseudo());
-            friendRequestDao.save(friendRequest);
-            emailService.sendFriendRequestEmail(user, receiverUser);
-        }
-    }
-
-    @Override
-    public void acceptFriendRequest(User user, UUID friendRequestId) {
-        FriendRequest friendRequest = friendRequestDao
-                .findByIdAndReceiverId(friendRequestId, user.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find friend request %s with receiver %s", friendRequestId, user.getId())));
-
-        User senderUser = getUser(friendRequest.getSenderId());
-        User receiverUser = getUser(friendRequest.getReceiverId());
-
-        if (userDao.areFriends(friendRequest.getSenderId(), friendRequest.getReceiverId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
-        } else {
-            userDao.addFriend(senderUser.getId(), new User.Friend(receiverUser.getId(), receiverUser.getPseudo()));
-            userDao.addFriend(receiverUser.getId(), new User.Friend(senderUser.getId(), senderUser.getPseudo()));
-            log.info(String.format("%s and %s are now friends", senderUser.getId(), receiverUser.getId()));
-            emailService.sendAcceptFriendRequestEmail(receiverUser, senderUser);
-        }
-
-        friendRequestDao.deleteById(friendRequest);
-    }
-
-    @Override
-    public void rejectFriendRequest(User user, UUID friendRequestId) {
-        friendRequestDao.deleteByIdAndReceiverId(friendRequestId, user.getId());
-    }
-
-    @Override
-    public void removeFriend(User user, String friendId) {
-        if (userDao.areFriends(user.getId(), friendId)) {
-            userDao.removeFriend(user.getId(), friendId);
-            userDao.removeFriend(friendId, user.getId());
-            log.info(String.format("%s and %s are no longer friends", user.getId(), friendId));
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("%s and %s are not friends", user.getId(), friendId));
-        }
-    }
-
-    @Override
     public UserToken updateUserPassword(User user, UserPasswordUpdate userPasswordUpdate) {
         if (!passwordEncoder.matches(userPasswordUpdate.getCurrentPassword(), user.getPassword())) {
             addFailedAuthentication(user);
@@ -341,7 +168,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void initiatePasswordReset(String userEmail) {
+    public UUID initiatePasswordReset(String userEmail) {
         User user = userDao
                 .findByEmail(userEmail)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user %s", userEmail)));
@@ -355,6 +182,8 @@ public class UserServiceImpl implements UserService {
                 .build();
         passwordResetDao.save(passwordReset);
         emailService.sendPasswordResetEmail(user.getEmail(), passwordReset.getId());
+
+        return passwordReset.getId();
     }
 
     @Override
@@ -396,46 +225,13 @@ public class UserServiceImpl implements UserService {
         userDao.delete(user);
     }
 
-    private SubscriptionPurchase getSubscriptionPurchase(String purchaseToken) {
-        SubscriptionPurchase subscription = null;
-
-        try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
-            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
-            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
-            subscription = publisher.purchases().subscriptions().get(androidPackageName, androidSubscriptionSku, purchaseToken).execute();
-        } catch (IOException | GeneralSecurityException e) {
-            log.error(e.getMessage());
-        }
-
-        return subscription;
-    }
-
-    private boolean isValidPurchaseToken(String purchaseToken) {
-        boolean valid = false;
-
-        try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
-            NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            GoogleCredential credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
-            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
-            publisher.purchases().products().get(androidPackageName, androidPurchaseSku, purchaseToken).execute();
-            valid = true;
-        } catch (IOException | GeneralSecurityException e) {
-            log.error(e.getMessage());
-        }
-
-        return valid;
-    }
-
     private UserToken buildToken(User user) {
         LocalDateTime iat = LocalDateTime.now();
         LocalDateTime exp = iat.plusMonths(3L);
 
         String token = Jwts
                 .builder()
-                .setIssuer(androidPackageName)
+                .setIssuer("com.tonkar.volleyballreferee")
                 .setSubject(user.getId())
                 .setIssuedAt(Date.from(iat.toInstant(ZoneOffset.UTC)))
                 .setExpiration(Date.from(exp.toInstant(ZoneOffset.UTC)))
@@ -548,5 +344,4 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Password must contain at most %d repeating characters", 3));
         }
     }
-
 }

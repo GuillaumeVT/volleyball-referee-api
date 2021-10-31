@@ -12,12 +12,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ScheduledTasks {
 
-    private final GameService   gameService;
-    private final TeamService   teamService;
-    private final RulesService  rulesService;
-    private final LeagueService leagueService;
-    private final UserService   userService;
-    private final UserDao       userDao;
+    private final GameService         gameService;
+    private final TeamService         teamService;
+    private final RulesService        rulesService;
+    private final LeagueService       leagueService;
+    private final UserService         userService;
+    private final SubscriptionService subscriptionService;
+    private final UserDao             userDao;
 
     // Every day at 4:00am
     @Scheduled(cron = "0 0 4 * * *")
@@ -43,7 +44,7 @@ public class ScheduledTasks {
     @Scheduled(cron = "0 15 4 * * *")
     public void refreshInactiveAccounts() {
         log.info("Refresh inactive accounts with subscription expiry older than 3 months");
-        userDao.findUsersBySubscriptionExpiryBefore(3L).forEach(user -> userService.refreshSubscriptionPurchaseToken(user.getPurchaseToken()));
+        userDao.findUsersBySubscriptionExpiryBefore(3L).forEach(user -> subscriptionService.refreshSubscriptionPurchaseToken(user.getPurchaseToken()));
     }
 
     // Every day at 4:30am

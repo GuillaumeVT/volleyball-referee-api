@@ -6,10 +6,10 @@ server:
 
 vbr:
   jwt:
-    key: ${TEST_VBR_JWT_KEY:}
+    key: 5rdtdWZv-iNiRyo6X28bKmJNSbIqI4wVW_vB3mbkiXu-7eOnE6Yhe815BTHPTt9yDyx1N1rRyLPki-PxYicmsN5xNx7FZf83YDlxhCprlW0dGx21hgXyWc0CZxttsPl2Ks59AaA9kkphsWCbNLLfczCNUOWrtlggwGzO6GDbG4s
   web:
-    domain: ${TEST_VBR_DOMAIN:}
-    color: ${TEST_VBR_COLOR:}
+    domain: 'https://localhost:4200'
+    color: '#fac511'
   android:
     app:
       packageName: ${TEST_VBR_ANDROID_PACKAGE:}
@@ -25,11 +25,6 @@ logging:
   config: classpath:logback-spring.xml
 
 test:
-  user1:
-    email: ${TEST_VBR_USER_1_MAIL:}
-    pseudo: ${TEST_VBR_USER_1_PSEUDO:}
-    purchase-token: ${TEST_VBR_USER_1_TOKEN:}
-  user2:
-    email: ${TEST_VBR_USER_2_MAIL:}
-    pseudo: ${TEST_VBR_USER_2_PSEUDO:}
-    purchase-token: ${TEST_VBR_USER_2_TOKEN:}
+  user:
+    email: ${TEST_VBR_TARGET_EMAIL:}
+    purchase-token: ${TEST_VBR_PURCHASE_TOKEN:}

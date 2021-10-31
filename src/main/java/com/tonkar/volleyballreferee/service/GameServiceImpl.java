@@ -121,7 +121,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public List<Ranking> listRankingsInDivision(UUID leagueId, String divisionName) {
         List<GameScore> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName, GameStatus.COMPLETED);
-        Rankings rankings = new Rankings();
+        var rankings = new Rankings();
         games.forEach(rankings::addGame);
         return rankings.list();
     }
@@ -155,7 +155,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public GameIngredients getGameIngredientsOfKind(User user, GameType kind) {
-        GameIngredients gameIngredients = new GameIngredients(kind);
+        var gameIngredients = new GameIngredients(kind);
         gameIngredients.setFriends(user.getFriends());
         gameIngredients.setDefaultRules(rulesService.getDefaultRules(kind));
         gameIngredients.setRules(rulesService.listRulesOfKind(user, kind));
@@ -188,53 +188,51 @@ public class GameServiceImpl implements GameService {
         } else if (!gameSummary.getCreatedBy().equals(gameSummary.getRefereedBy()) && !userDao.areFriends(gameSummary.getCreatedBy(), gameSummary.getRefereedBy())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not create game %s for user %s because %s and %s are not friends", gameSummary.getId(), user.getId(), gameSummary.getCreatedBy(), gameSummary.getRefereedBy()));
         } else {
-            Optional<Team> optHTeam = teamDao.findByIdAndCreatedByAndKind(gameSummary.getHomeTeamId(), user.getId(), gameSummary.getKind());
-            Optional<Team> optGTeam = teamDao.findByIdAndCreatedByAndKind(gameSummary.getGuestTeamId(), user.getId(), gameSummary.getKind());
-            Optional<Rules> optRules = findRules(user, gameSummary.getRulesId(), gameSummary.getKind());
+            Team hTeam = teamDao
+                    .findByIdAndCreatedByAndKind(gameSummary.getHomeTeamId(), user.getId(), gameSummary.getKind())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching home team %s for user %s", gameSummary.getHomeTeamId(), user.getId())));
+            Team gTeam = teamDao
+                    .findByIdAndCreatedByAndKind(gameSummary.getGuestTeamId(), user.getId(), gameSummary.getKind())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching guest team %s for user %s", gameSummary.getGuestTeamId(), user.getId())));
+            Rules rules =
+                    findRules(user, gameSummary.getRulesId(), gameSummary.getKind())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching rules %s for user %s", gameSummary.getRulesId(), user.getId())));
 
-            if (optHTeam.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching home team %s for user %s", gameSummary.getHomeTeamId(), user.getId()));
-            } else if (optGTeam.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching guest team %s for user %s", gameSummary.getGuestTeamId(), user.getId()));
-            } else if (optRules.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching rules %s for user %s", gameSummary.getRulesId(), user.getId()));
-            } else {
-                Game.SelectedLeague league = findOrCreateLeague(user, gameSummary);
+            Game.SelectedLeague league = findOrCreateLeague(user, gameSummary);
 
-                Game game = new Game();
+            Game game = new Game();
 
-                game.setId(gameSummary.getId());
-                game.setCreatedBy(gameSummary.getCreatedBy());
-                game.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-                game.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-                game.setScheduledAt(gameSummary.getScheduledAt());
-                game.setRefereedBy(gameSummary.getRefereedBy());
-                game.setRefereeName(gameSummary.getRefereeName());
-                game.setKind(gameSummary.getKind());
-                game.setGender(gameSummary.getGender());
-                game.setUsage(gameSummary.getUsage());
-                game.setStatus(GameStatus.SCHEDULED);
-                game.setIndexed(gameSummary.isIndexed());
-                game.setLeague(league);
-                game.setHomeTeam(optHTeam.get());
-                game.setGuestTeam(optGTeam.get());
-                game.setHomeSets(0);
-                game.setGuestSets(0);
-                game.setSets(new ArrayList<>());
-                game.setHomeCards(new ArrayList<>());
-                game.setGuestCards(new ArrayList<>());
-                game.setRules(optRules.get());
-                game.setScore("");
-                game.setStartTime(0L);
-                game.setEndTime(0L);
-                game.setReferee1(gameSummary.getReferee1Name());
-                game.setReferee2(gameSummary.getReferee2Name());
-                game.setScorer(gameSummary.getScorerName());
+            game.setId(gameSummary.getId());
+            game.setCreatedBy(gameSummary.getCreatedBy());
+            game.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            game.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            game.setScheduledAt(gameSummary.getScheduledAt());
+            game.setRefereedBy(gameSummary.getRefereedBy());
+            game.setRefereeName(gameSummary.getRefereeName());
+            game.setKind(gameSummary.getKind());
+            game.setGender(gameSummary.getGender());
+            game.setUsage(gameSummary.getUsage());
+            game.setStatus(GameStatus.SCHEDULED);
+            game.setIndexed(gameSummary.isIndexed());
+            game.setLeague(league);
+            game.setHomeTeam(hTeam);
+            game.setGuestTeam(gTeam);
+            game.setHomeSets(0);
+            game.setGuestSets(0);
+            game.setSets(new ArrayList<>());
+            game.setHomeCards(new ArrayList<>());
+            game.setGuestCards(new ArrayList<>());
+            game.setRules(rules);
+            game.setScore("");
+            game.setStartTime(0L);
+            game.setEndTime(0L);
+            game.setReferee1(gameSummary.getReferee1Name());
+            game.setReferee2(gameSummary.getReferee2Name());
+            game.setScorer(gameSummary.getScorerName());
 
-                gameDao.save(game);
+            gameDao.save(game);
 
-                createOrUpdateLeagueIfNeeded(user, game);
-            }
+            createOrUpdateLeagueIfNeeded(user, game);
         }
     }
 
@@ -275,77 +273,71 @@ public class GameServiceImpl implements GameService {
         } else {
             Game savedGame = optSavedGame.get();
 
-            Optional<Team> optHTeam = teamDao.findByIdAndCreatedByAndKind(gameSummary.getHomeTeamId(), user.getId(), savedGame.getKind());
-            Optional<Team> optGTeam = teamDao.findByIdAndCreatedByAndKind(gameSummary.getGuestTeamId(), user.getId(), savedGame.getKind());
-            Optional<Rules> optRules = findRules(user, gameSummary.getRulesId(), savedGame.getKind());
+            Team hTeam = teamDao
+                    .findByIdAndCreatedByAndKind(gameSummary.getHomeTeamId(), user.getId(), savedGame.getKind())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching home team %s for user %s", gameSummary.getHomeTeamId(), user.getId())));
+            Team gTeam = teamDao
+                    .findByIdAndCreatedByAndKind(gameSummary.getGuestTeamId(), user.getId(), savedGame.getKind())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching guest team %s for user %s", gameSummary.getGuestTeamId(), user.getId())));
+            Rules rules =
+                    findRules(user, gameSummary.getRulesId(), savedGame.getKind())
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching rules %s for user %s", gameSummary.getRulesId(), user.getId())));
 
-            if (optHTeam.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching home team %s for user %s", gameSummary.getHomeTeamId(), user.getId()));
-            } else if (optGTeam.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching guest team %s for user %s", gameSummary.getGuestTeamId(), user.getId()));
-            } else if (optRules.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching rules %s for user %s", gameSummary.getRulesId(), user.getId()));
-            } else {
-                Game.SelectedLeague league = findOrCreateLeague(user, gameSummary);
+            Game.SelectedLeague league = findOrCreateLeague(user, gameSummary);
 
-                savedGame.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-                savedGame.setScheduledAt(gameSummary.getScheduledAt());
-                savedGame.setRefereedBy(gameSummary.getRefereedBy());
-                savedGame.setRefereeName(gameSummary.getRefereeName());
-                savedGame.setGender(gameSummary.getGender());
-                savedGame.setUsage(gameSummary.getUsage());
-                savedGame.setIndexed(gameSummary.isIndexed());
-                savedGame.setLeague(league);
-                savedGame.setHomeTeam(optHTeam.get());
-                savedGame.setGuestTeam(optGTeam.get());
-                savedGame.setHomeSets(0);
-                savedGame.setGuestSets(0);
-                savedGame.setSets(new ArrayList<>());
-                savedGame.setHomeCards(new ArrayList<>());
-                savedGame.setGuestCards(new ArrayList<>());
-                savedGame.setRules(optRules.get());
-                savedGame.setScore("");
-                savedGame.setReferee1(gameSummary.getReferee1Name());
-                savedGame.setReferee2(gameSummary.getReferee2Name());
-                savedGame.setScorer(gameSummary.getScorerName());
+            savedGame.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            savedGame.setScheduledAt(gameSummary.getScheduledAt());
+            savedGame.setRefereedBy(gameSummary.getRefereedBy());
+            savedGame.setRefereeName(gameSummary.getRefereeName());
+            savedGame.setGender(gameSummary.getGender());
+            savedGame.setUsage(gameSummary.getUsage());
+            savedGame.setIndexed(gameSummary.isIndexed());
+            savedGame.setLeague(league);
+            savedGame.setHomeTeam(hTeam);
+            savedGame.setGuestTeam(gTeam);
+            savedGame.setHomeSets(0);
+            savedGame.setGuestSets(0);
+            savedGame.setSets(new ArrayList<>());
+            savedGame.setHomeCards(new ArrayList<>());
+            savedGame.setGuestCards(new ArrayList<>());
+            savedGame.setRules(rules);
+            savedGame.setScore("");
+            savedGame.setReferee1(gameSummary.getReferee1Name());
+            savedGame.setReferee2(gameSummary.getReferee2Name());
+            savedGame.setScorer(gameSummary.getScorerName());
 
-                gameDao.save(savedGame);
+            gameDao.save(savedGame);
 
-                createOrUpdateLeagueIfNeeded(user, savedGame);
-            }
+            createOrUpdateLeagueIfNeeded(user, savedGame);
         }
     }
 
     @Override
     public void updateGame(User user, Game game) {
-        Optional<Game> optSavedGame = gameDao.findByIdAndAllowedUserAndStatusNot(game.getId(), user.getId(), GameStatus.COMPLETED);
+        Game savedGame = gameDao
+                .findByIdAndAllowedUserAndStatusNot(game.getId(), user.getId(), GameStatus.COMPLETED)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find game %s for user %s", game.getId(), user.getId())));
 
-        if (optSavedGame.isPresent()) {
-            Game savedGame = optSavedGame.get();
+        savedGame.setUpdatedAt(game.getUpdatedAt());
+        savedGame.setStatus(game.getStatus());
+        savedGame.setIndexed(game.isIndexed());
+        savedGame.setLeague(game.getLeague());
+        savedGame.setHomeTeam(game.getHomeTeam());
+        savedGame.setGuestTeam(game.getGuestTeam());
+        savedGame.setHomeSets(game.getHomeSets());
+        savedGame.setGuestSets(game.getGuestSets());
+        savedGame.setSets(game.getSets());
+        savedGame.setHomeCards(game.getHomeCards());
+        savedGame.setGuestCards(game.getGuestCards());
+        savedGame.setRules(game.getRules());
+        savedGame.setScore(buildScore(savedGame));
+        savedGame.setStartTime(game.getStartTime());
+        savedGame.setEndTime(game.getEndTime());
+        savedGame.setReferee1(game.getReferee1());
+        savedGame.setReferee2(game.getReferee2());
+        savedGame.setScorer(game.getScorer());
 
-            savedGame.setUpdatedAt(game.getUpdatedAt());
-            savedGame.setStatus(game.getStatus());
-            savedGame.setIndexed(game.isIndexed());
-            savedGame.setLeague(game.getLeague());
-            savedGame.setHomeTeam(game.getHomeTeam());
-            savedGame.setGuestTeam(game.getGuestTeam());
-            savedGame.setHomeSets(game.getHomeSets());
-            savedGame.setGuestSets(game.getGuestSets());
-            savedGame.setSets(game.getSets());
-            savedGame.setHomeCards(game.getHomeCards());
-            savedGame.setGuestCards(game.getGuestCards());
-            savedGame.setRules(game.getRules());
-            savedGame.setScore(buildScore(savedGame));
-            savedGame.setStartTime(game.getStartTime());
-            savedGame.setEndTime(game.getEndTime());
-            savedGame.setReferee1(game.getReferee1());
-            savedGame.setReferee2(game.getReferee2());
-            savedGame.setScorer(game.getScorer());
-
-            gameDao.save(savedGame);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find game %s for user %s", game.getId(), user.getId()));
-        }
+        gameDao.save(savedGame);
     }
 
     @Override

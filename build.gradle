@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.5.3'
+    id 'org.springframework.boot' version '2.5.6'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
@@ -7,26 +7,18 @@ plugins {
 group = 'com.tonkar'
 version = '3.2'
 java {
-    sourceCompatibility = JavaVersion.VERSION_15
-    targetCompatibility = JavaVersion.VERSION_15
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
     mavenCentral()
 }
 
-tasks.withType(JavaCompile).each {
-    it.options.compilerArgs.add('--enable-preview')
-}
-
-test {
-    jvmArgs(['--enable-preview'])
-}
-
 dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-logging'
-    implementation('org.springframework.boot:spring-boot-starter-web') {
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-web') {
         exclude module: "spring-boot-starter-tomcat"
     }
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
@@ -46,6 +38,7 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo', version: '3.0.0'
+    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
 }
 
 test {
