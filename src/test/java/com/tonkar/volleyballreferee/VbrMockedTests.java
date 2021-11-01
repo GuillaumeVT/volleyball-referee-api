@@ -42,10 +42,10 @@ public class VbrMockedTests {
     @LocalServerPort
     private int port;
 
-    protected TestRestTemplate restTemplate;
-
     @Value("${server.servlet.context-path}")
     private String contextPath;
+
+    protected TestRestTemplate restTemplate;
 
     @MockBean
     private SubscriptionService subscriptionService;

@@ -22,7 +22,7 @@ import java.util.UUID;
 public class EmailTests {
 
     @Value("${test.user.email}")
-    String testMail;
+    private String testTargetEmail;
 
     private final Faker                        faker;
     private final VbrTestConfiguration.Sandbox sandbox;
@@ -34,19 +34,19 @@ public class EmailTests {
 
     @Test
     public void test_emails_userCreated(@Autowired EmailService emailService) {
-        User user = sandbox.generateUser(testMail);
+        User user = sandbox.generateUser(testTargetEmail);
 
         emailService.sendUserCreatedNotificationEmail(user);
     }
 
     @Test
     public void test_emails_passwordReset(@Autowired EmailService emailService) {
-        emailService.sendPasswordResetEmail(testMail, UUID.randomUUID());
+        emailService.sendPasswordResetEmail(testTargetEmail, UUID.randomUUID());
     }
 
     @Test
     public void test_emails_passwordUpdated(@Autowired EmailService emailService) {
-        User user = sandbox.generateUser(testMail);
+        User user = sandbox.generateUser(testTargetEmail);
 
         emailService.sendPasswordUpdatedNotificationEmail(user);
     }
@@ -54,7 +54,7 @@ public class EmailTests {
     @Test
     public void test_emails_friendRequested(@Autowired EmailService emailService) {
         User senderUser = sandbox.generateUser(faker.internet().safeEmailAddress());
-        User receiverUser = sandbox.generateUser(testMail);
+        User receiverUser = sandbox.generateUser(testTargetEmail);
 
         emailService.sendFriendRequestEmail(senderUser, receiverUser);
     }
@@ -62,7 +62,7 @@ public class EmailTests {
     @Test
     public void test_emails_friendAccepted(@Autowired EmailService emailService) {
         User acceptingUser = sandbox.generateUser(faker.internet().safeEmailAddress());
-        User senderUser = sandbox.generateUser(testMail);
+        User senderUser = sandbox.generateUser(testTargetEmail);
 
         emailService.sendFriendRequestEmail(acceptingUser, senderUser);
     }
