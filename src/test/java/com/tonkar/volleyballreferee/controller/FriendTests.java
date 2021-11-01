@@ -55,8 +55,8 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_request() {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
 
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(String.format("/users/friends/request/%s", userToken2.getUser().getPseudo()), HttpMethod.POST, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
@@ -68,7 +68,7 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_request_conflict() {
         // GIVEN
-        UserToken userToken = createUser();
+        UserToken userToken = sandbox.createUser();
 
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(String.format("/users/friends/request/%s", userToken.getUser().getPseudo()), HttpMethod.POST, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
@@ -80,9 +80,9 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_request_conflict2() {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        addFriend(getUser(userToken.getUser().getId()), getUser(userToken2.getUser().getId()));
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        sandbox.addFriend(sandbox.getUser(userToken.getUser().getId()), sandbox.getUser(userToken2.getUser().getId()));
 
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(String.format("/users/friends/request/%s", userToken2.getUser().getPseudo()), HttpMethod.POST, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
@@ -94,9 +94,9 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_request_received_count(@Autowired FriendService friendService) {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        friendService.sendFriendRequest(getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        friendService.sendFriendRequest(sandbox.getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
 
         // WHEN
         ResponseEntity<Count> friendResponse = restTemplate.exchange("/users/friends/received/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), Count.class);
@@ -109,9 +109,9 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_request_received_count2(@Autowired FriendService friendService) {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        friendService.sendFriendRequest(getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        friendService.sendFriendRequest(sandbox.getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
 
         // WHEN
         ResponseEntity<Count> friendResponse = restTemplate.exchange("/users/friends/received/count", HttpMethod.GET, emptyPayloadWithAuth(userToken2.getToken()), Count.class);
@@ -124,9 +124,9 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_request_received_list(@Autowired FriendService friendService) {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        friendService.sendFriendRequest(getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        friendService.sendFriendRequest(sandbox.getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
         ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
 
         // WHEN
@@ -140,9 +140,9 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_request_received_list2(@Autowired FriendService friendService) {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        friendService.sendFriendRequest(getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        friendService.sendFriendRequest(sandbox.getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
         ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
 
         // WHEN
@@ -156,9 +156,9 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_request_sent_list(@Autowired FriendService friendService) {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        friendService.sendFriendRequest(getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        friendService.sendFriendRequest(sandbox.getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
         ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
 
         // WHEN
@@ -172,9 +172,9 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_request_sent_list2(@Autowired FriendService friendService) {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        friendService.sendFriendRequest(getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        friendService.sendFriendRequest(sandbox.getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
         ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
 
         // WHEN
@@ -188,7 +188,7 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_and_requests() {
         // GIVEN
-        UserToken userToken = createUser();
+        UserToken userToken = sandbox.createUser();
 
         // WHEN
         ResponseEntity<FriendsAndRequests> friendResponse = restTemplate.exchange("/users/friends", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), FriendsAndRequests.class);
@@ -200,43 +200,43 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_reject(@Autowired FriendService friendService) {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        UUID friendRequestId = friendService.sendFriendRequest(getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        UUID friendRequestId = friendService.sendFriendRequest(sandbox.getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
 
         // WHEN
         ResponseEntity<Void> friendResponse = restTemplate.exchange(String.format("/users/friends/reject/%s", friendRequestId), HttpMethod.POST, emptyPayloadWithAuth(userToken2.getToken()), Void.class);
 
         // THEN
         assertEquals(HttpStatus.NO_CONTENT, friendResponse.getStatusCode());
-        assertTrue(friendService.listFriendRequestsSentBy(getUser(userToken.getUser().getId())).isEmpty());
-        assertTrue(friendService.listFriendRequestsReceivedBy(getUser(userToken2.getUser().getId())).isEmpty());
+        assertTrue(friendService.listFriendRequestsSentBy(sandbox.getUser(userToken.getUser().getId())).isEmpty());
+        assertTrue(friendService.listFriendRequestsReceivedBy(sandbox.getUser(userToken2.getUser().getId())).isEmpty());
     }
 
     @Test
     public void test_friends_accept(@Autowired FriendService friendService) {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        UUID friendRequestId = friendService.sendFriendRequest(getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        UUID friendRequestId = friendService.sendFriendRequest(sandbox.getUser(userToken.getUser().getId()), userToken2.getUser().getPseudo());
 
         // WHEN
         ResponseEntity<Void> friendResponse = restTemplate.exchange(String.format("/users/friends/accept/%s", friendRequestId), HttpMethod.POST, emptyPayloadWithAuth(userToken2.getToken()), Void.class);
 
         // THEN
         assertEquals(HttpStatus.CREATED, friendResponse.getStatusCode());
-        assertTrue(getUser(userToken.getUser().getId()).getFriends().stream().anyMatch(friend -> friend.getId().equals(userToken2.getUser().getId())));
-        assertTrue(getUser(userToken2.getUser().getId()).getFriends().stream().anyMatch(friend -> friend.getId().equals(userToken.getUser().getId())));
-        assertTrue(friendService.listFriendRequestsSentBy(getUser(userToken.getUser().getId())).isEmpty());
-        assertTrue(friendService.listFriendRequestsReceivedBy(getUser(userToken2.getUser().getId())).isEmpty());
+        assertTrue(sandbox.getUser(userToken.getUser().getId()).getFriends().stream().anyMatch(friend -> friend.getId().equals(userToken2.getUser().getId())));
+        assertTrue(sandbox.getUser(userToken2.getUser().getId()).getFriends().stream().anyMatch(friend -> friend.getId().equals(userToken.getUser().getId())));
+        assertTrue(friendService.listFriendRequestsSentBy(sandbox.getUser(userToken.getUser().getId())).isEmpty());
+        assertTrue(friendService.listFriendRequestsReceivedBy(sandbox.getUser(userToken2.getUser().getId())).isEmpty());
     }
 
     @Test
     public void test_friends_remove() {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        addFriend(getUser(userToken.getUser().getId()), getUser(userToken2.getUser().getId()));
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        sandbox.addFriend(sandbox.getUser(userToken.getUser().getId()), sandbox.getUser(userToken2.getUser().getId()));
 
         // WHEN
         ResponseEntity<Void> friendResponse = restTemplate.exchange(String.format("/users/friends/remove/%s", userToken2.getUser().getId()), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.getToken()), Void.class);
@@ -244,14 +244,14 @@ public class FriendTests extends VbrMockedTests {
 
         // THEN
         assertEquals(HttpStatus.NO_CONTENT, friendResponse.getStatusCode());
-        assertTrue(getUser(userToken.getUser().getId()).getFriends().stream().noneMatch(friend -> friend.getId().equals(userToken2.getUser().getId())));
-        assertTrue(getUser(userToken2.getUser().getId()).getFriends().stream().noneMatch(friend -> friend.getId().equals(userToken.getUser().getId())));
+        assertTrue(sandbox.getUser(userToken.getUser().getId()).getFriends().stream().noneMatch(friend -> friend.getId().equals(userToken2.getUser().getId())));
+        assertTrue(sandbox.getUser(userToken2.getUser().getId()).getFriends().stream().noneMatch(friend -> friend.getId().equals(userToken.getUser().getId())));
     }
 
     @Test
     public void test_friends_remove_notFound() {
         // GIVEN
-        UserToken userToken = createUser();
+        UserToken userToken = sandbox.createUser();
         String anyId = UUID.randomUUID().toString();
 
         // WHEN

@@ -7,9 +7,7 @@ import com.tonkar.volleyballreferee.dto.LeagueSummary;
 import com.tonkar.volleyballreferee.dto.UserToken;
 import com.tonkar.volleyballreferee.entity.GameType;
 import com.tonkar.volleyballreferee.entity.League;
-import com.tonkar.volleyballreferee.service.LeagueService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -49,11 +47,10 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_list(@Autowired LeagueService leagueService) {
+    public void test_leagues_list() {
         // GIVEN
-        UserToken userToken = createUser();
-        League league = generateLeague(userToken.getUser().getId());
-        leagueService.createLeague(getUser(userToken.getUser().getId()), league);
+        UserToken userToken = sandbox.createUser();
+        sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
         ParameterizedTypeReference<List<LeagueSummary>> listType = new ParameterizedTypeReference<>() {};
 
         // WHEN
@@ -65,11 +62,10 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_list_byKind(@Autowired LeagueService leagueService) {
+    public void test_leagues_list_byKind() {
         // GIVEN
-        UserToken userToken = createUser();
-        League league = generateLeague(userToken.getUser().getId());
-        leagueService.createLeague(getUser(userToken.getUser().getId()), league);
+        UserToken userToken = sandbox.createUser();
+        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
         ParameterizedTypeReference<List<LeagueSummary>> listType = new ParameterizedTypeReference<>() {};
 
         // WHEN
@@ -110,11 +106,10 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_get(@Autowired LeagueService leagueService) {
+    public void test_leagues_get() {
         // GIVEN
-        UserToken userToken = createUser();
-        League league = generateLeague(userToken.getUser().getId());
-        leagueService.createLeague(getUser(userToken.getUser().getId()), league);
+        UserToken userToken = sandbox.createUser();
+        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
 
         // WHEN
         ResponseEntity<League> leagueResponse = restTemplate.exchange("/leagues/" + league.getId(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), League.class);
@@ -127,7 +122,7 @@ public class LeagueTests extends VbrMockedTests {
     @Test
     public void test_leagues_get_notFound() {
         // GIVEN
-        UserToken userToken = createUser();
+        UserToken userToken = sandbox.createUser();
 
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
@@ -137,11 +132,10 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_public_get(@Autowired LeagueService leagueService) {
+    public void test_leagues_public_get() {
         // GIVEN
-        UserToken userToken = createUser();
-        League league = generateLeague(userToken.getUser().getId());
-        leagueService.createLeague(getUser(userToken.getUser().getId()), league);
+        UserToken userToken = sandbox.createUser();
+        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR);
 
         // WHEN
         ResponseEntity<League> leagueResponse = restTemplate.exchange("/public/leagues/" + league.getId(), HttpMethod.GET, emptyPayloadWithoutAuth(), League.class);
@@ -154,8 +148,8 @@ public class LeagueTests extends VbrMockedTests {
     @Test
     public void test_leagues_create() {
         // GIVEN
-        UserToken userToken = createUser();
-        League league = generateLeague(userToken.getUser().getId());
+        UserToken userToken = sandbox.createUser();
+        League league = sandbox.generateLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
 
         // WHEN
         ResponseEntity<Void> leagueResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.getToken(), league), Void.class);
@@ -165,11 +159,10 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_create_conflict(@Autowired LeagueService leagueService) {
+    public void test_leagues_create_conflict() {
         // GIVEN
-        UserToken userToken = createUser();
-        League league = generateLeague(userToken.getUser().getId());
-        leagueService.createLeague(getUser(userToken.getUser().getId()), league);
+        UserToken userToken = sandbox.createUser();
+        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
 
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.getToken(), league), ErrorResponse.class);
@@ -179,11 +172,10 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_create_conflict2(@Autowired LeagueService leagueService) {
+    public void test_leagues_create_conflict2() {
         // GIVEN
-        UserToken userToken = createUser();
-        League league = generateLeague(userToken.getUser().getId());
-        leagueService.createLeague(getUser(userToken.getUser().getId()), league);
+        UserToken userToken = sandbox.createUser();
+        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.BEACH);
         league.setId(UUID.randomUUID());
 
         // WHEN
@@ -194,11 +186,10 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_count(@Autowired LeagueService leagueService) {
+    public void test_leagues_count() {
         // GIVEN
-        UserToken userToken = createUser();
-        League league = generateLeague(userToken.getUser().getId());
-        leagueService.createLeague(getUser(userToken.getUser().getId()), league);
+        UserToken userToken = sandbox.createUser();
+        sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
 
         // WHEN
         ResponseEntity<Count> leagueResponse = restTemplate.exchange("/leagues/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), Count.class);
@@ -209,28 +200,15 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_delete(@Autowired LeagueService leagueService) {
+    public void test_leagues_delete() {
         // GIVEN
-        UserToken userToken = createUser();
-        League league = generateLeague(userToken.getUser().getId());
-        leagueService.createLeague(getUser(userToken.getUser().getId()), league);
+        UserToken userToken = sandbox.createUser();
+        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
 
         // WHEN
         ResponseEntity<Void> leagueResponse = restTemplate.exchange("/leagues/" + league.getId(), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.getToken()), Void.class);
 
         // THEN
         assertEquals(HttpStatus.NO_CONTENT, leagueResponse.getStatusCode());
-    }
-
-    private League generateLeague(String userId) {
-        League league = new League();
-        league.setId(UUID.randomUUID());
-        league.setCreatedBy(userId);
-        league.setCreatedAt(System.currentTimeMillis());
-        league.setUpdatedAt(System.currentTimeMillis());
-        league.setKind(GameType.INDOOR_4X4);
-        league.setName(faker.esports().league());
-        league.setDivisions(List.of(faker.medical().diseaseName(), faker.medical().diseaseName()));
-        return league;
     }
 }

@@ -23,8 +23,8 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_get_byPurchaseToken() {
         // GIVEN
-        UserToken userToken = createUser();
-        User user = getUser(userToken.getUser().getId());
+        UserToken userToken = sandbox.createUser();
+        User user = sandbox.getUser(userToken.getUser().getId());
 
         // WHEN
         ResponseEntity<UserSummary> userResponse = restTemplate.exchange(String.format("/public/users/%s", user.getPurchaseToken()), HttpMethod.GET, null, UserSummary.class);
@@ -45,7 +45,7 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_create() {
         // GIVEN
-        User user = generateUser(faker.internet().safeEmailAddress());
+        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
 
         // WHEN
         ResponseEntity<User> userResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user), User.class);
@@ -57,7 +57,7 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_create_invalidEmail() {
         // GIVEN
-        User user = generateUser("invalidemail.com");
+        User user = sandbox.generateUser("invalidemail.com");
 
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user), ErrorResponse.class);
@@ -69,7 +69,7 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_create_invalidPurchaseToken() {
         // GIVEN
-        User user = generateUser(faker.internet().safeEmailAddress());
+        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         user.setPurchaseToken(invalidPurchaseToken);
 
         // WHEN
@@ -82,7 +82,7 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_create_invalidPassword() {
         // GIVEN
-        User user = generateUser(faker.internet().safeEmailAddress());
+        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         user.setPassword("12345");
 
         // WHEN
@@ -95,8 +95,8 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_create_conflict() {
         // GIVEN
-        UserToken userToken = createUser();
-        User user = getUser(userToken.getUser().getId());
+        UserToken userToken = sandbox.createUser();
+        User user = sandbox.getUser(userToken.getUser().getId());
 
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user), ErrorResponse.class);
@@ -108,9 +108,9 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_create_conflict2() {
         // GIVEN
-        UserToken userToken = createUser();
-        User user = getUser(userToken.getUser().getId());
-        User user2 = generateUser(user.getEmail());
+        UserToken userToken = sandbox.createUser();
+        User user = sandbox.getUser(userToken.getUser().getId());
+        User user2 = sandbox.generateUser(user.getEmail());
 
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user2), ErrorResponse.class);
@@ -122,9 +122,9 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_create_conflict3() {
         // GIVEN
-        UserToken userToken = createUser();
-        User user = getUser(userToken.getUser().getId());
-        User user2 = generateUser(faker.internet().safeEmailAddress());
+        UserToken userToken = sandbox.createUser();
+        User user = sandbox.getUser(userToken.getUser().getId());
+        User user2 = sandbox.generateUser(faker.internet().safeEmailAddress());
         user2.setPseudo(user.getPseudo());
 
         // WHEN
@@ -137,7 +137,7 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_signIn(@Autowired UserService userService) {
         // GIVEN
-        User user = generateUser(faker.internet().safeEmailAddress());
+        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         String password = user.getPassword();
         userService.createUser(user);
 
@@ -151,8 +151,8 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_signIn_unauthorized() {
         // GIVEN
-        UserToken userToken = createUser();
-        User user = getUser(userToken.getUser().getId());
+        UserToken userToken = sandbox.createUser();
+        User user = sandbox.getUser(userToken.getUser().getId());
         String invalidPassword = "invalidPassword";
 
         // WHEN
@@ -165,7 +165,7 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_updatePassword(@Autowired UserService userService) {
         // GIVEN
-        User user = generateUser(faker.internet().safeEmailAddress());
+        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         String currentPassword = user.getPassword();
         String newPassword = "NewPassword5678-";
         UserToken userToken = userService.createUser(user);
@@ -180,7 +180,7 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_updatePassword_invalidPassword(@Autowired UserService userService) {
         // GIVEN
-        User user = generateUser(faker.internet().safeEmailAddress());
+        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         String currentPassword = user.getPassword();
         String newInvalidPassword = "newInvalidPassword";
         UserToken userToken = userService.createUser(user);
@@ -195,7 +195,7 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_updatePassword_unauthorized() {
         // GIVEN
-        UserToken userToken = createUser();
+        UserToken userToken = sandbox.createUser();
         String wrongCurrentPassword = "wrongCurrentPassword";
         String newPassword = "NewPassword5678-";
 
@@ -209,8 +209,8 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_recoverPassword() {
         // GIVEN
-        UserToken userToken = createUser();
-        User user = getUser(userToken.getUser().getId());
+        UserToken userToken = sandbox.createUser();
+        User user = sandbox.getUser(userToken.getUser().getId());
 
         // WHEN
         ResponseEntity<Void> userResponse = restTemplate.postForEntity(String.format("/public/users/password/recover/%s", user.getEmail()), emptyPayloadWithoutAuth(), Void.class);
@@ -234,8 +234,8 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_recoverPassword_follow(@Autowired UserService userService) {
         // GIVEN
-        UserToken userToken = createUser();
-        User user = getUser(userToken.getUser().getId());
+        UserToken userToken = sandbox.createUser();
+        User user = sandbox.getUser(userToken.getUser().getId());
         UUID passwordResetId = userService.initiatePasswordReset(user.getEmail());
 
         // WHEN
@@ -268,8 +268,8 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_recoverPassword_reset(@Autowired UserService userService) {
         // GIVEN
-        UserToken userToken = createUser();
-        User user = getUser(userToken.getUser().getId());
+        UserToken userToken = sandbox.createUser();
+        User user = sandbox.getUser(userToken.getUser().getId());
         UUID passwordResetId = userService.initiatePasswordReset(user.getEmail());
         String newPassword = "NewPassword5678-";
 
@@ -283,8 +283,8 @@ public class UserTests extends VbrMockedTests {
     @Test
     public void test_users_recoverPassword_reset_invalidPassword(@Autowired UserService userService) {
         // GIVEN
-        UserToken userToken = createUser();
-        User user = getUser(userToken.getUser().getId());
+        UserToken userToken = sandbox.createUser();
+        User user = sandbox.getUser(userToken.getUser().getId());
         UUID passwordResetId = userService.initiatePasswordReset(user.getEmail());
         String newInvalidPassword = "newInvalidPassword";
 

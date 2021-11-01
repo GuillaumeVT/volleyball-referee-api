@@ -24,7 +24,7 @@ public class StatisticsTests extends VbrMockedTests {
     @Test
     public void test_statistics_get() {
         // GIVEN
-        UserToken userToken = createUser();
+        UserToken userToken = sandbox.createUser();
 
         // WHEN
         ResponseEntity<Statistics> getStatisticsResponse = restTemplate.exchange("/statistics", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), Statistics.class);

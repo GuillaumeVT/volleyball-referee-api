@@ -37,7 +37,7 @@ public class AdminTests extends VbrMockedTests {
 
     @Test
     public void test_admin_forbidden() {
-        final var userToken = createUser();
+        final var userToken = sandbox.createUser();
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
                 .fromUriString("/admin/users")

@@ -14,7 +14,7 @@ public class AdminTests extends VbrMockedTests {
     @Test
     public void test_admin_listUsers(@Autowired AdminService adminService) {
         // GIVEN
-        createUser();
+        sandbox.createUser();
 
         // WHEN
         Page<User> page = adminService.listUsers(null, PageRequest.of(0, 50));
@@ -27,7 +27,7 @@ public class AdminTests extends VbrMockedTests {
     public void test_admin_listUsers_filter_empty(@Autowired AdminService adminService) {
         // GIVEN
         String email = faker.internet().safeEmailAddress();
-        createUser(email);
+        sandbox.createUser(email);
 
         // WHEN
         Page<User> page = adminService.listUsers("xxxxxx", PageRequest.of(0, 50));
@@ -40,7 +40,7 @@ public class AdminTests extends VbrMockedTests {
     public void test_admin_listUsers_filter(@Autowired AdminService adminService) {
         // GIVEN
         String email = faker.internet().safeEmailAddress();
-        createUser(email);
+        sandbox.createUser(email);
 
         // WHEN
         Page<User> page = adminService.listUsers(email, PageRequest.of(0, 50));

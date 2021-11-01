@@ -13,16 +13,16 @@ public class FriendTests extends VbrMockedTests {
     @Test
     public void test_friends_and_requests(@Autowired FriendService friendService) {
         // GIVEN
-        UserToken userToken = createUser();
-        UserToken userToken2 = createUser();
-        UserToken userToken3 = createUser();
-        UserToken userToken4 = createUser();
-        addFriend(getUser(userToken.getUser().getId()), getUser(userToken2.getUser().getId()));
-        friendService.sendFriendRequest(getUser(userToken.getUser().getId()), userToken3.getUser().getPseudo());
-        friendService.sendFriendRequest(getUser(userToken4.getUser().getId()), userToken.getUser().getPseudo());
+        UserToken userToken = sandbox.createUser();
+        UserToken userToken2 = sandbox.createUser();
+        UserToken userToken3 = sandbox.createUser();
+        UserToken userToken4 = sandbox.createUser();
+        sandbox.addFriend(sandbox.getUser(userToken.getUser().getId()), sandbox.getUser(userToken2.getUser().getId()));
+        friendService.sendFriendRequest(sandbox.getUser(userToken.getUser().getId()), userToken3.getUser().getPseudo());
+        friendService.sendFriendRequest(sandbox.getUser(userToken4.getUser().getId()), userToken.getUser().getPseudo());
 
         // WHEN
-        FriendsAndRequests friendsAndRequests = friendService.listFriendsAndRequests(getUser(userToken.getUser().getId()));
+        FriendsAndRequests friendsAndRequests = friendService.listFriendsAndRequests(sandbox.getUser(userToken.getUser().getId()));
 
         // THEN
         assertEquals(1, friendsAndRequests.getFriends().size());

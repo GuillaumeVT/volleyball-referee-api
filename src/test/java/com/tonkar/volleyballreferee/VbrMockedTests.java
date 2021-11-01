@@ -2,12 +2,10 @@ package com.tonkar.volleyballreferee;
 
 import com.github.javafaker.Faker;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
-import com.tonkar.volleyballreferee.dto.UserToken;
+import com.tonkar.volleyballreferee.configuration.VbrTestConfiguration;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.EmailService;
-import com.tonkar.volleyballreferee.service.FriendService;
 import com.tonkar.volleyballreferee.service.SubscriptionService;
-import com.tonkar.volleyballreferee.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,13 +30,12 @@ import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Locale;
 import java.util.UUID;
 
 @AutoConfigureDataMongo
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:application.yml")
+@Import(VbrTestConfiguration.class)
 @ActiveProfiles("test")
 public class VbrMockedTests {
 
@@ -49,8 +47,6 @@ public class VbrMockedTests {
     @Value("${server.servlet.context-path}")
     private String contextPath;
 
-    protected Faker faker;
-
     @MockBean
     private SubscriptionService subscriptionService;
 
@@ -58,10 +54,10 @@ public class VbrMockedTests {
     private EmailService emailService;
 
     @Autowired
-    private UserService userService;
+    protected VbrTestConfiguration.Sandbox sandbox;
 
     @Autowired
-    private FriendService friendService;
+    protected Faker faker;
 
     protected String invalidPurchaseToken = "invalidPurchaseToken";
 
@@ -71,8 +67,6 @@ public class VbrMockedTests {
                 .rootUri(String.format("http://localhost:%d%s", port, contextPath))
                 .setReadTimeout(Duration.ofMillis(20000L));
         restTemplate = new TestRestTemplate(restTemplateBuilder, null, null);
-
-        faker = new Faker(Locale.ENGLISH);
 
         SubscriptionPurchase subscriptionPurchase = new SubscriptionPurchase();
         subscriptionPurchase.setAutoRenewing(true);
@@ -160,42 +154,5 @@ public class VbrMockedTests {
 
     protected HttpEntity<?> payloadWithoutAuth(Object body) {
         return new HttpEntity<>(body, headersWithoutAuth());
-    }
-
-    protected User generateUser(String email) {
-        final var now = LocalDateTime.now();
-        final var nowMillis = now.toInstant(ZoneOffset.UTC).toEpochMilli();
-        final var expiryMillis = now.plusYears(50).toInstant(ZoneOffset.UTC).toEpochMilli();
-
-        var user = new User();
-        user.setId(UUID.randomUUID().toString());
-        user.setPseudo(faker.name().firstName());
-        user.setEmail(email == null ? faker.internet().safeEmailAddress() : email);
-        user.setPassword("Password1234+");
-        user.setPurchaseToken(faker.finance().iban());
-        user.setSubscriptionExpiryAt(expiryMillis);
-        user.setFriends(new ArrayList<>());
-        user.setCreatedAt(nowMillis);
-        user.setLastLoginAt(nowMillis);
-        user.setFailedAuthentication(new User.FailedAuthentication());
-
-        return user;
-    }
-
-    protected UserToken createUser() {
-        return createUser(null);
-    }
-
-    protected UserToken createUser(String email) {
-        return userService.createUser(generateUser(email));
-    }
-
-    protected User getUser(String userId) {
-        return userService.getUser(userId);
-    }
-
-    protected void addFriend(User user1, User user2) {
-        UUID friendRequestId = friendService.sendFriendRequest(user1, user2.getPseudo());
-        friendService.acceptFriendRequest(user2, friendRequestId);
     }
 }

@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -68,12 +67,11 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_list(@Autowired TeamService teamService) {
+    public void test_teams_list() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
         ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
+        UserToken userToken = sandbox.createUser();
+        sandbox.createBeachTeam(userToken.getUser().getId());
 
         // WHEN
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
@@ -88,12 +86,11 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_list_byKind(@Autowired TeamService teamService) {
+    public void test_teams_list_byKind() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
         ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
+        UserToken userToken = sandbox.createUser();
+        Team team = sandbox.createBeachTeam(userToken.getUser().getId());
 
         // WHEN
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
@@ -139,12 +136,11 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_list_byGender(@Autowired TeamService teamService) {
+    public void test_teams_list_byGender() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
         ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
+        UserToken userToken = sandbox.createUser();
+        Team team = sandbox.createBeachTeam(userToken.getUser().getId());
 
         // WHEN
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
@@ -190,12 +186,11 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_list_byKindAndGender(@Autowired TeamService teamService) {
+    public void test_teams_list_byKindAndGender() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
         ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
+        UserToken userToken = sandbox.createUser();
+        Team team = sandbox.createBeachTeam(userToken.getUser().getId());
 
         // WHEN
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
@@ -246,11 +241,10 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_get(@Autowired TeamService teamService) {
+    public void test_teams_get() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
+        UserToken userToken = sandbox.createUser();
+        Team team = sandbox.createBeachTeam(userToken.getUser().getId());
 
         // WHEN
         ResponseEntity<Team> teamResponse = restTemplate.exchange("/teams/" + team.getId(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), Team.class);
@@ -263,7 +257,7 @@ public class TeamTests extends VbrMockedTests {
     @Test
     public void test_teams_get_notFound() {
         // GIVEN
-        UserToken userToken = createUser();
+        UserToken userToken = sandbox.createUser();
 
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/teams/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
@@ -275,8 +269,8 @@ public class TeamTests extends VbrMockedTests {
     @Test
     public void test_teams_create() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
+        UserToken userToken = sandbox.createUser();
+        Team team = sandbox.generateBeachTeam(userToken.getUser().getId());
 
         // WHEN
         ResponseEntity<Void> teamResponse = restTemplate.exchange("/teams", HttpMethod.POST, payloadWithAuth(userToken.getToken(), team), Void.class);
@@ -286,11 +280,10 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_create_conflict(@Autowired TeamService teamService) {
+    public void test_teams_create_conflict() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
+        UserToken userToken = sandbox.createUser();
+        Team team = sandbox.createBeachTeam(userToken.getUser().getId());
 
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/teams", HttpMethod.POST, payloadWithAuth(userToken.getToken(), team), ErrorResponse.class);
@@ -300,11 +293,10 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_create_conflict2(@Autowired TeamService teamService) {
+    public void test_teams_create_conflict2() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
+        UserToken userToken = sandbox.createUser();
+        Team team = sandbox.createBeachTeam(userToken.getUser().getId());
         team.setId(UUID.randomUUID());
 
         // WHEN
@@ -315,11 +307,10 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_update(@Autowired TeamService teamService) {
+    public void test_teams_update() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
+        UserToken userToken = sandbox.createUser();
+        Team team = sandbox.createBeachTeam(userToken.getUser().getId());
 
         team.setUpdatedAt(System.currentTimeMillis());
         team.setColor(faker.color().hex());
@@ -334,8 +325,8 @@ public class TeamTests extends VbrMockedTests {
     @Test
     public void test_teams_update_notFound() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
+        UserToken userToken = sandbox.createUser();
+        Team team = sandbox.generateBeachTeam(userToken.getUser().getId());
 
         // WHEN
         ResponseEntity<Void> teamResponse = restTemplate.exchange("/teams", HttpMethod.PUT, payloadWithAuth(userToken.getToken(), team), Void.class);
@@ -345,11 +336,10 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_count(@Autowired TeamService teamService) {
+    public void test_teams_count() {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
+        UserToken userToken = sandbox.createUser();
+        sandbox.createBeachTeam(userToken.getUser().getId());
 
         // WHEN
         ResponseEntity<Count> teamResponse = restTemplate.exchange("/teams/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), Count.class);
@@ -362,49 +352,28 @@ public class TeamTests extends VbrMockedTests {
     @Test
     public void test_teams_delete(@Autowired TeamService teamService) {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
+        UserToken userToken = sandbox.createUser();
+        Team team = sandbox.createBeachTeam(userToken.getUser().getId());
 
         // WHEN
         ResponseEntity<Void> teamResponse = restTemplate.exchange("/teams/" + team.getId(), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.getToken()), Void.class);
 
         // THEN
         assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
-        assertTrue(teamService.listTeams(getUser(userToken.getUser().getId()), List.of(GameType.values()), List.of(GenderType.values()), PageRequest.of(0, 50)).isEmpty());
+        assertTrue(teamService.listTeams(sandbox.getUser(userToken.getUser().getId()), List.of(GameType.values()), List.of(GenderType.values()), PageRequest.of(0, 50)).isEmpty());
     }
 
     @Test
     public void test_teams_deleteAll(@Autowired TeamService teamService) {
         // GIVEN
-        UserToken userToken = createUser();
-        Team team = generateTeam(userToken.getUser().getId());
-        teamService.createTeam(getUser(userToken.getUser().getId()), team);
+        UserToken userToken = sandbox.createUser();
+        sandbox.createBeachTeam(userToken.getUser().getId());
 
         // WHEN
         ResponseEntity<Void> teamResponse = restTemplate.exchange("/teams", HttpMethod.DELETE, emptyPayloadWithAuth(userToken.getToken()), Void.class);
 
         // THEN
         assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
-        assertTrue(teamService.listTeams(getUser(userToken.getUser().getId()), List.of(GameType.values()), List.of(GenderType.values()), PageRequest.of(0, 50)).isEmpty());
-    }
-    
-    private Team generateTeam(String userId) {
-        Team team = new Team();
-        team.setId(UUID.randomUUID());
-        team.setCreatedBy(userId);
-        team.setCreatedAt(System.currentTimeMillis());
-        team.setUpdatedAt(System.currentTimeMillis());
-        team.setName(faker.team().name());
-        team.setKind(GameType.BEACH);
-        team.setGender(GenderType.LADIES);
-        team.setColor(faker.color().hex());
-        team.setLiberoColor(faker.color().hex());
-        team.setPlayers(new ArrayList<>());
-        team.getPlayers().add(new Team.Player(1, faker.name().fullName()));
-        team.getPlayers().add(new Team.Player(2, faker.name().fullName()));
-        team.setLiberos(new ArrayList<>());
-        team.setCaptain(1);
-        return team;
+        assertTrue(teamService.listTeams(sandbox.getUser(userToken.getUser().getId()), List.of(GameType.values()), List.of(GenderType.values()), PageRequest.of(0, 50)).isEmpty());
     }
 }
