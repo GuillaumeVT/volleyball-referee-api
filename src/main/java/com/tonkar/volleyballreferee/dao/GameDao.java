@@ -3,6 +3,7 @@ package com.tonkar.volleyballreferee.dao;
 import com.mongodb.client.result.UpdateResult;
 import com.tonkar.volleyballreferee.dto.GameScore;
 import com.tonkar.volleyballreferee.dto.GameSummary;
+import com.tonkar.volleyballreferee.dto.LeagueDashboard;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.GameStatus;
 import com.tonkar.volleyballreferee.entity.GameType;
@@ -194,6 +195,24 @@ public class GameDao {
         return new PageImpl<>(games, pageable, total);
     }
 
+    public LeagueDashboard findGamesInLeagueGroupedByStatus(UUID leagueId) {
+        MatchOperation leagueMatchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId));
+        MatchOperation liveMatchOperation = Aggregation.match(Criteria.where("status").is(GameStatus.LIVE));
+        MatchOperation last10MatchOperation = Aggregation.match(Criteria.where("status").is(GameStatus.COMPLETED));
+        MatchOperation next10MatchOperation = Aggregation.match(Criteria.where("status").is(GameStatus.SCHEDULED));
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
+        LimitOperation limitOperation = Aggregation.limit(10L);
+
+        FacetOperation facetOperation = Aggregation
+                .facet(liveMatchOperation, sGameSummaryProjection, sortOperation).as("liveGames")
+                .and(last10MatchOperation, sGameSummaryProjection, sortOperation, limitOperation).as("last10Games")
+                .and(next10MatchOperation, sGameSummaryProjection, sortOperation, limitOperation).as("next10Games");
+
+        return mongoTemplate
+                .aggregate(Aggregation.newAggregation(leagueMatchOperation, facetOperation), mongoTemplate.getCollectionName(Game.class), LeagueDashboard.class)
+                .getUniqueMappedResult();
+    }
+
     public List<GameSummary> listLiveGamesInLeague(UUID leagueId) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("status").is(GameStatus.LIVE));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
@@ -232,6 +251,24 @@ public class GameDao {
         List<GameSummary> games = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sGameSummaryProjection, sortOperation, skipOperation, limitOperation),
                 mongoTemplate.getCollectionName(Game.class), GameSummary.class).getMappedResults();
         return new PageImpl<>(games, pageable, total);
+    }
+
+    public LeagueDashboard findGamesInDivisionGroupedByStatus(UUID leagueId, String divisionName) {
+        MatchOperation divisionMatchOperation = Aggregation.match(Criteria.where("league._id").is(leagueId).and("league.division").is(divisionName));
+        MatchOperation liveMatchOperation = Aggregation.match(Criteria.where("status").is(GameStatus.LIVE));
+        MatchOperation last10MatchOperation = Aggregation.match(Criteria.where("status").is(GameStatus.COMPLETED));
+        MatchOperation next10MatchOperation = Aggregation.match(Criteria.where("status").is(GameStatus.SCHEDULED));
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC, "scheduledAt");
+        LimitOperation limitOperation = Aggregation.limit(10L);
+
+        FacetOperation facetOperation = Aggregation
+                .facet(liveMatchOperation, sGameSummaryProjection, sortOperation).as("liveGames")
+                .and(last10MatchOperation, sGameSummaryProjection, sortOperation, limitOperation).as("last10Games")
+                .and(next10MatchOperation, sGameSummaryProjection, sortOperation, limitOperation).as("next10Games");
+
+        return mongoTemplate
+                .aggregate(Aggregation.newAggregation(divisionMatchOperation, facetOperation), mongoTemplate.getCollectionName(Game.class), LeagueDashboard.class)
+                .getUniqueMappedResult();
     }
 
     public List<GameSummary> listLiveGamesInDivision(UUID leagueId, String divisionName) {

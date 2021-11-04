@@ -1,9 +1,6 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.GameIngredients;
-import com.tonkar.volleyballreferee.dto.GameSummary;
-import com.tonkar.volleyballreferee.dto.Ranking;
+import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +24,8 @@ public interface GameService {
 
     Page<GameSummary> listGamesOfTeamInLeague(UUID leagueId, UUID teamId, List<GameStatus> statuses, Pageable pageable);
 
+    LeagueDashboard getGamesInLeagueGroupedByStatus(UUID leagueId);
+
     List<GameSummary> listLiveGamesInLeague(UUID leagueId);
 
     List<GameSummary> listLast10GamesInLeague(UUID leagueId);
@@ -36,6 +35,8 @@ public interface GameService {
     Page<GameSummary> listGamesInDivision(UUID leagueId, String divisionName, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable);
 
     Page<GameSummary> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId, List<GameStatus> statuses, Pageable pageable);
+
+    LeagueDashboard getGamesInDivisionGroupedByStatus(UUID leagueId, String divisionName);
 
     List<GameSummary> listLiveGamesInDivision(UUID leagueId, String divisionName);
 

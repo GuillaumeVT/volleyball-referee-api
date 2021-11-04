@@ -75,8 +75,8 @@ public class PublicController {
     }
 
     @GetMapping(value = "/public/statistics", produces = {"application/json"})
-    public ResponseEntity<Statistics> getStatistics() {
-        return new ResponseEntity<>(statisticsService.getStatistics(), HttpStatus.OK);
+    public ResponseEntity<StatisticsGroup> getGlobalStatistics() {
+        return new ResponseEntity<>(statisticsService.getGlobalStatistics(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/public/games/{gameId}", produces = {"application/json"})
@@ -133,6 +133,11 @@ public class PublicController {
         return new ResponseEntity<>(gameService.listGamesInLeague(leagueId, statuses, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
+    @GetMapping(value = "/public/games/league/{leagueId}/group", produces = {"application/json"})
+    public ResponseEntity<LeagueDashboard> getGamesInLeagueGroupedByStatus(@PathVariable("leagueId") UUID leagueId) {
+        return new ResponseEntity<>(gameService.getGamesInLeagueGroupedByStatus(leagueId), HttpStatus.OK);
+    }
+
     @GetMapping(value = "/public/games/league/{leagueId}/live", produces = {"application/json"})
     public ResponseEntity<List<GameSummary>> listLiveGamesInLeague(@PathVariable("leagueId") UUID leagueId) {
         return new ResponseEntity<>(gameService.listLiveGamesInLeague(leagueId), HttpStatus.OK);
@@ -165,6 +170,11 @@ public class PublicController {
                                                                  @RequestParam("page") @Min(0) int page,
                                                                  @RequestParam("size") @Min(20) @Max(200) int size) {
         return new ResponseEntity<>(gameService.listGamesInDivision(leagueId, divisionName, statuses, genders, PageRequest.of(page, size)), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/public/games/league/{leagueId}/division/{divisionName}/group", produces = {"application/json"})
+    public ResponseEntity<LeagueDashboard> getGamesInDivisionGroupedByStatus(@PathVariable("leagueId") UUID leagueId, @PathVariable("divisionName") String divisionName) {
+        return new ResponseEntity<>(gameService.getGamesInDivisionGroupedByStatus(leagueId, divisionName), HttpStatus.OK);
     }
 
     @GetMapping(value = "/public/games/league/{leagueId}/division/{divisionName}/live", produces = {"application/json"})

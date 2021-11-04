@@ -2,7 +2,7 @@ package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.VbrMockedTests;
 import com.tonkar.volleyballreferee.dto.ErrorResponse;
-import com.tonkar.volleyballreferee.dto.Statistics;
+import com.tonkar.volleyballreferee.dto.StatisticsGroup;
 import com.tonkar.volleyballreferee.dto.UserToken;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
@@ -27,18 +27,18 @@ public class StatisticsTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
 
         // WHEN
-        ResponseEntity<Statistics> getStatisticsResponse = restTemplate.exchange("/statistics", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), Statistics.class);
+        ResponseEntity<StatisticsGroup> statisticsResponse = restTemplate.exchange("/statistics", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), StatisticsGroup.class);
 
         // THEN
-        assertEquals(HttpStatus.OK, getStatisticsResponse.getStatusCode());
+        assertEquals(HttpStatus.OK, statisticsResponse.getStatusCode());
     }
 
     @Test
     public void test_statistics_public_get() {
         // WHEN
-        ResponseEntity<Statistics> getStatisticsResponse = restTemplate.exchange("/public/statistics", HttpMethod.GET, emptyPayloadWithoutAuth(), Statistics.class);
+        ResponseEntity<StatisticsGroup> statisticsResponse = restTemplate.exchange("/public/statistics", HttpMethod.GET, emptyPayloadWithoutAuth(), StatisticsGroup.class);
 
         // THEN
-        assertEquals(HttpStatus.OK, getStatisticsResponse.getStatusCode());
+        assertEquals(HttpStatus.OK, statisticsResponse.getStatusCode());
     }
 }

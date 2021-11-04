@@ -1,22 +1,27 @@
 package com.tonkar.volleyballreferee.dto;
 
 import com.tonkar.volleyballreferee.entity.GameType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor
 @Getter
 @Setter
-public class Statistics {
-    private final List<Count> gameStatistics;
-    private final List<Count> teamStatistics;
+public class StatisticsGroup {
+    private Statistics globalStatistics;
+    private Statistics userStatistics;
 
-    public Statistics() {
-        this.gameStatistics = new ArrayList<>();
-        this.teamStatistics = new ArrayList<>();
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    public static class Statistics {
+        private List<Count> gameStatistics;
+        private List<Count> teamStatistics;
     }
 
     @NoArgsConstructor

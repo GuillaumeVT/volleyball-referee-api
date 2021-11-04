@@ -1,14 +1,14 @@
 package com.tonkar.volleyballreferee.dao;
 
-import com.tonkar.volleyballreferee.dto.Statistics;
+import com.tonkar.volleyballreferee.dto.StatisticsGroup;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.Team;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.GroupOperation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 
@@ -27,31 +27,55 @@ public class StatisticsDao {
 
     private final MongoTemplate mongoTemplate;
 
-    public List<Statistics.Count> findGameStatistics() {
-        return mongoTemplate
-                .aggregate(Aggregation.newAggregation(sStatisticsProjection, sStatisticsGroup), mongoTemplate.getCollectionName(Game.class), Statistics.Count.class)
+    public StatisticsGroup findGlobalStatistics() {
+        List<StatisticsGroup.Count> gameStatistics = mongoTemplate
+                .aggregate(Aggregation.newAggregation(sStatisticsProjection, sStatisticsGroup), mongoTemplate.getCollectionName(Game.class), StatisticsGroup.Count.class)
                 .getMappedResults();
+
+        List<StatisticsGroup.Count> teamStatistics = mongoTemplate
+                .aggregate(Aggregation.newAggregation(sStatisticsProjection, sStatisticsGroup), mongoTemplate.getCollectionName(Team.class), StatisticsGroup.Count.class)
+                .getMappedResults();
+
+        StatisticsGroup statisticsGroup = new StatisticsGroup();
+        statisticsGroup.setGlobalStatistics(new StatisticsGroup.Statistics(gameStatistics, teamStatistics));
+
+        return statisticsGroup;
     }
 
-    public List<Statistics.Count> findTeamStatistics() {
-        return mongoTemplate
-                .aggregate(Aggregation.newAggregation(sStatisticsProjection, sStatisticsGroup), mongoTemplate.getCollectionName(Team.class), Statistics.Count.class)
-                .getMappedResults();
-    }
-
-    public List<Statistics.Count> findGameStatistics(String userId) {
+    public StatisticsGroup findUserStatistics(String userId) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
 
-        return mongoTemplate
-                .aggregate(Aggregation.newAggregation(matchOperation, sStatisticsProjection, sStatisticsGroup), mongoTemplate.getCollectionName(Game.class), Statistics.Count.class)
-                .getMappedResults();
+        FacetOperation gameFacetOperation = Aggregation
+                .facet(sStatisticsProjection, sStatisticsGroup).as("globalStatistics")
+                .and(matchOperation, sStatisticsProjection, sStatisticsGroup).as("userStatistics");
+
+        FacetOperation teamFacetOperation = Aggregation
+                .facet(sStatisticsProjection, sStatisticsGroup).as("globalStatistics")
+                .and(matchOperation, sStatisticsProjection, sStatisticsGroup).as("userStatistics");
+
+        FacetStatistics gameFacetStatistics = mongoTemplate
+                .aggregate(Aggregation.newAggregation(gameFacetOperation), mongoTemplate.getCollectionName(Game.class), FacetStatistics.class)
+                .getUniqueMappedResult();
+
+        FacetStatistics teamFacetStatistics = mongoTemplate
+                .aggregate(Aggregation.newAggregation(teamFacetOperation), mongoTemplate.getCollectionName(Team.class), FacetStatistics.class)
+                .getUniqueMappedResult();
+
+        assert gameFacetStatistics != null;
+        assert teamFacetStatistics != null;
+
+        StatisticsGroup statisticsGroup = new StatisticsGroup();
+        statisticsGroup.setGlobalStatistics(new StatisticsGroup.Statistics(gameFacetStatistics.getGlobalStatistics(), teamFacetStatistics.getGlobalStatistics()));
+        statisticsGroup.setUserStatistics(new StatisticsGroup.Statistics(gameFacetStatistics.getUserStatistics(), teamFacetStatistics.getUserStatistics()));
+
+        return statisticsGroup;
     }
 
-    public List<Statistics.Count> findTeamStatistics(String userId) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
-
-        return mongoTemplate
-                .aggregate(Aggregation.newAggregation(matchOperation, sStatisticsProjection, sStatisticsGroup), mongoTemplate.getCollectionName(Team.class), Statistics.Count.class)
-                .getMappedResults();
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    private static class FacetStatistics {
+        private List<StatisticsGroup.Count> globalStatistics;
+        private List<StatisticsGroup.Count> userStatistics;
     }
 }

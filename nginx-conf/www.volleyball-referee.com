@@ -29,7 +29,7 @@ server {
         	proxy_redirect off;
 
 					location /api/v3.2/public/ {
-							limit_req zone=public;
+							limit_req zone=public burst=15;
 							proxy_set_header X-Real-IP $remote_addr;
 							proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 							proxy_set_header Host $http_host;
@@ -41,7 +41,7 @@ server {
 					}
 
 					location /api/v3.2/pro/ {
-							limit_req zone=pro;
+							limit_req zone=pro burst=20;
 							proxy_set_header X-Real-IP $remote_addr;
 							proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 							proxy_set_header Host $http_host;

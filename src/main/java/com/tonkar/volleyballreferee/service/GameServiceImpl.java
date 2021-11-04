@@ -60,6 +60,11 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public LeagueDashboard getGamesInLeagueGroupedByStatus(UUID leagueId) {
+        return gameDao.findGamesInLeagueGroupedByStatus(leagueId);
+    }
+
+    @Override
     public List<GameSummary> listLiveGamesInLeague(UUID leagueId) {
         return gameDao.listLiveGamesInLeague(leagueId);
     }
@@ -82,6 +87,11 @@ public class GameServiceImpl implements GameService {
     @Override
     public Page<GameSummary> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId, List<GameStatus> statuses, Pageable pageable) {
         return gameDao.listGamesOfTeamInDivision(leagueId, divisionName, teamId, statuses, pageable);
+    }
+
+    @Override
+    public LeagueDashboard getGamesInDivisionGroupedByStatus(UUID leagueId, String divisionName) {
+        return gameDao.findGamesInDivisionGroupedByStatus(leagueId, divisionName);
     }
 
     @Override
