@@ -73,7 +73,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserSummary getUserFromPurchaseToken(String purchaseToken) {
-        subscriptionService.refreshSubscriptionPurchaseToken(purchaseToken);
+        try {
+            subscriptionService.refreshSubscriptionPurchaseToken(purchaseToken);
+        } catch (ResponseStatusException e) {
+            subscriptionService.validatePurchaseToken(purchaseToken);
+        }
+
         return userDao
                 .findUserByPurchaseToken(purchaseToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user for purchase token %s", purchaseToken)));

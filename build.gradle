@@ -24,7 +24,7 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-mongodb'
-    implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.1'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.3'
     implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
     // Security
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
@@ -32,10 +32,10 @@ dependencies {
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
     implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: 'v3-rev142-1.25.0'
     // Excel
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.0.0'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.1.0'
     // Misc
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo', version: '3.0.0'
     testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
