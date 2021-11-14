@@ -16,6 +16,16 @@ repositories {
 }
 
 dependencies {
+    def jjwt_version = '0.11.2'
+    def lombok_version = '1.18.22'
+    def jsoup_version =  '1.14.3'
+    def mail_version = '1.6.2'
+    def jaxb_version = '2.3.1'
+    def android_publisher_version = 'v3-rev142-1.25.0'
+    def poi_xml_version = '5.1.0'
+    def embedded_mongo_version = '3.0.0'
+    def faker_version = '1.0.2'
+
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-logging'
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter-web') {
@@ -24,21 +34,23 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-mongodb'
-    implementation group: 'org.jsoup', name: 'jsoup', version: '1.14.3'
-    implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
+    implementation group: 'org.jsoup', name: 'jsoup', version: jsoup_version
+    implementation group: 'com.sun.mail', name: 'javax.mail', version: mail_version
     // Security
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
-    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
-    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
-    implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: 'v3-rev142-1.25.0'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: jjwt_version
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: jjwt_version
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: jjwt_version
+    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: jaxb_version
+    implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: android_publisher_version
     // Excel
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.1.0'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: poi_xml_version
     // Misc
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo', version: '3.0.0'
-    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
+    testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo', version: embedded_mongo_version
+    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: faker_version
 }
 
 test {

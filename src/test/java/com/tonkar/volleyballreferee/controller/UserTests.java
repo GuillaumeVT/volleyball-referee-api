@@ -34,12 +34,12 @@ public class UserTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_users_get_byPurchaseToken_notFound() {
+    public void test_users_get_byPurchaseToken_invalid() {
         // WHEN
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(String.format("/public/users/%s", invalidPurchaseToken), HttpMethod.GET, null, ErrorResponse.class);
 
         // THEN
-        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
+        assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
     }
 
     @Test

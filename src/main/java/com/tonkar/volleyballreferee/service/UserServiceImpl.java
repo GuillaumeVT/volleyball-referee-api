@@ -11,15 +11,18 @@ import com.tonkar.volleyballreferee.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -42,8 +45,12 @@ public class UserServiceImpl implements UserService {
     @Value("${vbr.web.domain}")
     private String webDomain;
 
-    @Value("${vbr.jwt.key}")
-    private String jwtKey;
+    private Key signingKey;
+
+    @Autowired
+    public void initJwtSigningKey(@Value("${vbr.jwt.key}") String jwtKey) {
+        signingKey = Keys.hmacShaKeyFor(jwtKey.getBytes(StandardCharsets.UTF_8));
+    }
 
     @Override
     public User getUser(String userId) {
@@ -240,7 +247,7 @@ public class UserServiceImpl implements UserService {
                 .setSubject(user.getId())
                 .setIssuedAt(Date.from(iat.toInstant(ZoneOffset.UTC)))
                 .setExpiration(Date.from(exp.toInstant(ZoneOffset.UTC)))
-                .signWith(SignatureAlgorithm.HS256, jwtKey)
+                .signWith(signingKey)
                 .compact();
 
         return UserToken
@@ -256,8 +263,9 @@ public class UserServiceImpl implements UserService {
 
         try {
             optionalClaims = Optional.of(Jwts
-                    .parser()
-                    .setSigningKey(jwtKey)
+                    .parserBuilder()
+                    .setSigningKey(signingKey)
+                    .build()
                     .parseClaimsJws(token)
                     .getBody());
         } catch (JwtException e) {
