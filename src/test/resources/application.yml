@@ -1,4 +1,8 @@
-spring.profiles: test
+spring:
+  profiles: test
+  mongodb:
+    embedded:
+      version: 4.0.2
 
 server:
   servlet:

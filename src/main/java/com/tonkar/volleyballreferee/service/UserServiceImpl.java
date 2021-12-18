@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -40,7 +41,7 @@ public class UserServiceImpl implements UserService {
     private final EmailService        emailService;
     private final UserDao             userDao;
     private final PasswordResetDao    passwordResetDao;
-    private final PasswordEncoder     passwordEncoder;
+    private final PasswordEncoder     passwordEncoder = new BCryptPasswordEncoder(12);
 
     @Value("${vbr.web.domain}")
     private String webDomain;
