@@ -32,17 +32,17 @@ public class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.getUser().getId()), sandbox.getUser(userToken2.getUser().getId()));
-        GameSummary gameSummary = sandbox.generateScheduledBeachGame(userToken.getUser().getId(), true);
-        gameSummary.setRefereedBy(userToken2.getUser().getId());
+        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
+        GameSummary gameSummary = sandbox.generateScheduledBeachGame(userToken.user().id(), true);
+        gameSummary.setRefereedBy(userToken2.user().id());
 
         // WHEN
-        gameService.createGame(sandbox.getUser(userToken.getUser().getId()), gameSummary);
+        gameService.createGame(sandbox.getUser(userToken.user().id()), gameSummary);
 
         // THEN
-        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken.getUser().getId())).getCount());
-        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken2.getUser().getId())).getCount());
-        assertNotNull(gameService.getGame(sandbox.getUser(userToken2.getUser().getId()), gameSummary.getId()));
+        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken.user().id())).count());
+        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken2.user().id())).count());
+        assertNotNull(gameService.getGame(sandbox.getUser(userToken2.user().id()), gameSummary.getId()));
     }
 
     @Test
@@ -50,11 +50,11 @@ public class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
-        GameSummary gameSummary = sandbox.generateScheduledBeachGame(userToken.getUser().getId(), false);
-        gameSummary.setRefereedBy(userToken2.getUser().getId());
+        GameSummary gameSummary = sandbox.generateScheduledBeachGame(userToken.user().id(), false);
+        gameSummary.setRefereedBy(userToken2.user().id());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class, () -> gameService.createGame(sandbox.getUser(userToken.getUser().getId()), gameSummary));
+        assertThrows(ResponseStatusException.class, () -> gameService.createGame(sandbox.getUser(userToken.user().id()), gameSummary));
     }
 
     @Test
@@ -62,10 +62,10 @@ public class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.getUser().getId());
+        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class, () -> gameService.getGame(sandbox.getUser(userToken2.getUser().getId()), gameSummary.getId()));
+        assertThrows(ResponseStatusException.class, () -> gameService.getGame(sandbox.getUser(userToken2.user().id()), gameSummary.getId()));
     }
 
     @Test
@@ -73,13 +73,13 @@ public class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.getUser().getId()), sandbox.getUser(userToken2.getUser().getId()));
-        Game game = sandbox.generateBeachGame(userToken.getUser().getId());
-        game.setRefereedBy(userToken2.getUser().getId());
-        gameService.createGame(sandbox.getUser(userToken.getUser().getId()), game);
+        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
+        Game game = sandbox.generateBeachGame(userToken.user().id());
+        game.setRefereedBy(userToken2.user().id());
+        gameService.createGame(sandbox.getUser(userToken.user().id()), game);
 
         // WHEN / THEN
-        assertDoesNotThrow(() -> gameService.updateGame(sandbox.getUser(userToken2.getUser().getId()), game));
+        assertDoesNotThrow(() -> gameService.updateGame(sandbox.getUser(userToken2.user().id()), game));
     }
 
     @Test
@@ -87,15 +87,15 @@ public class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.getUser().getId()), sandbox.getUser(userToken2.getUser().getId()));
-        Game game = sandbox.createBeachGame(userToken.getUser().getId());
+        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
+        Game game = sandbox.createBeachGame(userToken.user().id());
 
         // WHEN
-        gameService.setReferee(sandbox.getUser(userToken.getUser().getId()), game.getId(), userToken2.getUser().getId());
+        gameService.setReferee(sandbox.getUser(userToken.user().id()), game.getId(), userToken2.user().id());
 
         // THEN
-        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken.getUser().getId())).getCount());
-        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken2.getUser().getId())).getCount());
+        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken.user().id())).count());
+        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken2.user().id())).count());
     }
 
     @Test
@@ -103,72 +103,72 @@ public class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.getUser().getId()), sandbox.getUser(userToken2.getUser().getId()));
-        Game game = sandbox.generateBeachGame(userToken.getUser().getId());
-        game.setRefereedBy(userToken2.getUser().getId());
-        gameService.createGame(sandbox.getUser(userToken.getUser().getId()), game);
+        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
+        Game game = sandbox.generateBeachGame(userToken.user().id());
+        game.setRefereedBy(userToken2.user().id());
+        gameService.createGame(sandbox.getUser(userToken.user().id()), game);
 
         // WHEN / THEN
-        assertDoesNotThrow(() -> gameService.updateGame(sandbox.getUser(userToken.getUser().getId()), game));
+        assertDoesNotThrow(() -> gameService.updateGame(sandbox.getUser(userToken.user().id()), game));
     }
 
     @Test
     public void test_games_deleteRules() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.getUser().getId());
+        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
         // WHEN
-        gameService.deleteGame(sandbox.getUser(userToken.getUser().getId()), gameSummary.getId());
+        gameService.deleteGame(sandbox.getUser(userToken.user().id()), gameSummary.getId());
 
         // THEN
-        assertDoesNotThrow(() -> rulesService.deleteRules(sandbox.getUser(userToken.getUser().getId()), gameSummary.getRulesId()));
+        assertDoesNotThrow(() -> rulesService.deleteRules(sandbox.getUser(userToken.user().id()), gameSummary.getRulesId()));
     }
 
     @Test
     public void test_games_deleteRules_conflict() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.getUser().getId());
+        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class, () -> rulesService.deleteRules(sandbox.getUser(userToken.getUser().getId()), gameSummary.getRulesId()));
+        assertThrows(ResponseStatusException.class, () -> rulesService.deleteRules(sandbox.getUser(userToken.user().id()), gameSummary.getRulesId()));
     }
 
     @Test
     public void test_games_deleteTeam() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.getUser().getId());
+        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
         // WHEN
-        gameService.deleteGame(sandbox.getUser(userToken.getUser().getId()), gameSummary.getId());
+        gameService.deleteGame(sandbox.getUser(userToken.user().id()), gameSummary.getId());
 
         // THEN
-        assertDoesNotThrow(() -> teamService.deleteTeam(sandbox.getUser(userToken.getUser().getId()), gameSummary.getHomeTeamId()));
+        assertDoesNotThrow(() -> teamService.deleteTeam(sandbox.getUser(userToken.user().id()), gameSummary.getHomeTeamId()));
     }
 
     @Test
     public void test_games_deleteTeam_conflict() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.getUser().getId());
+        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class, () -> teamService.deleteTeam(sandbox.getUser(userToken.getUser().getId()), gameSummary.getHomeTeamId()));
+        assertThrows(ResponseStatusException.class, () -> teamService.deleteTeam(sandbox.getUser(userToken.user().id()), gameSummary.getHomeTeamId()));
     }
 
     @Test
     public void test_games_delete() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.getUser().getId());
+        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
         // WHEN
-        gameService.deleteGame(sandbox.getUser(userToken.getUser().getId()), gameSummary.getId());
+        gameService.deleteGame(sandbox.getUser(userToken.user().id()), gameSummary.getId());
 
         // THEN
-        assertTrue(gameService.listGames(sandbox.getUser(userToken.getUser().getId()), null, null, null, PageRequest.of(0, 20)).getContent().isEmpty());
+        assertTrue(gameService.listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20)).getContent().isEmpty());
     }
 
     @Test
@@ -177,55 +177,55 @@ public class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.getUser().getId()), sandbox.getUser(userToken2.getUser().getId()));
-        Game game = sandbox.generateBeachGame(userToken.getUser().getId());
-        game.setRefereedBy(userToken2.getUser().getId());
-        gameService.createGame(sandbox.getUser(userToken.getUser().getId()), game);
+        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
+        Game game = sandbox.generateBeachGame(userToken.user().id());
+        game.setRefereedBy(userToken2.user().id());
+        gameService.createGame(sandbox.getUser(userToken.user().id()), game);
 
         // WHEN
-        gameService.deleteGame(sandbox.getUser(userToken2.getUser().getId()), game.getId());
+        gameService.deleteGame(sandbox.getUser(userToken2.user().id()), game.getId());
 
         // THEN
-        assertNotNull(gameService.getGame(sandbox.getUser(userToken2.getUser().getId()), game.getId()));
+        assertNotNull(gameService.getGame(sandbox.getUser(userToken2.user().id()), game.getId()));
     }
 
     @Test
     public void test_games_deleteAll() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        sandbox.createBeachGame(userToken.getUser().getId());
-        Game game = sandbox.createBeachGame(userToken.getUser().getId());
+        sandbox.createBeachGame(userToken.user().id());
+        Game game = sandbox.createBeachGame(userToken.user().id());
         game.setStatus(GameStatus.COMPLETED);
-        gameService.updateGame(sandbox.getUser(userToken.getUser().getId()), game);
+        gameService.updateGame(sandbox.getUser(userToken.user().id()), game);
 
         // WHEN
-        gameService.deleteAllGames(sandbox.getUser(userToken.getUser().getId()));
+        gameService.deleteAllGames(sandbox.getUser(userToken.user().id()));
 
         // THEN
         // only COMPLETED games are affected by deleteAll
-        assertEquals(1, gameService.listGames(sandbox.getUser(userToken.getUser().getId()), null, null, null, PageRequest.of(0, 20)).getTotalElements());
+        assertEquals(1, gameService.listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20)).getTotalElements());
     }
 
     @Test
     public void test_games_deleteAll2() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        sandbox.createScheduledBeachGame(userToken.getUser().getId());
-        sandbox.createScheduledBeachGame(userToken.getUser().getId());
+        sandbox.createScheduledBeachGame(userToken.user().id());
+        sandbox.createScheduledBeachGame(userToken.user().id());
 
         // WHEN
-        gameService.deleteAllGames(sandbox.getUser(userToken.getUser().getId()));
+        gameService.deleteAllGames(sandbox.getUser(userToken.user().id()));
 
         // THEN
         // only COMPLETED games are affected by deleteAll
-        assertEquals(2, gameService.listGames(sandbox.getUser(userToken.getUser().getId()), null, null, null, PageRequest.of(0, 20)).getTotalElements());
+        assertEquals(2, gameService.listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20)).getTotalElements());
     }
 
     @Test
     public void test_games_public_list_token() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Game game = sandbox.createBeachGame(userToken.getUser().getId());
+        Game game = sandbox.createBeachGame(userToken.user().id());
         String token = game.getGuestTeam().getName().substring(0, 4);
 
         // WHEN
@@ -239,8 +239,8 @@ public class GameTests extends VbrMockedTests {
     public void test_games_public_list_token2() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        sandbox.createBeachGame(userToken.getUser().getId());
-        String token = userToken.getUser().getPseudo().substring(0, 3);
+        sandbox.createBeachGame(userToken.user().id());
+        String token = userToken.user().pseudo().substring(0, 3);
 
         // WHEN
         Page<GameSummary> gameSummary = gameService.listGamesMatchingToken(token, null, null, null, PageRequest.of(0, 20));
@@ -253,7 +253,7 @@ public class GameTests extends VbrMockedTests {
     public void test_games_public_list_token3() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Game game = sandbox.createBeachGame(userToken.getUser().getId());
+        Game game = sandbox.createBeachGame(userToken.user().id());
         String token = game.getLeague().getName().substring(0, 3);
 
         // WHEN
@@ -267,7 +267,7 @@ public class GameTests extends VbrMockedTests {
     public void test_games_public_list_token_noMatch() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        sandbox.createBeachGame(userToken.getUser().getId());
+        sandbox.createBeachGame(userToken.user().id());
         String token = "noMatch";
 
         // WHEN
@@ -281,7 +281,7 @@ public class GameTests extends VbrMockedTests {
     public void test_games_public_list_date() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        sandbox.createBeachGame(userToken.getUser().getId());
+        sandbox.createBeachGame(userToken.user().id());
         LocalDate date = LocalDate.now();
 
         // WHEN
@@ -295,7 +295,7 @@ public class GameTests extends VbrMockedTests {
     public void test_games_public_list_date_noMatch() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        sandbox.createBeachGame(userToken.getUser().getId());
+        sandbox.createBeachGame(userToken.user().id());
         LocalDate date = LocalDate.now().plusDays(10L);
 
         // WHEN
@@ -309,9 +309,9 @@ public class GameTests extends VbrMockedTests {
     public void test_games_public_list_token_notIndexed() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Game game = sandbox.generateBeachGame(userToken.getUser().getId());
+        Game game = sandbox.generateBeachGame(userToken.user().id());
         game.setIndexed(false);
-        gameService.createGame(sandbox.getUser(userToken.getUser().getId()), game);
+        gameService.createGame(sandbox.getUser(userToken.user().id()), game);
         String token = game.getGuestTeam().getName().substring(0, 4);
 
         // WHEN
@@ -325,9 +325,9 @@ public class GameTests extends VbrMockedTests {
     public void test_games_public_list_date_notIndexed() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Game game = sandbox.generateBeachGame(userToken.getUser().getId());
+        Game game = sandbox.generateBeachGame(userToken.user().id());
         game.setIndexed(false);
-        gameService.createGame(sandbox.getUser(userToken.getUser().getId()), game);
+        gameService.createGame(sandbox.getUser(userToken.user().id()), game);
         LocalDate date = LocalDate.now();
 
         // WHEN

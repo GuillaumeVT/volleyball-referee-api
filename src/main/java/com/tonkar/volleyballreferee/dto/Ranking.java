@@ -42,9 +42,9 @@ public class Ranking implements Comparable<Ranking> {
             this.setsDiff += setsDiff;
 
             for (SetSummary set : game.getSets()) {
-                int pointsDiff = set.getHomePoints() - set.getGuestPoints();
-                this.pointsFor += set.getHomePoints();
-                this.pointsAgainst += set.getGuestPoints();
+                int pointsDiff = set.homePoints() - set.guestPoints();
+                this.pointsFor += set.homePoints();
+                this.pointsAgainst += set.guestPoints();
                 this.pointsDiff += pointsDiff;
             }
         } else {
@@ -54,9 +54,9 @@ public class Ranking implements Comparable<Ranking> {
             this.setsDiff += setsDiff;
 
             for (SetSummary set : game.getSets()) {
-                int pointsDiff = set.getGuestPoints() - set.getHomePoints();
-                this.pointsFor += set.getGuestPoints();
-                this.pointsAgainst += set.getHomePoints();
+                int pointsDiff = set.guestPoints() - set.homePoints();
+                this.pointsFor += set.guestPoints();
+                this.pointsAgainst += set.homePoints();
                 this.pointsDiff += pointsDiff;
             }
         }

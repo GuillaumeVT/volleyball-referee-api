@@ -17,21 +17,21 @@ public class FriendTests extends VbrMockedTests {
         UserToken userToken2 = sandbox.createUser();
         UserToken userToken3 = sandbox.createUser();
         UserToken userToken4 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.getUser().getId()), sandbox.getUser(userToken2.getUser().getId()));
-        friendService.sendFriendRequest(sandbox.getUser(userToken.getUser().getId()), userToken3.getUser().getPseudo());
-        friendService.sendFriendRequest(sandbox.getUser(userToken4.getUser().getId()), userToken.getUser().getPseudo());
+        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
+        friendService.sendFriendRequest(sandbox.getUser(userToken.user().id()), userToken3.user().pseudo());
+        friendService.sendFriendRequest(sandbox.getUser(userToken4.user().id()), userToken.user().pseudo());
 
         // WHEN
-        FriendsAndRequests friendsAndRequests = friendService.listFriendsAndRequests(sandbox.getUser(userToken.getUser().getId()));
+        FriendsAndRequests friendsAndRequests = friendService.listFriendsAndRequests(sandbox.getUser(userToken.user().id()));
 
         // THEN
-        assertEquals(1, friendsAndRequests.getFriends().size());
-        assertEquals(userToken2.getUser().getPseudo(), friendsAndRequests.getFriends().get(0).getPseudo());
-        assertEquals(1, friendsAndRequests.getSentFriendRequests().size());
-        assertEquals(userToken3.getUser().getPseudo(), friendsAndRequests.getSentFriendRequests().get(0).getReceiverPseudo());
-        assertEquals(userToken.getUser().getPseudo(), friendsAndRequests.getSentFriendRequests().get(0).getSenderPseudo());
-        assertEquals(1, friendsAndRequests.getReceivedFriendRequests().size());
-        assertEquals(userToken.getUser().getPseudo(), friendsAndRequests.getReceivedFriendRequests().get(0).getReceiverPseudo());
-        assertEquals(userToken4.getUser().getPseudo(), friendsAndRequests.getReceivedFriendRequests().get(0).getSenderPseudo());
+        assertEquals(1, friendsAndRequests.friends().size());
+        assertEquals(userToken2.user().pseudo(), friendsAndRequests.friends().get(0).getPseudo());
+        assertEquals(1, friendsAndRequests.sentFriendRequests().size());
+        assertEquals(userToken3.user().pseudo(), friendsAndRequests.sentFriendRequests().get(0).getReceiverPseudo());
+        assertEquals(userToken.user().pseudo(), friendsAndRequests.sentFriendRequests().get(0).getSenderPseudo());
+        assertEquals(1, friendsAndRequests.receivedFriendRequests().size());
+        assertEquals(userToken.user().pseudo(), friendsAndRequests.receivedFriendRequests().get(0).getReceiverPseudo());
+        assertEquals(userToken4.user().pseudo(), friendsAndRequests.receivedFriendRequests().get(0).getSenderPseudo());
     }
 }

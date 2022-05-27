@@ -52,15 +52,14 @@ public class RulesServiceImpl implements RulesService {
             case SNOW -> Rules.OFFICIAL_SNOW_RULES;
         };
 
-        RulesSummary rulesSummary = new RulesSummary();
-        rulesSummary.setId(rules.getId());
-        rulesSummary.setCreatedBy(rules.getCreatedBy());
-        rulesSummary.setCreatedAt(rules.getCreatedAt());
-        rulesSummary.setUpdatedAt(rules.getUpdatedAt());
-        rulesSummary.setKind(rules.getKind());
-        rulesSummary.setName(rules.getName());
-
-        return rulesSummary;
+        return new RulesSummary(
+                rules.getId(),
+                rules.getCreatedBy(),
+                rules.getCreatedAt(),
+                rules.getUpdatedAt(),
+                rules.getName(),
+                rules.getKind()
+        );
     }
 
     @Override
@@ -129,8 +128,8 @@ public class RulesServiceImpl implements RulesService {
     public void deleteAllRules(User user) {
         CloseableIterator<RulesSummary> rulesStream = rulesDao.findByCreatedByOrderByNameAsc(user.getId());
         rulesStream.forEachRemaining(rules  -> {
-            if (!gameDao.existsByCreatedByAndRules_IdAndStatus(user.getId(), rules.getId(), GameStatus.SCHEDULED)) {
-                rulesDao.deleteByIdAndCreatedBy(rules.getId(), user.getId());
+            if (!gameDao.existsByCreatedByAndRules_IdAndStatus(user.getId(), rules.id(), GameStatus.SCHEDULED)) {
+                rulesDao.deleteByIdAndCreatedBy(rules.id(), user.getId());
             }
         });
         rulesStream.close();

@@ -169,12 +169,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserToken updateUserPassword(User user, UserPasswordUpdate userPasswordUpdate) {
-        if (!passwordEncoder.matches(userPasswordUpdate.getCurrentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(userPasswordUpdate.currentPassword(), user.getPassword())) {
             addFailedAuthentication(user);
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("Invalid password for user %s", user.getId()));
         }
 
-        String newPassword = userPasswordUpdate.getNewPassword().trim();
+        String newPassword = userPasswordUpdate.newPassword().trim();
         updateUserPassword(newPassword, user);
 
         return signInUser(user.getEmail(), newPassword);
@@ -251,12 +251,11 @@ public class UserServiceImpl implements UserService {
                 .signWith(signingKey)
                 .compact();
 
-        return UserToken
-                .builder()
-                .user(new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin()))
-                .token(token)
-                .tokenExpiry(Date.from(exp.toInstant(ZoneOffset.UTC)).getTime())
-                .build();
+        return new UserToken(
+                token,
+                Date.from(exp.toInstant(ZoneOffset.UTC)).getTime(),
+                new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin())
+        );
     }
 
     private Optional<Claims> parseToken(String token) {

@@ -165,13 +165,14 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public GameIngredients getGameIngredientsOfKind(User user, GameType kind) {
-        var gameIngredients = new GameIngredients(kind);
-        gameIngredients.setFriends(user.getFriends());
-        gameIngredients.setDefaultRules(rulesService.getDefaultRules(kind));
-        gameIngredients.setRules(rulesService.listRulesOfKind(user, kind));
-        gameIngredients.setTeams(teamService.listTeamsOfKind(user, kind));
-        gameIngredients.setLeagues(leagueService.listLeaguesOfKind(user, kind));
-        return gameIngredients;
+        return new GameIngredients(
+                kind,
+                user.getFriends(),
+                rulesService.getDefaultRules(kind),
+                rulesService.listRulesOfKind(user, kind),
+                teamService.listTeamsOfKind(user, kind),
+                leagueService.listLeaguesOfKind(user, kind)
+        );
     }
 
     @Override

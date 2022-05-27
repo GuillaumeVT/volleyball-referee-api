@@ -50,11 +50,11 @@ public class LeagueTests extends VbrMockedTests {
     public void test_leagues_list() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
+        sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
         ParameterizedTypeReference<List<LeagueSummary>> listType = new ParameterizedTypeReference<>() {};
 
         // WHEN
-        ResponseEntity<List<LeagueSummary>> leagueResponse = restTemplate.exchange("/leagues", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), listType);
+        ResponseEntity<List<LeagueSummary>> leagueResponse = restTemplate.exchange("/leagues", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
 
         // THEN
         assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
@@ -65,14 +65,15 @@ public class LeagueTests extends VbrMockedTests {
     public void test_leagues_list_byKind() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
-        ParameterizedTypeReference<List<LeagueSummary>> listType = new ParameterizedTypeReference<>() {};
+        League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
+        ParameterizedTypeReference<List<LeagueSummary>> listType = new ParameterizedTypeReference<>() {
+        };
 
         // WHEN
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
                 .fromUriString("/leagues")
                 .queryParam("kind", league.getKind());
-        ResponseEntity<List<LeagueSummary>> leagueResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), listType);
+        ResponseEntity<List<LeagueSummary>> leagueResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
 
         // THEN
         assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
@@ -85,7 +86,7 @@ public class LeagueTests extends VbrMockedTests {
         uriBuilder = UriComponentsBuilder
                 .fromUriString("/leagues")
                 .queryParam("kind", noResultGameType);
-        leagueResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), listType);
+        leagueResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
 
         // THEN
         assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
@@ -98,7 +99,7 @@ public class LeagueTests extends VbrMockedTests {
         uriBuilder = UriComponentsBuilder
                 .fromUriString("/leagues")
                 .queryParam("kind", kind);
-        leagueResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), listType);
+        leagueResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
 
         // THEN
         assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
@@ -109,10 +110,10 @@ public class LeagueTests extends VbrMockedTests {
     public void test_leagues_get() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
+        League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
 
         // WHEN
-        ResponseEntity<League> leagueResponse = restTemplate.exchange("/leagues/" + league.getId(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), League.class);
+        ResponseEntity<League> leagueResponse = restTemplate.exchange("/leagues/" + league.getId(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), League.class);
 
         // THEN
         assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
@@ -125,7 +126,7 @@ public class LeagueTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
 
         // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
 
         // THEN
         assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
@@ -135,7 +136,7 @@ public class LeagueTests extends VbrMockedTests {
     public void test_leagues_public_get() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR);
+        League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR);
 
         // WHEN
         ResponseEntity<League> leagueResponse = restTemplate.exchange("/public/leagues/" + league.getId(), HttpMethod.GET, emptyPayloadWithoutAuth(), League.class);
@@ -149,10 +150,10 @@ public class LeagueTests extends VbrMockedTests {
     public void test_leagues_create() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        League league = sandbox.generateLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
+        League league = sandbox.generateLeague(userToken.user().id(), GameType.INDOOR_4X4);
 
         // WHEN
-        ResponseEntity<Void> leagueResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.getToken(), league), Void.class);
+        ResponseEntity<Void> leagueResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.token(), league), Void.class);
 
         // THEN
         assertEquals(HttpStatus.CREATED, leagueResponse.getStatusCode());
@@ -162,10 +163,10 @@ public class LeagueTests extends VbrMockedTests {
     public void test_leagues_create_conflict() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
+        League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
 
         // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.getToken(), league), ErrorResponse.class);
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.token(), league), ErrorResponse.class);
 
         // THEN
         assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
@@ -175,11 +176,11 @@ public class LeagueTests extends VbrMockedTests {
     public void test_leagues_create_conflict2() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.BEACH);
+        League league = sandbox.createLeague(userToken.user().id(), GameType.BEACH);
         league.setId(UUID.randomUUID());
 
         // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.getToken(), league), ErrorResponse.class);
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.token(), league), ErrorResponse.class);
 
         // THEN
         assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
@@ -189,24 +190,24 @@ public class LeagueTests extends VbrMockedTests {
     public void test_leagues_count() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
+        sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
 
         // WHEN
-        ResponseEntity<Count> leagueResponse = restTemplate.exchange("/leagues/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), Count.class);
+        ResponseEntity<Count> leagueResponse = restTemplate.exchange("/leagues/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), Count.class);
 
         // THEN
         assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
-        assertEquals(1L, Objects.requireNonNull(leagueResponse.getBody()).getCount());
+        assertEquals(1L, Objects.requireNonNull(leagueResponse.getBody()).count());
     }
 
     @Test
     public void test_leagues_delete() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.getUser().getId(), GameType.INDOOR_4X4);
+        League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
 
         // WHEN
-        ResponseEntity<Void> leagueResponse = restTemplate.exchange("/leagues/" + league.getId(), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.getToken()), Void.class);
+        ResponseEntity<Void> leagueResponse = restTemplate.exchange("/leagues/" + league.getId(), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
 
         // THEN
         assertEquals(HttpStatus.NO_CONTENT, leagueResponse.getStatusCode());

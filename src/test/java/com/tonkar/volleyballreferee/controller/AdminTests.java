@@ -43,16 +43,16 @@ public class AdminTests extends VbrMockedTests {
                 .fromUriString("/admin/users")
                 .queryParam("page", 0)
                 .queryParam("size", 20);
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
         assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
 
-        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription", UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
+        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription", UUID.randomUUID()), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
         assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
 
-        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription", UUID.randomUUID()), HttpMethod.POST, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
+        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription", UUID.randomUUID()), HttpMethod.POST, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
         assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
 
-        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription/%s", UUID.randomUUID(), "token"), HttpMethod.POST, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
+        errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription/%s", UUID.randomUUID(), "token"), HttpMethod.POST, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
         assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
     }
 }

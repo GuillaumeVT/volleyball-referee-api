@@ -41,13 +41,11 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public FriendsAndRequests listFriendsAndRequests(User user) {
-        FriendsAndRequests friendsAndRequests = new FriendsAndRequests();
-
-        friendsAndRequests.setFriends(user.getFriends());
-        friendsAndRequests.setReceivedFriendRequests(friendRequestDao.findByReceiverId(user.getId()));
-        friendsAndRequests.setSentFriendRequests(friendRequestDao.findBySenderId(user.getId()));
-
-        return friendsAndRequests;
+        return new FriendsAndRequests(
+                user.getFriends(),
+                friendRequestDao.findByReceiverId(user.getId()),
+                friendRequestDao.findBySenderId(user.getId())
+        );
     }
 
     @Override

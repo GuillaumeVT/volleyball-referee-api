@@ -124,8 +124,8 @@ public class TeamServiceImpl implements TeamService {
     public void deleteAllTeams(User user) {
         CloseableIterator<TeamSummary> teamStream = teamDao.findByCreatedByOrderByNameAsc(user.getId());
         teamStream.forEachRemaining(team  -> {
-            if (!gameDao.existsByCreatedByAndRules_IdAndStatus(user.getId(), team.getId(), GameStatus.SCHEDULED)) {
-                teamDao.deleteByIdAndCreatedBy(team.getId(), user.getId());
+            if (!gameDao.existsByCreatedByAndRules_IdAndStatus(user.getId(), team.id(), GameStatus.SCHEDULED)) {
+                teamDao.deleteByIdAndCreatedBy(team.id(), user.getId());
             }
         });
         teamStream.close();

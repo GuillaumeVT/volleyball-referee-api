@@ -36,10 +36,7 @@ public class StatisticsDao {
                 .aggregate(Aggregation.newAggregation(sStatisticsProjection, sStatisticsGroup), mongoTemplate.getCollectionName(Team.class), StatisticsGroup.Count.class)
                 .getMappedResults();
 
-        StatisticsGroup statisticsGroup = new StatisticsGroup();
-        statisticsGroup.setGlobalStatistics(new StatisticsGroup.Statistics(gameStatistics, teamStatistics));
-
-        return statisticsGroup;
+        return new StatisticsGroup(new StatisticsGroup.Statistics(gameStatistics, teamStatistics));
     }
 
     public StatisticsGroup findUserStatistics(String userId) {
@@ -64,11 +61,10 @@ public class StatisticsDao {
         assert gameFacetStatistics != null;
         assert teamFacetStatistics != null;
 
-        StatisticsGroup statisticsGroup = new StatisticsGroup();
-        statisticsGroup.setGlobalStatistics(new StatisticsGroup.Statistics(gameFacetStatistics.getGlobalStatistics(), teamFacetStatistics.getGlobalStatistics()));
-        statisticsGroup.setUserStatistics(new StatisticsGroup.Statistics(gameFacetStatistics.getUserStatistics(), teamFacetStatistics.getUserStatistics()));
-
-        return statisticsGroup;
+        return new StatisticsGroup(
+                new StatisticsGroup.Statistics(gameFacetStatistics.getGlobalStatistics(), teamFacetStatistics.getGlobalStatistics()),
+                new StatisticsGroup.Statistics(gameFacetStatistics.getUserStatistics(), teamFacetStatistics.getUserStatistics())
+        );
     }
 
     @NoArgsConstructor

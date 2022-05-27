@@ -47,7 +47,7 @@ public class PublicController {
 
     @PostMapping(value = "/public/users/token", produces = {"application/json"})
     public ResponseEntity<UserToken> signInUser(@Valid @NotNull @RequestBody EmailCredentials emailCredentials) {
-        return new ResponseEntity<>(userService.signInUser(emailCredentials.getUserEmail(), emailCredentials.getUserPassword()), HttpStatus.OK);
+        return new ResponseEntity<>(userService.signInUser(emailCredentials.userEmail(), emailCredentials.userPassword()), HttpStatus.OK);
     }
 
     @PostMapping(value = "/public/users/password/recover/{userEmail}", produces = {"application/json"})
@@ -71,7 +71,7 @@ public class PublicController {
 
     @PostMapping(value = "/public/users/password/reset/{passwordResetId}", produces = {"application/json"})
     public ResponseEntity<UserToken> resetPassword(@PathVariable("passwordResetId") UUID passwordResetId, @Valid @NotNull @RequestBody UserPassword userPassword) {
-        return new ResponseEntity<>(userService.resetPassword(passwordResetId, userPassword.getUserPassword()), HttpStatus.OK);
+        return new ResponseEntity<>(userService.resetPassword(passwordResetId, userPassword.userPassword()), HttpStatus.OK);
     }
 
     @GetMapping(value = "/public/statistics", produces = {"application/json"})

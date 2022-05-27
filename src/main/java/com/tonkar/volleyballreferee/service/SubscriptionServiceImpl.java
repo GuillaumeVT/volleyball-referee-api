@@ -92,8 +92,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         // Store the latest purchase token and the subscription expiry date
         optionalUser.ifPresent(userSummary -> {
-            log.info(String.format("Found the user %s from the linked purchase tokens, store new token %s with expiry %d", userSummary.getId(), purchaseToken, subscriptionExpiryAt));
-            userDao.updateSubscriptionPurchaseToken(userSummary.getId(), purchaseToken, subscriptionExpiryAt);
+            log.info(String.format("Found the user %s from the linked purchase tokens, store new token %s with expiry %d", userSummary.id(), purchaseToken, subscriptionExpiryAt));
+            userDao.updateSubscriptionPurchaseToken(userSummary.id(), purchaseToken, subscriptionExpiryAt);
         });
     }
 

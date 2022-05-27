@@ -63,10 +63,10 @@ public class RulesTests extends VbrMockedTests {
         // GIVEN
         ParameterizedTypeReference<List<RulesSummary>> listType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
-        sandbox.createIndoorRules(userToken.getUser().getId());
+        sandbox.createIndoorRules(userToken.user().id());
 
         // WHEN
-        ResponseEntity<List<RulesSummary>> rulesResponse = restTemplate.exchange("/rules", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), listType);
+        ResponseEntity<List<RulesSummary>> rulesResponse = restTemplate.exchange("/rules", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
 
         // THEN
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
@@ -78,13 +78,13 @@ public class RulesTests extends VbrMockedTests {
         // GIVEN
         ParameterizedTypeReference<List<RulesSummary>> listType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.getUser().getId());
+        Rules rules = sandbox.createIndoorRules(userToken.user().id());
 
         // WHEN
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
                 .fromUriString("/rules")
                 .queryParam("kind", rules.getKind());
-        ResponseEntity<List<RulesSummary>> rulesResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), listType);
+        ResponseEntity<List<RulesSummary>> rulesResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
 
         // THEN
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
@@ -97,7 +97,7 @@ public class RulesTests extends VbrMockedTests {
         uriBuilder = UriComponentsBuilder
                 .fromUriString("/rules")
                 .queryParam("kind", noResultGameType);
-        rulesResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), listType);
+        rulesResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
 
         // THEN
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
@@ -110,7 +110,7 @@ public class RulesTests extends VbrMockedTests {
         uriBuilder = UriComponentsBuilder
                 .fromUriString("/rules")
                 .queryParam("kind", kind);
-        rulesResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), listType);
+        rulesResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
 
         // THEN
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
@@ -121,10 +121,10 @@ public class RulesTests extends VbrMockedTests {
     public void test_rules_get() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.getUser().getId());
+        Rules rules = sandbox.createIndoorRules(userToken.user().id());
 
         // WHEN
-        ResponseEntity<Rules> rulesResponse = restTemplate.exchange("/rules/" + rules.getId(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), Rules.class);
+        ResponseEntity<Rules> rulesResponse = restTemplate.exchange("/rules/" + rules.getId(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), Rules.class);
 
         // THEN
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
@@ -137,7 +137,7 @@ public class RulesTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
 
         // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/rules/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), ErrorResponse.class);
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/rules/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
 
         // THEN
         assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
@@ -150,31 +150,31 @@ public class RulesTests extends VbrMockedTests {
         GameType gameType = GameType.INDOOR;
 
         // WHEN
-        ResponseEntity<RulesSummary> rulesResponse = restTemplate.exchange("/rules/default/kind/" + gameType, HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), RulesSummary.class);
+        ResponseEntity<RulesSummary> rulesResponse = restTemplate.exchange("/rules/default/kind/" + gameType, HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), RulesSummary.class);
 
         // THEN
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
-        assertEquals(gameType, Objects.requireNonNull(rulesResponse.getBody()).getKind());
+        assertEquals(gameType, Objects.requireNonNull(rulesResponse.getBody()).kind());
 
         // GIVEN
         gameType = GameType.BEACH;
 
         // WHEN
-        rulesResponse = restTemplate.exchange("/rules/default/kind/" + gameType, HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), RulesSummary.class);
+        rulesResponse = restTemplate.exchange("/rules/default/kind/" + gameType, HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), RulesSummary.class);
 
         // THEN
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
-        assertEquals(gameType, Objects.requireNonNull(rulesResponse.getBody()).getKind());
+        assertEquals(gameType, Objects.requireNonNull(rulesResponse.getBody()).kind());
     }
 
     @Test
     public void test_rules_create() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.generateIndoorRules(userToken.getUser().getId());
+        Rules rules = sandbox.generateIndoorRules(userToken.user().id());
 
         // WHEN
-        ResponseEntity<Void> rulesResponse = restTemplate.exchange("/rules", HttpMethod.POST, payloadWithAuth(userToken.getToken(), rules), Void.class);
+        ResponseEntity<Void> rulesResponse = restTemplate.exchange("/rules", HttpMethod.POST, payloadWithAuth(userToken.token(), rules), Void.class);
 
         // THEN
         assertEquals(HttpStatus.CREATED, rulesResponse.getStatusCode());
@@ -184,10 +184,10 @@ public class RulesTests extends VbrMockedTests {
     public void test_rules_create_conflict() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.getUser().getId());
+        Rules rules = sandbox.createIndoorRules(userToken.user().id());
 
         // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/rules", HttpMethod.POST, payloadWithAuth(userToken.getToken(), rules), ErrorResponse.class);
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/rules", HttpMethod.POST, payloadWithAuth(userToken.token(), rules), ErrorResponse.class);
 
         // THEN
         assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
@@ -197,11 +197,11 @@ public class RulesTests extends VbrMockedTests {
     public void test_rules_create_conflict2() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.getUser().getId());
+        Rules rules = sandbox.createIndoorRules(userToken.user().id());
         rules.setId(UUID.randomUUID());
 
         // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/rules", HttpMethod.POST, payloadWithAuth(userToken.getToken(), rules), ErrorResponse.class);
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/rules", HttpMethod.POST, payloadWithAuth(userToken.token(), rules), ErrorResponse.class);
 
         // THEN
         assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
@@ -211,7 +211,7 @@ public class RulesTests extends VbrMockedTests {
     public void test_rules_update() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.getUser().getId());
+        Rules rules = sandbox.createIndoorRules(userToken.user().id());
 
         rules.setUpdatedAt(System.currentTimeMillis());
         rules.setCustomConsecutiveServesPerPlayer(10);
@@ -219,7 +219,7 @@ public class RulesTests extends VbrMockedTests {
         rules.setGameIntervalDuration(10);
 
         // WHEN
-        ResponseEntity<Void> rulesResponse = restTemplate.exchange("/rules", HttpMethod.PUT, payloadWithAuth(userToken.getToken(), rules), Void.class);
+        ResponseEntity<Void> rulesResponse = restTemplate.exchange("/rules", HttpMethod.PUT, payloadWithAuth(userToken.token(), rules), Void.class);
 
         // THEN
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
@@ -229,10 +229,10 @@ public class RulesTests extends VbrMockedTests {
     public void test_rules_update_notFound() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.generateIndoorRules(userToken.getUser().getId());
+        Rules rules = sandbox.generateIndoorRules(userToken.user().id());
 
         // WHEN
-        ResponseEntity<Void> rulesResponse = restTemplate.exchange("/rules", HttpMethod.PUT, payloadWithAuth(userToken.getToken(), rules), Void.class);
+        ResponseEntity<Void> rulesResponse = restTemplate.exchange("/rules", HttpMethod.PUT, payloadWithAuth(userToken.token(), rules), Void.class);
 
         // THEN
         assertEquals(HttpStatus.NOT_FOUND, rulesResponse.getStatusCode());
@@ -242,41 +242,41 @@ public class RulesTests extends VbrMockedTests {
     public void test_rules_count() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        sandbox.createIndoorRules(userToken.getUser().getId());
+        sandbox.createIndoorRules(userToken.user().id());
 
         // WHEN
-        ResponseEntity<Count> rulesResponse = restTemplate.exchange("/rules/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.getToken()), Count.class);
+        ResponseEntity<Count> rulesResponse = restTemplate.exchange("/rules/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), Count.class);
 
         // THEN
         assertEquals(HttpStatus.OK, rulesResponse.getStatusCode());
-        assertEquals(1L, Objects.requireNonNull(rulesResponse.getBody()).getCount());
+        assertEquals(1L, Objects.requireNonNull(rulesResponse.getBody()).count());
     }
 
     @Test
     public void test_rules_delete(@Autowired RulesService rulesService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.getUser().getId());
+        Rules rules = sandbox.createIndoorRules(userToken.user().id());
 
         // WHEN
-        ResponseEntity<Void> rulesResponse = restTemplate.exchange("/rules/" + rules.getId(), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.getToken()), Void.class);
+        ResponseEntity<Void> rulesResponse = restTemplate.exchange("/rules/" + rules.getId(), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
 
         // THEN
         assertEquals(HttpStatus.NO_CONTENT, rulesResponse.getStatusCode());
-        assertTrue(rulesService.listRules(sandbox.getUser(userToken.getUser().getId()), List.of(GameType.values())).isEmpty());
+        assertTrue(rulesService.listRules(sandbox.getUser(userToken.user().id()), List.of(GameType.values())).isEmpty());
     }
 
     @Test
     public void test_rules_deleteAll(@Autowired RulesService rulesService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
-        sandbox.createIndoorRules(userToken.getUser().getId());
+        sandbox.createIndoorRules(userToken.user().id());
 
         // WHEN
-        ResponseEntity<Void> rulesResponse = restTemplate.exchange("/rules", HttpMethod.DELETE, emptyPayloadWithAuth(userToken.getToken()), Void.class);
+        ResponseEntity<Void> rulesResponse = restTemplate.exchange("/rules", HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
 
         // THEN
         assertEquals(HttpStatus.NO_CONTENT, rulesResponse.getStatusCode());
-        assertTrue(rulesService.listRules(sandbox.getUser(userToken.getUser().getId()), List.of(GameType.values())).isEmpty());
+        assertTrue(rulesService.listRules(sandbox.getUser(userToken.user().id()), List.of(GameType.values())).isEmpty());
     }
 }
