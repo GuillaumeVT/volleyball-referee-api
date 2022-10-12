@@ -1,11 +1,11 @@
 package com.tonkar.volleyballreferee;
 
-import com.github.javafaker.Faker;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
 import com.tonkar.volleyballreferee.configuration.VbrTestConfiguration;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.EmailService;
 import com.tonkar.volleyballreferee.service.SubscriptionService;
+import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +14,8 @@ import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataM
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpEntity;
@@ -59,7 +59,7 @@ public class VbrMockedTests {
     @Autowired
     protected Faker faker;
 
-    protected String invalidPurchaseToken = "invalidPurchaseToken";
+    protected final String invalidPurchaseToken = "invalidPurchaseToken";
 
     @PostConstruct
     public void init() {

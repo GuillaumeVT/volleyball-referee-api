@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version '2.6.7'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version '2.7.4'
+    id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id 'java'
 }
 
@@ -18,15 +18,15 @@ repositories {
 ext['log4j2.version'] = '2.17.0' // https://spring.io/blog/2021/12/10/log4j2-vulnerability-and-spring-boot
 
 dependencies {
-    def jjwt_version = '0.11.2'
+    def jjwt_version = '0.11.5'
     def lombok_version = '1.18.24'
-    def jsoup_version =  '1.14.3'
+    def jsoup_version =  '1.15.3'
     def mail_version = '1.6.2'
     def jaxb_version = '2.3.1'
     def android_publisher_version = 'v3-rev142-1.25.0'
-    def poi_xml_version = '5.2.2'
-    def embedded_mongo_version = '3.4.5'
-    def faker_version = '1.0.2'
+    def poi_xml_version = '5.2.3'
+    def embedded_mongo_version = '3.4.11'
+    def faker_version = '1.6.0'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-logging'
@@ -52,7 +52,7 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo', version: embedded_mongo_version
-    testImplementation group: 'com.github.javafaker', name: 'javafaker', version: faker_version
+    testImplementation group: 'net.datafaker', name: 'datafaker', version: faker_version
 }
 
 test {

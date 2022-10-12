@@ -1,8 +1,8 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.github.javafaker.Faker;
 import com.tonkar.volleyballreferee.configuration.VbrTestConfiguration;
 import com.tonkar.volleyballreferee.entity.User;
+import net.datafaker.Faker;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

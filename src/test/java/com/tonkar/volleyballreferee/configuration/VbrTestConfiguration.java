@@ -1,10 +1,10 @@
 package com.tonkar.volleyballreferee.configuration;
 
-import com.github.javafaker.Faker;
 import com.tonkar.volleyballreferee.dto.GameSummary;
 import com.tonkar.volleyballreferee.dto.UserToken;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.*;
+import net.datafaker.Faker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

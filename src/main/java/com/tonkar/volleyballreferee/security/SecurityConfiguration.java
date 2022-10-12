@@ -5,14 +5,15 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -23,7 +24,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(jsr250Enabled = true)
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration {
 
     @Autowired
     private TokenAuthenticationProvider tokenAuthenticationProvider;
@@ -38,18 +39,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         protectedUrls = new NegatedRequestMatcher(publicUrls);
     }
 
-    @Override
-    protected void configure(final AuthenticationManagerBuilder auth) {
-        auth.authenticationProvider(tokenAuthenticationProvider);
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers(publicUrls);
     }
 
-    @Override
-    public void configure(final WebSecurity web) {
-        web.ignoring().requestMatchers(publicUrls);
-    }
-
-    @Override
-    protected void configure(final HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors()
                 .and()
@@ -62,7 +58,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .defaultAuthenticationEntryPointFor(forbiddenEntryPoint(), protectedUrls)
                 .and()
                 .authenticationProvider(tokenAuthenticationProvider)
-                .addFilterBefore(restAuthenticationFilter(), AnonymousAuthenticationFilter.class)
+                .addFilterBefore(restAuthenticationFilter(http), AnonymousAuthenticationFilter.class)
                 .authorizeRequests()
                 .anyRequest()
                 .authenticated()
@@ -71,19 +67,26 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .formLogin().disable()
                 .httpBasic().disable()
                 .logout().disable();
+        return http.build();
     }
 
     @Bean
-    TokenAuthenticationFilter restAuthenticationFilter() throws Exception {
-        final TokenAuthenticationFilter filter = new TokenAuthenticationFilter(protectedUrls);
-        filter.setAuthenticationManager(authenticationManager());
+    TokenAuthenticationFilter restAuthenticationFilter(final HttpSecurity http) throws Exception {
+        final var filter = new TokenAuthenticationFilter(protectedUrls);
+        filter.setAuthenticationManager(authenticationManager(http));
         filter.setAuthenticationSuccessHandler(successHandler());
         return filter;
     }
 
     @Bean
+    public AuthenticationManager authenticationManager(final HttpSecurity http) throws Exception {
+        final var auth = http.getSharedObject(AuthenticationManagerBuilder.class);
+        return auth.authenticationProvider(tokenAuthenticationProvider).build();
+    }
+
+    @Bean
     SimpleUrlAuthenticationSuccessHandler successHandler() {
-        final SimpleUrlAuthenticationSuccessHandler successHandler = new SimpleUrlAuthenticationSuccessHandler();
+        final var successHandler = new SimpleUrlAuthenticationSuccessHandler();
         successHandler.setRedirectStrategy(new NoRedirectStrategy());
         return successHandler;
     }
@@ -92,8 +95,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
      * Disable Spring boot automatic filter registration.
      */
     @Bean
-    FilterRegistrationBean disableAutoRegistration(final TokenAuthenticationFilter filter) {
-        final FilterRegistrationBean registration = new FilterRegistrationBean(filter);
+    FilterRegistrationBean<TokenAuthenticationFilter> disableAutoRegistration(final TokenAuthenticationFilter filter) {
+        final FilterRegistrationBean<TokenAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;
     }
