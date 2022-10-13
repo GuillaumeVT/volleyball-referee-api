@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -31,6 +32,28 @@ public class EmailServiceImpl implements EmailService {
 
     @Value("${vbr.email.password}")
     private String mailPassword;
+
+    private Session session;
+
+    @PostConstruct
+    public void init() {
+        if (mailUser == null || mailPassword == null) {
+            throw new IllegalStateException("Emails are not properly configured");
+        }
+
+        Properties prop = new Properties();
+        prop.put("mail.smtp.host", "smtp.gmail.com");
+        prop.put("mail.smtp.port", "465");
+        prop.put("mail.smtp.auth", "true");
+        prop.put("mail.smtp.socketFactory.port", "465");
+        prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+
+        session = Session.getInstance(prop, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(mailUser, mailPassword);
+            }
+        });
+    }
 
     @Override
     public void sendUserCreatedNotificationEmail(User user) {
@@ -157,18 +180,7 @@ public class EmailServiceImpl implements EmailService {
 
     private void sendEmail(org.jsoup.nodes.Document email, String emailSubject, @Email String emailTo) {
         try {
-            Properties prop = new Properties();
-            prop.put("mail.smtp.host", "smtp.gmail.com");
-            prop.put("mail.smtp.port", "465");
-            prop.put("mail.smtp.auth", "true");
-            prop.put("mail.smtp.socketFactory.port", "465");
-            prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 
-            Session session = Session.getInstance(prop, new javax.mail.Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(mailUser, mailPassword);
-                }
-            });
 
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(mailUser));

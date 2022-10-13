@@ -1,37 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <root level="INFO">
-        <appender-ref ref="CONSOLE" />
+    <root level="DEBUG">
+        <appender-ref ref="CONSOLE"/>
     </root>
-    <logger name="com.tonkar.volleyballreferee.service.GameServiceImpl" level="DEBUG">
-        <appender-ref ref="CONSOLE" />
-    </logger>
-    <logger name="com.tonkar.volleyballreferee.service.UserServiceImpl" level="DEBUG">
-        <appender-ref ref="CONSOLE" />
-    </logger>
-    <logger name="com.tonkar.volleyballreferee.controller.ManageGameController" level="DEBUG">
-        <appender-ref ref="CONSOLE" />
-    </logger>
-    <logger name="com.tonkar.volleyballreferee.controller.SearchGameController" level="DEBUG">
-        <appender-ref ref="CONSOLE" />
-    </logger>
-    <logger name="com.tonkar.volleyballreferee.controller.StatisticsController" level="DEBUG">
-        <appender-ref ref="CONSOLE" />
-    </logger>
-    <logger name="com.tonkar.volleyballreferee.controller.ViewController" level="DEBUG">
-        <appender-ref ref="CONSOLE" />
-    </logger>
-    <logger name="com.tonkar.volleyballreferee.controller.UserRulesController" level="DEBUG">
-        <appender-ref ref="CONSOLE" />
-    </logger>
-    <logger name="com.tonkar.volleyballreferee.controller.UserTeamController" level="DEBUG">
-        <appender-ref ref="CONSOLE" />
-    </logger>
-    <logger name="com.tonkar.volleyballreferee.controller.UserGameController" level="DEBUG">
-        <appender-ref ref="CONSOLE" />
-    </logger>
-    <logger name="com.tonkar.volleyballreferee.controller.UserLeagueController" level="DEBUG">
-        <appender-ref ref="CONSOLE" />
-    </logger>
 </configuration>
