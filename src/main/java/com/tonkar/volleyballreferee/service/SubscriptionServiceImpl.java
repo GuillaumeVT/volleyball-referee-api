@@ -55,7 +55,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             products = publisher.purchases().products();
         } catch (IOException | GeneralSecurityException e) {
             log.error(e.getMessage());
-            throw new RuntimeException("Failed to start the subscription service");
+            throw new IllegalStateException("Failed to start the subscription service");
         }
     }
 
