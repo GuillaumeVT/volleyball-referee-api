@@ -28,12 +28,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Create Google API credentials file
-      id: create-json
-      uses: jsdaniell/create-json@1.1.2
-      with:
-        name: "google-api-credentials.json"
-        json: ${{ secrets.TEST_VBR_ANDROID_BILLING_CREDENTIALS_FILE }}
     - name: Build with Gradle
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
