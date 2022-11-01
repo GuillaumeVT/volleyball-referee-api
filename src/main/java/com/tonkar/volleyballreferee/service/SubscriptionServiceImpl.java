@@ -1,11 +1,12 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.AndroidPublisherScopes;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.tonkar.volleyballreferee.dao.UserDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 
@@ -46,11 +47,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @PostConstruct
     public void init() {
-        try (InputStream stream = Files.newInputStream(Paths.get(androidCredential))) {
-            var httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            var jsonFactory = JacksonFactory.getDefaultInstance();
-            var credential = GoogleCredential.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
-            var publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential).setApplicationName(androidPackageName).build();
+        try (InputStream stream = new ByteArrayInputStream(androidCredential.getBytes(StandardCharsets.UTF_8))) {
+            var credentials = ServiceAccountCredentials.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
+            var requestInitializer = new HttpCredentialsAdapter(credentials);
+            var publisher = new AndroidPublisher
+                    .Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), requestInitializer)
+                    .setApplicationName(androidPackageName)
+                    .build();
             subscriptions = publisher.purchases().subscriptions();
             products = publisher.purchases().products();
         } catch (IOException | GeneralSecurityException e) {

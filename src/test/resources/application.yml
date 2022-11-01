@@ -16,14 +16,14 @@ vbr:
     color: '#fac511'
   android:
     app:
-      packageName: ${TEST_VBR_ANDROID_PACKAGE:}
+      packageName: ${VBR_ANDROID_PACKAGE:}
       billing:
-        credential: ${TEST_VBR_ANDROID_BILLING_CREDENTIALS:}
-        sku-purchase: ${TEST_VBR_ANDROID_BILLING_PURCHASE_SKU:}
-        sku-subscription: ${TEST_VBR_ANDROID_BILLING_SUBSCRIPTION_SKU:}
+        credential: ${VBR_ANDROID_BILLING_CREDENTIALS:}
+        sku-purchase: ${VBR_ANDROID_BILLING_PURCHASE_SKU:}
+        sku-subscription: ${VBR_ANDROID_BILLING_SUBSCRIPTION_SKU:}
   email:
-    user: ${TEST_VBR_EMAIL_USER:}
-    password: ${TEST_VBR_EMAIL_PASSWORD:}
+    user: ${VBR_EMAIL_USER:}
+    password: ${VBR_EMAIL_PASSWORD:}
 
 logging:
   config: classpath:logback-spring.xml
