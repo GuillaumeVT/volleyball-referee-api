@@ -4,6 +4,7 @@ import com.tonkar.volleyballreferee.configuration.VbrTestConfiguration;
 import com.tonkar.volleyballreferee.entity.User;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @TestPropertySource(locations = "classpath:application.yml")
 @Import(VbrTestConfiguration.class)
 @ActiveProfiles("test")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 public class EmailTests {
 
     @Value("${test.user.email}")

@@ -3,6 +3,7 @@ package com.tonkar.volleyballreferee.service;
 import com.tonkar.volleyballreferee.configuration.VbrTestConfiguration;
 import com.tonkar.volleyballreferee.entity.User;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @TestPropertySource(locations = "classpath:application.yml")
 @Import(VbrTestConfiguration.class)
 @ActiveProfiles("test")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 public class SubscriptionTests {
 
     @MockBean
