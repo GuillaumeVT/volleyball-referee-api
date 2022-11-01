@@ -1,5 +1,7 @@
 # Volleyball Referee API
 
+[![Java CI with Gradle](https://github.com/GuillaumeVT/volleyball-referee-api/actions/workflows/gradle.yml/badge.svg?branch=master)](https://github.com/GuillaumeVT/volleyball-referee-api/actions/workflows/gradle.yml)
+
 Volleyball Referee API is a Spring Boot application, part of the [Volleyball Referee system][vbr], and providing REST endpoints.
 
 #### Manage your data
