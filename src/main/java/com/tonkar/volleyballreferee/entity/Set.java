@@ -3,6 +3,7 @@ package com.tonkar.volleyballreferee.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldNameConstants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -12,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@FieldNameConstants
 public class Set {
     private long               duration;
     private long               startTime;

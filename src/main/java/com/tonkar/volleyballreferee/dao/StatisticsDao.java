@@ -3,10 +3,8 @@ package com.tonkar.volleyballreferee.dao;
 import com.tonkar.volleyballreferee.dto.StatisticsGroup;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.Team;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.experimental.FieldNameConstants;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -43,12 +41,12 @@ public class StatisticsDao {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
 
         FacetOperation gameFacetOperation = Aggregation
-                .facet(sStatisticsProjection, sStatisticsGroup).as("globalStatistics")
-                .and(matchOperation, sStatisticsProjection, sStatisticsGroup).as("userStatistics");
+                .facet(sStatisticsProjection, sStatisticsGroup).as(FacetStatistics.Fields.globalStatistics)
+                .and(matchOperation, sStatisticsProjection, sStatisticsGroup).as(FacetStatistics.Fields.userStatistics);
 
         FacetOperation teamFacetOperation = Aggregation
-                .facet(sStatisticsProjection, sStatisticsGroup).as("globalStatistics")
-                .and(matchOperation, sStatisticsProjection, sStatisticsGroup).as("userStatistics");
+                .facet(sStatisticsProjection, sStatisticsGroup).as(FacetStatistics.Fields.globalStatistics)
+                .and(matchOperation, sStatisticsProjection, sStatisticsGroup).as(FacetStatistics.Fields.userStatistics);
 
         FacetStatistics gameFacetStatistics = mongoTemplate
                 .aggregate(Aggregation.newAggregation(gameFacetOperation), mongoTemplate.getCollectionName(Game.class), FacetStatistics.class)
@@ -62,16 +60,13 @@ public class StatisticsDao {
         assert teamFacetStatistics != null;
 
         return new StatisticsGroup(
-                new StatisticsGroup.Statistics(gameFacetStatistics.getGlobalStatistics(), teamFacetStatistics.getGlobalStatistics()),
-                new StatisticsGroup.Statistics(gameFacetStatistics.getUserStatistics(), teamFacetStatistics.getUserStatistics())
+                new StatisticsGroup.Statistics(gameFacetStatistics.globalStatistics(), teamFacetStatistics.globalStatistics()),
+                new StatisticsGroup.Statistics(gameFacetStatistics.userStatistics(), teamFacetStatistics.userStatistics())
         );
     }
 
-    @NoArgsConstructor
-    @Getter
-    @Setter
-    private static class FacetStatistics {
-        private List<StatisticsGroup.Count> globalStatistics;
-        private List<StatisticsGroup.Count> userStatistics;
+    @FieldNameConstants
+    private record FacetStatistics(List<StatisticsGroup.Count> globalStatistics,
+                                   List<StatisticsGroup.Count> userStatistics) {
     }
 }

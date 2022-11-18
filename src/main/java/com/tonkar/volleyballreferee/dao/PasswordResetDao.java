@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.tonkar.volleyballreferee.dao.DaoUtils._id;
+
 @Repository
 @RequiredArgsConstructor
 public class PasswordResetDao {
@@ -26,18 +28,12 @@ public class PasswordResetDao {
     }
 
     public void deleteByExpiresAtBefore(LocalDateTime dateTime) {
-        Query query = Query.query(Criteria.where("expiresAt").lte(dateTime));
+        Query query = Query.query(Criteria.where(PasswordReset.Fields.expiresAt).lte(dateTime));
         mongoTemplate.remove(query, PasswordReset.class);
     }
 
     public Optional<PasswordReset> findById(UUID id) {
-        Query query = Query.query(Criteria.where("_id").is(id));
-        return Optional.ofNullable(mongoTemplate.findOne(query, PasswordReset.class));
-    }
-
-    // Tests only
-    public Optional<PasswordReset> findByUserId(String userId) {
-        Query query = Query.query(Criteria.where("userId").is(userId));
+        Query query = Query.query(Criteria.where(_id).is(id));
         return Optional.ofNullable(mongoTemplate.findOne(query, PasswordReset.class));
     }
 }

@@ -3,6 +3,7 @@ package com.tonkar.volleyballreferee.dto;
 import com.tonkar.volleyballreferee.entity.TeamType;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldNameConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@FieldNameConstants
 public class GameScore {
     private UUID             id;
     private long             scheduledAt;

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,6 +23,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @Getter
 @Setter
+@FieldNameConstants
 @Document(collection = "users")
 public class User implements UserDetails {
     @Id
@@ -89,6 +91,7 @@ public class User implements UserDetails {
     @NoArgsConstructor
     @Getter
     @Setter
+    @FieldNameConstants
     public static class Friend {
         @NotBlank
         private String id;
@@ -100,6 +103,7 @@ public class User implements UserDetails {
     @NoArgsConstructor
     @Getter
     @Setter
+    @FieldNameConstants
     public static class FailedAuthentication {
         private int  attempts;
         private long resetsAt;

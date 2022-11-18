@@ -8,6 +8,8 @@ import java.util.List;
 
 public class DaoUtils {
 
+    public static final String _id = "_id";
+
     public static List<GameStatus> computeStatuses(List<GameStatus> statuses) {
         if (statuses == null || statuses.isEmpty()) {
             statuses = List.of(GameStatus.values());

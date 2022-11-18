@@ -4,6 +4,7 @@ import com.tonkar.volleyballreferee.dto.LeagueSummary;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Getter
 @Setter
+@FieldNameConstants
 @Document(collection = "games")
 public class Game {
 
@@ -121,6 +123,7 @@ public class Game {
     @NoArgsConstructor
     @Getter
     @Setter
+    @FieldNameConstants
     public static class SelectedLeague extends LeagueSummary {
         @NotBlank
         private String division;
