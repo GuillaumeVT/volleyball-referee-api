@@ -13,6 +13,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -306,5 +307,34 @@ public class UserTests extends VbrMockedTests {
 
         // THEN
         assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
+    }
+
+    @Test
+    public void test_users_updatePseudo(@Autowired UserService userService) {
+        // GIVEN
+        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
+        String newPseudo = faker.name().firstName();
+        UserToken userToken = userService.createUser(user);
+
+        // WHEN
+        ResponseEntity<UserSummary> userResponse = restTemplate.exchange("/users/pseudo", HttpMethod.PATCH, payloadWithAuth(userToken.token(), new UserPseudo(newPseudo)), UserSummary.class);
+
+        // THEN
+        assertEquals(HttpStatus.OK, userResponse.getStatusCode());
+        assertEquals(newPseudo, Objects.requireNonNull(userResponse.getBody()).pseudo());
+    }
+
+    @Test
+    public void test_users_updatePseudo_conflict(@Autowired UserService userService) {
+        // GIVEN
+        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
+        String newPseudo = user.getPseudo();
+        UserToken userToken = userService.createUser(user);
+
+        // WHEN
+        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/users/pseudo", HttpMethod.PATCH, payloadWithAuth(userToken.token(), new UserPseudo(newPseudo)), ErrorResponse.class);
+
+        // THEN
+        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
     }
 }

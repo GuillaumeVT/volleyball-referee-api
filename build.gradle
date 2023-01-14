@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.7.5'
+    id 'org.springframework.boot' version '3.0.1'
     id 'io.spring.dependency-management' version '1.1.0'
     id 'java'
 }
@@ -24,8 +24,8 @@ dependencies {
     def google_oauth2_version = '1.12.1'
     def android_publisher_version = 'v3-rev20221025-2.0.0'
     def poi_xml_version = '5.2.3'
-    def embedded_mongo_version = '3.5.1'
-    def faker_version = '1.6.0'
+    def embedded_mongo_version = '4.3.2'
+    def faker_version = '1.7.0'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-logging'
@@ -48,12 +48,14 @@ dependencies {
     implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: android_publisher_version
     // Excel
     implementation group: 'org.apache.poi', name: 'poi-ooxml', version: poi_xml_version
-    // Misc
+    // Lombok
     compileOnly group: 'org.projectlombok', name: 'lombok', version: lombok_version
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
+    // Test
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo', version: embedded_mongo_version
+    testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo.spring30x', version: embedded_mongo_version
     testImplementation group: 'net.datafaker', name: 'datafaker', version: faker_version
+    testImplementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5'
 }
 
 test {

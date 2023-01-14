@@ -54,6 +54,13 @@ public class EmailTests {
     }
 
     @Test
+    public void test_emails_pseudoUpdated(@Autowired EmailService emailService) {
+        User user = sandbox.generateUser(testTargetEmail);
+
+        emailService.sendPseudoUpdatedNotificationEmail(user);
+    }
+
+    @Test
     public void test_emails_friendRequested(@Autowired EmailService emailService) {
         User senderUser = sandbox.generateUser(faker.internet().safeEmailAddress());
         User receiverUser = sandbox.generateUser(testTargetEmail);

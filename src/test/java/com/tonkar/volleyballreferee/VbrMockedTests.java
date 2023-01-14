@@ -5,6 +5,7 @@ import com.tonkar.volleyballreferee.configuration.VbrTestConfiguration;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.EmailService;
 import com.tonkar.volleyballreferee.service.SubscriptionService;
+import jakarta.annotation.PostConstruct;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
@@ -22,15 +23,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.UUID;
 
 @AutoConfigureDataMongo
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -64,6 +64,7 @@ public class VbrMockedTests {
     @PostConstruct
     public void init() {
         var restTemplateBuilder = new RestTemplateBuilder()
+                .requestFactory(HttpComponentsClientHttpRequestFactory.class)
                 .rootUri(String.format("http://localhost:%d%s", port, contextPath))
                 .setReadTimeout(Duration.ofMillis(20000L));
         restTemplate = new TestRestTemplate(restTemplateBuilder, null, null);
@@ -93,38 +94,31 @@ public class VbrMockedTests {
         Mockito
                 .when(subscriptionService.validatePurchaseToken(invalidPurchaseToken))
                 .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN));
-
-        Mockito
-                .doNothing()
-                .when(emailService)
-                .sendUserCreatedNotificationEmail(Mockito.any(User.class));
-        Mockito
-                .doNothing()
-                .when(emailService)
-                .sendPasswordResetEmail(Mockito.anyString(), Mockito.any(UUID.class));
-        Mockito
-                .doNothing()
-                .when(emailService)
-                .sendPasswordUpdatedNotificationEmail(Mockito.any(User.class));
-        Mockito
-                .doNothing()
-                .when(emailService)
-                .sendFriendRequestEmail(Mockito.any(User.class), Mockito.any(User.class));
-        Mockito
-                .doNothing()
-                .when(emailService)
-                .sendAcceptFriendRequestEmail(Mockito.any(User.class), Mockito.any(User.class));
     }
 
     @BeforeEach
     public void setUp(@Autowired MongoTemplate mongoTemplate) {
-        mongoTemplate.dropCollection(User.class);
-        mongoTemplate.dropCollection(FriendRequest.class);
-        mongoTemplate.dropCollection(Rules.class);
-        mongoTemplate.dropCollection(Team.class);
-        mongoTemplate.dropCollection(League.class);
-        mongoTemplate.dropCollection(Game.class);
-        mongoTemplate.dropCollection(PasswordReset.class);
+        if (mongoTemplate.collectionExists(User.class)) {
+            mongoTemplate.dropCollection(User.class);
+        }
+        if (mongoTemplate.collectionExists(FriendRequest.class)) {
+            mongoTemplate.dropCollection(FriendRequest.class);
+        }
+        if (mongoTemplate.collectionExists(Rules.class)) {
+            mongoTemplate.dropCollection(Rules.class);
+        }
+        if (mongoTemplate.collectionExists(Team.class)) {
+            mongoTemplate.dropCollection(Team.class);
+        }
+        if (mongoTemplate.collectionExists(League.class)) {
+            mongoTemplate.dropCollection(League.class);
+        }
+        if (mongoTemplate.collectionExists(Game.class)) {
+            mongoTemplate.dropCollection(Game.class);
+        }
+        if (mongoTemplate.collectionExists(PasswordReset.class)) {
+            mongoTemplate.dropCollection(PasswordReset.class);
+        }
     }
 
     private HttpHeaders headersWithAuth(String testUser) {

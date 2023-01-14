@@ -1,9 +1,8 @@
 package com.tonkar.volleyballreferee.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.experimental.FieldNameConstants;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 
 @FieldNameConstants
 public record UserSummary(

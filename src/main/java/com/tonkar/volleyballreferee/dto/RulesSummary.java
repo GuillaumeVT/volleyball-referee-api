@@ -1,10 +1,10 @@
 package com.tonkar.volleyballreferee.dto;
 
 import com.tonkar.volleyballreferee.entity.GameType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.experimental.FieldNameConstants;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @FieldNameConstants

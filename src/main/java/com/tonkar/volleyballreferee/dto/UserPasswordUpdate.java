@@ -1,6 +1,6 @@
 package com.tonkar.volleyballreferee.dto;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public record UserPasswordUpdate(
         @NotBlank

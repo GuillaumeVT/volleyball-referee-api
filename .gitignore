@@ -29,4 +29,4 @@ dist/
 nbdist/
 .nb-gradle/
 
-src/test/java/com/tonkar/volleyballreferee/private
+src/test/java/com/tonkar/volleyballreferee/local
