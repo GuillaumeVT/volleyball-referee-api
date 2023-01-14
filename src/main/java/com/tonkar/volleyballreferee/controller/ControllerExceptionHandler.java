@@ -1,6 +1,8 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.ErrorResponse;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -9,9 +11,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
-
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
 
 @ControllerAdvice
 public class ControllerExceptionHandler {
@@ -43,6 +42,6 @@ public class ControllerExceptionHandler {
     @ResponseBody
     @ExceptionHandler(ResponseStatusException.class)
     ResponseEntity<ErrorResponse> exceptionHandler(ResponseStatusException e) {
-        return new ResponseEntity<>(new ErrorResponse(e.getMessage()), e.getStatus());
+        return new ResponseEntity<>(new ErrorResponse(e.getMessage()), e.getStatusCode());
     }
 }

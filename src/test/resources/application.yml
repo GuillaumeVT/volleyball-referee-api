@@ -1,8 +1,12 @@
 spring:
-  profiles: test
-  mongodb:
-    embedded:
-      version: 4.0.2
+  profiles:
+    active: test
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 4.0.2
 
 server:
   servlet:

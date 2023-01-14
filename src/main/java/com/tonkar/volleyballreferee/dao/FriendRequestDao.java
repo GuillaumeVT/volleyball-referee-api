@@ -1,10 +1,12 @@
 package com.tonkar.volleyballreferee.dao;
 
+import com.mongodb.client.result.UpdateResult;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -46,6 +48,20 @@ public class FriendRequestDao {
     public List<FriendRequest> findByReceiverId(String receiverId) {
         Query query = Query.query(Criteria.where(FriendRequest.Fields.receiverId).is(receiverId));
         return mongoTemplate.find(query, FriendRequest.class);
+    }
+
+    public boolean updateReceiverPseudo(String receiverId, String pseudo) {
+        Query query = Query.query(Criteria.where(FriendRequest.Fields.receiverId).is(receiverId));
+        Update update = new Update().set(FriendRequest.Fields.receiverPseudo, pseudo);
+        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, FriendRequest.class);
+        return (updateResult.getMatchedCount() > 0 && updateResult.getModifiedCount() > 0) || updateResult.getMatchedCount() == 0;
+    }
+
+    public boolean updateSenderPseudo(String senderId, String pseudo) {
+        Query query = Query.query(Criteria.where(FriendRequest.Fields.senderId).is(senderId));
+        Update update = new Update().set(FriendRequest.Fields.senderPseudo, pseudo);
+        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, FriendRequest.class);
+        return (updateResult.getMatchedCount() > 0 && updateResult.getModifiedCount() > 0) || updateResult.getMatchedCount() == 0;
     }
 
     public void deleteByIdAndReceiverId(UUID id, String receiverId) {

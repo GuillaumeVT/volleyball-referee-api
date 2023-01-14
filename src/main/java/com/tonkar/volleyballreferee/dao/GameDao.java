@@ -507,6 +507,13 @@ public class GameDao {
         return updateResult.getModifiedCount() > 0;
     }
 
+    public boolean updateUserPseudo(String id, String pseudo) {
+        Query query = new Query(Criteria.where(Game.Fields.refereedBy).is(id));
+        Update update = new Update().set(Game.Fields.refereeName, pseudo);
+        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, Game.class);
+        return (updateResult.getMatchedCount() > 0 && updateResult.getModifiedCount() > 0) || updateResult.getMatchedCount() == 0;
+    }
+
     @NoArgsConstructor
     @Getter
     @Setter

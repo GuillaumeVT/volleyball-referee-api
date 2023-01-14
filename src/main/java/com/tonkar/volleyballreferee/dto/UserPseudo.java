@@ -2,7 +2,7 @@ package com.tonkar.volleyballreferee.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record UserPassword(
+public record UserPseudo(
         @NotBlank
-        String userPassword) {
+        String userPseudo) {
 }

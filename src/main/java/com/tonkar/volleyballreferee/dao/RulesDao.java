@@ -15,12 +15,12 @@ import org.springframework.data.mongodb.core.aggregation.SortOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static com.tonkar.volleyballreferee.dao.DaoUtils._id;
 
@@ -67,7 +67,7 @@ public class RulesDao {
         mongoTemplate.updateMulti(query, Update.update(Game.Fields.rules, rules), mongoTemplate.getCollectionName(Game.class));
     }
 
-    public CloseableIterator<RulesSummary> findByCreatedByOrderByNameAsc(String userId) {
+    public Stream<RulesSummary> findByCreatedByOrderByNameAsc(String userId) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where(Rules.Fields.createdBy).is(userId));
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, RulesSummary.Fields.name);
         return mongoTemplate.aggregateStream(

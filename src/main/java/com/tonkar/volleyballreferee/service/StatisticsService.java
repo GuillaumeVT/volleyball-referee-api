@@ -1,12 +1,23 @@
 package com.tonkar.volleyballreferee.service;
 
+import com.tonkar.volleyballreferee.dao.StatisticsDao;
 import com.tonkar.volleyballreferee.dto.StatisticsGroup;
 import com.tonkar.volleyballreferee.entity.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-public interface StatisticsService {
+@Service
+@RequiredArgsConstructor
+public class StatisticsService {
 
-    StatisticsGroup getGlobalStatistics();
+    private final StatisticsDao statisticsDao;
 
-    StatisticsGroup getUserStatistics(User user);
+    public StatisticsGroup getGlobalStatistics() {
+        return statisticsDao.findGlobalStatistics();
+    }
+
+    public StatisticsGroup getUserStatistics(User user) {
+        return statisticsDao.findUserStatistics(user.getId());
+    }
 
 }
