@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class FriendTests extends VbrMockedTests {
+class FriendTests extends VbrMockedTests {
 
     @Test
-    public void test_friends_and_requests(@Autowired FriendService friendService) {
+    void test_friends_and_requests(@Autowired FriendService friendService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();

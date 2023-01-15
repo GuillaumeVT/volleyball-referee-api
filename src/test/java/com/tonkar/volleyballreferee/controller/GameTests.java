@@ -25,7 +25,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GameTests extends VbrMockedTests {
+class GameTests extends VbrMockedTests {
 
     private final GameService gameService;
 
@@ -34,7 +34,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_unauthorized() {
+    void test_games_unauthorized() {
         final var invalidToken = "invalid";
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
@@ -104,7 +104,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_list() {
+    void test_games_list() {
         // GIVEN
         ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
@@ -123,7 +123,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_list_byStatus() {
+    void test_games_list_byStatus() {
         // GIVEN
         ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
@@ -159,7 +159,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_list_byStatusAndKindAndGender() {
+    void test_games_list_byStatusAndKindAndGender() {
         // GIVEN
         ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
@@ -202,7 +202,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_list_available() {
+    void test_games_list_available() {
         // GIVEN
         ParameterizedTypeReference<List<GameSummary>> listType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
@@ -217,7 +217,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_list_available_refereedByFriend() {
+    void test_games_list_available_refereedByFriend() {
         // GIVEN
         ParameterizedTypeReference<List<GameSummary>> listType = new ParameterizedTypeReference<>() {
         };
@@ -237,7 +237,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_list_completed() {
+    void test_games_list_completed() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.generateBeachGame(userToken.user().id());
@@ -258,7 +258,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_get() {
+    void test_games_get() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
@@ -271,7 +271,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_get_notFound() {
+    void test_games_get_notFound() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UUID unknownGameId = UUID.randomUUID();
@@ -284,7 +284,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_public_list_token() {
+    void test_games_public_list_token() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.createBeachGame(userToken.user().id());
@@ -305,7 +305,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_public_list_date() {
+    void test_games_public_list_date() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createBeachGame(userToken.user().id());
@@ -325,7 +325,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_public_list_live() {
+    void test_games_public_list_live() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.generateBeachGame(userToken.user().id());
@@ -346,7 +346,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_public_get() {
+    void test_games_public_get() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
@@ -359,7 +359,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_public_get_notFound() {
+    void test_games_public_get_notFound() {
         // GIVEN
         UUID unknownGameId = UUID.randomUUID();
 
@@ -371,7 +371,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_get_ingredients() {
+    void test_games_get_ingredients() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
@@ -384,7 +384,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_create() {
+    void test_games_create() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.generateBeachGame(userToken.user().id());
@@ -397,7 +397,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_update() {
+    void test_games_update() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.createBeachGame(userToken.user().id());
@@ -411,7 +411,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_update_notFound() {
+    void test_games_update_notFound() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.generateBeachGame(userToken.user().id());
@@ -424,7 +424,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_set_update() {
+    void test_games_set_update() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.createBeachGame(userToken.user().id());
@@ -437,7 +437,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_index_no() {
+    void test_games_index_no() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.createBeachGame(userToken.user().id());
@@ -450,7 +450,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_index_yes() {
+    void test_games_index_yes() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.createBeachGame(userToken.user().id());
@@ -463,7 +463,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_update_refereedByFriend() {
+    void test_games_update_refereedByFriend() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -478,7 +478,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_schedule_create() {
+    void test_games_schedule_create() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.generateScheduledBeachGame(userToken.user().id(), true);
@@ -491,7 +491,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_schedule_update() {
+    void test_games_schedule_update() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
@@ -504,7 +504,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_schedule_update_notFound() {
+    void test_games_schedule_update_notFound() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.generateScheduledBeachGame(userToken.user().id(), false);
@@ -517,7 +517,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_delete() {
+    void test_games_delete() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
@@ -530,7 +530,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_deleteAll() {
+    void test_games_deleteAll() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createScheduledBeachGame(userToken.user().id());
@@ -544,7 +544,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_count() {
+    void test_games_count() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createScheduledBeachGame(userToken.user().id());
@@ -559,7 +559,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_count_inLeague() {
+    void test_games_count_inLeague() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
@@ -574,7 +574,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_inLeague() {
+    void test_games_inLeague() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
@@ -594,7 +594,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_public_inLeague() {
+    void test_games_public_inLeague() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
@@ -614,7 +614,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_public_inDivision() {
+    void test_games_public_inDivision() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
@@ -634,7 +634,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_public_inDivision2() {
+    void test_games_public_inDivision2() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
@@ -655,7 +655,7 @@ public class GameTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_games_public_downloadDivision() {
+    void test_games_public_downloadDivision() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());

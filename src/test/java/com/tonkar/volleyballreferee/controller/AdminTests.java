@@ -12,10 +12,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AdminTests extends VbrMockedTests {
+class AdminTests extends VbrMockedTests {
 
     @Test
-    public void test_admin_unauthorized() {
+    void test_admin_unauthorized() {
         final var invalidToken = "invalid";
         
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
@@ -36,7 +36,7 @@ public class AdminTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_admin_forbidden() {
+    void test_admin_forbidden() {
         final var userToken = sandbox.createUser();
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder

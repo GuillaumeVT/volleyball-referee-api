@@ -20,10 +20,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LeagueTests extends VbrMockedTests {
+class LeagueTests extends VbrMockedTests {
 
     @Test
-    public void test_leagues_unauthorized() {
+    void test_leagues_unauthorized() {
         final var invalidToken = "invalid";
 
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
@@ -47,7 +47,7 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_list() {
+    void test_leagues_list() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
@@ -62,7 +62,7 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_list_byKind() {
+    void test_leagues_list_byKind() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
@@ -107,7 +107,7 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_get() {
+    void test_leagues_get() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
@@ -121,7 +121,7 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_get_notFound() {
+    void test_leagues_get_notFound() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
@@ -133,7 +133,7 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_public_get() {
+    void test_leagues_public_get() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR);
@@ -147,7 +147,7 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_create() {
+    void test_leagues_create() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         League league = sandbox.generateLeague(userToken.user().id(), GameType.INDOOR_4X4);
@@ -160,7 +160,7 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_create_conflict() {
+    void test_leagues_create_conflict() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
@@ -173,7 +173,7 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_create_conflict2() {
+    void test_leagues_create_conflict2() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.BEACH);
@@ -187,7 +187,7 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_count() {
+    void test_leagues_count() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
@@ -201,7 +201,7 @@ public class LeagueTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_leagues_delete() {
+    void test_leagues_delete() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);

@@ -23,10 +23,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RulesTests extends VbrMockedTests {
+class RulesTests extends VbrMockedTests {
 
     @Test
-    public void test_rules_unauthorized() {
+    void test_rules_unauthorized() {
         final var invalidToken = "invalid";
         
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/rules", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
@@ -59,7 +59,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_list() {
+    void test_rules_list() {
         // GIVEN
         ParameterizedTypeReference<List<RulesSummary>> listType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
@@ -74,7 +74,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_list_byKind() {
+    void test_rules_list_byKind() {
         // GIVEN
         ParameterizedTypeReference<List<RulesSummary>> listType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
@@ -118,7 +118,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_get() {
+    void test_rules_get() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Rules rules = sandbox.createIndoorRules(userToken.user().id());
@@ -132,7 +132,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_get_notFound() {
+    void test_rules_get_notFound() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
@@ -144,7 +144,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_get_default() {
+    void test_rules_get_default() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameType gameType = GameType.INDOOR;
@@ -168,7 +168,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_create() {
+    void test_rules_create() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Rules rules = sandbox.generateIndoorRules(userToken.user().id());
@@ -181,7 +181,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_create_conflict() {
+    void test_rules_create_conflict() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Rules rules = sandbox.createIndoorRules(userToken.user().id());
@@ -194,7 +194,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_create_conflict2() {
+    void test_rules_create_conflict2() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Rules rules = sandbox.createIndoorRules(userToken.user().id());
@@ -208,7 +208,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_update() {
+    void test_rules_update() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Rules rules = sandbox.createIndoorRules(userToken.user().id());
@@ -226,7 +226,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_update_notFound() {
+    void test_rules_update_notFound() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Rules rules = sandbox.generateIndoorRules(userToken.user().id());
@@ -239,7 +239,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_count() {
+    void test_rules_count() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createIndoorRules(userToken.user().id());
@@ -253,7 +253,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_delete(@Autowired RulesService rulesService) {
+    void test_rules_delete(@Autowired RulesService rulesService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Rules rules = sandbox.createIndoorRules(userToken.user().id());
@@ -267,7 +267,7 @@ public class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_rules_deleteAll(@Autowired RulesService rulesService) {
+    void test_rules_deleteAll(@Autowired RulesService rulesService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createIndoorRules(userToken.user().id());
