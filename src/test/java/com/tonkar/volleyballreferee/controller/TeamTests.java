@@ -26,10 +26,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TeamTests extends VbrMockedTests {
+class TeamTests extends VbrMockedTests {
 
     @Test
-    public void test_teams_unauthorized() {
+    void test_teams_unauthorized() {
         final var invalidToken = "invalid";
 
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
@@ -67,7 +67,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_list() {
+    void test_teams_list() {
         // GIVEN
         ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
@@ -86,7 +86,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_list_byKind() {
+    void test_teams_list_byKind() {
         // GIVEN
         ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
@@ -136,7 +136,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_list_byGender() {
+    void test_teams_list_byGender() {
         // GIVEN
         ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
@@ -186,7 +186,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_list_byKindAndGender() {
+    void test_teams_list_byKindAndGender() {
         // GIVEN
         ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
@@ -241,7 +241,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_get() {
+    void test_teams_get() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
@@ -255,7 +255,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_get_notFound() {
+    void test_teams_get_notFound() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
@@ -267,7 +267,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_create() {
+    void test_teams_create() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.generateBeachTeam(userToken.user().id());
@@ -280,7 +280,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_create_conflict() {
+    void test_teams_create_conflict() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
@@ -293,7 +293,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_create_conflict2() {
+    void test_teams_create_conflict2() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
@@ -307,7 +307,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_update() {
+    void test_teams_update() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
@@ -323,7 +323,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_update_notFound() {
+    void test_teams_update_notFound() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.generateBeachTeam(userToken.user().id());
@@ -336,7 +336,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_count() {
+    void test_teams_count() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createBeachTeam(userToken.user().id());
@@ -350,7 +350,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_delete(@Autowired TeamService teamService) {
+    void test_teams_delete(@Autowired TeamService teamService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
@@ -364,7 +364,7 @@ public class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_teams_deleteAll(@Autowired TeamService teamService) {
+    void test_teams_deleteAll(@Autowired TeamService teamService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createBeachTeam(userToken.user().id());

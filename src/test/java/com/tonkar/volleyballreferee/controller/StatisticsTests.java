@@ -11,10 +11,10 @@ import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class StatisticsTests extends VbrMockedTests {
+class StatisticsTests extends VbrMockedTests {
 
     @Test
-    public void test_statistics_unauthorized() {
+    void test_statistics_unauthorized() {
         final var invalidToken = "invalid";
 
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/statistics", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
@@ -22,7 +22,7 @@ public class StatisticsTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_statistics_get() {
+    void test_statistics_get() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
@@ -34,7 +34,7 @@ public class StatisticsTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_statistics_public_get() {
+    void test_statistics_public_get() {
         // WHEN
         ResponseEntity<StatisticsGroup> statisticsResponse = restTemplate.exchange("/public/statistics", HttpMethod.GET, emptyPayloadWithoutAuth(), StatisticsGroup.class);
 

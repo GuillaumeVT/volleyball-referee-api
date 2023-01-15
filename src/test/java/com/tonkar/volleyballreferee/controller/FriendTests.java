@@ -21,10 +21,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FriendTests extends VbrMockedTests {
+class FriendTests extends VbrMockedTests {
 
     @Test
-    public void test_friends_unauthorized() {
+    void test_friends_unauthorized() {
         final var invalidToken = "invalid";
 
         ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/users/friends", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
@@ -53,7 +53,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_request() {
+    void test_friends_request() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -66,7 +66,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_request_conflict() {
+    void test_friends_request_conflict() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
@@ -78,7 +78,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_request_conflict2() {
+    void test_friends_request_conflict2() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -92,7 +92,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_request_received_count(@Autowired FriendService friendService) {
+    void test_friends_request_received_count(@Autowired FriendService friendService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -107,7 +107,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_request_received_count2(@Autowired FriendService friendService) {
+    void test_friends_request_received_count2(@Autowired FriendService friendService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -122,7 +122,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_request_received_list(@Autowired FriendService friendService) {
+    void test_friends_request_received_list(@Autowired FriendService friendService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -138,7 +138,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_request_received_list2(@Autowired FriendService friendService) {
+    void test_friends_request_received_list2(@Autowired FriendService friendService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -154,7 +154,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_request_sent_list(@Autowired FriendService friendService) {
+    void test_friends_request_sent_list(@Autowired FriendService friendService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -170,7 +170,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_request_sent_list2(@Autowired FriendService friendService) {
+    void test_friends_request_sent_list2(@Autowired FriendService friendService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -186,7 +186,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_and_requests() {
+    void test_friends_and_requests() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
@@ -198,7 +198,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_reject(@Autowired FriendService friendService) {
+    void test_friends_reject(@Autowired FriendService friendService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -214,7 +214,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_accept(@Autowired FriendService friendService) {
+    void test_friends_accept(@Autowired FriendService friendService) {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -232,7 +232,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_remove() {
+    void test_friends_remove() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
@@ -249,7 +249,7 @@ public class FriendTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_friends_remove_notFound() {
+    void test_friends_remove_notFound() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         String anyId = UUID.randomUUID().toString();

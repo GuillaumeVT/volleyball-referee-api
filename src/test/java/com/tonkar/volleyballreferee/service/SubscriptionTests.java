@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Import(VbrTestConfiguration.class)
 @ActiveProfiles("test")
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
-public class SubscriptionTests {
+class SubscriptionTests {
 
     @MockBean
     private EmailService emailService;
@@ -36,7 +36,7 @@ public class SubscriptionTests {
     private String testPurchaseToken;
 
     @PostConstruct
-    public void init() {
+    void init() {
         Mockito
                 .doNothing()
                 .when(emailService)
@@ -60,13 +60,13 @@ public class SubscriptionTests {
     }
 
     @Test
-    public void test_subscriptions_get(@Autowired SubscriptionService subscriptionService) {
+    void test_subscriptions_get(@Autowired SubscriptionService subscriptionService) {
         // The purchase token is not a subscription
         assertThrows(ResponseStatusException.class, () -> subscriptionService.getUserSubscription(testPurchaseToken));
     }
 
     @Test
-    public void test_subscriptions_validate(@Autowired SubscriptionService subscriptionService) {
+    void test_subscriptions_validate(@Autowired SubscriptionService subscriptionService) {
         // WHEN
         var subscription = subscriptionService.validatePurchaseToken(testPurchaseToken);
 
@@ -76,7 +76,7 @@ public class SubscriptionTests {
     }
 
     @Test
-    public void test_subscriptions_refresh(@Autowired SubscriptionService subscriptionService) {
+    void test_subscriptions_refresh(@Autowired SubscriptionService subscriptionService) {
         // The purchase token is not a subscription
         assertThrows(ResponseStatusException.class, () -> subscriptionService.refreshSubscriptionPurchaseToken(testPurchaseToken));
     }

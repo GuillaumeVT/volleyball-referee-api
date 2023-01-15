@@ -9,10 +9,10 @@ import org.springframework.data.domain.PageRequest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AdminTests extends VbrMockedTests {
+class AdminTests extends VbrMockedTests {
 
     @Test
-    public void test_admin_listUsers(@Autowired AdminService adminService) {
+    void test_admin_listUsers(@Autowired AdminService adminService) {
         // GIVEN
         sandbox.createUser();
 
@@ -24,7 +24,7 @@ public class AdminTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_admin_listUsers_filter_empty(@Autowired AdminService adminService) {
+    void test_admin_listUsers_filter_empty(@Autowired AdminService adminService) {
         // GIVEN
         sandbox.createUser();
 
@@ -36,7 +36,7 @@ public class AdminTests extends VbrMockedTests {
     }
 
     @Test
-    public void test_admin_listUsers_filter(@Autowired AdminService adminService) {
+    void test_admin_listUsers_filter(@Autowired AdminService adminService) {
         // GIVEN
         String email = faker.internet().safeEmailAddress();
         sandbox.createUser(email);

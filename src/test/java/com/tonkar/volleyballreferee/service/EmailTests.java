@@ -21,7 +21,7 @@ import java.util.UUID;
 @Import(VbrTestConfiguration.class)
 @ActiveProfiles("test")
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
-public class EmailTests {
+class EmailTests {
 
     @Value("${test.user.email}")
     private String testTargetEmail;
@@ -35,33 +35,33 @@ public class EmailTests {
     }
 
     @Test
-    public void test_emails_userCreated(@Autowired EmailService emailService) {
+    void test_emails_userCreated(@Autowired EmailService emailService) {
         User user = sandbox.generateUser(testTargetEmail);
 
         emailService.sendUserCreatedNotificationEmail(user);
     }
 
     @Test
-    public void test_emails_passwordReset(@Autowired EmailService emailService) {
+    void test_emails_passwordReset(@Autowired EmailService emailService) {
         emailService.sendPasswordResetEmail(testTargetEmail, UUID.randomUUID());
     }
 
     @Test
-    public void test_emails_passwordUpdated(@Autowired EmailService emailService) {
+    void test_emails_passwordUpdated(@Autowired EmailService emailService) {
         User user = sandbox.generateUser(testTargetEmail);
 
         emailService.sendPasswordUpdatedNotificationEmail(user);
     }
 
     @Test
-    public void test_emails_pseudoUpdated(@Autowired EmailService emailService) {
+    void test_emails_pseudoUpdated(@Autowired EmailService emailService) {
         User user = sandbox.generateUser(testTargetEmail);
 
         emailService.sendPseudoUpdatedNotificationEmail(user);
     }
 
     @Test
-    public void test_emails_friendRequested(@Autowired EmailService emailService) {
+    void test_emails_friendRequested(@Autowired EmailService emailService) {
         User senderUser = sandbox.generateUser(faker.internet().safeEmailAddress());
         User receiverUser = sandbox.generateUser(testTargetEmail);
 
@@ -69,7 +69,7 @@ public class EmailTests {
     }
 
     @Test
-    public void test_emails_friendAccepted(@Autowired EmailService emailService) {
+    void test_emails_friendAccepted(@Autowired EmailService emailService) {
         User acceptingUser = sandbox.generateUser(faker.internet().safeEmailAddress());
         User senderUser = sandbox.generateUser(testTargetEmail);
 
