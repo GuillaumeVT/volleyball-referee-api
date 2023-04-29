@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '3.0.1'
+    id 'org.springframework.boot' version '3.0.6'
     id 'io.spring.dependency-management' version '1.1.0'
     id 'java'
 }
@@ -18,14 +18,13 @@ repositories {
 dependencies {
     def jjwt_version = '0.11.5'
     def lombok_version = '1.18.24'
-    def jsoup_version =  '1.15.3'
+    def jsoup_version =  '1.15.4'
     def mail_version = '1.6.2'
-    def jaxb_version = '2.3.1'
     def google_oauth2_version = '1.12.1'
     def android_publisher_version = 'v3-rev20221025-2.0.0'
     def poi_xml_version = '5.2.3'
-    def embedded_mongo_version = '4.3.2'
-    def faker_version = '1.7.0'
+    def embedded_mongo_version = '4.6.2'
+    def faker_version = '1.9.0'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-logging'
@@ -42,7 +41,6 @@ dependencies {
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: jjwt_version
     implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: jjwt_version
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: jjwt_version
-    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: jaxb_version
     // Google APIs
     implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version: google_oauth2_version
     implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: android_publisher_version

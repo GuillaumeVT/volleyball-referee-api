@@ -23,7 +23,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(jsr250Enabled = true)
+@EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
 
     @Autowired
