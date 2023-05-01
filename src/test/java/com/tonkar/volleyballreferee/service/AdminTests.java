@@ -11,8 +11,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AdminTests extends VbrMockedTests {
 
+    private final AdminService adminService;
+
+    public AdminTests(@Autowired AdminService adminService) {
+        super();
+        this.adminService = adminService;
+    }
+
     @Test
-    void test_admin_listUsers(@Autowired AdminService adminService) {
+    void test_admin_listUsers() {
         // GIVEN
         sandbox.createUser();
 
@@ -24,7 +31,7 @@ class AdminTests extends VbrMockedTests {
     }
 
     @Test
-    void test_admin_listUsers_filter_empty(@Autowired AdminService adminService) {
+    void test_admin_listUsers_filter_empty() {
         // GIVEN
         sandbox.createUser();
 
@@ -36,7 +43,7 @@ class AdminTests extends VbrMockedTests {
     }
 
     @Test
-    void test_admin_listUsers_filter(@Autowired AdminService adminService) {
+    void test_admin_listUsers_filter() {
         // GIVEN
         String email = faker.internet().safeEmailAddress();
         sandbox.createUser(email);

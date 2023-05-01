@@ -30,6 +30,7 @@ class GameTests extends VbrMockedTests {
     private final GameService gameService;
 
     public GameTests(@Autowired GameService gameService) {
+        super();
         this.gameService = gameService;
     }
 

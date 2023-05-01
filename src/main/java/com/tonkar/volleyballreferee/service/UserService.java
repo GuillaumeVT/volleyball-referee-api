@@ -240,6 +240,7 @@ public class UserService {
             if (!userDao.updateUserPseudo(user.getId(), pseudo)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Unable to set pseudo %s for user %s", pseudo, user.getId()));
             }
+            userDao.updateFriendPseudo(user.getId(), pseudo);
             gameDao.updateUserPseudo(user.getId(), pseudo);
             friendRequestDao.updateSenderPseudo(user.getId(), pseudo);
             friendRequestDao.updateReceiverPseudo(user.getId(), pseudo);

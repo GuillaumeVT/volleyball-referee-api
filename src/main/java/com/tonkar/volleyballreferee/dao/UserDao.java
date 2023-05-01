@@ -126,6 +126,13 @@ public class UserDao {
         return updateResult.getModifiedCount() > 0;
     }
 
+    public boolean updateFriendPseudo(String userId, String pseudo) {
+        Query query = new Query(Criteria.where(User.Fields.friends + "." + User.Friend.Fields.id).is(userId));
+        Update update = new Update().set(User.Fields.friends + ".$." + User.Friend.Fields.pseudo, pseudo);
+        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, User.class);
+        return updateResult.getModifiedCount() > 0;
+    }
+
     public boolean addFriend(String userId, User.Friend friend) {
         Query query = new Query(Criteria.where(_id).is(userId));
         Update update = new Update().addToSet(User.Fields.friends, friend);

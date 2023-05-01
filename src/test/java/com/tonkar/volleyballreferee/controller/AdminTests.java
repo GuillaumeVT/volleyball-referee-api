@@ -22,6 +22,16 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class AdminTests extends VbrMockedTests {
 
+    private final UserService userService;
+
+    private final UserDao userDao;
+
+    public AdminTests(@Autowired UserService userService, @Autowired UserDao userDao) {
+        super();
+        this.userService = userService;
+        this.userDao = userDao;
+    }
+
     @Test
     void test_admin_unauthorized() {
         final var invalidToken = "invalid";
@@ -63,12 +73,6 @@ class AdminTests extends VbrMockedTests {
         errorResponse = restTemplate.exchange(String.format("/admin/users/%s/subscription/%s", UUID.randomUUID(), "token"), HttpMethod.POST, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
         assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
     }
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private UserDao userDao;
 
     @Test
     void test_admin() {

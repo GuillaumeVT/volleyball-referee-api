@@ -10,8 +10,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FriendTests extends VbrMockedTests {
 
+    private final FriendService friendService;
+
+    public FriendTests(@Autowired FriendService friendService) {
+        super();
+        this.friendService = friendService;
+    }
+
     @Test
-    void test_friends_and_requests(@Autowired FriendService friendService) {
+    void test_friends_and_requests() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
