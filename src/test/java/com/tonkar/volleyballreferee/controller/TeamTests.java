@@ -28,6 +28,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TeamTests extends VbrMockedTests {
 
+     private final TeamService teamService;
+
+    public TeamTests(@Autowired TeamService teamService) {
+        super();
+        this.teamService = teamService;
+    }
+
     @Test
     void test_teams_unauthorized() {
         final var invalidToken = "invalid";
@@ -350,7 +357,7 @@ class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    void test_teams_delete(@Autowired TeamService teamService) {
+    void test_teams_delete() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
@@ -364,7 +371,7 @@ class TeamTests extends VbrMockedTests {
     }
 
     @Test
-    void test_teams_deleteAll(@Autowired TeamService teamService) {
+    void test_teams_deleteAll() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createBeachTeam(userToken.user().id());

@@ -29,11 +29,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 class SubscriptionTests {
 
+    private final SubscriptionService subscriptionService;
+
     @MockBean
     private EmailService emailService;
 
-    @Value("${test.user.purchase-token}")
-    private String testPurchaseToken;
+
+    private final String testPurchaseToken;
+
+    public SubscriptionTests(@Autowired SubscriptionService subscriptionService,  @Value("${test.user.purchase-token}") String testPurchaseToken) {
+        this.subscriptionService = subscriptionService;
+        this.testPurchaseToken = testPurchaseToken;
+    }
 
     @PostConstruct
     void init() {
@@ -60,13 +67,13 @@ class SubscriptionTests {
     }
 
     @Test
-    void test_subscriptions_get(@Autowired SubscriptionService subscriptionService) {
+    void test_subscriptions_get() {
         // The purchase token is not a subscription
         assertThrows(ResponseStatusException.class, () -> subscriptionService.getUserSubscription(testPurchaseToken));
     }
 
     @Test
-    void test_subscriptions_validate(@Autowired SubscriptionService subscriptionService) {
+    void test_subscriptions_validate() {
         // WHEN
         var subscription = subscriptionService.validatePurchaseToken(testPurchaseToken);
 
@@ -76,7 +83,7 @@ class SubscriptionTests {
     }
 
     @Test
-    void test_subscriptions_refresh(@Autowired SubscriptionService subscriptionService) {
+    void test_subscriptions_refresh() {
         // The purchase token is not a subscription
         assertThrows(ResponseStatusException.class, () -> subscriptionService.refreshSubscriptionPurchaseToken(testPurchaseToken));
     }

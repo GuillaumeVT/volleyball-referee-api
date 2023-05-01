@@ -5,6 +5,7 @@ import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -20,7 +21,7 @@ public class StatisticsController {
 
     private final StatisticsService statisticsService;
 
-    @GetMapping(value = "/statistics", produces = {"application/json"})
+    @GetMapping(value = "/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<StatisticsGroup> getUserStatistics(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(statisticsService.getUserStatistics(user), HttpStatus.OK);
     }

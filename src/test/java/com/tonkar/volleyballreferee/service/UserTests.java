@@ -8,18 +8,34 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.server.ResponseStatusException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class UserTests extends VbrMockedTests {
 
+
+    private final UserService userService;
+
+    private final GameService gameService;
+
+    public UserTests(@Autowired UserService userService, @Autowired GameService gameService) {
+        super();
+        this.userService = userService;
+        this.gameService = gameService;
+    }
+
     @Test
-    void test_users_updatePseudo(@Autowired UserService userService, @Autowired GameService gameService) {
+    void test_users_updatePseudo() {
         // GIVEN
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         userService.createUser(user);
+
+        User user2 = sandbox.generateUser(faker.internet().safeEmailAddress());
+        userService.createUser(user2);
+        sandbox.addFriend(user, user2);
+
         Game game = sandbox.generateBeachGame(user.getId());
         gameService.createGame(user, game);
+
         String newPseudo = faker.name().firstName();
 
         // WHEN
@@ -28,10 +44,16 @@ class UserTests extends VbrMockedTests {
         // THEN
         assertEquals(newPseudo, userSummary.pseudo());
         assertEquals(newPseudo, gameService.getGame(game.getId()).getRefereeName());
+        assertTrue(userService
+                .getUser(user2.getId())
+                .getFriends()
+                .stream()
+                .anyMatch(friend -> friend.getId().equals(user.getId()) && friend.getPseudo().equals(newPseudo))
+        );
     }
 
     @Test
-    void test_users_updatePseudo_conflict(@Autowired UserService userService) {
+    void test_users_updatePseudo_conflict() {
         // GIVEN
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         String newPseudo = user.getPseudo();
@@ -41,7 +63,7 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
-    void test_users_updatePseudo_invalid(@Autowired UserService userService) {
+    void test_users_updatePseudo_invalid() {
         // GIVEN
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         String newPseudo = "ab";

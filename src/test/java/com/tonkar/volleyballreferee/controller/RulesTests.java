@@ -25,6 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RulesTests extends VbrMockedTests {
 
+    private final RulesService rulesService;
+
+    public RulesTests(@Autowired RulesService rulesService) {
+        super();
+        this.rulesService = rulesService;
+    }
+
     @Test
     void test_rules_unauthorized() {
         final var invalidToken = "invalid";
@@ -253,7 +260,7 @@ class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    void test_rules_delete(@Autowired RulesService rulesService) {
+    void test_rules_delete() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Rules rules = sandbox.createIndoorRules(userToken.user().id());
@@ -267,7 +274,7 @@ class RulesTests extends VbrMockedTests {
     }
 
     @Test
-    void test_rules_deleteAll(@Autowired RulesService rulesService) {
+    void test_rules_deleteAll() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createIndoorRules(userToken.user().id());

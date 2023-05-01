@@ -52,7 +52,7 @@ public class User implements UserDetails {
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(admin ? "ROLE_ADMIN" : "ROLE_USER"));
+        return List.of(new SimpleGrantedAuthority(admin ? "ADMIN" : "USER"));
     }
 
     @JsonIgnore

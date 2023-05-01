@@ -21,6 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class UserTests extends VbrMockedTests {
 
+    private final UserService userService;
+
+    public UserTests(@Autowired UserService userService) {
+        super();
+        this.userService = userService;
+    }
+
     @Test
     void test_users_get_byPurchaseToken() {
         // GIVEN
@@ -136,7 +143,7 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
-    void test_users_signIn(@Autowired UserService userService) {
+    void test_users_signIn() {
         // GIVEN
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         String password = user.getPassword();
@@ -164,7 +171,7 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
-    void test_users_updatePassword(@Autowired UserService userService) {
+    void test_users_updatePassword() {
         // GIVEN
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         String currentPassword = user.getPassword();
@@ -179,7 +186,7 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
-    void test_users_updatePassword_invalidPassword(@Autowired UserService userService) {
+    void test_users_updatePassword_invalidPassword() {
         // GIVEN
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         String currentPassword = user.getPassword();
@@ -233,7 +240,7 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
-    void test_users_recoverPassword_follow(@Autowired UserService userService) {
+    void test_users_recoverPassword_follow() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         User user = sandbox.getUser(userToken.user().id());
@@ -267,7 +274,7 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
-    void test_users_recoverPassword_reset(@Autowired UserService userService) {
+    void test_users_recoverPassword_reset() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         User user = sandbox.getUser(userToken.user().id());
@@ -282,7 +289,7 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
-    void test_users_recoverPassword_reset_invalidPassword(@Autowired UserService userService) {
+    void test_users_recoverPassword_reset_invalidPassword() {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         User user = sandbox.getUser(userToken.user().id());
@@ -310,7 +317,7 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
-    void test_users_updatePseudo(@Autowired UserService userService) {
+    void test_users_updatePseudo() {
         // GIVEN
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         UserToken userToken = userService.createUser(user);
@@ -325,7 +332,7 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
-    void test_users_updatePseudo_conflict(@Autowired UserService userService) {
+    void test_users_updatePseudo_conflict() {
         // GIVEN
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         UserToken userToken = userService.createUser(user);
@@ -339,7 +346,7 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
-    void test_users_updatePseudo_invalid(@Autowired UserService userService) {
+    void test_users_updatePseudo_invalid() {
         // GIVEN
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         UserToken userToken = userService.createUser(user);
