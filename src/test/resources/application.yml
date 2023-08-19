@@ -1,6 +1,9 @@
 spring:
   profiles:
     active: test
+  cache:
+    jcache:
+      provider: org.ehcache.jsr107.EhcacheCachingProvider
 
 de:
   flapdoodle:

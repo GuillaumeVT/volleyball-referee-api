@@ -10,6 +10,9 @@ spring:
       database: ${VBR_DB:}
       username: ${VBR_DB_USER:}
       password: ${VBR_DB_PASSWORD:}
+  cache:
+    jcache:
+      provider: org.ehcache.jsr107.EhcacheCachingProvider
 
 vbr:
   jwt:
