@@ -20,11 +20,11 @@ dependencies {
     def lombok_version = '1.18.28'
     def jsoup_version =  '1.16.1'
     def mail_version = '1.6.2'
-    def google_oauth2_version = '1.12.1'
+    def google_oauth2_version = '1.19.0'
     def ehcache_version = '3.10.8'
     def android_publisher_version = 'v3-rev20230815-2.0.0'
     def poi_xml_version = '5.2.3'
-    def embedded_mongo_version = '4.7.0'
+    def embedded_mongo_version = '4.7.1'
     def faker_version = '2.0.1'
 
     implementation 'org.springframework.boot:spring-boot-starter'

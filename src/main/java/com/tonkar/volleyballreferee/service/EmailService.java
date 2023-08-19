@@ -73,6 +73,36 @@ public class EmailService {
         sendEmail(email, title, user.getEmail());
     }
 
+    public void sendUserDeletedNotificationEmail(User user) {
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(EMAIL_HTML_SKELETON);
+
+        org.jsoup.nodes.Element titleHtmlDiv = email.getElementById("title");
+        org.jsoup.nodes.Element contentHtmlDiv = email.getElementById("content");
+
+        String title = "Your Volleyball Referee account was deleted";
+        titleHtmlDiv.appendText(title);
+
+        String content = String.format("Dear %s. As requested, your account is now deleted including all your personal data, and your Android app subscription is canceled.", user.getPseudo());
+        contentHtmlDiv.appendText(content);
+
+        sendEmail(email, title, user.getEmail());
+    }
+
+    public void sendInactiveUserDeletedNotificationEmail(User user) {
+        org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(EMAIL_HTML_SKELETON);
+
+        org.jsoup.nodes.Element titleHtmlDiv = email.getElementById("title");
+        org.jsoup.nodes.Element contentHtmlDiv = email.getElementById("content");
+
+        String title = "Your Volleyball Referee account was deleted";
+        titleHtmlDiv.appendText(title);
+
+        String content = String.format("Dear %s. Your subscription expired over 12 months ago and your account is now deleted including all your personal data.", user.getPseudo());
+        contentHtmlDiv.appendText(content);
+
+        sendEmail(email, title, user.getEmail());
+    }
+
     public void sendPasswordResetEmail(@Email String userEmail, UUID passwordResetId) {
         org.jsoup.nodes.Document email = org.jsoup.Jsoup.parse(EMAIL_HTML_SKELETON);
 

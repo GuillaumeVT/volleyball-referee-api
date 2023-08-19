@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.configuration;
 
 import com.tonkar.volleyballreferee.dto.GameSummary;
+import com.tonkar.volleyballreferee.dto.NewUser;
 import com.tonkar.volleyballreferee.dto.UserToken;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.*;
@@ -55,6 +56,10 @@ public class VbrTestConfiguration {
             faker = faker();
         }
 
+        public NewUser generateNewUser(String email) {
+            return new NewUser(UUID.randomUUID().toString(), faker.name().firstName(), email == null ? faker.internet().safeEmailAddress() : email, "Password1234+", faker.finance().iban());
+        }
+
         public User generateUser(String email) {
             final var now = LocalDateTime.now();
             final var nowMillis = now.toInstant(ZoneOffset.UTC).toEpochMilli();
@@ -80,7 +85,7 @@ public class VbrTestConfiguration {
         }
 
         public UserToken createUser(String email) {
-            return userService.createUser(generateUser(email));
+            return userService.createUser(generateNewUser(email));
         }
 
         public User getUser(String userId) {
@@ -91,7 +96,6 @@ public class VbrTestConfiguration {
             UUID friendRequestId = friendService.sendFriendRequest(user1, user2.getPseudo());
             friendService.acceptFriendRequest(user2, friendRequestId);
         }
-
 
         public GameSummary createScheduledBeachGame(String userId) {
             GameSummary gameSummary = generateScheduledBeachGame(userId, true);

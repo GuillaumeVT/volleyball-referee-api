@@ -86,7 +86,7 @@ public class FriendService {
         } else {
             userDao.addFriend(senderUser.getId(), new User.Friend(receiverUser.getId(), receiverUser.getPseudo()));
             userDao.addFriend(receiverUser.getId(), new User.Friend(senderUser.getId(), senderUser.getPseudo()));
-            log.info(String.format("%s and %s are now friends", senderUser.getId(), receiverUser.getId()));
+            log.info("{} and {} are now friends", senderUser.getId(), receiverUser.getId());
             emailService.sendAcceptFriendRequestEmail(receiverUser, senderUser);
         }
 
@@ -101,7 +101,7 @@ public class FriendService {
         if (userDao.areFriends(user.getId(), friendId)) {
             userDao.removeFriend(user.getId(), friendId);
             userDao.removeFriend(friendId, user.getId());
-            log.info(String.format("%s and %s are no longer friends", user.getId(), friendId));
+            log.info("{} and {} are no longer friends", user.getId(), friendId);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("%s and %s are not friends", user.getId(), friendId));
         }

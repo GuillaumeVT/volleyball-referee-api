@@ -8,6 +8,7 @@ import org.jsoup.nodes.Element;
 
 import java.awt.*;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
@@ -744,12 +745,12 @@ public class ScoreSheetWriter {
     private String toBase64(String imageFilename) {
         String base64Image;
 
-        try {
-            byte[] imageData = getClass().getResourceAsStream(String.format("/images/%s", imageFilename)).readAllBytes();
+        try (InputStream stream = getClass().getResourceAsStream(String.format("/images/%s", imageFilename))) {
+            byte[] imageData = stream.readAllBytes();
             base64Image = Base64.getEncoder().encodeToString(imageData);
         } catch (IOException e) {
             base64Image = "";
-            log.error(String.format("Could not encode %s into base 64", imageFilename));
+            log.error("Could not encode {} into base 64", imageFilename);
         }
 
         return base64Image;

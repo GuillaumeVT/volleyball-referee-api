@@ -31,7 +31,9 @@ public class UserDao {
             .and(_id).as(_id)
             .and(User.Fields.pseudo).as(UserSummary.Fields.pseudo)
             .and(User.Fields.email).as(UserSummary.Fields.email)
-            .and(User.Fields.admin).as(UserSummary.Fields.admin);
+            .and(User.Fields.admin).as(UserSummary.Fields.admin)
+            .and(User.Fields.subscription).as(UserSummary.Fields.subscription)
+            .and(User.Fields.subscriptionExpiryAt).as(UserSummary.Fields.subscriptionExpiryAt);
 
     private final MongoTemplate mongoTemplate;
 

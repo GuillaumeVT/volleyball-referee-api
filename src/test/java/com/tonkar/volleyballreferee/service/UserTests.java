@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.VbrMockedTests;
+import com.tonkar.volleyballreferee.dto.NewUser;
 import com.tonkar.volleyballreferee.dto.UserSummary;
 import com.tonkar.volleyballreferee.entity.Game;
 import com.tonkar.volleyballreferee.entity.User;
@@ -26,11 +27,15 @@ class UserTests extends VbrMockedTests {
     @Test
     void test_users_updatePseudo() {
         // GIVEN
-        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
-        userService.createUser(user);
+        NewUser newUser = sandbox.generateNewUser(faker.internet().safeEmailAddress());
+        userService.createUser(newUser);
 
-        User user2 = sandbox.generateUser(faker.internet().safeEmailAddress());
-        userService.createUser(user2);
+        NewUser newUser2 = sandbox.generateNewUser(faker.internet().safeEmailAddress());
+        userService.createUser(newUser2);
+
+        User user = userService.getUser(newUser.id());
+        User user2 = userService.getUser(newUser2.id());
+
         sandbox.addFriend(user, user2);
 
         Game game = sandbox.generateBeachGame(user.getId());

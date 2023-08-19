@@ -12,5 +12,7 @@ public record UserSummary(
         String pseudo,
         @Email
         String email,
-        boolean admin) {
+        boolean admin,
+        boolean subscription,
+        long subscriptionExpiryAt) {
 }

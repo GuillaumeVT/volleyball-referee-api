@@ -75,11 +75,13 @@ public class VbrMockedTests {
         subscriptionPurchase.setExpiryTimeMillis(LocalDateTime.of(2100, 12, 31, 0, 0).toInstant(ZoneOffset.UTC).toEpochMilli());
 
         Mockito
-                .when(subscriptionService.getUserSubscription(Mockito.anyString()))
-                .thenReturn(subscriptionPurchase);
+                .doReturn(subscriptionPurchase)
+                .when(subscriptionService)
+                .getUserSubscription(Mockito.anyString());
         Mockito
-                .when(subscriptionService.getUserSubscription(invalidPurchaseToken))
-                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
+                .when(subscriptionService)
+                .getUserSubscription(invalidPurchaseToken);
         Mockito
                 .doNothing()
                 .when(subscriptionService)
@@ -89,11 +91,17 @@ public class VbrMockedTests {
                 .when(subscriptionService)
                 .refreshSubscriptionPurchaseToken(invalidPurchaseToken);
         Mockito
-                .when(subscriptionService.validatePurchaseToken(Mockito.anyString()))
-                .thenReturn(subscriptionPurchase);
+                .doReturn(subscriptionPurchase)
+                .when(subscriptionService)
+                .validatePurchaseToken(Mockito.anyString());
         Mockito
-                .when(subscriptionService.validatePurchaseToken(invalidPurchaseToken))
-                .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN));
+                .doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN))
+                .when(subscriptionService)
+                .validatePurchaseToken(invalidPurchaseToken);
+        Mockito
+                .doNothing()
+                .when(subscriptionService)
+                .cancelUserSubscription(Mockito.anyString());
     }
 
     @BeforeEach

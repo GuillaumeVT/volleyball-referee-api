@@ -41,8 +41,8 @@ public class PublicController {
     }
 
     @PostMapping(value = "/public/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserToken> createUser(@Valid @NotNull @RequestBody User user) {
-        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+    public ResponseEntity<UserToken> createUser(@Valid @NotNull @RequestBody NewUser newUser) {
+        return new ResponseEntity<>(userService.createUser(newUser), HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/public/users/token", produces = MediaType.APPLICATION_JSON_VALUE)

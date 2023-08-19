@@ -66,6 +66,7 @@ public class SubscriptionService {
         try {
             return subscriptions.get(androidPackageName, androidSubscriptionSku, purchaseToken).execute();
         } catch (IOException e) {
+            log.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the purchase token %s", purchaseToken));
         }
     }
@@ -93,7 +94,7 @@ public class SubscriptionService {
 
         // Store the latest purchase token and the subscription expiry date
         optionalUser.ifPresent(userSummary -> {
-            log.info(String.format("Found the user %s from the linked purchase tokens, store new token %s with expiry %d", userSummary.id(), purchaseToken, subscriptionExpiryAt));
+            log.info("Found the user {} ({}) from the linked purchase tokens, store new token {} with expiry {}", userSummary.id(), userSummary.pseudo(), purchaseToken, subscriptionExpiryAt);
             userDao.updateSubscriptionPurchaseToken(userSummary.id(), purchaseToken, subscriptionExpiryAt);
         });
     }
@@ -122,5 +123,14 @@ public class SubscriptionService {
         }
 
         return valid;
+    }
+
+    public void cancelUserSubscription(String purchaseToken) {
+        try {
+            subscriptions.cancel(androidPackageName, androidSubscriptionSku, purchaseToken).execute();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the purchase token %s", purchaseToken));
+        }
     }
 }

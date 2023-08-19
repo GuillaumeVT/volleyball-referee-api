@@ -5,6 +5,7 @@ import com.tonkar.volleyballreferee.dao.FriendRequestDao;
 import com.tonkar.volleyballreferee.dao.GameDao;
 import com.tonkar.volleyballreferee.dao.PasswordResetDao;
 import com.tonkar.volleyballreferee.dao.UserDao;
+import com.tonkar.volleyballreferee.dto.NewUser;
 import com.tonkar.volleyballreferee.dto.UserPasswordUpdate;
 import com.tonkar.volleyballreferee.dto.UserSummary;
 import com.tonkar.volleyballreferee.dto.UserToken;
@@ -93,23 +94,29 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user for purchase token %s", purchaseToken)));
     }
 
-    public UserToken createUser(User user) {
-        if (userDao.existsByPurchaseToken(user.getPurchaseToken())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with purchase token %s", user.getPurchaseToken()));
+    public UserToken createUser(NewUser newUser) {
+        if (userDao.existsByPurchaseToken(newUser.purchaseToken())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with purchase token %s", newUser.purchaseToken()));
         }
 
-        SubscriptionPurchase subscription = subscriptionService.validatePurchaseToken(user.getPurchaseToken());
+        SubscriptionPurchase subscription = subscriptionService.validatePurchaseToken(newUser.purchaseToken());
 
-        String password = user.getPassword().trim();
+        String password = newUser.password().trim();
         validatePassword(password);
 
-        Optional<User> optionalExistingUser = userDao.findByEmail(user.getEmail());
+        User user = new User();
+        user.setId(newUser.id());
+        user.setPseudo(newUser.pseudo());
+        user.setEmail(newUser.email());
+        user.setPurchaseToken(newUser.purchaseToken());
+
+        Optional<User> optionalExistingUser = userDao.findByEmail(newUser.email());
 
         if (optionalExistingUser.isPresent()) {
             User existingUser = optionalExistingUser.get();
 
             if (existingUser.isAccountNonExpired()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with email %s", user.getEmail()));
+                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with email %s", newUser.email()));
             } else {
                 user.setId(existingUser.getId());
                 user.setPseudo(existingUser.getPseudo());
@@ -252,7 +259,7 @@ public class UserService {
 
         emailService.sendPseudoUpdatedNotificationEmail(user);
 
-        return new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin());
+        return new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin(), user.isSubscription(), user.getSubscriptionExpiryAt());
     }
 
     private UserToken buildToken(User user) {
@@ -271,7 +278,7 @@ public class UserService {
         return new UserToken(
                 token,
                 Date.from(exp.toInstant(ZoneOffset.UTC)).getTime(),
-                new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin())
+                new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin(), user.isSubscription(), user.getSubscriptionExpiryAt())
         );
     }
 
@@ -286,7 +293,7 @@ public class UserService {
                     .parseClaimsJws(token)
                     .getBody());
         } catch (JwtException e) {
-            log.error(String.format("Failed to parse token %s", token));
+            log.error("Failed to parse token {}", token);
             optionalClaims = Optional.empty();
         }
 

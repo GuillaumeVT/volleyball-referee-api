@@ -4,6 +4,7 @@ import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.service.FriendService;
+import com.tonkar.volleyballreferee.service.GdprComplianceService;
 import com.tonkar.volleyballreferee.service.SubscriptionService;
 import com.tonkar.volleyballreferee.service.UserService;
 import jakarta.validation.Valid;
@@ -26,9 +27,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService         userService;
-    private final SubscriptionService subscriptionService;
-    private final FriendService       friendService;
+    private final UserService           userService;
+    private final SubscriptionService   subscriptionService;
+    private final FriendService         friendService;
+    private final GdprComplianceService gdprComplianceService;
 
     @PostMapping(value = "/users/{purchaseToken}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> refreshSubscriptionPurchaseToken(@AuthenticationPrincipal User user, @PathVariable("purchaseToken") @NotBlank String purchaseToken) {
@@ -46,6 +48,12 @@ public class UserController {
     @PatchMapping(value = "/users/pseudo", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserSummary> updateUserPseudo(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody UserPseudo userPseudo) {
         return new ResponseEntity<>(userService.updateUserPseudo(user, userPseudo.userPseudo()), HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal User user) {
+        gdprComplianceService.deleteUser(user, true);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping(value = "/users/friends/requested", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -87,7 +95,7 @@ public class UserController {
     }
 
     @DeleteMapping(value = "/users/friends/remove/{friendId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> removeFriend(@AuthenticationPrincipal User user, @PathVariable("friendId") String friendId){
+    public ResponseEntity<Void> removeFriend(@AuthenticationPrincipal User user, @PathVariable("friendId") String friendId) {
         friendService.removeFriend(user, friendId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

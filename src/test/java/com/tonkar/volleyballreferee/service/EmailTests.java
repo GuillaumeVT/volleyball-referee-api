@@ -46,6 +46,20 @@ class EmailTests {
     }
 
     @Test
+    void test_emails_userDeleted_requested() {
+        User user = sandbox.generateUser(testTargetEmail);
+
+        emailService.sendUserDeletedNotificationEmail(user);
+    }
+
+    @Test
+    void test_emails_userDeleted_inactive() {
+        User user = sandbox.generateUser(testTargetEmail);
+
+        emailService.sendInactiveUserDeletedNotificationEmail(user);
+    }
+
+    @Test
     void test_emails_passwordReset() {
         emailService.sendPasswordResetEmail(testTargetEmail, UUID.randomUUID());
     }
