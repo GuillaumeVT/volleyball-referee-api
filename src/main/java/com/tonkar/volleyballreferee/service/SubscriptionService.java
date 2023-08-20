@@ -1,6 +1,7 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.AndroidPublisherScopes;
@@ -66,7 +67,7 @@ public class SubscriptionService {
         try {
             return subscriptions.get(androidPackageName, androidSubscriptionSku, purchaseToken).execute();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            printGoogleApiError(purchaseToken, e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the purchase token %s", purchaseToken));
         }
     }
@@ -119,7 +120,7 @@ public class SubscriptionService {
             products.get(androidPackageName, androidPurchaseSku, purchaseToken).execute();
             valid = true;
         } catch (IOException e) {
-            log.error(e.getMessage());
+            printGoogleApiError(purchaseToken, e);
         }
 
         return valid;
@@ -129,8 +130,16 @@ public class SubscriptionService {
         try {
             subscriptions.cancel(androidPackageName, androidSubscriptionSku, purchaseToken).execute();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            printGoogleApiError(purchaseToken, e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find the purchase token %s", purchaseToken));
+        }
+    }
+
+    private void printGoogleApiError(String purchaseToken, IOException exception) {
+        if (exception instanceof GoogleJsonResponseException googleJsonResponseException) {
+            log.error("Error while retrieving the purchase token {}: {}", purchaseToken, googleJsonResponseException.getDetails().getOrDefault("message", googleJsonResponseException.getContent()));
+        } else {
+            log.error(exception.getMessage());
         }
     }
 }
