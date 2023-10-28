@@ -25,8 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -51,7 +51,7 @@ public class UserService {
     @Value("${vbr.web.domain}")
     private String webDomain;
 
-    private Key signingKey;
+    private SecretKey signingKey;
 
     @Autowired
     public void initJwtSigningKey(@Value("${vbr.jwt.key}") String jwtKey) {
@@ -268,10 +268,10 @@ public class UserService {
 
         String token = Jwts
                 .builder()
-                .setIssuer("com.tonkar.volleyballreferee")
-                .setSubject(user.getId())
-                .setIssuedAt(Date.from(iat.toInstant(ZoneOffset.UTC)))
-                .setExpiration(Date.from(exp.toInstant(ZoneOffset.UTC)))
+                .issuer("com.tonkar.volleyballreferee")
+                .subject(user.getId())
+                .issuedAt(Date.from(iat.toInstant(ZoneOffset.UTC)))
+                .expiration(Date.from(exp.toInstant(ZoneOffset.UTC)))
                 .signWith(signingKey)
                 .compact();
 
@@ -287,11 +287,11 @@ public class UserService {
 
         try {
             optionalClaims = Optional.of(Jwts
-                    .parserBuilder()
-                    .setSigningKey(signingKey)
+                    .parser()
+                    .verifyWith(signingKey)
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody());
+                    .parseSignedClaims(token)
+                    .getPayload());
         } catch (JwtException e) {
             log.error("Failed to parse token {}", token);
             optionalClaims = Optional.empty();

@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '3.1.2'
+    id 'org.springframework.boot' version '3.1.5'
     id 'io.spring.dependency-management' version '1.1.0'
     id 'java'
 }
@@ -16,16 +16,16 @@ repositories {
 }
 
 dependencies {
-    def jjwt_version = '0.11.5'
-    def lombok_version = '1.18.28'
-    def jsoup_version =  '1.16.1'
+    def jjwt_version = '0.12.3'
+    def lombok_version = '1.18.30'
+    def jsoup_version =  '1.16.2'
     def mail_version = '1.6.2'
     def google_oauth2_version = '1.19.0'
     def ehcache_version = '3.10.8'
     def android_publisher_version = 'v3-rev20230815-2.0.0'
     def poi_xml_version = '5.2.3'
-    def embedded_mongo_version = '4.7.1'
-    def faker_version = '2.0.1'
+    def embedded_mongo_version = '4.9.3'
+    def faker_version = '2.0.2'
 
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-logging'
@@ -55,7 +55,7 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok_version
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo.spring30x', version: embedded_mongo_version
+    testImplementation group: 'de.flapdoodle.embed', name: 'de.flapdoodle.embed.mongo.spring31x', version: embedded_mongo_version
     testImplementation group: 'net.datafaker', name: 'datafaker', version: faker_version
     testImplementation 'org.apache.httpcomponents.client5:httpclient5'
 }
