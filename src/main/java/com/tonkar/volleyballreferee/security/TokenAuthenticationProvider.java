@@ -16,7 +16,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-final class TokenAuthenticationProvider implements AuthenticationProvider {
+public final class TokenAuthenticationProvider implements AuthenticationProvider {
 
     private final UserService userService;
 
