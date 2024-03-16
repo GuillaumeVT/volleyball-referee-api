@@ -1,19 +1,15 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.dao.FriendRequestDao;
-import com.tonkar.volleyballreferee.dao.UserDao;
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.FriendsAndRequests;
-import com.tonkar.volleyballreferee.entity.FriendRequest;
-import com.tonkar.volleyballreferee.entity.User;
+import com.tonkar.volleyballreferee.dao.*;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -37,11 +33,8 @@ public class FriendService {
     }
 
     public FriendsAndRequests listFriendsAndRequests(User user) {
-        return new FriendsAndRequests(
-                user.getFriends(),
-                friendRequestDao.findByReceiverId(user.getId()),
-                friendRequestDao.findBySenderId(user.getId())
-        );
+        return new FriendsAndRequests(user.getFriends(), friendRequestDao.findByReceiverId(user.getId()),
+                                      friendRequestDao.findBySenderId(user.getId()));
     }
 
     public UUID sendFriendRequest(User user, String receiverPseudo) {
@@ -50,9 +43,12 @@ public class FriendService {
         if (user.getId().equals(receiverUser.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("%s cannot be friend with himself", user.getId()));
         } else if (userDao.areFriends(user.getId(), receiverUser.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("%s and %s are already friends", user.getId(), receiverUser.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("%s and %s are already friends", user.getId(), receiverUser.getId()));
         } else if (friendRequestDao.existsBySenderIdAndReceiverId(user.getId(), receiverUser.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing friend request from %s to %s", user.getId(), receiverUser.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Found an existing friend request from %s to %s", user.getId(),
+                                                            receiverUser.getId()));
         } else {
             FriendRequest friendRequest = new FriendRequest();
             friendRequest.setId(UUID.randomUUID());
@@ -76,13 +72,16 @@ public class FriendService {
     public void acceptFriendRequest(User user, UUID friendRequestId) {
         FriendRequest friendRequest = friendRequestDao
                 .findByIdAndReceiverId(friendRequestId, user.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find friend request %s with receiver %s", friendRequestId, user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find friend request %s with receiver %s",
+                                                                             friendRequestId, user.getId())));
 
         User senderUser = getUser(friendRequest.getSenderId());
         User receiverUser = getUser(friendRequest.getReceiverId());
 
         if (userDao.areFriends(friendRequest.getSenderId(), friendRequest.getReceiverId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("%s and %s are already friends", senderUser.getId(), receiverUser.getId()));
         } else {
             userDao.addFriend(senderUser.getId(), new User.Friend(receiverUser.getId(), receiverUser.getPseudo()));
             userDao.addFriend(receiverUser.getId(), new User.Friend(senderUser.getId(), senderUser.getPseudo()));

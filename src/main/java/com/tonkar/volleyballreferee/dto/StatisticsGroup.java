@@ -10,9 +10,7 @@ public record StatisticsGroup(Statistics globalStatistics, Statistics userStatis
         this(globalStatistics, null);
     }
 
-    public record Statistics(List<Count> gameStatistics, List<Count> teamStatistics) {
-    }
+    public record Statistics(List<Count> gameStatistics, List<Count> teamStatistics) {}
 
-    public record Count(GameType kind, long count) {
-    }
+    public record Count(GameType kind, long count) {}
 }

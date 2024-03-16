@@ -1,12 +1,8 @@
 package com.tonkar.volleyballreferee.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.*;
+import lombok.*;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,11 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.time.*;
+import java.util.*;
 
 @NoArgsConstructor
 @Getter
@@ -81,10 +74,7 @@ public class User implements UserDetails {
 
     @JsonIgnore
     public Optional<Friend> getFriend(String friendId) {
-        return friends
-                .stream()
-                .filter(f -> f.getId().equals(friendId))
-                .findFirst();
+        return friends.stream().filter(f -> f.getId().equals(friendId)).findFirst();
     }
 
     @AllArgsConstructor

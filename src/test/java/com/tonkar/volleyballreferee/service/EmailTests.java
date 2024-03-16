@@ -5,17 +5,16 @@ import com.tonkar.volleyballreferee.entity.User;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.*;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.UUID;
 
-@AutoConfigureDataMongo
+@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:application.yml")
 @Import(VbrTestConfiguration.class)
@@ -31,7 +30,18 @@ class EmailTests {
 
     private final VbrTestConfiguration.Sandbox sandbox;
 
-    public EmailTests(@Autowired EmailService emailService, @Autowired Faker faker, @Autowired VbrTestConfiguration.Sandbox sandbox, @Value("${test.user.email}") String testTargetEmail) {
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:4.0.2").withReuse(true);
+
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        mongoDBContainer.start();
+        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+    }
+
+    public EmailTests(@Autowired EmailService emailService,
+                      @Autowired Faker faker,
+                      @Autowired VbrTestConfiguration.Sandbox sandbox,
+                      @Value("${test.user.email}") String testTargetEmail) {
         this.emailService = emailService;
         this.faker = faker;
         this.sandbox = sandbox;

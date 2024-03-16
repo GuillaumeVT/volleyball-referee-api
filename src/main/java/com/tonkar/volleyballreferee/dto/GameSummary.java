@@ -1,14 +1,8 @@
 package com.tonkar.volleyballreferee.dto;
 
-import com.tonkar.volleyballreferee.entity.GameStatus;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.GenderType;
-import com.tonkar.volleyballreferee.entity.UsageType;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.tonkar.volleyballreferee.entity.*;
+import jakarta.validation.constraints.*;
+import lombok.*;
 import lombok.experimental.FieldNameConstants;
 
 import java.util.UUID;

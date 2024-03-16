@@ -1,11 +1,8 @@
 package com.tonkar.volleyballreferee.entity;
 
-import com.tonkar.volleyballreferee.dto.GameScore;
-import com.tonkar.volleyballreferee.dto.Ranking;
+import com.tonkar.volleyballreferee.dto.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Rankings {

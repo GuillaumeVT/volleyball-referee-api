@@ -1,23 +1,17 @@
 package com.tonkar.volleyballreferee.controller;
 
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.LeagueSummary;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.League;
-import com.tonkar.volleyballreferee.entity.User;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.LeagueService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @Validated
@@ -34,7 +28,7 @@ public class LeagueController {
     }
 
     @GetMapping(value = "/leagues/{leagueId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<League> getLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId){
+    public ResponseEntity<League> getLeague(@AuthenticationPrincipal User user, @PathVariable("leagueId") UUID leagueId) {
         return new ResponseEntity<>(leagueService.getLeague(user, leagueId), HttpStatus.OK);
     }
 

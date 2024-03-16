@@ -1,8 +1,6 @@
 package com.tonkar.volleyballreferee.dao;
 
-import com.tonkar.volleyballreferee.entity.GameStatus;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.GenderType;
+import com.tonkar.volleyballreferee.entity.*;
 
 import java.util.List;
 

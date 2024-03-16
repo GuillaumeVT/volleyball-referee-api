@@ -1,34 +1,23 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.ErrorResponse;
-import com.tonkar.volleyballreferee.dto.TeamSummary;
-import com.tonkar.volleyballreferee.dto.UserToken;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.GenderType;
-import com.tonkar.volleyballreferee.entity.Team;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.TeamService;
 import com.tonkar.volleyballreferee.util.TestPageImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.*;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TeamTests extends VbrMockedTests {
 
-     private final TeamService teamService;
+    private final TeamService teamService;
 
     public TeamTests(@Autowired TeamService teamService) {
         super();
@@ -39,212 +28,277 @@ class TeamTests extends VbrMockedTests {
     void test_teams_unauthorized() {
         final var invalidToken = "invalid";
 
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/teams").queryParam("page", 0).queryParam("size", 20).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("kind", GameType.INDOOR)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams")
+                        .queryParam("kind", GameType.INDOOR)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/teams/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri("/teams/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/teams/count", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri("/teams/count")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/teams", HttpMethod.POST, payloadWithAuth(invalidToken, new Team()), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .post()
+                .uri("/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .bodyValue(new Team())
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/teams", HttpMethod.PUT, payloadWithAuth(invalidToken, new Team()), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .put()
+                .uri("/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .bodyValue(new Team())
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/teams/" + UUID.randomUUID(), HttpMethod.DELETE, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .delete()
+                .uri("/teams/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/teams", HttpMethod.DELETE, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .delete()
+                .uri("/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
     void test_teams_list() {
         // GIVEN
-        ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
         sandbox.createBeachTeam(userToken.user().id());
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<TeamSummary>> teamResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(teamResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/teams").queryParam("page", 0).queryParam("size", 20).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<TeamSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
     void test_teams_list_byKind() {
         // GIVEN
-        ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("kind", team.getKind())
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<TeamSummary>> teamResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(teamResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams")
+                        .queryParam("kind", team.getKind())
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<TeamSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
 
         // GIVEN
         GameType noResultGameType = GameType.INDOOR_4X4;
 
-        // WHEN
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("kind", noResultGameType)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        teamResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(0, Objects.requireNonNull(teamResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams")
+                        .queryParam("kind", noResultGameType)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<TeamSummary>>() {})
+                .value(page -> assertEquals(0, page.getTotalElements()));
 
         // GIVEN
-        String kind = String.join(",", noResultGameType.toString(), team.getKind().toString());
+        String kinds = String.join(",", noResultGameType.toString(), team.getKind().toString());
 
-        // WHEN
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("kind", kind)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        teamResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(teamResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/teams").queryParam("kind", kinds).queryParam("page", 0).queryParam("size", 20).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<TeamSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
     void test_teams_list_byGender() {
         // GIVEN
-        ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("gender", team.getGender())
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<TeamSummary>> teamResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(teamResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams")
+                        .queryParam("gender", team.getGender())
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<TeamSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
 
         // GIVEN
         GenderType noResultGenderType = GenderType.GENTS;
 
-        // WHEN
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("gender", noResultGenderType)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        teamResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(0, Objects.requireNonNull(teamResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams")
+                        .queryParam("gender", noResultGenderType)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<TeamSummary>>() {})
+                .value(page -> assertEquals(0, page.getTotalElements()));
 
         // GIVEN
-        String gender = String.join(",", noResultGenderType.toString(), team.getGender().toString());
+        String genders = String.join(",", noResultGenderType.toString(), team.getGender().toString());
 
-        // WHEN
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("gender", gender)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        teamResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(teamResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams")
+                        .queryParam("gender", genders)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<TeamSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
     void test_teams_list_byKindAndGender() {
         // GIVEN
-        ParameterizedTypeReference<TestPageImpl<TeamSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("kind", team.getKind())
-                .queryParam("gender", team.getGender())
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<TeamSummary>> teamResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(teamResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams")
+                        .queryParam("kind", team.getKind())
+                        .queryParam("gender", team.getGender())
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<TeamSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
 
         // GIVEN
         GameType noResultGameType = GameType.INDOOR_4X4;
         GenderType noResultGenderType = GenderType.GENTS;
 
-        // WHEN
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("kind", noResultGameType)
-                .queryParam("gender", noResultGenderType)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        teamResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(0, Objects.requireNonNull(teamResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams")
+                        .queryParam("kind", noResultGameType)
+                        .queryParam("gender", noResultGenderType)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<TeamSummary>>() {})
+                .value(page -> assertEquals(0, page.getTotalElements()));
 
         // GIVEN
-        String kind = String.join(",", noResultGameType.toString(), team.getKind().toString());
-        String gender = String.join(",", noResultGenderType.toString(), team.getGender().toString());
+        String kinds = String.join(",", noResultGameType.toString(), team.getKind().toString());
+        String genders = String.join(",", noResultGenderType.toString(), team.getGender().toString());
 
-        // WHEN
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/teams")
-                .queryParam("kind", kind)
-                .queryParam("gender", gender)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        teamResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(teamResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/teams")
+                        .queryParam("kind", kinds)
+                        .queryParam("gender", genders)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<TeamSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
@@ -253,12 +307,16 @@ class TeamTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Team> teamResponse = restTemplate.exchange("/teams/" + team.getId(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), Team.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(team.getName(), Objects.requireNonNull(teamResponse.getBody()).getName());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/teams/%s".formatted(team.getId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Team.class)
+                .value(team1 -> assertEquals(team.getName(), team1.getName()));
     }
 
     @Test
@@ -266,11 +324,14 @@ class TeamTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/teams/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/teams/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
     @Test
@@ -279,11 +340,15 @@ class TeamTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.generateBeachTeam(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> teamResponse = restTemplate.exchange("/teams", HttpMethod.POST, payloadWithAuth(userToken.token(), team), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.CREATED, teamResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(team)
+                .exchange()
+                .expectStatus()
+                .isCreated();
     }
 
     @Test
@@ -292,11 +357,15 @@ class TeamTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/teams", HttpMethod.POST, payloadWithAuth(userToken.token(), team), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(team)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -306,11 +375,15 @@ class TeamTests extends VbrMockedTests {
         Team team = sandbox.createBeachTeam(userToken.user().id());
         team.setId(UUID.randomUUID());
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/teams", HttpMethod.POST, payloadWithAuth(userToken.token(), team), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(team)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -322,11 +395,15 @@ class TeamTests extends VbrMockedTests {
         team.setUpdatedAt(System.currentTimeMillis());
         team.setColor(faker.color().hex());
 
-        // WHEN
-        ResponseEntity<Void> teamResponse = restTemplate.exchange("/teams", HttpMethod.PUT, payloadWithAuth(userToken.token(), team), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .put()
+                .uri("/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(team)
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 
     @Test
@@ -335,11 +412,15 @@ class TeamTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.generateBeachTeam(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> teamResponse = restTemplate.exchange("/teams", HttpMethod.PUT, payloadWithAuth(userToken.token(), team), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, teamResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .put()
+                .uri("/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(team)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
     @Test
@@ -348,12 +429,16 @@ class TeamTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         sandbox.createBeachTeam(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Count> teamResponse = restTemplate.exchange("/teams/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), Count.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, teamResponse.getStatusCode());
-        assertEquals(1L, Objects.requireNonNull(teamResponse.getBody()).count());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/teams/count")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Count.class)
+                .value(count -> assertEquals(1L, count.count()));
     }
 
     @Test
@@ -362,12 +447,19 @@ class TeamTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         Team team = sandbox.createBeachTeam(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> teamResponse = restTemplate.exchange("/teams/" + team.getId(), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
+        // WHEN / THEN
+        webTestClient
+                .delete()
+                .uri("/teams/%s".formatted(team.getId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
 
-        // THEN
-        assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
-        assertTrue(teamService.listTeams(sandbox.getUser(userToken.user().id()), List.of(GameType.values()), List.of(GenderType.values()), PageRequest.of(0, 50)).isEmpty());
+        assertTrue(teamService
+                           .listTeams(sandbox.getUser(userToken.user().id()), List.of(GameType.values()), List.of(GenderType.values()),
+                                      PageRequest.of(0, 50))
+                           .isEmpty());
     }
 
     @Test
@@ -376,11 +468,18 @@ class TeamTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         sandbox.createBeachTeam(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> teamResponse = restTemplate.exchange("/teams", HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
+        // WHEN / THEN
+        webTestClient
+                .delete()
+                .uri("/teams")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
 
-        // THEN
-        assertEquals(HttpStatus.NO_CONTENT, teamResponse.getStatusCode());
-        assertTrue(teamService.listTeams(sandbox.getUser(userToken.user().id()), List.of(GameType.values()), List.of(GenderType.values()), PageRequest.of(0, 50)).isEmpty());
+        assertTrue(teamService
+                           .listTeams(sandbox.getUser(userToken.user().id()), List.of(GameType.values()), List.of(GenderType.values()),
+                                      PageRequest.of(0, 50))
+                           .isEmpty());
     }
 }

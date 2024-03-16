@@ -1,21 +1,11 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.ErrorResponse;
-import com.tonkar.volleyballreferee.dto.LeagueSummary;
-import com.tonkar.volleyballreferee.dto.UserToken;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.League;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.*;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,24 +16,54 @@ class LeagueTests extends VbrMockedTests {
     void test_leagues_unauthorized() {
         final var invalidToken = "invalid";
 
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri("/leagues")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString("/leagues").queryParam("kind", GameType.INDOOR);
-        errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/leagues").queryParam("kind", GameType.INDOOR).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/leagues/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri("/leagues/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/leagues/count", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri("/leagues/count")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(invalidToken, new League()), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .post()
+                .uri("/leagues")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .bodyValue(new League())
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/leagues/" + UUID.randomUUID(), HttpMethod.DELETE, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .delete()
+                .uri("/leagues/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -51,14 +71,17 @@ class LeagueTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
-        ParameterizedTypeReference<List<LeagueSummary>> listType = new ParameterizedTypeReference<>() {};
 
-        // WHEN
-        ResponseEntity<List<LeagueSummary>> leagueResponse = restTemplate.exchange("/leagues", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(leagueResponse.getBody()).size());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/leagues")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(LeagueSummary.class)
+                .hasSize(1);
     }
 
     @Test
@@ -66,44 +89,41 @@ class LeagueTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
-        ParameterizedTypeReference<List<LeagueSummary>> listType = new ParameterizedTypeReference<>() {
-        };
-
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/leagues")
-                .queryParam("kind", league.getKind());
-        ResponseEntity<List<LeagueSummary>> leagueResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(leagueResponse.getBody()).size());
-
-        // GIVEN
         GameType noResultGameType = GameType.BEACH;
+        String kinds = String.join(",", noResultGameType.toString(), league.getKind().toString());
 
-        // WHEN
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/leagues")
-                .queryParam("kind", noResultGameType);
-        leagueResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/leagues").queryParam("kind", league.getKind()).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(LeagueSummary.class)
+                .hasSize(1);
 
-        // THEN
-        assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
-        assertEquals(0, Objects.requireNonNull(leagueResponse.getBody()).size());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/leagues").queryParam("kind", noResultGameType).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(LeagueSummary.class)
+                .hasSize(0);
 
-        // GIVEN
-        String kind = String.join(",", noResultGameType.toString(), league.getKind().toString());
-
-        // WHEN
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/leagues")
-                .queryParam("kind", kind);
-        leagueResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(leagueResponse.getBody()).size());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/leagues").queryParam("kind", kinds).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(LeagueSummary.class)
+                .hasSize(1);
     }
 
     @Test
@@ -112,12 +132,16 @@ class LeagueTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
 
-        // WHEN
-        ResponseEntity<League> leagueResponse = restTemplate.exchange("/leagues/" + league.getId(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), League.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
-        assertEquals(league.getName(), Objects.requireNonNull(leagueResponse.getBody()).getName());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/leagues/%s".formatted(league.getId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(League.class)
+                .value(league1 -> assertEquals(league.getName(), league1.getName()));
     }
 
     @Test
@@ -125,11 +149,14 @@ class LeagueTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/leagues/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
     @Test
@@ -138,12 +165,16 @@ class LeagueTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR);
 
-        // WHEN
-        ResponseEntity<League> leagueResponse = restTemplate.exchange("/public/leagues/" + league.getId(), HttpMethod.GET, emptyPayloadWithoutAuth(), League.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
-        assertEquals(league.getName(), Objects.requireNonNull(leagueResponse.getBody()).getName());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/public/leagues/%s".formatted(league.getId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(League.class)
+                .value(league1 -> assertEquals(league.getName(), league1.getName()));
     }
 
     @Test
@@ -152,11 +183,15 @@ class LeagueTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         League league = sandbox.generateLeague(userToken.user().id(), GameType.INDOOR_4X4);
 
-        // WHEN
-        ResponseEntity<Void> leagueResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.token(), league), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.CREATED, leagueResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/leagues")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(league)
+                .exchange()
+                .expectStatus()
+                .isCreated();
     }
 
     @Test
@@ -165,11 +200,15 @@ class LeagueTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.token(), league), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/leagues")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(league)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -179,11 +218,15 @@ class LeagueTests extends VbrMockedTests {
         League league = sandbox.createLeague(userToken.user().id(), GameType.BEACH);
         league.setId(UUID.randomUUID());
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/leagues", HttpMethod.POST, payloadWithAuth(userToken.token(), league), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/leagues")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(league)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -192,12 +235,16 @@ class LeagueTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
 
-        // WHEN
-        ResponseEntity<Count> leagueResponse = restTemplate.exchange("/leagues/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), Count.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, leagueResponse.getStatusCode());
-        assertEquals(1L, Objects.requireNonNull(leagueResponse.getBody()).count());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/leagues/count")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Count.class)
+                .value(count -> assertEquals(1L, count.count()));
     }
 
     @Test
@@ -206,10 +253,13 @@ class LeagueTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
 
-        // WHEN
-        ResponseEntity<Void> leagueResponse = restTemplate.exchange("/leagues/" + league.getId(), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.NO_CONTENT, leagueResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .delete()
+                .uri("/leagues/%s".formatted(league.getId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
     }
 }

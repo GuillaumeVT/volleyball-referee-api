@@ -1,10 +1,7 @@
 package com.tonkar.volleyballreferee.scheduling;
 
 import com.tonkar.volleyballreferee.dao.UserDao;
-import com.tonkar.volleyballreferee.service.GameService;
-import com.tonkar.volleyballreferee.service.GdprComplianceService;
-import com.tonkar.volleyballreferee.service.SubscriptionService;
-import com.tonkar.volleyballreferee.service.UserService;
+import com.tonkar.volleyballreferee.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -49,7 +46,9 @@ public class ScheduledTasks {
             try {
                 subscriptionService.refreshSubscriptionPurchaseToken(user.getPurchaseToken());
             } catch (Exception e) {
-                log.info("The subscription purchase token of user with pseudo {} does not appear to be refresh-able. It may be gone because cancelled for more than 2 months", user.getPseudo());
+                log.info(
+                        "The subscription purchase token of user with pseudo {} does not appear to be refresh-able. It may be gone because cancelled for more than 2 months",
+                        user.getPseudo());
             }
         });
     }
@@ -57,8 +56,8 @@ public class ScheduledTasks {
     // Every day at 4:30am
     @Scheduled(cron = "0 30 4 * * *")
     public void purgeInactiveAccounts() {
-        log.info("Deleting inactive accounts with subscription expiry older than 12 months");
-        userDao.findUsersBySubscriptionExpiryBefore(12L).forEach(user -> {
+        log.info("Deleting inactive accounts with subscription expiry older than 6 months");
+        userDao.findUsersBySubscriptionExpiryBefore(6L).forEach(user -> {
             try {
                 gdprComplianceService.deleteUser(user, false);
             } catch (Exception e) {

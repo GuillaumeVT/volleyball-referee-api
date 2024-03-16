@@ -1,8 +1,7 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dto.FriendsAndRequests;
-import com.tonkar.volleyballreferee.dto.UserToken;
+import com.tonkar.volleyballreferee.dto.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,12 +32,12 @@ class FriendTests extends VbrMockedTests {
 
         // THEN
         assertEquals(1, friendsAndRequests.friends().size());
-        assertEquals(userToken2.user().pseudo(), friendsAndRequests.friends().get(0).getPseudo());
+        assertEquals(userToken2.user().pseudo(), friendsAndRequests.friends().getFirst().getPseudo());
         assertEquals(1, friendsAndRequests.sentFriendRequests().size());
-        assertEquals(userToken3.user().pseudo(), friendsAndRequests.sentFriendRequests().get(0).getReceiverPseudo());
-        assertEquals(userToken.user().pseudo(), friendsAndRequests.sentFriendRequests().get(0).getSenderPseudo());
+        assertEquals(userToken3.user().pseudo(), friendsAndRequests.sentFriendRequests().getFirst().getReceiverPseudo());
+        assertEquals(userToken.user().pseudo(), friendsAndRequests.sentFriendRequests().getFirst().getSenderPseudo());
         assertEquals(1, friendsAndRequests.receivedFriendRequests().size());
-        assertEquals(userToken.user().pseudo(), friendsAndRequests.receivedFriendRequests().get(0).getReceiverPseudo());
-        assertEquals(userToken4.user().pseudo(), friendsAndRequests.receivedFriendRequests().get(0).getSenderPseudo());
+        assertEquals(userToken.user().pseudo(), friendsAndRequests.receivedFriendRequests().getFirst().getReceiverPseudo());
+        assertEquals(userToken4.user().pseudo(), friendsAndRequests.receivedFriendRequests().getFirst().getSenderPseudo());
     }
 }

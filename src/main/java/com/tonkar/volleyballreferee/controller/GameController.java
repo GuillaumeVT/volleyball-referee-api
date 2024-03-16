@@ -1,24 +1,19 @@
 package com.tonkar.volleyballreferee.controller;
 
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.GameIngredients;
-import com.tonkar.volleyballreferee.dto.GameSummary;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.Set;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.GameService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.*;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @Validated
@@ -57,7 +52,8 @@ public class GameController {
                                                                @RequestParam(value = "gender", required = false) List<GenderType> genders,
                                                                @RequestParam("page") @Min(0) int page,
                                                                @RequestParam("size") @Min(20) @Max(200) int size) {
-        return new ResponseEntity<>(gameService.listGamesInLeague(user, leagueId, statuses, genders, PageRequest.of(page, size)), HttpStatus.OK);
+        return new ResponseEntity<>(gameService.listGamesInLeague(user, leagueId, statuses, genders, PageRequest.of(page, size)),
+                                    HttpStatus.OK);
     }
 
     @GetMapping(value = "/games/{gameId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -66,7 +62,8 @@ public class GameController {
     }
 
     @GetMapping(value = "/games/ingredients/{kind}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GameIngredients> getGameIngredientsOfKind(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
+    public ResponseEntity<GameIngredients> getGameIngredientsOfKind(@AuthenticationPrincipal User user,
+                                                                    @PathVariable("kind") GameType kind) {
         return new ResponseEntity<>(gameService.getGameIngredientsOfKind(user, kind), HttpStatus.OK);
     }
 
@@ -121,7 +118,7 @@ public class GameController {
     @PatchMapping(value = "/games/{gameId}/indexed/{indexed}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> setIndexed(@AuthenticationPrincipal User user,
                                            @PathVariable("gameId") UUID gameId,
-                                           @PathVariable("indexed") boolean indexed)  {
+                                           @PathVariable("indexed") boolean indexed) {
         gameService.setIndexed(user, gameId, indexed);
         return new ResponseEntity<>(HttpStatus.OK);
     }

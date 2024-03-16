@@ -1,0 +1,49 @@
+version: "3.8"
+networks:
+  vbr:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.51.51.0/16
+services:
+  db:
+    container_name: vbr-mongo
+    image: mongo
+    restart: always
+    volumes:
+      - ./database:/data
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    ports:
+      - "27017:27017"
+    networks:
+      vbr:
+        ipv4_address: 172.51.51.2
+    environment:
+      - MONGO_INITDB_DATABASE=${VBR_DB}
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+  api:
+    container_name: vbr-api
+    image: vbr-api
+    networks:
+      vbr:
+        ipv4_address: 172.51.51.3
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - VBR_DB_HOST=db
+      - VBR_DB_PORT=27017
+      - VBR_DB=${VBR_DB}
+      - VBR_DB_USER=${VBR_DB_USER}
+      - VBR_DB_PASSWORD=${VBR_DB_PASSWORD}
+      - VBR_JWT_KEY=${VBR_JWT_KEY}
+      - VBR_DOMAIN=${VBR_DOMAIN}
+      - VBR_COLOR=${VBR_COLOR}
+      - VBR_ANDROID_PACKAGE=${VBR_ANDROID_PACKAGE}
+      - VBR_ANDROID_BILLING_CREDENTIALS=${VBR_ANDROID_BILLING_CREDENTIALS}
+      - VBR_ANDROID_BILLING_PURCHASE_SKU=${VBR_ANDROID_BILLING_PURCHASE_SKU}
+      - VBR_ANDROID_BILLING_SUBSCRIPTION_SKU=${VBR_ANDROID_BILLING_SUBSCRIPTION_SKU}
+      - VBR_EMAIL_USER=${VBR_EMAIL_USER}
+      - VBR_EMAIL_PASSWORD=${VBR_EMAIL_PASSWORD}

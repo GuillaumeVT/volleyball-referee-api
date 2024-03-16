@@ -1,25 +1,16 @@
 package com.tonkar.volleyballreferee.export;
 
-import com.tonkar.volleyballreferee.dto.GameScore;
-import com.tonkar.volleyballreferee.dto.Ranking;
-import com.tonkar.volleyballreferee.dto.SetSummary;
-import com.tonkar.volleyballreferee.entity.FileWrapper;
-import com.tonkar.volleyballreferee.entity.Rankings;
-import com.tonkar.volleyballreferee.entity.TeamType;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 
-import java.awt.*;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.awt.Color;
+import java.io.*;
 import java.text.DateFormat;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExcelDivisionWriter {
@@ -39,7 +30,7 @@ public class ExcelDivisionWriter {
 
     private ExcelDivisionWriter(List<GameScore> games) {
         this.games = games;
-        this.workbook =new XSSFWorkbook();
+        this.workbook = new XSSFWorkbook();
         this.headerStyle = createExcelBorderedStyle("#e4e4e4");
         this.matchStyle = createExcelBorderedStyle("#F0E68C");
         this.setStyle = createExcelBorderedStyle("#ADD8E6");
@@ -92,7 +83,7 @@ public class ExcelDivisionWriter {
             XSSFCell cell = row.createCell(0);
             cell.setCellValue(formatter.format(game.getScheduledAt()));
             cell.setCellStyle(headerStyle);
-            sheet.addMergedRegion(new CellRangeAddress(rowIndex, rowIndex+1, 0, 0));
+            sheet.addMergedRegion(new CellRangeAddress(rowIndex, rowIndex + 1, 0, 0));
 
             createMatchExcelRow(row, TeamType.HOME, game);
             rowIndex++;
@@ -145,7 +136,18 @@ public class ExcelDivisionWriter {
     }
 
     private void createRankingsExcelSheet() {
-        String[] rankingsHeader = { "Team", "Matches Played", "Matches Won", "Matches Lost", "Matches Diff", "Sets Won", "Sets Lost", "Sets Diff", "Points Won", "Points Lost", "Points Diff" };
+        String[] rankingsHeader = { "Team",
+                                    "Matches Played",
+                                    "Matches Won",
+                                    "Matches Lost",
+                                    "Matches Diff",
+                                    "Sets Won",
+                                    "Sets Lost",
+                                    "Sets Diff",
+                                    "Points Won",
+                                    "Points Lost",
+                                    "Points Diff"
+        };
 
         XSSFSheet sheet = workbook.createSheet("Rankings");
         XSSFRow row = sheet.createRow(0);
@@ -280,7 +282,7 @@ public class ExcelDivisionWriter {
         Color color = Color.decode(backgroundColor);
         short textColor;
 
-        double a = 1 - ( 0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
+        double a = 1 - (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
 
         if (a < 0.5) {
             textColor = IndexedColors.BLACK.getIndex();

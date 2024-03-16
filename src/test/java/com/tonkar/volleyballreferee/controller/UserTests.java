@@ -6,18 +6,11 @@ import com.tonkar.volleyballreferee.entity.User;
 import com.tonkar.volleyballreferee.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.*;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class UserTests extends VbrMockedTests {
 
@@ -34,20 +27,21 @@ class UserTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         User user = sandbox.getUser(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<UserSummary> userResponse = restTemplate.exchange(String.format("/public/users/%s", user.getPurchaseToken()), HttpMethod.GET, null, UserSummary.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, userResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/public/users/%s".formatted(user.getPurchaseToken()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserSummary.class)
+                .value(userSummary -> assertEquals(user.getId(), userSummary.id()));
     }
 
     @Test
     void test_users_get_byPurchaseToken_invalid() {
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(String.format("/public/users/%s", invalidPurchaseToken), HttpMethod.GET, null, ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.get().uri("/public/users/%s".formatted(invalidPurchaseToken)).exchange().expectStatus().isForbidden();
     }
 
     @Test
@@ -55,11 +49,8 @@ class UserTests extends VbrMockedTests {
         // GIVEN
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
 
-        // WHEN
-        ResponseEntity<User> userResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user), User.class);
-
-        // THEN
-        assertEquals(HttpStatus.CREATED, userResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.post().uri("/public/users").bodyValue(user).exchange().expectStatus().isCreated();
     }
 
     @Test
@@ -67,11 +58,8 @@ class UserTests extends VbrMockedTests {
         // GIVEN
         User user = sandbox.generateUser("invalidemail.com");
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.BAD_REQUEST, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.post().uri("/public/users").bodyValue(user).exchange().expectStatus().isBadRequest();
     }
 
     @Test
@@ -80,11 +68,8 @@ class UserTests extends VbrMockedTests {
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         user.setPurchaseToken(invalidPurchaseToken);
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.FORBIDDEN, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.post().uri("/public/users").bodyValue(user).exchange().expectStatus().isForbidden();
     }
 
     @Test
@@ -93,11 +78,8 @@ class UserTests extends VbrMockedTests {
         User user = sandbox.generateUser(faker.internet().safeEmailAddress());
         user.setPassword("12345");
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.BAD_REQUEST, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.post().uri("/public/users").bodyValue(user).exchange().expectStatus().isBadRequest();
     }
 
     @Test
@@ -106,11 +88,8 @@ class UserTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         User user = sandbox.getUser(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.post().uri("/public/users").bodyValue(user).exchange().expectStatus().isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -120,11 +99,8 @@ class UserTests extends VbrMockedTests {
         User user = sandbox.getUser(userToken.user().id());
         User user2 = sandbox.generateUser(user.getEmail());
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user2), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.post().uri("/public/users").bodyValue(user2).exchange().expectStatus().isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -135,11 +111,8 @@ class UserTests extends VbrMockedTests {
         User user2 = sandbox.generateUser(faker.internet().safeEmailAddress());
         user2.setPseudo(user.getPseudo());
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity("/public/users", payloadWithoutAuth(user2), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.post().uri("/public/users").bodyValue(user2).exchange().expectStatus().isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -149,11 +122,16 @@ class UserTests extends VbrMockedTests {
         String password = user.password();
         userService.createUser(user);
 
-        // WHEN
-        ResponseEntity<UserToken> userResponse = restTemplate.postForEntity("/public/users/token", payloadWithoutAuth(new EmailCredentials(user.email(), password)), UserToken.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, userResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/public/users/token")
+                .bodyValue(new EmailCredentials(user.email(), password))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserToken.class)
+                .value(userToken -> assertNotNull(userToken.token()));
     }
 
     @Test
@@ -163,11 +141,14 @@ class UserTests extends VbrMockedTests {
         User user = sandbox.getUser(userToken.user().id());
         String invalidPassword = "invalidPassword";
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity("/public/users/token", payloadWithoutAuth(new EmailCredentials(user.getEmail(), invalidPassword)), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/public/users/token")
+                .bodyValue(new EmailCredentials(user.getEmail(), invalidPassword))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -178,11 +159,17 @@ class UserTests extends VbrMockedTests {
         String newPassword = "NewPassword5678-";
         UserToken userToken = userService.createUser(user);
 
-        // WHEN
-        ResponseEntity<UserToken> userResponse = restTemplate.exchange("/users/password", HttpMethod.PATCH, payloadWithAuth(userToken.token(), new UserPasswordUpdate(currentPassword, newPassword)), UserToken.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, userResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .patch()
+                .uri("/users/password")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(new UserPasswordUpdate(currentPassword, newPassword))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserToken.class)
+                .value(userToken1 -> assertNotNull(userToken1.token()));
     }
 
     @Test
@@ -193,11 +180,15 @@ class UserTests extends VbrMockedTests {
         String newInvalidPassword = "newInvalidPassword";
         UserToken userToken = userService.createUser(user);
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/users/password", HttpMethod.PATCH, payloadWithAuth(userToken.token(), new UserPasswordUpdate(currentPassword, newInvalidPassword)), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.BAD_REQUEST, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .patch()
+                .uri("/users/password")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(new UserPasswordUpdate(currentPassword, newInvalidPassword))
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
     }
 
     @Test
@@ -207,11 +198,15 @@ class UserTests extends VbrMockedTests {
         String wrongCurrentPassword = "wrongCurrentPassword";
         String newPassword = "NewPassword5678-";
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/users/password", HttpMethod.PATCH, payloadWithAuth(userToken.token(), new UserPasswordUpdate(wrongCurrentPassword, newPassword)), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .patch()
+                .uri("/users/password")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(new UserPasswordUpdate(wrongCurrentPassword, newPassword))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -220,23 +215,17 @@ class UserTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         User user = sandbox.getUser(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> userResponse = restTemplate.postForEntity(String.format("/public/users/password/recover/%s", user.getEmail()), emptyPayloadWithoutAuth(), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, userResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.post().uri("/public/users/password/recover/%s".formatted(user.getEmail())).exchange().expectStatus().isOk();
     }
 
     @Test
-    void test_users_recoverPassword_notFound() {
+    void test_users_recoverPassword_unknownEmail() {
         // GIVEN
         String unknownEmail = faker.internet().safeEmailAddress();
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity(String.format("/public/users/password/recover/%s", unknownEmail), emptyPayloadWithoutAuth(), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.post().uri("/public/users/password/recover/%s".formatted(unknownEmail)).exchange().expectStatus().isOk();
     }
 
     @Test
@@ -244,21 +233,17 @@ class UserTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         User user = sandbox.getUser(userToken.user().id());
-        UUID passwordResetId = userService.initiatePasswordReset(user.getEmail());
+        UUID passwordResetId = userService.initiatePasswordReset(user.getEmail()).orElseThrow();
 
-        // WHEN
-        ResponseEntity<Void> userResponse = restTemplate.exchange(String.format("/public/users/password/follow/%s", passwordResetId), HttpMethod.GET, null, Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.FOUND, userResponse.getStatusCode());
-
-        List<String> location = userResponse.getHeaders().get("Location");
-        assertNotNull(location);
-        assertEquals(1, location.size());
-
-        MultiValueMap<String, String> parameters = UriComponentsBuilder.fromUriString(location.get(0)).build().getQueryParams();
-        assertEquals(1, parameters.get("passwordResetId").size());
-        assertEquals(passwordResetId, UUID.fromString(parameters.get("passwordResetId").get(0)));
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(String.format("/public/users/password/follow/%s", passwordResetId))
+                .exchange()
+                .expectStatus()
+                .isFound()
+                .expectHeader()
+                .value("location", location -> assertTrue(location.contains(passwordResetId.toString())));
     }
 
     @Test
@@ -266,11 +251,13 @@ class UserTests extends VbrMockedTests {
         // GIVEN
         UUID unknownPasswordResetId = UUID.randomUUID();
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(String.format("/public/users/password/follow/%s", unknownPasswordResetId), HttpMethod.GET, null, ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(String.format("/public/users/password/follow/%s", unknownPasswordResetId))
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
     @Test
@@ -278,14 +265,19 @@ class UserTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         User user = sandbox.getUser(userToken.user().id());
-        UUID passwordResetId = userService.initiatePasswordReset(user.getEmail());
+        UUID passwordResetId = userService.initiatePasswordReset(user.getEmail()).orElseThrow();
         String newPassword = "NewPassword5678-";
 
-        // WHEN
-        ResponseEntity<UserToken> userResponse = restTemplate.postForEntity(String.format("/public/users/password/reset/%s", passwordResetId), payloadWithoutAuth(new UserPassword(newPassword)), UserToken.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, userResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri(String.format("/public/users/password/reset/%s", passwordResetId))
+                .bodyValue(new UserPassword(newPassword))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserToken.class)
+                .value(userToken1 -> assertNotNull(userToken1.token()));
     }
 
     @Test
@@ -293,14 +285,17 @@ class UserTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         User user = sandbox.getUser(userToken.user().id());
-        UUID passwordResetId = userService.initiatePasswordReset(user.getEmail());
+        UUID passwordResetId = userService.initiatePasswordReset(user.getEmail()).orElseThrow();
         String newInvalidPassword = "newInvalidPassword";
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity(String.format("/public/users/password/reset/%s", passwordResetId), payloadWithoutAuth(new UserPassword(newInvalidPassword)), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.BAD_REQUEST, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri(String.format("/public/users/password/reset/%s", passwordResetId))
+                .bodyValue(new UserPassword(newInvalidPassword))
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
     }
 
     @Test
@@ -309,11 +304,14 @@ class UserTests extends VbrMockedTests {
         UUID unknownPasswordResetId = UUID.randomUUID();
         String newPassword = "NewPassword5678-";
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.postForEntity(String.format("/public/users/password/reset/%s", unknownPasswordResetId), payloadWithoutAuth(new UserPassword(newPassword)), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri(String.format("/public/users/password/reset/%s", unknownPasswordResetId))
+                .bodyValue(new UserPassword(newPassword))
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
     @Test
@@ -323,12 +321,17 @@ class UserTests extends VbrMockedTests {
         UserToken userToken = userService.createUser(user);
         String newPseudo = faker.name().firstName();
 
-        // WHEN
-        ResponseEntity<UserSummary> userResponse = restTemplate.exchange("/users/pseudo", HttpMethod.PATCH, payloadWithAuth(userToken.token(), new UserPseudo(newPseudo)), UserSummary.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, userResponse.getStatusCode());
-        assertEquals(newPseudo, Objects.requireNonNull(userResponse.getBody()).pseudo());
+        // WHEN / THEN
+        webTestClient
+                .patch()
+                .uri("/users/pseudo")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(new UserPseudo(newPseudo))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(UserSummary.class)
+                .value(userSummary -> assertEquals(newPseudo, userSummary.pseudo()));
     }
 
     @Test
@@ -338,11 +341,15 @@ class UserTests extends VbrMockedTests {
         UserToken userToken = userService.createUser(user);
         String newPseudo = user.pseudo();
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/users/pseudo", HttpMethod.PATCH, payloadWithAuth(userToken.token(), new UserPseudo(newPseudo)), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .patch()
+                .uri("/users/pseudo")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(new UserPseudo(newPseudo))
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -352,11 +359,15 @@ class UserTests extends VbrMockedTests {
         UserToken userToken = userService.createUser(user);
         String newPseudo = "ab";
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/users/pseudo", HttpMethod.PATCH, payloadWithAuth(userToken.token(), new UserPseudo(newPseudo)), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.BAD_REQUEST, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .patch()
+                .uri("/users/pseudo")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(new UserPseudo(newPseudo))
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
     }
 
     @Test
@@ -364,10 +375,13 @@ class UserTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
-        // WHEN
-        ResponseEntity<Void> userResponse = restTemplate.exchange("/users", HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.NO_CONTENT, userResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .delete()
+                .uri("/users")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class VolleyballRefereeApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(VolleyballRefereeApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(VolleyballRefereeApplication.class, args);
+    }
 }

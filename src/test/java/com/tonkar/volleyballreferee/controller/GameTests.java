@@ -2,28 +2,20 @@ package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.VbrMockedTests;
 import com.tonkar.volleyballreferee.dto.*;
-import com.tonkar.volleyballreferee.entity.Game;
-import com.tonkar.volleyballreferee.entity.GameStatus;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.GenderType;
+import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.GameService;
 import com.tonkar.volleyballreferee.util.TestPageImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.HttpHeaders;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GameTests extends VbrMockedTests {
 
@@ -38,190 +30,269 @@ class GameTests extends VbrMockedTests {
     void test_games_unauthorized() {
         final var invalidToken = "invalid";
 
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/games")
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/games").queryParam("page", 0).queryParam("size", 20).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/games")
-                .queryParam("status", GameStatus.COMPLETED)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/games")
+                        .queryParam("status", GameStatus.COMPLETED)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games/available", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri("/games/available")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/games/completed")
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/games/completed").queryParam("page", 0).queryParam("size", 20).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/games/league/" + UUID.randomUUID())
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        errorResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/games/league/%s".formatted(UUID.randomUUID()))
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games/" + UUID.randomUUID(), HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri("/games/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games/count", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri("/games/count")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games/league" + UUID.randomUUID() + "/count", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .get()
+                .uri("/games/league/%s/count".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games", HttpMethod.POST, payloadWithAuth(invalidToken, new GameSummary()), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .post()
+                .uri("/games")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .bodyValue(new GameSummary())
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games/full", HttpMethod.POST, payloadWithAuth(invalidToken, new Game()), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .post()
+                .uri("/games/full")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .bodyValue(new Game())
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games", HttpMethod.PUT, payloadWithAuth(invalidToken, new GameSummary()), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .put()
+                .uri("/games")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .bodyValue(new GameSummary())
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games/full", HttpMethod.PUT, payloadWithAuth(invalidToken, new Game()), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .put()
+                .uri("/games/full")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .bodyValue(new Game())
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games/" + UUID.randomUUID() + "/set/2", HttpMethod.PATCH, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .patch()
+                .uri("/games/%s/set/2".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games/" + UUID.randomUUID() + "/indexed/true", HttpMethod.PATCH, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .patch()
+                .uri("/games/%s/indexed/true".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games/" + UUID.randomUUID(), HttpMethod.DELETE, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .delete()
+                .uri("/games/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
 
-        errorResponse = restTemplate.exchange("/games", HttpMethod.DELETE, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .delete()
+                .uri("/games")
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
     void test_games_list() {
         // GIVEN
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
         sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/games")
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/games").queryParam("page", 0).queryParam("size", 20).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
     void test_games_list_byStatus() {
         // GIVEN
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
         sandbox.createScheduledBeachGame(userToken.user().id());
-        GameStatus status = GameStatus.SCHEDULED;
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/games")
-                .queryParam("status", status)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/games")
+                        .queryParam("status", GameStatus.SCHEDULED)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
 
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
-
-        // GIVEN
-        status = GameStatus.LIVE;
-
-        // WHEN
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/games")
-                .queryParam("status", status)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(0, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/games")
+                        .queryParam("status", GameStatus.LIVE)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(0, page.getTotalElements()));
     }
 
     @Test
     void test_games_list_byStatusAndKindAndGender() {
         // GIVEN
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
         sandbox.createScheduledBeachGame(userToken.user().id());
-        GameStatus status = GameStatus.SCHEDULED;
-        GameType kind = GameType.INDOOR;
-        GenderType gender = GenderType.GENTS;
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/games")
-                .queryParam("status", status)
-                .queryParam("kind", kind)
-                .queryParam("gender", gender)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/games")
+                        .queryParam("status", GameStatus.SCHEDULED)
+                        .queryParam("kind", GameType.INDOOR)
+                        .queryParam("gender", GenderType.GENTS)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(0, page.getTotalElements()));
 
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(0, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
-
-        // GIVEN
-        kind = GameType.BEACH;
-        gender = GenderType.LADIES;
-
-        // WHEN
-        uriBuilder = UriComponentsBuilder
-                .fromUriString("/games")
-                .queryParam("status", status)
-                .queryParam("kind", kind)
-                .queryParam("gender", gender)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/games")
+                        .queryParam("status", GameStatus.SCHEDULED)
+                        .queryParam("kind", GameType.BEACH)
+                        .queryParam("gender", GenderType.LADIES)
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
     void test_games_list_available() {
         // GIVEN
-        ParameterizedTypeReference<List<GameSummary>> listType = new ParameterizedTypeReference<>() {};
         UserToken userToken = sandbox.createUser();
         sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<List<GameSummary>> gameResponse = restTemplate.exchange("/games/available", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), listType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).size());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/games/available")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(GameSummary.class)
+                .hasSize(1);
     }
 
     @Test
     void test_games_list_available_refereedByFriend() {
         // GIVEN
-        ParameterizedTypeReference<List<GameSummary>> listType = new ParameterizedTypeReference<>() {
-        };
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
         sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
@@ -229,12 +300,16 @@ class GameTests extends VbrMockedTests {
         gameSummary.setRefereedBy(userToken2.user().id());
         gameService.createGame(sandbox.getUser(userToken.user().id()), gameSummary);
 
-        // WHEN
-        ResponseEntity<List<GameSummary>> gameResponse = restTemplate.exchange("/games/available", HttpMethod.GET, emptyPayloadWithAuth(userToken2.token()), listType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).size());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/games/available")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken2.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(GameSummary.class)
+                .hasSize(1);
     }
 
     @Test
@@ -244,18 +319,17 @@ class GameTests extends VbrMockedTests {
         Game game = sandbox.generateBeachGame(userToken.user().id());
         game.setStatus(GameStatus.COMPLETED);
         gameService.createGame(sandbox.getUser(userToken.user().id()), game);
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/games/completed")
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/games/completed").queryParam("page", 0).queryParam("size", 20).build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
@@ -264,11 +338,16 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Game> gameResponse = restTemplate.exchange("/games/" + gameSummary.getId(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), Game.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/games/%s".formatted(gameSummary.getId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Game.class)
+                .value(game -> assertEquals(gameSummary.getId(), game.getId()));
     }
 
     @Test
@@ -277,11 +356,14 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         UUID unknownGameId = UUID.randomUUID();
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/games/" + unknownGameId, HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/games/%s".formatted(unknownGameId))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
     @Test
@@ -289,20 +371,21 @@ class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.createBeachGame(userToken.user().id());
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {
-        };
         String token = game.getGuestTeam().getName().substring(0, 4);
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/public/games/token/" + token)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/games/token/%s".formatted(token))
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
@@ -310,19 +393,21 @@ class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         sandbox.createBeachGame(userToken.user().id());
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
         String date = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/public/games/date/" + date)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/games/date/%s".formatted(date))
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
@@ -332,18 +417,16 @@ class GameTests extends VbrMockedTests {
         Game game = sandbox.generateBeachGame(userToken.user().id());
         game.setStatus(GameStatus.LIVE);
         gameService.createGame(sandbox.getUser(userToken.user().id()), game);
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {};
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/public/games/live")
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/public/games/live").queryParam("page", 0).queryParam("size", 20).build())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
@@ -352,11 +435,15 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Game> gameResponse = restTemplate.exchange("/public/games/" + gameSummary.getId(), HttpMethod.GET, emptyPayloadWithoutAuth(), Game.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/public/games/%s".formatted(gameSummary.getId()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Game.class)
+                .value(game -> assertEquals(gameSummary.getId(), game.getId()));
     }
 
     @Test
@@ -364,11 +451,8 @@ class GameTests extends VbrMockedTests {
         // GIVEN
         UUID unknownGameId = UUID.randomUUID();
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/public/games/" + unknownGameId, HttpMethod.GET, emptyPayloadWithoutAuth(), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient.get().uri("/public/games/%s".formatted(unknownGameId)).exchange().expectStatus().isNotFound();
     }
 
     @Test
@@ -377,11 +461,16 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<GameIngredients> gameResponse = restTemplate.exchange(String.format("/games/ingredients/%s", gameSummary.getKind()), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), GameIngredients.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/games/ingredients/%s".formatted(gameSummary.getKind()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(GameIngredients.class)
+                .value(gameIngredients -> assertNotNull(gameIngredients.defaultRules()));
     }
 
     @Test
@@ -390,11 +479,15 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.generateBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games/full", HttpMethod.POST, payloadWithAuth(userToken.token(), game), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.CREATED, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/games/full")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(game)
+                .exchange()
+                .expectStatus()
+                .isCreated();
     }
 
     @Test
@@ -404,11 +497,15 @@ class GameTests extends VbrMockedTests {
         Game game = sandbox.createBeachGame(userToken.user().id());
         game.setStatus(GameStatus.COMPLETED);
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games/full", HttpMethod.PUT, payloadWithAuth(userToken.token(), game), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .put()
+                .uri("/games/full")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(game)
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 
     @Test
@@ -417,11 +514,15 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.generateBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games/full", HttpMethod.PUT, payloadWithAuth(userToken.token(), game), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .put()
+                .uri("/games/full")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(game)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
     @Test
@@ -430,11 +531,15 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.createBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games/" + game.getId() + "/set/1", HttpMethod.PATCH, payloadWithAuth(userToken.token(), sandbox.generateSet()), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .patch()
+                .uri("/games/%s/set/1".formatted(game.getId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(sandbox.generateSet())
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 
     @Test
@@ -443,11 +548,14 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.createBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games/" + game.getId() + "/indexed/false", HttpMethod.PATCH, emptyPayloadWithAuth(userToken.token()), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .patch()
+                .uri("/games/%s/indexed/false".formatted(game.getId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 
     @Test
@@ -456,11 +564,14 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         Game game = sandbox.createBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games/" + game.getId() + "/indexed/true", HttpMethod.PATCH, emptyPayloadWithAuth(userToken.token()), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .patch()
+                .uri("/games/%s/indexed/true".formatted(game.getId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 
     @Test
@@ -471,11 +582,14 @@ class GameTests extends VbrMockedTests {
         sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
         Game game = sandbox.createBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games/" + game.getId() + "/referee/" + userToken2.user().id(), HttpMethod.PATCH, emptyPayloadWithAuth(userToken.token()), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .patch()
+                .uri("/games/%s/referee/%s".formatted(game.getId(), userToken2.user().id()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 
     @Test
@@ -484,11 +598,15 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.generateScheduledBeachGame(userToken.user().id(), true);
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games", HttpMethod.POST, payloadWithAuth(userToken.token(), gameSummary), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.CREATED, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/games")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(gameSummary)
+                .exchange()
+                .expectStatus()
+                .isCreated();
     }
 
     @Test
@@ -497,11 +615,15 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games", HttpMethod.PUT, payloadWithAuth(userToken.token(), gameSummary), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .put()
+                .uri("/games")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(gameSummary)
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 
     @Test
@@ -510,11 +632,15 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.generateScheduledBeachGame(userToken.user().id(), false);
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/games", HttpMethod.PUT, payloadWithAuth(userToken.token(), gameSummary), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .put()
+                .uri("/games")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .bodyValue(gameSummary)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
     @Test
@@ -523,11 +649,14 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games/" + gameSummary.getId(), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.NO_CONTENT, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .delete()
+                .uri("/games/%s".formatted(gameSummary.getId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
     }
 
     @Test
@@ -537,11 +666,14 @@ class GameTests extends VbrMockedTests {
         sandbox.createScheduledBeachGame(userToken.user().id());
         sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Void> gameResponse = restTemplate.exchange("/games", HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.NO_CONTENT, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .delete()
+                .uri("/games")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
     }
 
     @Test
@@ -551,12 +683,16 @@ class GameTests extends VbrMockedTests {
         sandbox.createScheduledBeachGame(userToken.user().id());
         sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Count> gameResponse = restTemplate.exchange("/games/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), Count.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(2L, Objects.requireNonNull(gameResponse.getBody()).count());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/games/count")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Count.class)
+                .value(count -> assertEquals(2L, count.count()));
     }
 
     @Test
@@ -566,12 +702,16 @@ class GameTests extends VbrMockedTests {
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
         sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<Count> gameResponse = restTemplate.exchange("/games/league/" + gameSummary.getLeagueId() + "/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), Count.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1L, Objects.requireNonNull(gameResponse.getBody()).count());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/games/league/%s/count".formatted(gameSummary.getLeagueId()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Count.class)
+                .value(count -> assertEquals(1L, count.count()));
     }
 
     @Test
@@ -579,19 +719,21 @@ class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {
-        };
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/games/league/" + gameSummary.getLeagueId())
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/games/league/%s".formatted(gameSummary.getLeagueId()))
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
@@ -599,19 +741,20 @@ class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {
-        };
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/public/games/league/" + gameSummary.getLeagueId())
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/games/league/%s".formatted(gameSummary.getLeagueId()))
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
@@ -619,19 +762,20 @@ class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {
-        };
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/public/games/league/" + gameSummary.getLeagueId() + "/division/" + gameSummary.getDivisionName())
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/games/league/%s/division/%s".formatted(gameSummary.getLeagueId(), gameSummary.getDivisionName()))
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(1, page.getTotalElements()));
     }
 
     @Test
@@ -639,20 +783,21 @@ class GameTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
-        ParameterizedTypeReference<TestPageImpl<GameSummary>> pageType = new ParameterizedTypeReference<>() {
-        };
         String unknownDivision = "unknownDivision";
 
-        // WHEN
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder
-                .fromUriString("/public/games/league/" + gameSummary.getLeagueId() + "/division/" + unknownDivision)
-                .queryParam("page", 0)
-                .queryParam("size", 20);
-        ResponseEntity<TestPageImpl<GameSummary>> gameResponse = restTemplate.exchange(uriBuilder.build(false).toUriString(), HttpMethod.GET, emptyPayloadWithoutAuth(), pageType);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
-        assertEquals(0, Objects.requireNonNull(gameResponse.getBody()).getTotalElements());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/games/league/%s/division/%s".formatted(gameSummary.getLeagueId(), unknownDivision))
+                        .queryParam("page", 0)
+                        .queryParam("size", 20)
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<TestPageImpl<GameSummary>>() {})
+                .value(page -> assertEquals(0, page.getTotalElements()));
     }
 
     @Test
@@ -661,10 +806,14 @@ class GameTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
-        // WHEN
-        ResponseEntity<ByteArrayResource> gameResponse = restTemplate.exchange("/public/games/league/" + gameSummary.getLeagueId() + "/division/" + gameSummary.getDivisionName() + "/excel", HttpMethod.GET, emptyPayloadWithoutAuth(), ByteArrayResource.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, gameResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/public/games/league/%s/division/%s/excel".formatted(gameSummary.getLeagueId(), gameSummary.getDivisionName()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(ByteArrayResource.class)
+                .value(byteArrayResource -> assertTrue(byteArrayResource.contentLength() > 0L));
     }
 }

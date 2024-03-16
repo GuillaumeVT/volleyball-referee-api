@@ -1,22 +1,15 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.dao.GameDao;
-import com.tonkar.volleyballreferee.dao.RulesDao;
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.RulesSummary;
-import com.tonkar.volleyballreferee.entity.GameStatus;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.Rules;
-import com.tonkar.volleyballreferee.entity.User;
+import com.tonkar.volleyballreferee.dao.*;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.UUID;
+import java.time.*;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +29,9 @@ public class RulesService {
     public Rules getRules(User user, UUID rulesId) {
         return rulesDao
                 .findByIdAndCreatedBy(rulesId, user.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find rules %s for user %s", rulesId, user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find rules %s for user %s", rulesId,
+                                                                             user.getId())));
     }
 
     public RulesSummary getDefaultRules(GameType kind) {
@@ -47,14 +42,8 @@ public class RulesService {
             case SNOW -> Rules.OFFICIAL_SNOW_RULES;
         };
 
-        return new RulesSummary(
-                rules.getId(),
-                rules.getCreatedBy(),
-                rules.getCreatedAt(),
-                rules.getUpdatedAt(),
-                rules.getName(),
-                rules.getKind()
-        );
+        return new RulesSummary(rules.getId(), rules.getCreatedBy(), rules.getCreatedAt(), rules.getUpdatedAt(), rules.getName(),
+                                rules.getKind());
     }
 
     public Count getNumberOfRules(User user) {
@@ -63,11 +52,17 @@ public class RulesService {
 
     public void createRules(User user, Rules rules) {
         if (Rules.getDefaultRules(rules.getId(), rules.getKind()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create rules %s for user %s because they are default rules", rules.getId(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not create rules %s for user %s because they are default rules",
+                                                            rules.getId(), user.getId()));
         } else if (rulesDao.existsById(rules.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create rules %s for user %s because they already exist", rules.getId(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not create rules %s for user %s because they already exist",
+                                                            rules.getId(), user.getId()));
         } else if (rulesDao.existsByCreatedByAndNameAndKind(user.getId(), rules.getName(), rules.getKind())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create rules %s %s for user %s because they already exist", rules.getName(), rules.getKind(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not create rules %s %s for user %s because they already exist",
+                                                            rules.getName(), rules.getKind(), user.getId()));
         } else {
             rules.setCreatedBy(user.getId());
             rules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
@@ -78,7 +73,9 @@ public class RulesService {
     public void updateRules(User user, Rules rules) {
         Rules savedRules = rulesDao
                 .findByIdAndCreatedBy(rules.getId(), user.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find rules %s %s for user %s", rules.getId(), rules.getKind(), user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find rules %s %s for user %s", rules.getId(),
+                                                                             rules.getKind(), user.getId())));
 
         savedRules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         savedRules.setName(rules.getName());
@@ -109,19 +106,19 @@ public class RulesService {
 
     public void deleteRules(User user, UUID rulesId) {
         if (gameDao.existsByCreatedByAndRules_IdAndStatus(user.getId(), rulesId, GameStatus.SCHEDULED)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not delete rules %s for user %s because they are used in a game", rulesId, user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not delete rules %s for user %s because they are used in a game",
+                                                            rulesId, user.getId()));
         } else {
             rulesDao.deleteByIdAndCreatedBy(rulesId, user.getId());
         }
     }
 
     public void deleteAllRules(User user) {
-        rulesDao
-                .findByCreatedByOrderByNameAsc(user.getId())
-                .forEach(rules -> {
-                    if (!gameDao.existsByCreatedByAndRules_IdAndStatus(user.getId(), rules.id(), GameStatus.SCHEDULED)) {
-                        rulesDao.deleteByIdAndCreatedBy(rules.id(), user.getId());
-                    }
-                });
+        rulesDao.findByCreatedByOrderByNameAsc(user.getId()).forEach(rules -> {
+            if (!gameDao.existsByCreatedByAndRules_IdAndStatus(user.getId(), rules.id(), GameStatus.SCHEDULED)) {
+                rulesDao.deleteByIdAndCreatedBy(rules.id(), user.getId());
+            }
+        });
     }
 }

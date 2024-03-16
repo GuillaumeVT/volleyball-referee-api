@@ -1,23 +1,17 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.dao.GameDao;
-import com.tonkar.volleyballreferee.dao.TeamDao;
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.TeamSummary;
+import com.tonkar.volleyballreferee.dao.*;
+import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
+import java.time.*;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +53,8 @@ public class TeamService {
     public Team getTeam(User user, UUID teamId) {
         return teamDao
                 .findByIdAndCreatedBy(teamId, user.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find team %s for user %s", teamId, user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find team %s for user %s", teamId, user.getId())));
     }
 
     public Count getNumberOfTeams(User user) {
@@ -68,9 +63,13 @@ public class TeamService {
 
     public void createTeam(User user, Team team) {
         if (teamDao.existsById(team.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create team %s for user %s because it already exists", team.getId(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not create team %s for user %s because it already exists", team.getId(),
+                                                            user.getId()));
         } else if (teamDao.existsByCreatedByAndNameAndKindAndGender(user.getId(), team.getName(), team.getKind(), team.getGender())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create team %s %s %s for user %s because it already exists", team.getName(), team.getKind(), team.getGender(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not create team %s %s %s for user %s because it already exists",
+                                                            team.getName(), team.getKind(), team.getGender(), user.getId()));
         } else {
             team.setCreatedBy(user.getId());
             team.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
@@ -81,7 +80,9 @@ public class TeamService {
     public void updateTeam(User user, Team team) {
         Team savedTeam = teamDao
                 .findByIdAndCreatedBy(team.getId(), user.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find team %s %s %s for user %s", team.getId(), team.getKind(), team.getGender(), user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find team %s %s %s for user %s", team.getId(),
+                                                                             team.getKind(), team.getGender(), user.getId())));
 
         savedTeam.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         savedTeam.setName(team.getName());
@@ -104,19 +105,19 @@ public class TeamService {
 
     public void deleteTeam(User user, UUID teamId) {
         if (gameDao.existsByCreatedByAndTeamAndStatus(user.getId(), teamId, GameStatus.SCHEDULED)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not delete team %s for user %s because it is used in a game", teamId, user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not delete team %s for user %s because it is used in a game", teamId,
+                                                            user.getId()));
         } else {
             teamDao.deleteByIdAndCreatedBy(teamId, user.getId());
         }
     }
 
     public void deleteAllTeams(User user) {
-        teamDao
-                .findByCreatedByOrderByNameAsc(user.getId())
-                .forEach(team -> {
-                    if (!gameDao.existsByCreatedByAndRules_IdAndStatus(user.getId(), team.id(), GameStatus.SCHEDULED)) {
-                        teamDao.deleteByIdAndCreatedBy(team.id(), user.getId());
-                    }
-                });
+        teamDao.findByCreatedByOrderByNameAsc(user.getId()).forEach(team -> {
+            if (!gameDao.existsByCreatedByAndRules_IdAndStatus(user.getId(), team.id(), GameStatus.SCHEDULED)) {
+                teamDao.deleteByIdAndCreatedBy(team.id(), user.getId());
+            }
+        });
     }
 }

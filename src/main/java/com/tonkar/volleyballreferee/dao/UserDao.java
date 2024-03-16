@@ -5,21 +5,14 @@ import com.mongodb.client.result.UpdateResult;
 import com.tonkar.volleyballreferee.dto.UserSummary;
 import com.tonkar.volleyballreferee.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.query.*;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Optional;
+import java.time.*;
+import java.util.*;
 
 import static com.tonkar.volleyballreferee.dao.DaoUtils._id;
 
@@ -27,13 +20,20 @@ import static com.tonkar.volleyballreferee.dao.DaoUtils._id;
 @RequiredArgsConstructor
 public class UserDao {
 
-    private final static ProjectionOperation sUserSummaryProjection = Aggregation.project()
-            .and(_id).as(_id)
-            .and(User.Fields.pseudo).as(UserSummary.Fields.pseudo)
-            .and(User.Fields.email).as(UserSummary.Fields.email)
-            .and(User.Fields.admin).as(UserSummary.Fields.admin)
-            .and(User.Fields.subscription).as(UserSummary.Fields.subscription)
-            .and(User.Fields.subscriptionExpiryAt).as(UserSummary.Fields.subscriptionExpiryAt);
+    private final static ProjectionOperation sUserSummaryProjection = Aggregation
+            .project()
+            .and(_id)
+            .as(_id)
+            .and(User.Fields.pseudo)
+            .as(UserSummary.Fields.pseudo)
+            .and(User.Fields.email)
+            .as(UserSummary.Fields.email)
+            .and(User.Fields.admin)
+            .as(UserSummary.Fields.admin)
+            .and(User.Fields.subscription)
+            .as(UserSummary.Fields.subscription)
+            .and(User.Fields.subscriptionExpiryAt)
+            .as(UserSummary.Fields.subscriptionExpiryAt);
 
     private final MongoTemplate mongoTemplate;
 
@@ -82,8 +82,10 @@ public class UserDao {
 
     public Optional<UserSummary> findUserByPurchaseToken(String purchaseToken) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where(User.Fields.purchaseToken).is(purchaseToken));
-        return Optional.ofNullable(mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sUserSummaryProjection),
-                mongoTemplate.getCollectionName(User.class), UserSummary.class).getUniqueMappedResult());
+        return Optional.ofNullable(mongoTemplate
+                                           .aggregate(Aggregation.newAggregation(matchOperation, sUserSummaryProjection),
+                                                      mongoTemplate.getCollectionName(User.class), UserSummary.class)
+                                           .getUniqueMappedResult());
     }
 
     public void updateSubscriptionPurchaseToken(String id, String purchaseToken, long subscriptionExpiryAt) {
@@ -95,14 +97,16 @@ public class UserDao {
 
     public List<User> findUsersBySubscriptionExpiryBefore(long monthsAgo) {
         long accountRemovalThresholdDate = LocalDateTime.now(ZoneOffset.UTC).minusMonths(monthsAgo).toEpochSecond(ZoneOffset.UTC) * 1000L;
-        return mongoTemplate.find(
-                Query.query(Criteria.where(User.Fields.subscription).is(true).and(User.Fields.subscriptionExpiryAt).lt(accountRemovalThresholdDate)),
-                User.class);
+        return mongoTemplate.find(Query.query(
+                                          Criteria.where(User.Fields.subscription).is(true).and(User.Fields.subscriptionExpiryAt).lt(accountRemovalThresholdDate)),
+                                  User.class);
     }
 
     public boolean updateUserSignedIn(String userId, long lastLoginAt) {
         Query query = new Query(Criteria.where(_id).is(userId));
-        Update update = new Update().set(User.Fields.lastLoginAt, lastLoginAt).set(User.Fields.failedAuthentication + "." + User.FailedAuthentication.Fields.attempts, 0);
+        Update update = new Update()
+                .set(User.Fields.lastLoginAt, lastLoginAt)
+                .set(User.Fields.failedAuthentication + "." + User.FailedAuthentication.Fields.attempts, 0);
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class);
         return updateResult.getModifiedCount() > 0;
     }
@@ -116,7 +120,9 @@ public class UserDao {
 
     public boolean updateUserPassword(String userId, String password) {
         Query query = new Query(Criteria.where(_id).is(userId));
-        Update update = new Update().set(User.Fields.password, password).set(User.Fields.failedAuthentication + "." + User.FailedAuthentication.Fields.attempts, 0);
+        Update update = new Update()
+                .set(User.Fields.password, password)
+                .set(User.Fields.failedAuthentication + "." + User.FailedAuthentication.Fields.attempts, 0);
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class);
         return updateResult.getModifiedCount() > 0;
     }
@@ -153,11 +159,12 @@ public class UserDao {
         Criteria criteria;
 
         if (filter != null && filter.trim().length() > 0) {
-            criteria = Criteria.where(User.Fields.admin).is(false).orOperator(
-                    Criteria.where(User.Fields.pseudo).regex(".*" + filter + ".*", "i"),
-                    Criteria.where(User.Fields.email).regex(".*" + filter + ".*", "i"),
-                    Criteria.where(User.Fields.purchaseToken).regex(".*" + filter + ".*", "i")
-            );
+            criteria = Criteria
+                    .where(User.Fields.admin)
+                    .is(false)
+                    .orOperator(Criteria.where(User.Fields.pseudo).regex(".*" + filter + ".*", "i"),
+                                Criteria.where(User.Fields.email).regex(".*" + filter + ".*", "i"),
+                                Criteria.where(User.Fields.purchaseToken).regex(".*" + filter + ".*", "i"));
         } else {
             criteria = Criteria.where(User.Fields.admin).is(false);
         }
@@ -168,8 +175,10 @@ public class UserDao {
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, User.Fields.pseudo);
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
-        List<User> users = mongoTemplate.aggregate(Aggregation.newAggregation(matchOperation, sortOperation, skipOperation, limitOperation),
-                mongoTemplate.getCollectionName(User.class), User.class).getMappedResults();
+        List<User> users = mongoTemplate
+                .aggregate(Aggregation.newAggregation(matchOperation, sortOperation, skipOperation, limitOperation),
+                           mongoTemplate.getCollectionName(User.class), User.class)
+                .getMappedResults();
         return new PageImpl<>(users, pageable, total);
     }
 }

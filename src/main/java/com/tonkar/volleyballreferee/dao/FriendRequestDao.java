@@ -4,14 +4,10 @@ import com.mongodb.client.result.UpdateResult;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.query.*;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.tonkar.volleyballreferee.dao.DaoUtils._id;
 
@@ -31,7 +27,8 @@ public class FriendRequestDao {
     }
 
     public boolean existsBySenderIdAndReceiverId(String senderId, String receiverId) {
-        Query query = Query.query(Criteria.where(FriendRequest.Fields.senderId).is(senderId).and(FriendRequest.Fields.receiverId).is(receiverId));
+        Query query = Query.query(
+                Criteria.where(FriendRequest.Fields.senderId).is(senderId).and(FriendRequest.Fields.receiverId).is(receiverId));
         return mongoTemplate.exists(query, FriendRequest.class);
     }
 

@@ -2,20 +2,15 @@ package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.entity.User;
 import jakarta.annotation.PostConstruct;
+import jakarta.mail.*;
+import jakarta.mail.internet.*;
 import jakarta.validation.constraints.Email;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import java.awt.*;
-import java.util.Date;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -48,7 +43,7 @@ public class EmailService {
         prop.put("mail.smtp.socketFactory.port", "465");
         prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 
-        session = Session.getInstance(prop, new javax.mail.Authenticator() {
+        session = Session.getInstance(prop, new jakarta.mail.Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(mailUser, mailPassword);
             }
@@ -65,7 +60,9 @@ public class EmailService {
         String title = "Your Volleyball Referee account was successfully created";
         titleHtmlDiv.appendText(title);
 
-        String content = String.format("Dear %s. You may now sign in with the Android app and the website using your email address and your password.", user.getPseudo());
+        String content = String.format(
+                "Dear %s. You may now sign in with the Android app and the website using your email address and your password.",
+                user.getPseudo());
         contentHtmlDiv.appendText(content);
 
         appendLink(linkHtmlDiv, "VISIT WEBSITE", webDomain);
@@ -82,7 +79,9 @@ public class EmailService {
         String title = "Your Volleyball Referee account was deleted";
         titleHtmlDiv.appendText(title);
 
-        String content = String.format("Dear %s. As requested, your account is now deleted including all your personal data, and your Android app subscription is canceled.", user.getPseudo());
+        String content = String.format(
+                "Dear %s. As requested, your account is now deleted including all your personal data, and your Android app subscription is canceled.",
+                user.getPseudo());
         contentHtmlDiv.appendText(content);
 
         sendEmail(email, title, user.getEmail());
@@ -97,7 +96,9 @@ public class EmailService {
         String title = "Your Volleyball Referee account was deleted";
         titleHtmlDiv.appendText(title);
 
-        String content = String.format("Dear %s. Your subscription expired over 12 months ago and your account is now deleted including all your personal data.", user.getPseudo());
+        String content = String.format(
+                "Dear %s. Your subscription expired over 12 months ago and your account is now deleted including all your personal data.",
+                user.getPseudo());
         contentHtmlDiv.appendText(content);
 
         sendEmail(email, title, user.getEmail());
@@ -151,7 +152,9 @@ public class EmailService {
         String title = String.format("The user %s wishes to be your colleague", senderUser.getPseudo());
         titleHtmlDiv.appendText(title);
 
-        String content = String.format("Dear %s. Colleagues are able to select each other to referee games. You may accept or reject this request from the Android app or from the website.", receiverUser.getPseudo());
+        String content = String.format(
+                "Dear %s. Colleagues are able to select each other to referee games. You may accept or reject this request from the Android app or from the website.",
+                receiverUser.getPseudo());
         contentHtmlDiv.appendText(content);
 
         appendLink(linkHtmlDiv, "VISIT WEBSITE", webDomain);
@@ -169,7 +172,8 @@ public class EmailService {
         String title = String.format("The user %s is now your colleague", acceptingUser.getPseudo());
         titleHtmlDiv.appendText(title);
 
-        String content = String.format("Dear %s. You are now able to select %s to referee your games.", senderUser.getPseudo(), acceptingUser.getPseudo());
+        String content = String.format("Dear %s. You are now able to select %s to referee your games.", senderUser.getPseudo(),
+                                       acceptingUser.getPseudo());
         contentHtmlDiv.appendText(content);
 
         appendLink(linkHtmlDiv, "VISIT WEBSITE", webDomain);
@@ -186,7 +190,8 @@ public class EmailService {
         String title = "Your Volleyball Referee pseudo was successfully changed";
         titleHtmlDiv.appendText(title);
 
-        String content = String.format("Dear %s. Your new pseudo is now registered and your data was updated accordingly.", user.getPseudo());
+        String content = String.format("Dear %s. Your new pseudo is now registered and your data was updated accordingly.",
+                                       user.getPseudo());
         contentHtmlDiv.appendText(content);
 
         sendEmail(email, title, user.getEmail());
@@ -207,7 +212,7 @@ public class EmailService {
         Color color = Color.decode(backgroundColor);
         String textColor;
 
-        double a = 1 - ( 0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue()) / 255;
+        double a = 1 - (0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue()) / 255;
 
         if (a < 0.5) {
             textColor = "#000";

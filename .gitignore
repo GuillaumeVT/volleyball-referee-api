@@ -30,3 +30,6 @@ nbdist/
 .nb-gradle/
 
 src/test/java/com/tonkar/volleyballreferee/local
+.docker/.env
+.docker/database
+.docker/VolleyballReferee-587e8e90786e.json

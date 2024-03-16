@@ -2,24 +2,18 @@ package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.dao.*;
 import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.Set;
 import com.tonkar.volleyballreferee.entity.*;
-import com.tonkar.volleyballreferee.export.ExcelDivisionWriter;
-import com.tonkar.volleyballreferee.export.ScoreSheetWriter;
+import com.tonkar.volleyballreferee.export.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.*;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,11 +32,19 @@ public class GameService {
         return gameDao.listLiveGames(kinds, genders, pageable);
     }
 
-    public Page<GameSummary> listGamesMatchingToken(String token, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+    public Page<GameSummary> listGamesMatchingToken(String token,
+                                                    List<GameStatus> statuses,
+                                                    List<GameType> kinds,
+                                                    List<GenderType> genders,
+                                                    Pageable pageable) {
         return gameDao.listGamesMatchingToken(token, statuses, kinds, genders, pageable);
     }
 
-    public Page<GameSummary> listGamesWithScheduleDate(LocalDate date, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+    public Page<GameSummary> listGamesWithScheduleDate(LocalDate date,
+                                                       List<GameStatus> statuses,
+                                                       List<GameType> kinds,
+                                                       List<GenderType> genders,
+                                                       Pageable pageable) {
         return gameDao.listGamesWithScheduleDate(date, statuses, kinds, genders, pageable);
     }
 
@@ -70,11 +72,19 @@ public class GameService {
         return gameDao.listNext10GamesInLeague(leagueId);
     }
 
-    public Page<GameSummary> listGamesInDivision(UUID leagueId, String divisionName, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable) {
+    public Page<GameSummary> listGamesInDivision(UUID leagueId,
+                                                 String divisionName,
+                                                 List<GameStatus> statuses,
+                                                 List<GenderType> genders,
+                                                 Pageable pageable) {
         return gameDao.listGamesInDivision(leagueId, divisionName, statuses, genders, pageable);
     }
 
-    public Page<GameSummary> listGamesOfTeamInDivision(UUID leagueId, String divisionName, UUID teamId, List<GameStatus> statuses, Pageable pageable) {
+    public Page<GameSummary> listGamesOfTeamInDivision(UUID leagueId,
+                                                       String divisionName,
+                                                       UUID teamId,
+                                                       List<GameStatus> statuses,
+                                                       Pageable pageable) {
         return gameDao.listGamesOfTeamInDivision(leagueId, divisionName, teamId, statuses, pageable);
     }
 
@@ -106,18 +116,24 @@ public class GameService {
     }
 
     public FileWrapper listGamesInDivisionExcel(UUID leagueId, String divisionName) throws IOException {
-        List<GameScore> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName, GameStatus.COMPLETED);
+        List<GameScore> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName,
+                                                                                                        GameStatus.COMPLETED);
         return ExcelDivisionWriter.writeExcelDivision(divisionName, games);
     }
 
     public List<Ranking> listRankingsInDivision(UUID leagueId, String divisionName) {
-        List<GameScore> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName, GameStatus.COMPLETED);
+        List<GameScore> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName,
+                                                                                                        GameStatus.COMPLETED);
         var rankings = new Rankings();
         games.forEach(rankings::addGame);
         return rankings.list();
     }
 
-    public Page<GameSummary> listGames(User user, List<GameStatus> statuses, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+    public Page<GameSummary> listGames(User user,
+                                       List<GameStatus> statuses,
+                                       List<GameType> kinds,
+                                       List<GenderType> genders,
+                                       Pageable pageable) {
         return gameDao.listGames(user.getId(), statuses, kinds, genders, pageable);
     }
 
@@ -129,25 +145,24 @@ public class GameService {
         return gameDao.listCompletedGames(user.getId(), pageable);
     }
 
-    public Page<GameSummary> listGamesInLeague(User user, UUID leagueId, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable) {
+    public Page<GameSummary> listGamesInLeague(User user,
+                                               UUID leagueId,
+                                               List<GameStatus> statuses,
+                                               List<GenderType> genders,
+                                               Pageable pageable) {
         return gameDao.listGamesInLeague(user.getId(), leagueId, statuses, genders, pageable);
     }
 
     public Game getGame(User user, UUID gameId) {
         return gameDao
                 .findByIdAndAllowedUser(gameId, user.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find game %s for user %s", gameId, user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find game %s for user %s", gameId, user.getId())));
     }
 
     public GameIngredients getGameIngredientsOfKind(User user, GameType kind) {
-        return new GameIngredients(
-                kind,
-                user.getFriends(),
-                rulesService.getDefaultRules(kind),
-                rulesService.listRulesOfKind(user, kind),
-                teamService.listTeamsOfKind(user, kind),
-                leagueService.listLeaguesOfKind(user, kind)
-        );
+        return new GameIngredients(kind, user.getFriends(), rulesService.getDefaultRules(kind), rulesService.listRulesOfKind(user, kind),
+                                   teamService.listTeamsOfKind(user, kind), leagueService.listLeaguesOfKind(user, kind));
     }
 
     public Count getNumberOfGames(User user) {
@@ -164,21 +179,33 @@ public class GameService {
 
     public void createGame(User user, GameSummary gameSummary) {
         if (gameDao.existsById(gameSummary.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create game %s for user %s because it already exists", gameSummary.getId(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not create game %s for user %s because it already exists",
+                                                            gameSummary.getId(), user.getId()));
         } else if (gameSummary.getHomeTeamId().equals(gameSummary.getGuestTeamId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create game %s for user %s because team %s cannot play against itself", gameSummary.getId(), user.getId(), gameSummary.getHomeTeamId()));
-        } else if (!gameSummary.getCreatedBy().equals(gameSummary.getRefereedBy()) && !userDao.areFriends(gameSummary.getCreatedBy(), gameSummary.getRefereedBy())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not create game %s for user %s because %s and %s are not friends", gameSummary.getId(), user.getId(), gameSummary.getCreatedBy(), gameSummary.getRefereedBy()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(
+                    "Could not create game %s for user %s because team %s cannot play against itself", gameSummary.getId(), user.getId(),
+                    gameSummary.getHomeTeamId()));
+        } else if (!gameSummary.getCreatedBy().equals(gameSummary.getRefereedBy()) && !userDao.areFriends(gameSummary.getCreatedBy(),
+                                                                                                          gameSummary.getRefereedBy())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                              String.format("Could not create game %s for user %s because %s and %s are not friends",
+                                                            gameSummary.getId(), user.getId(), gameSummary.getCreatedBy(),
+                                                            gameSummary.getRefereedBy()));
         } else {
             Team hTeam = teamDao
                     .findByIdAndCreatedByAndKind(gameSummary.getHomeTeamId(), user.getId(), gameSummary.getKind())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching home team %s for user %s", gameSummary.getHomeTeamId(), user.getId())));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                                   String.format("Could not find matching home team %s for user %s",
+                                                                                 gameSummary.getHomeTeamId(), user.getId())));
             Team gTeam = teamDao
                     .findByIdAndCreatedByAndKind(gameSummary.getGuestTeamId(), user.getId(), gameSummary.getKind())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching guest team %s for user %s", gameSummary.getGuestTeamId(), user.getId())));
-            Rules rules =
-                    findRules(user, gameSummary.getRulesId(), gameSummary.getKind())
-                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching rules %s for user %s", gameSummary.getRulesId(), user.getId())));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                                   String.format("Could not find matching guest team %s for user %s",
+                                                                                 gameSummary.getGuestTeamId(), user.getId())));
+            Rules rules = findRules(user, gameSummary.getRulesId(), gameSummary.getKind()).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching rules %s for user %s",
+                                                                                          gameSummary.getRulesId(), user.getId())));
 
             Game.SelectedLeague league = findOrCreateLeague(user, gameSummary);
 
@@ -220,11 +247,17 @@ public class GameService {
 
     public void createGame(User user, Game game) {
         if (gameDao.existsById(game.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create game %s for user %s because it already exists", game.getId(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not create game %s for user %s because it already exists", game.getId(),
+                                                            user.getId()));
         } else if (game.getHomeTeam().getId().equals(game.getGuestTeam().getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create game %s for user %s because team %s cannot play against itself", game.getId(), user.getId(), game.getHomeTeam().getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(
+                    "Could not create game %s for user %s because team %s cannot play against itself", game.getId(), user.getId(),
+                    game.getHomeTeam().getId()));
         } else if (!game.getCreatedBy().equals(game.getRefereedBy()) && !userDao.areFriends(game.getCreatedBy(), game.getRefereedBy())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not create game %s for user %s because %s and %s are not friends", game.getId(), user.getId(), game.getCreatedBy(), game.getRefereedBy()));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                              String.format("Could not create game %s for user %s because %s and %s are not friends",
+                                                            game.getId(), user.getId(), game.getCreatedBy(), game.getRefereedBy()));
         } else {
             game.setCreatedBy(user.getId());
             game.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
@@ -245,23 +278,35 @@ public class GameService {
         Optional<Game> optSavedGame = gameDao.findByIdAndAllowedUserAndStatus(gameSummary.getId(), user.getId(), GameStatus.SCHEDULED);
 
         if (optSavedGame.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find game %s %s for user %s", gameSummary.getId(), GameStatus.SCHEDULED, user.getId()));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                              String.format("Could not find game %s %s for user %s", gameSummary.getId(),
+                                                            GameStatus.SCHEDULED, user.getId()));
         } else if (gameSummary.getHomeTeamId().equals(gameSummary.getGuestTeamId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create game %s for user %s because team %s cannot play against itself", gameSummary.getId(), user.getId(), gameSummary.getHomeTeamId()));
-        } else if (!gameSummary.getCreatedBy().equals(gameSummary.getRefereedBy()) && !userDao.areFriends(gameSummary.getCreatedBy(), gameSummary.getRefereedBy())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not create game %s for user %s because %s and %s are not friends", gameSummary.getId(), user.getId(), gameSummary.getCreatedBy(), gameSummary.getRefereedBy()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(
+                    "Could not create game %s for user %s because team %s cannot play against itself", gameSummary.getId(), user.getId(),
+                    gameSummary.getHomeTeamId()));
+        } else if (!gameSummary.getCreatedBy().equals(gameSummary.getRefereedBy()) && !userDao.areFriends(gameSummary.getCreatedBy(),
+                                                                                                          gameSummary.getRefereedBy())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                              String.format("Could not create game %s for user %s because %s and %s are not friends",
+                                                            gameSummary.getId(), user.getId(), gameSummary.getCreatedBy(),
+                                                            gameSummary.getRefereedBy()));
         } else {
             Game savedGame = optSavedGame.get();
 
             Team hTeam = teamDao
                     .findByIdAndCreatedByAndKind(gameSummary.getHomeTeamId(), user.getId(), savedGame.getKind())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching home team %s for user %s", gameSummary.getHomeTeamId(), user.getId())));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                                   String.format("Could not find matching home team %s for user %s",
+                                                                                 gameSummary.getHomeTeamId(), user.getId())));
             Team gTeam = teamDao
                     .findByIdAndCreatedByAndKind(gameSummary.getGuestTeamId(), user.getId(), savedGame.getKind())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching guest team %s for user %s", gameSummary.getGuestTeamId(), user.getId())));
-            Rules rules =
-                    findRules(user, gameSummary.getRulesId(), savedGame.getKind())
-                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching rules %s for user %s", gameSummary.getRulesId(), user.getId())));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                                   String.format("Could not find matching guest team %s for user %s",
+                                                                                 gameSummary.getGuestTeamId(), user.getId())));
+            Rules rules = findRules(user, gameSummary.getRulesId(), savedGame.getKind()).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find matching rules %s for user %s",
+                                                                                          gameSummary.getRulesId(), user.getId())));
 
             Game.SelectedLeague league = findOrCreateLeague(user, gameSummary);
 
@@ -295,7 +340,9 @@ public class GameService {
     public void updateGame(User user, Game game) {
         Game savedGame = gameDao
                 .findByIdAndAllowedUserAndStatusNot(game.getId(), user.getId(), GameStatus.COMPLETED)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find game %s for user %s", game.getId(), user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find game %s for user %s", game.getId(),
+                                                                             user.getId())));
 
         savedGame.setUpdatedAt(game.getUpdatedAt());
         savedGame.setStatus(game.getStatus());
@@ -322,7 +369,8 @@ public class GameService {
     public void updateSet(User user, UUID gameId, int setIndex, Set set) {
         Game savedGame = gameDao
                 .findByIdAndAllowedUserAndStatus(gameId, user.getId(), GameStatus.LIVE)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find game %s for user %s", gameId, user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find game %s for user %s", gameId, user.getId())));
 
         if (setIndex > 0 && setIndex <= savedGame.getSets().size()) {
             savedGame.getSets().set(setIndex - 1, set);
@@ -330,7 +378,9 @@ public class GameService {
             savedGame.setScore(buildScore(savedGame));
             gameDao.save(savedGame);
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find set %d of game %s for user %s", setIndex, savedGame.getId(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                              String.format("Could not find set %d of game %s for user %s", setIndex, savedGame.getId(),
+                                                            user.getId()));
         }
     }
 
@@ -342,14 +392,19 @@ public class GameService {
     public void setReferee(User user, UUID gameId, String refereeUserId) {
         Game game = gameDao
                 .findByIdAndCreatedByAndStatusNot(gameId, user.getId(), GameStatus.COMPLETED)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find game %s for user %s", gameId, user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find game %s for user %s", gameId, user.getId())));
         if (user.getId().equals(refereeUserId)) {
-            gameDao.updateReferee(game.getId(), user.getId(), user.getPseudo(), LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            gameDao.updateReferee(game.getId(), user.getId(), user.getPseudo(),
+                                  LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         } else {
             User.Friend friend = user
                     .getFriend(refereeUserId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find referee %s in friends for user %s", gameId, user.getId())));
-            gameDao.updateReferee(game.getId(), friend.getId(), friend.getPseudo(), LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                                   String.format("Could not find referee %s in friends for user %s", gameId,
+                                                                                 user.getId())));
+            gameDao.updateReferee(game.getId(), friend.getId(), friend.getPseudo(),
+                                  LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
         }
     }
 
@@ -390,9 +445,9 @@ public class GameService {
     private Game.SelectedLeague findOrCreateLeague(User user, GameSummary gameSummary) {
         Game.SelectedLeague selectedLeague = null;
 
-        if (gameSummary.getLeagueId() != null
-                && gameSummary.getLeagueName() != null && !gameSummary.getLeagueName().isBlank()
-                && gameSummary.getDivisionName() != null && !gameSummary.getDivisionName().isBlank()) {
+        if (gameSummary.getLeagueId() != null && gameSummary.getLeagueName() != null && !gameSummary
+                .getLeagueName()
+                .isBlank() && gameSummary.getDivisionName() != null && !gameSummary.getDivisionName().isBlank()) {
             Optional<League> optLeague = leagueDao.findByIdAndCreatedBy(gameSummary.getLeagueId(), user.getId());
             League league;
 

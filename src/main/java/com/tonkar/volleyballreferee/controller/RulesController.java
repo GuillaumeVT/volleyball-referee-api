@@ -1,23 +1,17 @@
 package com.tonkar.volleyballreferee.controller;
 
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.RulesSummary;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.Rules;
-import com.tonkar.volleyballreferee.entity.User;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.RulesService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @Validated
@@ -34,7 +28,7 @@ public class RulesController {
     }
 
     @GetMapping(value = "/rules/{rulesId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Rules> getRules(@AuthenticationPrincipal User user, @PathVariable("rulesId") UUID rulesId){
+    public ResponseEntity<Rules> getRules(@AuthenticationPrincipal User user, @PathVariable("rulesId") UUID rulesId) {
         return new ResponseEntity<>(rulesService.getRules(user, rulesId), HttpStatus.OK);
     }
 
@@ -55,7 +49,7 @@ public class RulesController {
     }
 
     @PutMapping(value = "/rules", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> updateRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules){
+    public ResponseEntity<Void> updateRules(@AuthenticationPrincipal User user, @Valid @NotNull @RequestBody Rules rules) {
         rulesService.updateRules(user, rules);
         return new ResponseEntity<>(HttpStatus.OK);
     }

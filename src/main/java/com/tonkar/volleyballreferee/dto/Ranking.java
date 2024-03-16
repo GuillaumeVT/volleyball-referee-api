@@ -70,7 +70,6 @@ public class Ranking implements Comparable<Ranking> {
         }
     }
 
-
     @Override
     public int compareTo(Ranking other) {
         return Integer.compare(other.matchesFor, this.matchesFor);

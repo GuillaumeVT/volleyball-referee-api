@@ -1,22 +1,15 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.dao.GameDao;
-import com.tonkar.volleyballreferee.dao.LeagueDao;
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.LeagueSummary;
-import com.tonkar.volleyballreferee.entity.GameStatus;
-import com.tonkar.volleyballreferee.entity.GameType;
-import com.tonkar.volleyballreferee.entity.League;
-import com.tonkar.volleyballreferee.entity.User;
+import com.tonkar.volleyballreferee.dao.*;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.UUID;
+import java.time.*;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +35,9 @@ public class LeagueService {
     public League getLeague(User user, UUID leagueId) {
         return leagueDao
                 .findByIdAndCreatedBy(leagueId, user.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find league %s for user %s", leagueId, user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find league %s for user %s", leagueId,
+                                                                             user.getId())));
     }
 
     public Count getNumberOfLeagues(User user) {
@@ -51,9 +46,13 @@ public class LeagueService {
 
     public void createLeague(User user, League league) {
         if (leagueDao.existsById(league.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create league %s for user %s because it already exists", league.getId(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not create league %s for user %s because it already exists",
+                                                            league.getId(), user.getId()));
         } else if (leagueDao.existsByCreatedByAndNameAndKind(user.getId(), league.getName(), league.getKind())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not create league %s %s for user %s because it already exists", league.getName(), league.getKind(), user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not create league %s %s for user %s because it already exists",
+                                                            league.getName(), league.getKind(), user.getId()));
         } else {
             league.setCreatedBy(user.getId());
             league.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
@@ -64,7 +63,9 @@ public class LeagueService {
     public void updateDivisions(User user, UUID leagueId) {
         League savedLeague = leagueDao
                 .findByIdAndCreatedBy(leagueId, user.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find league %s for user %s", leagueId, user.getId())));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find league %s for user %s", leagueId,
+                                                                             user.getId())));
 
         savedLeague.setDivisions(gameDao.listDivisionsInLeague(user.getId(), savedLeague.getId()));
         savedLeague.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
@@ -73,7 +74,9 @@ public class LeagueService {
 
     public void deleteLeague(User user, UUID leagueId) {
         if (gameDao.existsByCreatedByAndLeague_IdAndStatus(user.getId(), leagueId, GameStatus.SCHEDULED)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not delete league %s for user %s because it is used in a game", leagueId, user.getId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Could not delete league %s for user %s because it is used in a game", leagueId,
+                                                            user.getId()));
         } else {
             leagueDao.deleteByIdAndCreatedBy(leagueId, user.getId());
         }

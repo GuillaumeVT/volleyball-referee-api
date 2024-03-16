@@ -1,14 +1,11 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dto.GameSummary;
-import com.tonkar.volleyballreferee.dto.UserToken;
-import com.tonkar.volleyballreferee.entity.Game;
-import com.tonkar.volleyballreferee.entity.GameStatus;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -18,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameTests extends VbrMockedTests {
 
     private final RulesService rulesService;
-    private final TeamService teamService;
-    private final GameService gameService;
+    private final TeamService  teamService;
+    private final GameService  gameService;
 
     public GameTests(@Autowired RulesService rulesService, @Autowired TeamService teamService, @Autowired GameService gameService) {
         this.rulesService = rulesService;
@@ -65,7 +62,8 @@ class GameTests extends VbrMockedTests {
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class, () -> gameService.getGame(sandbox.getUser(userToken2.user().id()), gameSummary.getId()));
+        assertThrows(ResponseStatusException.class,
+                     () -> gameService.getGame(sandbox.getUser(userToken2.user().id()), gameSummary.getId()));
     }
 
     @Test
@@ -132,7 +130,8 @@ class GameTests extends VbrMockedTests {
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class, () -> rulesService.deleteRules(sandbox.getUser(userToken.user().id()), gameSummary.getRulesId()));
+        assertThrows(ResponseStatusException.class,
+                     () -> rulesService.deleteRules(sandbox.getUser(userToken.user().id()), gameSummary.getRulesId()));
     }
 
     @Test
@@ -155,7 +154,8 @@ class GameTests extends VbrMockedTests {
         GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class, () -> teamService.deleteTeam(sandbox.getUser(userToken.user().id()), gameSummary.getHomeTeamId()));
+        assertThrows(ResponseStatusException.class,
+                     () -> teamService.deleteTeam(sandbox.getUser(userToken.user().id()), gameSummary.getHomeTeamId()));
     }
 
     @Test
@@ -168,7 +168,10 @@ class GameTests extends VbrMockedTests {
         gameService.deleteGame(sandbox.getUser(userToken.user().id()), gameSummary.getId());
 
         // THEN
-        assertTrue(gameService.listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20)).getContent().isEmpty());
+        assertTrue(gameService
+                           .listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20))
+                           .getContent()
+                           .isEmpty());
     }
 
     @Test
@@ -203,7 +206,9 @@ class GameTests extends VbrMockedTests {
 
         // THEN
         // only COMPLETED games are affected by deleteAll
-        assertEquals(1, gameService.listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20)).getTotalElements());
+        assertEquals(1, gameService
+                .listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20))
+                .getTotalElements());
     }
 
     @Test
@@ -218,7 +223,9 @@ class GameTests extends VbrMockedTests {
 
         // THEN
         // only COMPLETED games are affected by deleteAll
-        assertEquals(2, gameService.listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20)).getTotalElements());
+        assertEquals(2, gameService
+                .listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20))
+                .getTotalElements());
     }
 
     @Test

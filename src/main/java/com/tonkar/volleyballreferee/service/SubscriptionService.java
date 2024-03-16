@@ -3,8 +3,7 @@ package com.tonkar.volleyballreferee.service;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.androidpublisher.AndroidPublisher;
-import com.google.api.services.androidpublisher.AndroidPublisherScopes;
+import com.google.api.services.androidpublisher.*;
 import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.ServiceAccountCredentials;
@@ -17,9 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -49,12 +46,12 @@ public class SubscriptionService {
     @PostConstruct
     public void init() {
         try (InputStream stream = new ByteArrayInputStream(androidCredential.getBytes(StandardCharsets.UTF_8))) {
-            var credentials = ServiceAccountCredentials.fromStream(stream).createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
+            var credentials = ServiceAccountCredentials
+                    .fromStream(stream)
+                    .createScoped(Collections.singleton(AndroidPublisherScopes.ANDROIDPUBLISHER));
             var requestInitializer = new HttpCredentialsAdapter(credentials);
-            var publisher = new AndroidPublisher
-                    .Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), requestInitializer)
-                    .setApplicationName(androidPackageName)
-                    .build();
+            var publisher = new AndroidPublisher.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(),
+                                                         requestInitializer).setApplicationName(androidPackageName).build();
             subscriptions = publisher.purchases().subscriptions();
             products = publisher.purchases().products();
         } catch (IOException | GeneralSecurityException e) {
@@ -95,7 +92,8 @@ public class SubscriptionService {
 
         // Store the latest purchase token and the subscription expiry date
         optionalUser.ifPresent(userSummary -> {
-            log.info("Found the user {} ({}) from the linked purchase tokens, store new token {} with expiry {}", userSummary.id(), userSummary.pseudo(), purchaseToken, subscriptionExpiryAt);
+            log.info("Found the user {} ({}) from the linked purchase tokens, store new token {} with expiry {}", userSummary.id(),
+                     userSummary.pseudo(), purchaseToken, subscriptionExpiryAt);
             userDao.updateSubscriptionPurchaseToken(userSummary.id(), purchaseToken, subscriptionExpiryAt);
         });
     }
@@ -108,7 +106,8 @@ public class SubscriptionService {
                 // The purchase token is not a subscription but is a valid legacy lifetime purchase
                 return null;
             } else {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format("User provided an invalid purchase token %s", purchaseToken));
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                                                  String.format("User provided an invalid purchase token %s", purchaseToken));
             }
         }
     }
@@ -137,7 +136,8 @@ public class SubscriptionService {
 
     private void printGoogleApiError(String purchaseToken, IOException exception) {
         if (exception instanceof GoogleJsonResponseException googleJsonResponseException) {
-            log.error("Error while retrieving the purchase token {}: {}", purchaseToken, googleJsonResponseException.getDetails().getOrDefault("message", googleJsonResponseException.getContent()));
+            log.error("Error while retrieving the purchase token {}: {}", purchaseToken,
+                      googleJsonResponseException.getDetails().getOrDefault("message", googleJsonResponseException.getContent()));
         } else {
             log.error(exception.getMessage());
         }

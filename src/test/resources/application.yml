@@ -4,12 +4,8 @@ spring:
   cache:
     jcache:
       provider: org.ehcache.jsr107.EhcacheCachingProvider
-
-de:
-  flapdoodle:
-    mongodb:
-      embedded:
-        version: 4.0.2
+  config:
+    import: optional:file:.docker/.env[.properties]
 
 server:
   servlet:

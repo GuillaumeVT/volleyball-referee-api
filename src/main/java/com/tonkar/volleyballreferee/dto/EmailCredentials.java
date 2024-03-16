@@ -1,12 +1,5 @@
 package com.tonkar.volleyballreferee.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 
-public record EmailCredentials(
-        @NotBlank
-        @Email
-        String userEmail,
-        @NotBlank
-        String userPassword) {
-}
+public record EmailCredentials(@NotBlank @Email String userEmail, @NotBlank String userPassword) {}

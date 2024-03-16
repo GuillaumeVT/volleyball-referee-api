@@ -1,24 +1,17 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dto.Count;
-import com.tonkar.volleyballreferee.dto.ErrorResponse;
-import com.tonkar.volleyballreferee.dto.FriendsAndRequests;
-import com.tonkar.volleyballreferee.dto.UserToken;
+import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.FriendRequest;
 import com.tonkar.volleyballreferee.service.FriendService;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FriendTests extends VbrMockedTests {
@@ -30,33 +23,26 @@ class FriendTests extends VbrMockedTests {
         this.friendService = friendService;
     }
 
-    @Test
-    void test_friends_unauthorized() {
+    @ParameterizedTest
+    @CsvSource(value = { "GET, /users/friends",
+                         "GET, /users/friends/requested",
+                         "GET, /users/friends/received",
+                         "GET, /users/friends/received/count",
+                         "POST, /users/friends/request/anyPseudo",
+                         "POST, /users/friends/accept/anyId",
+                         "POST, /users/friends/reject/anyId",
+                         "DELETE, /users/friends/remove/anyId"
+    })
+    void test_friends_unauthorized(HttpMethod method, String path) {
         final var invalidToken = "invalid";
 
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange("/users/friends", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
-
-        errorResponse = restTemplate.exchange("/users/friends/requested", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
-
-        errorResponse = restTemplate.exchange("/users/friends/received", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
-
-        errorResponse = restTemplate.exchange("/users/friends/received/count", HttpMethod.GET, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
-
-        errorResponse = restTemplate.exchange("/users/friends/request/anyPseudo", HttpMethod.POST, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
-
-        errorResponse = restTemplate.exchange("/users/friends/accept/anyId", HttpMethod.POST, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
-
-        errorResponse = restTemplate.exchange("/users/friends/reject/anyId", HttpMethod.POST, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
-
-        errorResponse = restTemplate.exchange("/users/friends/remove/anyId", HttpMethod.DELETE, emptyPayloadWithAuth(invalidToken), ErrorResponse.class);
-        assertEquals(HttpStatus.UNAUTHORIZED, errorResponse.getStatusCode());
+        webTestClient
+                .method(method)
+                .uri(path)
+                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .exchange()
+                .expectStatus()
+                .isUnauthorized();
     }
 
     @Test
@@ -65,11 +51,14 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(String.format("/users/friends/request/%s", userToken2.user().pseudo()), HttpMethod.POST, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CREATED, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri(String.format("/users/friends/request/%s", userToken2.user().pseudo()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isCreated();
     }
 
     @Test
@@ -77,11 +66,14 @@ class FriendTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(String.format("/users/friends/request/%s", userToken.user().pseudo()), HttpMethod.POST, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri(String.format("/users/friends/request/%s", userToken.user().pseudo()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -91,11 +83,14 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken2 = sandbox.createUser();
         sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
 
-        // WHEN
-        ResponseEntity<ErrorResponse> errorResponse = restTemplate.exchange(String.format("/users/friends/request/%s", userToken2.user().pseudo()), HttpMethod.POST, emptyPayloadWithAuth(userToken.token()), ErrorResponse.class);
-
-        // THEN
-        assertEquals(HttpStatus.CONFLICT, errorResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri(String.format("/users/friends/request/%s", userToken2.user().pseudo()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -105,12 +100,16 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken2 = sandbox.createUser();
         friendService.sendFriendRequest(sandbox.getUser(userToken.user().id()), userToken2.user().pseudo());
 
-        // WHEN
-        ResponseEntity<Count> friendResponse = restTemplate.exchange("/users/friends/received/count", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), Count.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, friendResponse.getStatusCode());
-        assertEquals(0L, Objects.requireNonNull(friendResponse.getBody()).count());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/users/friends/received/count")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Count.class)
+                .value(count -> Assertions.assertEquals(0L, count.count()));
     }
 
     @Test
@@ -120,12 +119,16 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken2 = sandbox.createUser();
         friendService.sendFriendRequest(sandbox.getUser(userToken.user().id()), userToken2.user().pseudo());
 
-        // WHEN
-        ResponseEntity<Count> friendResponse = restTemplate.exchange("/users/friends/received/count", HttpMethod.GET, emptyPayloadWithAuth(userToken2.token()), Count.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, friendResponse.getStatusCode());
-        assertEquals(1L, Objects.requireNonNull(friendResponse.getBody()).count());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/users/friends/received/count")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken2.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Count.class)
+                .value(count -> Assertions.assertEquals(1L, count.count()));
     }
 
     @Test
@@ -134,14 +137,17 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
         friendService.sendFriendRequest(sandbox.getUser(userToken.user().id()), userToken2.user().pseudo());
-        ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
 
-        // WHEN
-        ResponseEntity<List<FriendRequest>> friendResponse = restTemplate.exchange("/users/friends/received", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), typeReference);
-
-        // THEN
-        assertEquals(HttpStatus.OK, friendResponse.getStatusCode());
-        assertTrue(Objects.requireNonNull(friendResponse.getBody()).isEmpty());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/users/friends/received")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(FriendRequest.class)
+                .hasSize(0);
     }
 
     @Test
@@ -150,14 +156,17 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
         friendService.sendFriendRequest(sandbox.getUser(userToken.user().id()), userToken2.user().pseudo());
-        ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
 
-        // WHEN
-        ResponseEntity<List<FriendRequest>> friendResponse = restTemplate.exchange("/users/friends/received", HttpMethod.GET, emptyPayloadWithAuth(userToken2.token()), typeReference);
-
-        // THEN
-        assertEquals(HttpStatus.OK, friendResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(friendResponse.getBody()).size());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/users/friends/received")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken2.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(FriendRequest.class)
+                .hasSize(1);
     }
 
     @Test
@@ -166,14 +175,17 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
         friendService.sendFriendRequest(sandbox.getUser(userToken.user().id()), userToken2.user().pseudo());
-        ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
 
-        // WHEN
-        ResponseEntity<List<FriendRequest>> friendResponse = restTemplate.exchange("/users/friends/requested", HttpMethod.GET, emptyPayloadWithAuth(userToken2.token()), typeReference);
-
-        // THEN
-        assertEquals(HttpStatus.OK, friendResponse.getStatusCode());
-        assertTrue(Objects.requireNonNull(friendResponse.getBody()).isEmpty());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/users/friends/requested")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken2.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(FriendRequest.class)
+                .hasSize(0);
     }
 
     @Test
@@ -182,14 +194,17 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         UserToken userToken2 = sandbox.createUser();
         friendService.sendFriendRequest(sandbox.getUser(userToken.user().id()), userToken2.user().pseudo());
-        ParameterizedTypeReference<List<FriendRequest>> typeReference = new ParameterizedTypeReference<>() {};
 
-        // WHEN
-        ResponseEntity<List<FriendRequest>> friendResponse = restTemplate.exchange("/users/friends/requested", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), typeReference);
-
-        // THEN
-        assertEquals(HttpStatus.OK, friendResponse.getStatusCode());
-        assertEquals(1, Objects.requireNonNull(friendResponse.getBody()).size());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/users/friends/requested")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(FriendRequest.class)
+                .hasSize(1);
     }
 
     @Test
@@ -197,11 +212,14 @@ class FriendTests extends VbrMockedTests {
         // GIVEN
         UserToken userToken = sandbox.createUser();
 
-        // WHEN
-        ResponseEntity<FriendsAndRequests> friendResponse = restTemplate.exchange("/users/friends", HttpMethod.GET, emptyPayloadWithAuth(userToken.token()), FriendsAndRequests.class);
-
-        // THEN
-        assertEquals(HttpStatus.OK, friendResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .get()
+                .uri("/users/friends")
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 
     @Test
@@ -211,11 +229,16 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken2 = sandbox.createUser();
         UUID friendRequestId = friendService.sendFriendRequest(sandbox.getUser(userToken.user().id()), userToken2.user().pseudo());
 
-        // WHEN
-        ResponseEntity<Void> friendResponse = restTemplate.exchange(String.format("/users/friends/reject/%s", friendRequestId), HttpMethod.POST, emptyPayloadWithAuth(userToken2.token()), Void.class);
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri(String.format("/users/friends/reject/%s", friendRequestId))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken2.token()))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
 
         // THEN
-        assertEquals(HttpStatus.NO_CONTENT, friendResponse.getStatusCode());
         assertTrue(friendService.listFriendRequestsSentBy(sandbox.getUser(userToken.user().id())).isEmpty());
         assertTrue(friendService.listFriendRequestsReceivedBy(sandbox.getUser(userToken2.user().id())).isEmpty());
     }
@@ -227,13 +250,25 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken2 = sandbox.createUser();
         UUID friendRequestId = friendService.sendFriendRequest(sandbox.getUser(userToken.user().id()), userToken2.user().pseudo());
 
-        // WHEN
-        ResponseEntity<Void> friendResponse = restTemplate.exchange(String.format("/users/friends/accept/%s", friendRequestId), HttpMethod.POST, emptyPayloadWithAuth(userToken2.token()), Void.class);
+        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri(String.format("/users/friends/accept/%s", friendRequestId))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken2.token()))
+                .exchange()
+                .expectStatus()
+                .isCreated();
 
-        // THEN
-        assertEquals(HttpStatus.CREATED, friendResponse.getStatusCode());
-        assertTrue(sandbox.getUser(userToken.user().id()).getFriends().stream().anyMatch(friend -> friend.getId().equals(userToken2.user().id())));
-        assertTrue(sandbox.getUser(userToken2.user().id()).getFriends().stream().anyMatch(friend -> friend.getId().equals(userToken.user().id())));
+        assertTrue(sandbox
+                           .getUser(userToken.user().id())
+                           .getFriends()
+                           .stream()
+                           .anyMatch(friend -> friend.getId().equals(userToken2.user().id())));
+        assertTrue(sandbox
+                           .getUser(userToken2.user().id())
+                           .getFriends()
+                           .stream()
+                           .anyMatch(friend -> friend.getId().equals(userToken.user().id())));
         assertTrue(friendService.listFriendRequestsSentBy(sandbox.getUser(userToken.user().id())).isEmpty());
         assertTrue(friendService.listFriendRequestsReceivedBy(sandbox.getUser(userToken2.user().id())).isEmpty());
     }
@@ -245,14 +280,25 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken2 = sandbox.createUser();
         sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
 
-        // WHEN
-        ResponseEntity<Void> friendResponse = restTemplate.exchange(String.format("/users/friends/remove/%s", userToken2.user().id()), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
-        assertEquals(HttpStatus.NO_CONTENT, friendResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .delete()
+                .uri(String.format("/users/friends/remove/%s", userToken2.user().id()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNoContent();
 
-        // THEN
-        assertEquals(HttpStatus.NO_CONTENT, friendResponse.getStatusCode());
-        assertTrue(sandbox.getUser(userToken.user().id()).getFriends().stream().noneMatch(friend -> friend.getId().equals(userToken2.user().id())));
-        assertTrue(sandbox.getUser(userToken2.user().id()).getFriends().stream().noneMatch(friend -> friend.getId().equals(userToken.user().id())));
+        assertTrue(sandbox
+                           .getUser(userToken.user().id())
+                           .getFriends()
+                           .stream()
+                           .noneMatch(friend -> friend.getId().equals(userToken2.user().id())));
+        assertTrue(sandbox
+                           .getUser(userToken2.user().id())
+                           .getFriends()
+                           .stream()
+                           .noneMatch(friend -> friend.getId().equals(userToken.user().id())));
     }
 
     @Test
@@ -261,10 +307,13 @@ class FriendTests extends VbrMockedTests {
         UserToken userToken = sandbox.createUser();
         String anyId = UUID.randomUUID().toString();
 
-        // WHEN
-        ResponseEntity<Void> friendResponse = restTemplate.exchange(String.format("/users/friends/remove/%s", anyId), HttpMethod.DELETE, emptyPayloadWithAuth(userToken.token()), Void.class);
-
-        // THEN
-        assertEquals(HttpStatus.NOT_FOUND, friendResponse.getStatusCode());
+        // WHEN / THEN
+        webTestClient
+                .delete()
+                .uri(String.format("/users/friends/remove/%s", anyId))
+                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 }

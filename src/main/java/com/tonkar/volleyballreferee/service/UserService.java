@@ -1,24 +1,14 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
-import com.tonkar.volleyballreferee.dao.FriendRequestDao;
-import com.tonkar.volleyballreferee.dao.GameDao;
-import com.tonkar.volleyballreferee.dao.PasswordResetDao;
-import com.tonkar.volleyballreferee.dao.UserDao;
-import com.tonkar.volleyballreferee.dto.NewUser;
-import com.tonkar.volleyballreferee.dto.UserPasswordUpdate;
-import com.tonkar.volleyballreferee.dto.UserSummary;
-import com.tonkar.volleyballreferee.dto.UserToken;
-import com.tonkar.volleyballreferee.entity.PasswordReset;
-import com.tonkar.volleyballreferee.entity.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
+import com.tonkar.volleyballreferee.dao.*;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,13 +17,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.*;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -91,12 +76,14 @@ public class UserService {
 
         return userDao
                 .findUserByPurchaseToken(purchaseToken)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user for purchase token %s", purchaseToken)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find user for purchase token %s", purchaseToken)));
     }
 
     public UserToken createUser(NewUser newUser) {
         if (userDao.existsByPurchaseToken(newUser.purchaseToken())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with purchase token %s", newUser.purchaseToken()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                              String.format("Found an existing user with purchase token %s", newUser.purchaseToken()));
         }
 
         SubscriptionPurchase subscription = subscriptionService.validatePurchaseToken(newUser.purchaseToken());
@@ -116,7 +103,8 @@ public class UserService {
             User existingUser = optionalExistingUser.get();
 
             if (existingUser.isAccountNonExpired()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with email %s", newUser.email()));
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                                  String.format("Found an existing user with email %s", newUser.email()));
             } else {
                 user.setId(existingUser.getId());
                 user.setPseudo(existingUser.getPseudo());
@@ -129,7 +117,8 @@ public class UserService {
             if (idExists) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with id %s", user.getId()));
             } else if (pseudoExists) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with pseudo %s", user.getPseudo()));
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                                  String.format("Found an existing user with pseudo %s", user.getPseudo()));
             } else {
                 user.setFriends(new ArrayList<>());
                 user.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
@@ -185,28 +174,34 @@ public class UserService {
         return signInUser(user.getEmail(), newPassword);
     }
 
-    public UUID initiatePasswordReset(String userEmail) {
-        User user = userDao
-                .findByEmail(userEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user %s", userEmail)));
+    public Optional<UUID> initiatePasswordReset(String userEmail) {
+        Optional<User> optionalUser = userDao.findByEmail(userEmail);
 
-        PasswordReset passwordReset = PasswordReset
-                .builder()
-                .id(UUID.randomUUID())
-                .userId(user.getId())
-                .createdAt(LocalDateTime.now(ZoneOffset.UTC))
-                .expiresAt(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(30L))
-                .build();
-        passwordResetDao.save(passwordReset);
-        emailService.sendPasswordResetEmail(user.getEmail(), passwordReset.getId());
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
 
-        return passwordReset.getId();
+            PasswordReset passwordReset = PasswordReset
+                    .builder()
+                    .id(UUID.randomUUID())
+                    .userId(user.getId())
+                    .createdAt(LocalDateTime.now(ZoneOffset.UTC))
+                    .expiresAt(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(30L))
+                    .build();
+            passwordResetDao.save(passwordReset);
+            emailService.sendPasswordResetEmail(user.getEmail(), passwordReset.getId());
+
+            return Optional.of(passwordReset.getId());
+        } else {
+            log.error(String.format("Could not find user %s", userEmail));
+            return Optional.empty();
+        }
     }
 
     public String followPasswordReset(UUID passwordResetId) {
         PasswordReset passwordReset = passwordResetDao
                 .findById(passwordResetId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find password reset %s", passwordResetId)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find password reset %s", passwordResetId)));
 
         getUser(passwordReset.getUserId());
 
@@ -218,7 +213,8 @@ public class UserService {
 
         PasswordReset passwordReset = passwordResetDao
                 .findById(passwordResetId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find password reset %s", passwordResetId)));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                               String.format("Could not find password reset %s", passwordResetId)));
 
         User user = getUser(passwordReset.getUserId());
 
@@ -245,7 +241,8 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Found an existing user with pseudo %s", pseudo));
         } else {
             if (!userDao.updateUserPseudo(user.getId(), pseudo)) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Unable to set pseudo %s for user %s", pseudo, user.getId()));
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                                  String.format("Unable to set pseudo %s for user %s", pseudo, user.getId()));
             }
             userDao.updateFriendPseudo(user.getId(), pseudo);
             gameDao.updateUserPseudo(user.getId(), pseudo);
@@ -259,7 +256,8 @@ public class UserService {
 
         emailService.sendPseudoUpdatedNotificationEmail(user);
 
-        return new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin(), user.isSubscription(), user.getSubscriptionExpiryAt());
+        return new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin(), user.isSubscription(),
+                               user.getSubscriptionExpiryAt());
     }
 
     private UserToken buildToken(User user) {
@@ -275,23 +273,16 @@ public class UserService {
                 .signWith(signingKey)
                 .compact();
 
-        return new UserToken(
-                token,
-                Date.from(exp.toInstant(ZoneOffset.UTC)).getTime(),
-                new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin(), user.isSubscription(), user.getSubscriptionExpiryAt())
-        );
+        return new UserToken(token, Date.from(exp.toInstant(ZoneOffset.UTC)).getTime(),
+                             new UserSummary(user.getId(), user.getPseudo(), user.getEmail(), user.isAdmin(), user.isSubscription(),
+                                             user.getSubscriptionExpiryAt()));
     }
 
     private Optional<Claims> parseToken(String token) {
         Optional<Claims> optionalClaims;
 
         try {
-            optionalClaims = Optional.of(Jwts
-                    .parser()
-                    .verifyWith(signingKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload());
+            optionalClaims = Optional.of(Jwts.parser().verifyWith(signingKey).build().parseSignedClaims(token).getPayload());
         } catch (JwtException e) {
             log.error("Failed to parse token {}", token);
             optionalClaims = Optional.empty();
@@ -301,8 +292,9 @@ public class UserService {
     }
 
     private boolean isLocked(User user) {
-        return user.getFailedAuthentication().getAttempts() >= 5
-                && LocalDateTime.now(ZoneOffset.UTC).isBefore(LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getFailedAuthentication().getResetsAt()), ZoneOffset.UTC));
+        return user.getFailedAuthentication().getAttempts() >= 5 && LocalDateTime
+                .now(ZoneOffset.UTC)
+                .isBefore(LocalDateTime.ofInstant(Instant.ofEpochMilli(user.getFailedAuthentication().getResetsAt()), ZoneOffset.UTC));
     }
 
     private void userSignedIn(User user) {
@@ -318,7 +310,8 @@ public class UserService {
             failedAuthentication = new User.FailedAuthentication(0, now.toInstant(ZoneOffset.UTC).toEpochMilli());
         }
 
-        failedAuthentication.setAttempts(user.getFailedAuthentication().getAttempts() == 5 ? 5 : user.getFailedAuthentication().getAttempts() + 1);
+        failedAuthentication.setAttempts(
+                user.getFailedAuthentication().getAttempts() == 5 ? 5 : user.getFailedAuthentication().getAttempts() + 1);
         failedAuthentication.setResetsAt(willResetAt.toInstant(ZoneOffset.UTC).toEpochMilli());
         userDao.addFailedAuthentication(user.getId(), failedAuthentication);
     }
@@ -373,15 +366,18 @@ public class UserService {
         }
 
         if (numberOfUppercaseCharacters < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Password must contain at least %d uppercase characters", 1));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                              String.format("Password must contain at least %d uppercase characters", 1));
         }
 
         if (numberOfSpecialCharacters < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Password must contain at least %d special characters", 1));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                              String.format("Password must contain at least %d special characters", 1));
         }
 
         if (maxNumberORepeatedCharacters > 3) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Password must contain at most %d repeating characters", 3));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                              String.format("Password must contain at most %d repeating characters", 3));
         }
     }
 }

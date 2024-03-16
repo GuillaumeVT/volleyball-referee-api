@@ -1,10 +1,8 @@
 package com.tonkar.volleyballreferee.service;
 
 import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dto.NewUser;
-import com.tonkar.volleyballreferee.dto.UserSummary;
-import com.tonkar.volleyballreferee.entity.Game;
-import com.tonkar.volleyballreferee.entity.User;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserTests extends VbrMockedTests {
-
 
     private final UserService userService;
 
@@ -50,11 +47,10 @@ class UserTests extends VbrMockedTests {
         assertEquals(newPseudo, userSummary.pseudo());
         assertEquals(newPseudo, gameService.getGame(game.getId()).getRefereeName());
         assertTrue(userService
-                .getUser(user2.getId())
-                .getFriends()
-                .stream()
-                .anyMatch(friend -> friend.getId().equals(user.getId()) && friend.getPseudo().equals(newPseudo))
-        );
+                           .getUser(user2.getId())
+                           .getFriends()
+                           .stream()
+                           .anyMatch(friend -> friend.getId().equals(user.getId()) && friend.getPseudo().equals(newPseudo)));
     }
 
     @Test

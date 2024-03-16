@@ -1,8 +1,7 @@
 package com.tonkar.volleyballreferee.configuration;
 
-import com.tonkar.volleyballreferee.dto.GameSummary;
-import com.tonkar.volleyballreferee.dto.NewUser;
-import com.tonkar.volleyballreferee.dto.UserToken;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.entity.Set;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.*;
 import net.datafaker.Faker;
@@ -10,12 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.time.*;
+import java.util.*;
 
 @TestConfiguration
 public class VbrTestConfiguration {
@@ -27,9 +22,12 @@ public class VbrTestConfiguration {
     private final GameService   gameService;
     private final LeagueService leagueService;
 
-    public VbrTestConfiguration(@Autowired UserService userService, @Autowired FriendService friendService,
-                                @Autowired RulesService rulesService, @Autowired TeamService teamService,
-                                @Autowired GameService gameService, @Autowired LeagueService leagueService) {
+    public VbrTestConfiguration(@Autowired UserService userService,
+                                @Autowired FriendService friendService,
+                                @Autowired RulesService rulesService,
+                                @Autowired TeamService teamService,
+                                @Autowired GameService gameService,
+                                @Autowired LeagueService leagueService) {
         this.userService = userService;
         this.friendService = friendService;
         this.rulesService = rulesService;
@@ -57,7 +55,8 @@ public class VbrTestConfiguration {
         }
 
         public NewUser generateNewUser(String email) {
-            return new NewUser(UUID.randomUUID().toString(), faker.name().firstName(), email == null ? faker.internet().safeEmailAddress() : email, "Password1234+", faker.finance().iban());
+            return new NewUser(UUID.randomUUID().toString(), faker.name().firstName(),
+                               email == null ? faker.internet().safeEmailAddress() : email, "Password1234+", faker.finance().iban());
         }
 
         public User generateUser(String email) {
@@ -214,17 +213,13 @@ public class VbrTestConfiguration {
         }
 
         public Rules generateBeachRules(String userId) {
-            return new Rules(UUID.randomUUID(), userId, 0L, 0L, faker.company().buzzword(), GameType.BEACH,
-                    3, 21, true, 15, true, true, Rules.WIN_TERMINATION, true, 1, 30,
-                    true, 30, true, 60,
-                    Rules.FIVB_LIMITATION, 0, true, 7, 5, 9999);
+            return new Rules(UUID.randomUUID(), userId, 0L, 0L, faker.company().buzzword(), GameType.BEACH, 3, 21, true, 15, true, true,
+                             Rules.WIN_TERMINATION, true, 1, 30, true, 30, true, 60, Rules.FIVB_LIMITATION, 0, true, 7, 5, 9999);
         }
 
         public Rules generateIndoorRules(String userId) {
-            return new Rules(UUID.randomUUID(), userId, 0L, 0L, faker.company().buzzword(), GameType.INDOOR,
-                    5, 25, true, 15, true, true, Rules.WIN_TERMINATION, true, 2, 30,
-                    false, 60, true, 180,
-                    Rules.NO_LIMITATION, 6, false, 0, 0, 9999);
+            return new Rules(UUID.randomUUID(), userId, 0L, 0L, faker.company().buzzword(), GameType.INDOOR, 5, 25, true, 15, true, true,
+                             Rules.WIN_TERMINATION, true, 2, 30, false, 60, true, 180, Rules.NO_LIMITATION, 6, false, 0, 0, 9999);
         }
 
         public Rules createIndoorRules(String userId) {
