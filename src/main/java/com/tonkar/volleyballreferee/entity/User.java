@@ -7,10 +7,8 @@ import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.*;
 import java.util.*;
 
 @NoArgsConstructor
@@ -19,20 +17,14 @@ import java.util.*;
 @FieldNameConstants
 @Document(collection = "users")
 public class User implements UserDetails {
+
     @Id
-    @NotBlank
-    private String               id;
+    @NotNull
+    private UUID                 id;
     @NotBlank
     private String               pseudo;
-    @Email
-    @NotBlank
-    private String               email;
     @NotBlank
     private String               password;
-    @NotBlank
-    private String               purchaseToken;
-    private boolean              subscription;
-    private long                 subscriptionExpiryAt;
     private List<Friend>         friends;
     private long                 createdAt;
     private long                 lastLoginAt;
@@ -40,12 +32,10 @@ public class User implements UserDetails {
     private boolean              enabled;
     private boolean              admin;
 
-    public static String VBR_USER_ID = "01022018@vbr";
-
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(admin ? "ADMIN" : "USER"));
+        return List.of();
     }
 
     @JsonIgnore
@@ -57,7 +47,7 @@ public class User implements UserDetails {
     @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
-        return !subscription || LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli() < subscriptionExpiryAt;
+        return true;
     }
 
     @JsonIgnore
@@ -83,8 +73,8 @@ public class User implements UserDetails {
     @Setter
     @FieldNameConstants
     public static class Friend {
-        @NotBlank
-        private String id;
+        @NotNull
+        private UUID   id;
         @NotBlank
         private String pseudo;
     }

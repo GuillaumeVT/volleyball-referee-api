@@ -16,7 +16,6 @@ import java.util.*;
 @Service
 public class FriendService {
 
-    private final EmailService     emailService;
     private final UserDao          userDao;
     private final FriendRequestDao friendRequestDao;
 
@@ -57,13 +56,12 @@ public class FriendService {
             friendRequest.setReceiverId(receiverUser.getId());
             friendRequest.setReceiverPseudo(receiverUser.getPseudo());
             friendRequestDao.save(friendRequest);
-            emailService.sendFriendRequestEmail(user, receiverUser);
 
             return friendRequest.getId();
         }
     }
 
-    private User getUser(String userId) {
+    private User getUser(UUID userId) {
         return userDao
                 .findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find user %s", userId)));
@@ -86,7 +84,6 @@ public class FriendService {
             userDao.addFriend(senderUser.getId(), new User.Friend(receiverUser.getId(), receiverUser.getPseudo()));
             userDao.addFriend(receiverUser.getId(), new User.Friend(senderUser.getId(), senderUser.getPseudo()));
             log.info("{} and {} are now friends", senderUser.getId(), receiverUser.getId());
-            emailService.sendAcceptFriendRequestEmail(receiverUser, senderUser);
         }
 
         friendRequestDao.deleteById(friendRequest);
@@ -96,7 +93,7 @@ public class FriendService {
         friendRequestDao.deleteByIdAndReceiverId(friendRequestId, user.getId());
     }
 
-    public void removeFriend(User user, String friendId) {
+    public void removeFriend(User user, UUID friendId) {
         if (userDao.areFriends(user.getId(), friendId)) {
             userDao.removeFriend(user.getId(), friendId);
             userDao.removeFriend(friendId, user.getId());

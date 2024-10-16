@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.*;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.*;
@@ -15,26 +15,20 @@ import org.springframework.security.web.util.matcher.*;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
 
-    private final RequestMatcher publicUrls;
-    private final RequestMatcher protectedUrls;
+    private final RequestMatcher publicEndpoints;
 
     public SecurityConfiguration(TokenAuthenticationFilter bearerFilter) {
         super();
 
+        publicEndpoints = new AntPathRequestMatcher("/public/**");
+
         this.tokenAuthenticationFilter = bearerFilter;
-
-        publicUrls = new AntPathRequestMatcher("/public/**");
-        protectedUrls = new NegatedRequestMatcher(publicUrls);
-    }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers(publicUrls);
+        this.tokenAuthenticationFilter.setPublicEndpoints(publicEndpoints);
     }
 
     @Bean
@@ -42,10 +36,8 @@ public class SecurityConfiguration {
         return http
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(
-                        exceptionHandling -> exceptionHandling.defaultAuthenticationEntryPointFor(forbiddenEntryPoint(), protectedUrls))
+                .authorizeHttpRequests(auth -> auth.requestMatchers(publicEndpoints).permitAll().anyRequest().authenticated())
                 .addFilterBefore(tokenAuthenticationFilter, AnonymousAuthenticationFilter.class)
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -53,9 +45,7 @@ public class SecurityConfiguration {
                 .build();
     }
 
-    /**
-     * Disable Spring boot automatic filter registration.
-     */
+    // Disable Spring boot automatic filter registration.
     @Bean
     FilterRegistrationBean<TokenAuthenticationFilter> disableAutoRegistration(final TokenAuthenticationFilter filter) {
         final FilterRegistrationBean<TokenAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);

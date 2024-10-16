@@ -3,6 +3,7 @@ package com.tonkar.volleyballreferee.dto;
 import jakarta.validation.constraints.*;
 import lombok.experimental.FieldNameConstants;
 
+import java.util.UUID;
+
 @FieldNameConstants
-public record UserSummary(@NotBlank String id, @NotBlank String pseudo, @Email String email, boolean admin, boolean subscription,
-                          long subscriptionExpiryAt) {}
+public record UserSummary(@NotNull UUID id, @NotBlank String pseudo, boolean admin) {}

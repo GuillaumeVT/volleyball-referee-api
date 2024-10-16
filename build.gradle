@@ -1,11 +1,11 @@
 plugins {
-    id 'org.springframework.boot' version '3.2.3'
-    id 'io.spring.dependency-management' version '1.1.4'
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
     id 'java'
 }
 
 group = 'com.tonkar'
-version = '3.2'
+version = '4.0'
 java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
@@ -16,16 +16,14 @@ repositories {
 }
 
 dependencies {
-    def jjwt_version = '0.12.5'
-    def lombok_version = '1.18.30'
-    def jsoup_version =  '1.17.2'
-    def mail_version = '2.0.1'
-    def google_oauth2_version = '1.19.0'
+    def jwt_version = '4.4.0'
+    def lombok_version = '1.18.34'
+    def jsoup_version =  '1.18.1'
     def ehcache_version = '3.10.8'
-    def android_publisher_version = 'v3-rev20230815-2.0.0'
-    def poi_xml_version = '5.2.3'
-    def testcontainers_version = '1.19.7'
-    def faker_version = '2.1.0'
+    def poi_xml_version = '5.3.0'
+    def commons_lang3_version = '3.17.0'
+    def testcontainers_version = '1.20.2'
+    def faker_version = '2.4.0'
 
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-logging'
@@ -36,18 +34,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation group: 'org.jsoup', name: 'jsoup', version: jsoup_version
-    implementation group: 'com.sun.mail', name: 'jakarta.mail', version: mail_version
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: commons_lang3_version
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: jjwt_version
-    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: jjwt_version
-    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: jjwt_version
+    implementation group: 'com.auth0', name: 'java-jwt', version: jwt_version
     // Caching
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation group: 'org.ehcache', name: 'ehcache', version: ehcache_version
-    // Google APIs
-    implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version: google_oauth2_version
-    implementation group: 'com.google.apis', name: 'google-api-services-androidpublisher', version: android_publisher_version
     // Excel
     implementation group: 'org.apache.poi', name: 'poi-ooxml', version: poi_xml_version
     // Lombok

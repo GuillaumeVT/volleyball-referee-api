@@ -1,6 +1,6 @@
 server:
   servlet:
-    context-path: "/api/v3.2"
+    context-path: "/api"
 
 spring:
   data:
@@ -17,19 +17,6 @@ spring:
 vbr:
   jwt:
     key: ${VBR_JWT_KEY:}
-  web:
-    domain: ${VBR_DOMAIN:}
-    color: ${VBR_COLOR:}
-  android:
-    app:
-      packageName: ${VBR_ANDROID_PACKAGE:}
-      billing:
-        credential: ${VBR_ANDROID_BILLING_CREDENTIALS:}
-        sku-purchase: ${VBR_ANDROID_BILLING_PURCHASE_SKU:}
-        sku-subscription: ${VBR_ANDROID_BILLING_SUBSCRIPTION_SKU:}
-  email:
-    user: ${VBR_EMAIL_USER:}
-    password: ${VBR_EMAIL_PASSWORD:}
 
 logging:
   config: classpath:logback-spring.xml

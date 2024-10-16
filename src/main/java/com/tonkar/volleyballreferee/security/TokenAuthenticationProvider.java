@@ -31,8 +31,8 @@ public final class TokenAuthenticationProvider implements AuthenticationProvider
                 .ofNullable(token)
                 .map(String::valueOf)
                 .flatMap(userService::getUserFromToken)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        String.format("Could not find the application with authentication token %s", token)));
+                .orElseThrow(
+                        () -> new UsernameNotFoundException(String.format("Could not find the user with authentication token %s", token)));
 
         return UsernamePasswordAuthenticationToken.authenticated(userAuthentication, token, userAuthentication.getAuthorities());
     }

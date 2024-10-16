@@ -18,10 +18,10 @@ public class FriendRequest {
     @Id
     @NotNull
     private UUID   id;
-    @NotBlank
-    private String senderId;
-    @NotBlank
-    private String receiverId;
+    @NotNull
+    private UUID   senderId;
+    @NotNull
+    private UUID   receiverId;
     @NotBlank
     private String senderPseudo;
     @NotBlank

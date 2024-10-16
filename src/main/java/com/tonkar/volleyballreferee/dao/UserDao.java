@@ -5,13 +5,13 @@ import com.mongodb.client.result.UpdateResult;
 import com.tonkar.volleyballreferee.dto.UserSummary;
 import com.tonkar.volleyballreferee.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.*;
 import org.springframework.stereotype.Repository;
 
-import java.time.*;
 import java.util.*;
 
 import static com.tonkar.volleyballreferee.dao.DaoUtils._id;
@@ -26,14 +26,8 @@ public class UserDao {
             .as(_id)
             .and(User.Fields.pseudo)
             .as(UserSummary.Fields.pseudo)
-            .and(User.Fields.email)
-            .as(UserSummary.Fields.email)
             .and(User.Fields.admin)
-            .as(UserSummary.Fields.admin)
-            .and(User.Fields.subscription)
-            .as(UserSummary.Fields.subscription)
-            .and(User.Fields.subscriptionExpiryAt)
-            .as(UserSummary.Fields.subscriptionExpiryAt);
+            .as(UserSummary.Fields.admin);
 
     private final MongoTemplate mongoTemplate;
 
@@ -45,7 +39,7 @@ public class UserDao {
         mongoTemplate.remove(user);
     }
 
-    public boolean existsById(String id) {
+    public boolean existsById(UUID id) {
         Query query = Query.query(Criteria.where(_id).is(id));
         return mongoTemplate.exists(query, User.class);
     }
@@ -55,7 +49,7 @@ public class UserDao {
         return mongoTemplate.exists(query, User.class);
     }
 
-    public Optional<User> findById(String id) {
+    public Optional<User> findById(UUID id) {
         Query query = Query.query(Criteria.where("id").is(id));
         return Optional.ofNullable(mongoTemplate.findOne(query, User.class));
     }
@@ -65,41 +59,9 @@ public class UserDao {
         return Optional.ofNullable(mongoTemplate.findOne(query, User.class));
     }
 
-    public Optional<User> findByEmail(String email) {
-        Query query = Query.query(Criteria.where(User.Fields.email).is(email));
-        return Optional.ofNullable(mongoTemplate.findOne(query, User.class));
-    }
-
-    public boolean areFriends(String id1, String id2) {
+    public boolean areFriends(UUID id1, UUID id2) {
         Query query = Query.query(Criteria.where("id").is(id1).and(User.Fields.friends + "." + User.Friend.Fields.id).is(id2));
         return mongoTemplate.exists(query, User.class);
-    }
-
-    public boolean existsByPurchaseToken(String purchaseToken) {
-        Query query = Query.query(Criteria.where(User.Fields.purchaseToken).is(purchaseToken));
-        return mongoTemplate.exists(query, User.class);
-    }
-
-    public Optional<UserSummary> findUserByPurchaseToken(String purchaseToken) {
-        MatchOperation matchOperation = Aggregation.match(Criteria.where(User.Fields.purchaseToken).is(purchaseToken));
-        return Optional.ofNullable(mongoTemplate
-                                           .aggregate(Aggregation.newAggregation(matchOperation, sUserSummaryProjection),
-                                                      mongoTemplate.getCollectionName(User.class), UserSummary.class)
-                                           .getUniqueMappedResult());
-    }
-
-    public void updateSubscriptionPurchaseToken(String id, String purchaseToken, long subscriptionExpiryAt) {
-        Query query = Query.query(Criteria.where(_id).is(id));
-        Update update = new Update();
-        update.set(User.Fields.purchaseToken, purchaseToken).set(User.Fields.subscriptionExpiryAt, subscriptionExpiryAt);
-        mongoTemplate.updateFirst(query, update, mongoTemplate.getCollectionName(User.class));
-    }
-
-    public List<User> findUsersBySubscriptionExpiryBefore(long monthsAgo) {
-        long accountRemovalThresholdDate = LocalDateTime.now(ZoneOffset.UTC).minusMonths(monthsAgo).toEpochSecond(ZoneOffset.UTC) * 1000L;
-        return mongoTemplate.find(Query.query(
-                                          Criteria.where(User.Fields.subscription).is(true).and(User.Fields.subscriptionExpiryAt).lt(accountRemovalThresholdDate)),
-                                  User.class);
     }
 
     public boolean updateUserSignedIn(String userId, long lastLoginAt) {
@@ -111,14 +73,14 @@ public class UserDao {
         return updateResult.getModifiedCount() > 0;
     }
 
-    public boolean addFailedAuthentication(String userId, User.FailedAuthentication failedAuthentication) {
+    public boolean addFailedAuthentication(UUID userId, User.FailedAuthentication failedAuthentication) {
         Query query = new Query(Criteria.where(_id).is(userId));
         Update update = new Update().set(User.Fields.failedAuthentication, failedAuthentication);
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class);
         return updateResult.getModifiedCount() > 0;
     }
 
-    public boolean updateUserPassword(String userId, String password) {
+    public boolean updateUserPassword(UUID userId, String password) {
         Query query = new Query(Criteria.where(_id).is(userId));
         Update update = new Update()
                 .set(User.Fields.password, password)
@@ -127,28 +89,28 @@ public class UserDao {
         return updateResult.getModifiedCount() > 0;
     }
 
-    public boolean updateUserPseudo(String userId, String pseudo) {
+    public boolean updateUserPseudo(UUID userId, String pseudo) {
         Query query = new Query(Criteria.where(_id).is(userId));
         Update update = new Update().set(User.Fields.pseudo, pseudo);
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class);
         return updateResult.getModifiedCount() > 0;
     }
 
-    public boolean updateFriendPseudo(String userId, String pseudo) {
+    public boolean updateFriendPseudo(UUID userId, String pseudo) {
         Query query = new Query(Criteria.where(User.Fields.friends + "." + User.Friend.Fields.id).is(userId));
         Update update = new Update().set(User.Fields.friends + ".$." + User.Friend.Fields.pseudo, pseudo);
         UpdateResult updateResult = mongoTemplate.updateMulti(query, update, User.class);
         return updateResult.getModifiedCount() > 0;
     }
 
-    public boolean addFriend(String userId, User.Friend friend) {
+    public boolean addFriend(UUID userId, User.Friend friend) {
         Query query = new Query(Criteria.where(_id).is(userId));
         Update update = new Update().addToSet(User.Fields.friends, friend);
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class);
         return updateResult.getModifiedCount() > 0;
     }
 
-    public boolean removeFriend(String userId, String friendId) {
+    public boolean removeFriend(UUID userId, UUID friendId) {
         Query query = new Query(Criteria.where(_id).is(userId));
         Update update = new Update().pull(User.Fields.friends, new BasicDBObject(_id, friendId));
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, User.class);
@@ -158,13 +120,11 @@ public class UserDao {
     public Page<User> listUsers(String filter, Pageable pageable) {
         Criteria criteria;
 
-        if (filter != null && filter.trim().length() > 0) {
+        if (StringUtils.isNotBlank(filter)) {
             criteria = Criteria
                     .where(User.Fields.admin)
                     .is(false)
-                    .orOperator(Criteria.where(User.Fields.pseudo).regex(".*" + filter + ".*", "i"),
-                                Criteria.where(User.Fields.email).regex(".*" + filter + ".*", "i"),
-                                Criteria.where(User.Fields.purchaseToken).regex(".*" + filter + ".*", "i"));
+                    .orOperator(Criteria.where(User.Fields.pseudo).regex(".*" + filter + ".*", "i"));
         } else {
             criteria = Criteria.where(User.Fields.admin).is(false);
         }
@@ -175,10 +135,12 @@ public class UserDao {
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, User.Fields.pseudo);
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
+
         List<User> users = mongoTemplate
                 .aggregate(Aggregation.newAggregation(matchOperation, sortOperation, skipOperation, limitOperation),
                            mongoTemplate.getCollectionName(User.class), User.class)
                 .getMappedResults();
+
         return new PageImpl<>(users, pageable, total);
     }
 }
