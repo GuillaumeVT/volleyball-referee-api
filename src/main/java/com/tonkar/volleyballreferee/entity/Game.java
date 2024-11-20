@@ -1,6 +1,6 @@
 package com.tonkar.volleyballreferee.entity;
 
-import com.tonkar.volleyballreferee.dto.LeagueSummary;
+import com.tonkar.volleyballreferee.dto.LeagueSummaryDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -21,13 +21,13 @@ public class Game {
     @Id
     @NotNull
     private UUID           id;
-    @NotBlank
-    private String         createdBy;
+    @NotNull
+    private UUID           createdBy;
     private long           createdAt;
     private long           updatedAt;
     private long           scheduledAt;
-    @NotBlank
-    private String         refereedBy;
+    @NotNull
+    private UUID           refereedBy;
     @NotBlank
     private String         refereeName;
     @NotNull
@@ -38,7 +38,6 @@ public class Game {
     private UsageType      usage;
     @NotNull
     private GameStatus     status;
-    private boolean        indexed;
     @Valid
     private SelectedLeague league;
     @Valid
@@ -120,7 +119,7 @@ public class Game {
     @Getter
     @Setter
     @FieldNameConstants
-    public static class SelectedLeague extends LeagueSummary {
+    public static class SelectedLeague extends LeagueSummaryDto {
         @NotBlank
         private String division;
     }

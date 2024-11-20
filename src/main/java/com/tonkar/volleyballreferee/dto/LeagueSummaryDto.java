@@ -11,11 +11,11 @@ import java.util.UUID;
 @Getter
 @Setter
 @FieldNameConstants
-public class LeagueSummary {
+public class LeagueSummaryDto {
     @NotNull
     private UUID     id;
-    @NotBlank
-    private String   createdBy;
+    @NotNull
+    private UUID     createdBy;
     private long     createdAt;
     private long     updatedAt;
     @NotNull

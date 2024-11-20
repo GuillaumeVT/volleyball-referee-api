@@ -22,8 +22,8 @@ public class RulesController {
     private final RulesService rulesService;
 
     @GetMapping(value = "/rules", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<RulesSummary>> listRules(@AuthenticationPrincipal User user,
-                                                        @RequestParam(value = "kind", required = false) List<GameType> kinds) {
+    public ResponseEntity<List<RulesSummaryDto>> listRules(@AuthenticationPrincipal User user,
+                                                           @RequestParam(value = "kind", required = false) java.util.Set<GameType> kinds) {
         return new ResponseEntity<>(rulesService.listRules(user, kinds), HttpStatus.OK);
     }
 
@@ -33,12 +33,12 @@ public class RulesController {
     }
 
     @GetMapping(value = "/rules/default/kind/{kind}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RulesSummary> getDefaultRules(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
+    public ResponseEntity<RulesSummaryDto> getDefaultRules(@AuthenticationPrincipal User user, @PathVariable("kind") GameType kind) {
         return new ResponseEntity<>(rulesService.getDefaultRules(kind), HttpStatus.OK);
     }
 
     @GetMapping(value = "/rules/count", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Count> getNumberOfRules(@AuthenticationPrincipal User user) {
+    public ResponseEntity<CountDto> getNumberOfRules(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(rulesService.getNumberOfRules(user), HttpStatus.OK);
     }
 

@@ -1,7 +1,6 @@
 package com.tonkar.volleyballreferee.controller;
 
-import com.tonkar.volleyballreferee.dto.ErrorResponse;
-import io.undertow.util.BadRequestException;
+import com.tonkar.volleyballreferee.dto.ErrorResponseDto;
 import jakarta.validation.*;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -18,17 +17,17 @@ public class ControllerExceptionHandler {
                         ConstraintViolationException.class,
                         MissingServletRequestParameterException.class,
                         MethodArgumentNotValidException.class,
-                        BadRequestException.class,
                         HttpMessageNotReadableException.class,
-                        MethodArgumentTypeMismatchException.class
+                        MethodArgumentTypeMismatchException.class,
+                        IllegalArgumentException.class
     })
-    ResponseEntity<ErrorResponse> badRequestExceptionHandler(Exception e) {
-        return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+    ResponseEntity<ErrorResponseDto> badRequestExceptionHandler(Exception e) {
+        return new ResponseEntity<>(new ErrorResponseDto(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ResponseBody
     @ExceptionHandler(ResponseStatusException.class)
-    ResponseEntity<ErrorResponse> exceptionHandler(ResponseStatusException e) {
-        return new ResponseEntity<>(new ErrorResponse(e.getMessage()), e.getStatusCode());
+    ResponseEntity<ErrorResponseDto> exceptionHandler(ResponseStatusException e) {
+        return new ResponseEntity<>(new ErrorResponseDto(e.getMessage()), e.getStatusCode());
     }
 }

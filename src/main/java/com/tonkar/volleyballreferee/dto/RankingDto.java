@@ -4,7 +4,7 @@ import com.tonkar.volleyballreferee.entity.TeamType;
 import lombok.Getter;
 
 @Getter
-public class Ranking implements Comparable<Ranking> {
+public class RankingDto implements Comparable<RankingDto> {
 
     private final String teamName;
     private final String teamColor;
@@ -18,7 +18,7 @@ public class Ranking implements Comparable<Ranking> {
     private       int    pointsAgainst;
     private       int    pointsDiff;
 
-    public Ranking(String teamName, String teamColor) {
+    public RankingDto(String teamName, String teamColor) {
         this.teamName = teamName;
         this.teamColor = teamColor;
         this.matchesFor = 0;
@@ -32,7 +32,7 @@ public class Ranking implements Comparable<Ranking> {
         this.pointsDiff = 0;
     }
 
-    public void addGame(TeamType teamType, GameScore game) {
+    public void addGame(TeamType teamType, GameScoreDto game) {
         int setsDiff;
 
         if (TeamType.HOME.equals(teamType)) {
@@ -41,7 +41,7 @@ public class Ranking implements Comparable<Ranking> {
             this.setsAgainst += game.getGuestSets();
             this.setsDiff += setsDiff;
 
-            for (SetSummary set : game.getSets()) {
+            for (SetSummaryDto set : game.getSets()) {
                 int pointsDiff = set.homePoints() - set.guestPoints();
                 this.pointsFor += set.homePoints();
                 this.pointsAgainst += set.guestPoints();
@@ -53,7 +53,7 @@ public class Ranking implements Comparable<Ranking> {
             this.setsAgainst += game.getHomeSets();
             this.setsDiff += setsDiff;
 
-            for (SetSummary set : game.getSets()) {
+            for (SetSummaryDto set : game.getSets()) {
                 int pointsDiff = set.guestPoints() - set.homePoints();
                 this.pointsFor += set.guestPoints();
                 this.pointsAgainst += set.homePoints();
@@ -71,7 +71,7 @@ public class Ranking implements Comparable<Ranking> {
     }
 
     @Override
-    public int compareTo(Ranking other) {
+    public int compareTo(RankingDto other) {
         return Integer.compare(other.matchesFor, this.matchesFor);
     }
 }

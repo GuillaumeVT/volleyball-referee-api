@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.*;
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -18,11 +18,11 @@ public class RulesService {
     private final RulesDao rulesDao;
     private final GameDao  gameDao;
 
-    public List<RulesSummary> listRules(User user, List<GameType> kinds) {
+    public List<RulesSummaryDto> listRules(User user, java.util.Set<GameType> kinds) {
         return rulesDao.listRules(user.getId(), kinds);
     }
 
-    public List<RulesSummary> listRulesOfKind(User user, GameType kind) {
+    public List<RulesSummaryDto> listRulesOfKind(User user, GameType kind) {
         return rulesDao.listRulesOfKind(user.getId(), kind);
     }
 
@@ -34,7 +34,7 @@ public class RulesService {
                                                                              user.getId())));
     }
 
-    public RulesSummary getDefaultRules(GameType kind) {
+    public RulesSummaryDto getDefaultRules(GameType kind) {
         final Rules rules = switch (kind) {
             case INDOOR -> Rules.OFFICIAL_INDOOR_RULES;
             case INDOOR_4X4 -> Rules.DEFAULT_INDOOR_4X4_RULES;
@@ -42,12 +42,12 @@ public class RulesService {
             case SNOW -> Rules.OFFICIAL_SNOW_RULES;
         };
 
-        return new RulesSummary(rules.getId(), rules.getCreatedBy(), rules.getCreatedAt(), rules.getUpdatedAt(), rules.getName(),
-                                rules.getKind());
+        return new RulesSummaryDto(rules.getId(), rules.getCreatedBy(), rules.getCreatedAt(), rules.getUpdatedAt(), rules.getName(),
+                                   rules.getKind());
     }
 
-    public Count getNumberOfRules(User user) {
-        return new Count(rulesDao.countByCreatedBy(user.getId()));
+    public CountDto getNumberOfRules(User user) {
+        return new CountDto(rulesDao.countByCreatedBy(user.getId()));
     }
 
     public void createRules(User user, Rules rules) {
@@ -65,7 +65,7 @@ public class RulesService {
                                                             rules.getName(), rules.getKind(), user.getId()));
         } else {
             rules.setCreatedBy(user.getId());
-            rules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            rules.setUpdatedAt(Instant.now().toEpochMilli());
             rulesDao.save(rules);
         }
     }
@@ -77,7 +77,7 @@ public class RulesService {
                                                                String.format("Could not find rules %s %s for user %s", rules.getId(),
                                                                              rules.getKind(), user.getId())));
 
-        savedRules.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        savedRules.setUpdatedAt(Instant.now().toEpochMilli());
         savedRules.setName(rules.getName());
         savedRules.setSetsPerGame(rules.getSetsPerGame());
         savedRules.setPointsPerSet(rules.getPointsPerSet());

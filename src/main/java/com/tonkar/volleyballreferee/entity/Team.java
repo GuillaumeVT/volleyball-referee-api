@@ -14,12 +14,11 @@ import java.util.*;
 @FieldNameConstants
 @Document(collection = "teams")
 public class Team {
-
     @Id
     @NotNull
     private UUID         id;
-    @NotBlank
-    private String       createdBy;
+    @NotNull
+    private UUID         createdBy;
     private long         createdAt;
     private long         updatedAt;
     @NotBlank
@@ -44,10 +43,8 @@ public class Team {
     @Getter
     @Setter
     public static class Player {
-
         private int    num;
         private String name;
-
     }
 }
 

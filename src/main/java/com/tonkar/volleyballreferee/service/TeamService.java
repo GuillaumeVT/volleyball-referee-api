@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.*;
+import java.time.Instant;
 import java.util.Set;
 import java.util.*;
 
@@ -20,7 +20,7 @@ public class TeamService {
     private final TeamDao teamDao;
     private final GameDao gameDao;
 
-    public List<TeamSummary> listTeamsOfLeague(UUID leagueId) {
+    public List<TeamSummaryDto> listTeamsOfLeague(UUID leagueId) {
         Set<UUID> teamIds = new TreeSet<>();
 
         gameDao.listGamesInLeague(leagueId).forEach(game -> {
@@ -31,7 +31,7 @@ public class TeamService {
         return teamDao.listTeamsWithIds(teamIds);
     }
 
-    public List<TeamSummary> listTeamsOfDivision(UUID leagueId, String divisionName) {
+    public List<TeamSummaryDto> listTeamsOfDivision(UUID leagueId, String divisionName) {
         Set<UUID> teamIds = new TreeSet<>();
 
         gameDao.listGamesInDivision(leagueId, divisionName).forEach(game -> {
@@ -42,11 +42,11 @@ public class TeamService {
         return teamDao.listTeamsWithIds(teamIds);
     }
 
-    public Page<TeamSummary> listTeams(User user, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+    public Page<TeamSummaryDto> listTeams(User user, java.util.Set<GameType> kinds, java.util.Set<GenderType> genders, Pageable pageable) {
         return teamDao.listTeams(user.getId(), kinds, genders, pageable);
     }
 
-    public List<TeamSummary> listTeamsOfKind(User user, GameType kind) {
+    public List<TeamSummaryDto> listTeamsOfKind(User user, GameType kind) {
         return teamDao.listTeamsOfKind(user.getId(), kind);
     }
 
@@ -57,8 +57,8 @@ public class TeamService {
                                                                String.format("Could not find team %s for user %s", teamId, user.getId())));
     }
 
-    public Count getNumberOfTeams(User user) {
-        return new Count(teamDao.countByCreatedBy(user.getId()));
+    public CountDto getNumberOfTeams(User user) {
+        return new CountDto(teamDao.countByCreatedBy(user.getId()));
     }
 
     public void createTeam(User user, Team team) {
@@ -72,7 +72,7 @@ public class TeamService {
                                                             team.getName(), team.getKind(), team.getGender(), user.getId()));
         } else {
             team.setCreatedBy(user.getId());
-            team.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            team.setUpdatedAt(Instant.now().toEpochMilli());
             teamDao.save(team);
         }
     }
@@ -84,7 +84,7 @@ public class TeamService {
                                                                String.format("Could not find team %s %s %s for user %s", team.getId(),
                                                                              team.getKind(), team.getGender(), user.getId())));
 
-        savedTeam.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        savedTeam.setUpdatedAt(Instant.now().toEpochMilli());
         savedTeam.setName(team.getName());
         savedTeam.setGender(team.getGender());
         savedTeam.setColor(team.getColor());

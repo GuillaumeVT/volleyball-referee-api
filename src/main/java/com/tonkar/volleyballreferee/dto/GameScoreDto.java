@@ -9,18 +9,18 @@ import java.util.*;
 @Getter
 @Setter
 @FieldNameConstants
-public class GameScore {
-    private UUID             id;
-    private long             scheduledAt;
-    private String           homeTeamName;
-    private String           guestTeamName;
-    private String           homeTeamColor;
-    private String           guestTeamColor;
-    private int              homeSets;
-    private int              guestSets;
-    private List<SetSummary> sets;
+public class GameScoreDto {
+    private UUID                id;
+    private long                scheduledAt;
+    private String              homeTeamName;
+    private String              guestTeamName;
+    private String              homeTeamColor;
+    private String              guestTeamColor;
+    private int                 homeSets;
+    private int                 guestSets;
+    private List<SetSummaryDto> sets;
 
-    public GameScore() {
+    public GameScoreDto() {
         this.sets = new ArrayList<>();
     }
 

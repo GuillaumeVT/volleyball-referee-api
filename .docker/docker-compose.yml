@@ -8,7 +8,7 @@ networks:
 services:
   db:
     container_name: vbr-mongo
-    image: mongo
+    image: mongo:8.0.3
     restart: always
     volumes:
       - ./database:/data

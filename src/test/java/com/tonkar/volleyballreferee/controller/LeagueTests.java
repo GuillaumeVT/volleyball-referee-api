@@ -1,265 +1,98 @@
 package com.tonkar.volleyballreferee.controller;
 
-import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.*;
-import org.junit.jupiter.api.Test;
+import com.tonkar.volleyballreferee.service.LeagueService;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
+import org.springframework.test.context.ContextConfiguration;
 
-import java.util.UUID;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+@ContextConfiguration(classes = LeagueController.class)
+class LeagueTests extends VbrControllerTests {
 
-class LeagueTests extends VbrMockedTests {
+    @MockBean
+    private LeagueService leagueService;
 
-    @Test
-    void test_leagues_unauthorized() {
-        final var invalidToken = "invalid";
-
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, OK", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_leagues_listLeagues(String token, HttpStatus responseCode) {
         webTestClient
                 .get()
                 .uri("/leagues")
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isUnauthorized();
+                .isEqualTo(responseCode);
+    }
 
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/leagues").queryParam("kind", GameType.INDOOR).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, OK", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_leagues_getLeague(String token, HttpStatus responseCode) {
         webTestClient
                 .get()
                 .uri("/leagues/%s".formatted(UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isUnauthorized();
+                .isEqualTo(responseCode);
+    }
 
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, OK", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_leagues_getNumberOfLeagues(String token, HttpStatus responseCode) {
         webTestClient
                 .get()
                 .uri("/leagues/count")
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .post()
-                .uri("/leagues")
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .bodyValue(new League())
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .delete()
-                .uri("/leagues/%s".formatted(UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
+                .isEqualTo(responseCode);
     }
 
-    @Test
-    void test_leagues_list() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri("/leagues")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBodyList(LeagueSummary.class)
-                .hasSize(1);
-    }
-
-    @Test
-    void test_leagues_list_byKind() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
-        GameType noResultGameType = GameType.BEACH;
-        String kinds = String.join(",", noResultGameType.toString(), league.getKind().toString());
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/leagues").queryParam("kind", league.getKind()).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBodyList(LeagueSummary.class)
-                .hasSize(1);
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/leagues").queryParam("kind", noResultGameType).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBodyList(LeagueSummary.class)
-                .hasSize(0);
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/leagues").queryParam("kind", kinds).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBodyList(LeagueSummary.class)
-                .hasSize(1);
-    }
-
-    @Test
-    void test_leagues_get() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri("/leagues/%s".formatted(league.getId()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(League.class)
-                .value(league1 -> assertEquals(league.getName(), league1.getName()));
-    }
-
-    @Test
-    void test_leagues_get_notFound() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri("/leagues/%s".formatted(UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isNotFound();
-    }
-
-    @Test
-    void test_leagues_public_get() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR);
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri("/public/leagues/%s".formatted(league.getId()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(League.class)
-                .value(league1 -> assertEquals(league.getName(), league1.getName()));
-    }
-
-    @Test
-    void test_leagues_create() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        League league = sandbox.generateLeague(userToken.user().id(), GameType.INDOOR_4X4);
-
-        // WHEN / THEN
-        webTestClient
-                .post()
-                .uri("/leagues")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .bodyValue(league)
-                .exchange()
-                .expectStatus()
-                .isCreated();
-    }
-
-    @Test
-    void test_leagues_create_conflict() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
-
-        // WHEN / THEN
-        webTestClient
-                .post()
-                .uri("/leagues")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .bodyValue(league)
-                .exchange()
-                .expectStatus()
-                .isEqualTo(HttpStatus.CONFLICT);
-    }
-
-    @Test
-    void test_leagues_create_conflict2() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.user().id(), GameType.BEACH);
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, CREATED", "adminToken, CREATED", "invalidToken, UNAUTHORIZED" })
+    void test_leagues_createLeague(String token, HttpStatus responseCode) {
+        var league = new League();
         league.setId(UUID.randomUUID());
+        league.setCreatedBy(UUID.randomUUID());
+        league.setKind(GameType.INDOOR);
+        league.setName(faker.rockBand().name());
+        league.setDivisions(new ArrayList<>());
 
-        // WHEN / THEN
         webTestClient
                 .post()
                 .uri("/leagues")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .bodyValue(league)
                 .exchange()
                 .expectStatus()
-                .isEqualTo(HttpStatus.CONFLICT);
+                .isEqualTo(responseCode);
     }
 
-    @Test
-    void test_leagues_count() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri("/leagues/count")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(Count.class)
-                .value(count -> assertEquals(1L, count.count()));
-    }
-
-    @Test
-    void test_leagues_delete() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        League league = sandbox.createLeague(userToken.user().id(), GameType.INDOOR_4X4);
-
-        // WHEN / THEN
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, NO_CONTENT", "adminToken, NO_CONTENT", "invalidToken, UNAUTHORIZED" })
+    void test_leagues_deleteLeague(String token, HttpStatus responseCode) {
         webTestClient
                 .delete()
-                .uri("/leagues/%s".formatted(league.getId()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .uri("/leagues/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isNoContent();
+                .isEqualTo(responseCode);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, NO_CONTENT", "adminToken, NO_CONTENT", "invalidToken, UNAUTHORIZED" })
+    void test_leagues_deleteAllLeagues(String token, HttpStatus responseCode) {
+        webTestClient
+                .delete()
+                .uri("/leagues")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .exchange()
+                .expectStatus()
+                .isEqualTo(responseCode);
     }
 }

@@ -19,8 +19,8 @@ public class FriendService {
     private final UserDao          userDao;
     private final FriendRequestDao friendRequestDao;
 
-    public Count getNumberOfFriendRequestsReceivedBy(User user) {
-        return new Count(friendRequestDao.countByReceiverId(user.getId()));
+    public CountDto getNumberOfFriendRequestsReceivedBy(User user) {
+        return new CountDto(friendRequestDao.countByReceiverId(user.getId()));
     }
 
     public List<FriendRequest> listFriendRequestsSentBy(User user) {
@@ -31,9 +31,9 @@ public class FriendService {
         return friendRequestDao.findByReceiverId(user.getId());
     }
 
-    public FriendsAndRequests listFriendsAndRequests(User user) {
-        return new FriendsAndRequests(user.getFriends(), friendRequestDao.findByReceiverId(user.getId()),
-                                      friendRequestDao.findBySenderId(user.getId()));
+    public FriendsAndRequestsDto listFriendsAndRequests(User user) {
+        return new FriendsAndRequestsDto(user.getFriends(), friendRequestDao.findByReceiverId(user.getId()),
+                                         friendRequestDao.findBySenderId(user.getId()));
     }
 
     public UUID sendFriendRequest(User user, String receiverPseudo) {

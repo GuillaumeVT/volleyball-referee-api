@@ -1,18 +1,19 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.dto.GameSummaryDto;
 import com.tonkar.volleyballreferee.entity.*;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GameTests extends VbrMockedTests {
+class GameTests extends VbrServiceTests {
 
     private final RulesService rulesService;
     private final TeamService  teamService;
@@ -25,218 +26,492 @@ class GameTests extends VbrMockedTests {
     }
 
     @Test
-    void test_games_create_refereedByFriend() {
+    void test_games_list() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        UserToken userToken2 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
-        GameSummary gameSummary = sandbox.generateScheduledBeachGame(userToken.user().id(), true);
-        gameSummary.setRefereedBy(userToken2.user().id());
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createBeachGame(user.getId());
 
         // WHEN
-        gameService.createGame(sandbox.getUser(userToken.user().id()), gameSummary);
+        Page<GameSummaryDto> games = gameService.listGames(user, Set.of(), Set.of(), Set.of(), PageRequest.of(0, 20));
 
         // THEN
-        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken.user().id())).count());
-        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken2.user().id())).count());
-        assertNotNull(gameService.getGame(sandbox.getUser(userToken2.user().id()), gameSummary.getId()));
+        Assertions.assertEquals(1, games.getTotalElements());
+        Assertions.assertEquals(game.getId(), games.getContent().getFirst().getId());
+    }
+
+    @Test
+    void test_games_list_byStatus() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        Page<GameSummaryDto> games = gameService.listGames(user, Set.of(game.getStatus()), Set.of(), Set.of(), PageRequest.of(0, 20));
+
+        // THEN
+        Assertions.assertEquals(1, games.getTotalElements());
+        Assertions.assertEquals(game.getId(), games.getContent().getFirst().getId());
+    }
+
+    @Test
+    void test_games_list_byStatus2() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        sandbox.createScheduledBeachGame(user.getId());
+        var noResultGameStatus = GameStatus.LIVE;
+
+        // WHEN
+        Page<GameSummaryDto> games = gameService.listGames(user, Set.of(noResultGameStatus), Set.of(), Set.of(), PageRequest.of(0, 20));
+
+        // THEN
+        Assertions.assertEquals(0, games.getTotalElements());
+    }
+
+    @Test
+    void test_games_list_byStatusAndKindAndGender() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        Page<GameSummaryDto> games = gameService.listGames(user, Set.of(game.getStatus(), GameStatus.LIVE), Set.of(game.getKind()),
+                                                           Set.of(game.getGender()), PageRequest.of(0, 20));
+
+        // THEN
+        Assertions.assertEquals(1, games.getTotalElements());
+        Assertions.assertEquals(game.getId(), games.getContent().getFirst().getId());
+    }
+
+    @Test
+    void test_games_list_byStatusAndKindAndGender2() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        Page<GameSummaryDto> games = gameService.listGames(user, Set.of(game.getStatus()), Set.of(GameType.INDOOR_4X4),
+                                                           Set.of(game.getGender()), PageRequest.of(0, 20));
+
+        // THEN
+        Assertions.assertEquals(0, games.getTotalElements());
+    }
+
+    @Test
+    void test_games_list_available() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        List<GameSummaryDto> games = gameService.listAvailableGames(user);
+
+        // THEN
+        Assertions.assertEquals(1, games.size());
+        Assertions.assertEquals(game.getId(), games.getFirst().getId());
+    }
+
+    @Test
+    void test_games_list_available_refereedByFriend() {
+        // GIVEN
+        var user1 = sandbox.createAndGetUser();
+        var user2 = sandbox.createAndGetUser();
+        sandbox.addFriend(user1, user2);
+        var game = sandbox.createBeachGame(user1.getId());
+        gameService.setReferee(user1, game.getId(), user2.getId());
+
+        // WHEN
+        List<GameSummaryDto> games = gameService.listAvailableGames(user2);
+
+        // THEN
+        Assertions.assertEquals(1, games.size());
+        Assertions.assertEquals(game.getId(), games.getFirst().getId());
+    }
+
+    @Test
+    void test_games_list_completed() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.generateBeachGame(user.getId());
+        game.setStatus(GameStatus.COMPLETED);
+        gameService.upsertGame(user, game);
+
+        // WHEN
+        Page<GameSummaryDto> games = gameService.listCompletedGames(user, PageRequest.of(0, 20));
+
+        // THEN
+        Assertions.assertEquals(1, games.getTotalElements());
+        Assertions.assertEquals(game.getId(), games.getContent().getFirst().getId());
+    }
+
+    @Test
+    void test_games_get() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        var game2 = gameService.getGame(user, game.getId());
+
+        // THEN
+        Assertions.assertNotNull(game2);
+        Assertions.assertEquals(game.getId(), game2.getId());
+    }
+
+    @Test
+    void test_games_get_notFound() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        UUID unknownGameId = UUID.randomUUID();
+
+        // WHEN / THEN
+        Assertions.assertThrows(ResponseStatusException.class, () -> gameService.getGame(user, unknownGameId));
+    }
+
+    @Test
+    void test_games_get_ingredients() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        var gameIngredients = gameService.getGameIngredientsOfKind(user, game.getKind());
+
+        // THEN
+        Assertions.assertNotNull(gameIngredients);
+        Assertions.assertNotNull(gameIngredients.defaultRules());
+        Assertions.assertNotNull(gameIngredients.rules());
+        Assertions.assertNotNull(gameIngredients.teams());
+    }
+
+    @Test
+    void test_games_create() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.generateScheduledBeachGame(user.getId(), true);
+
+        // WHEN / THEN
+        Assertions.assertDoesNotThrow(() -> gameService.createGame(user, game));
+    }
+
+    @Test
+    void test_games_update() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createBeachGame(user.getId());
+        game.setStatus(GameStatus.COMPLETED);
+
+        // WHEN
+        gameService.upsertGame(user, game);
+
+        // THEN
+        var game2 = gameService.getGame(user, game.getId());
+        Assertions.assertNotNull(game2);
+        Assertions.assertEquals(game.getStatus(), game2.getStatus());
+    }
+
+    @Test
+    void test_games_update_upsert() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.generateBeachGame(user.getId());
+
+        // WHEN
+        gameService.upsertGame(user, game);
+
+        // THEN
+        var game2 = gameService.getGame(user, game.getId());
+        Assertions.assertNotNull(game2);
+    }
+
+    @Test
+    void test_games_set_update() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createBeachGame(user.getId());
+
+        // WHEN
+        gameService.updateSet(user, game.getId(), 1, sandbox.generateSet());
+
+        // THEN
+        var game2 = gameService.getGame(user, game.getId());
+        Assertions.assertNotNull(game2);
+        Assertions.assertEquals(1, game2.getSets().size());
+    }
+
+    @Test
+    void test_games_create_refereedByFriend() {
+        // GIVEN
+        var user1 = sandbox.createAndGetUser();
+        var user2 = sandbox.createAndGetUser();
+        sandbox.addFriend(user1, user2);
+        var game = sandbox.generateScheduledBeachGame(user1.getId(), true);
+        game.setRefereedBy(user2.getId());
+
+        // WHEN
+        gameService.createGame(user1, game);
+
+        // THEN
+        assertEquals(1L, gameService.getNumberOfAvailableGames(user1).count());
+        assertEquals(1L, gameService.getNumberOfAvailableGames(user2).count());
+        assertNotNull(gameService.getGame(user2, game.getId()));
     }
 
     @Test
     void test_games_create_refereedByFriend_notFriend() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        UserToken userToken2 = sandbox.createUser();
-        GameSummary gameSummary = sandbox.generateScheduledBeachGame(userToken.user().id(), false);
-        gameSummary.setRefereedBy(userToken2.user().id());
+        var user1 = sandbox.createAndGetUser();
+        var user2 = sandbox.createAndGetUser();
+        var game = sandbox.generateScheduledBeachGame(user1.getId(), false);
+        game.setRefereedBy(user2.getId());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class, () -> gameService.createGame(sandbox.getUser(userToken.user().id()), gameSummary));
+        assertThrows(ResponseStatusException.class, () -> gameService.createGame(user1, game));
     }
 
     @Test
     void test_games_create_refereedByFriend_notAssigned() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        UserToken userToken2 = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
+        var user1 = sandbox.createAndGetUser();
+        var user2 = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user1.getId());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class,
-                     () -> gameService.getGame(sandbox.getUser(userToken2.user().id()), gameSummary.getId()));
+        assertThrows(ResponseStatusException.class, () -> gameService.getGame(user2, game.getId()));
     }
 
     @Test
     void test_games_update_refereedByFriend() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        UserToken userToken2 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
-        Game game = sandbox.generateBeachGame(userToken.user().id());
-        game.setRefereedBy(userToken2.user().id());
-        gameService.createGame(sandbox.getUser(userToken.user().id()), game);
+        var user1 = sandbox.createAndGetUser();
+        var user2 = sandbox.createAndGetUser();
+        sandbox.addFriend(user1, user2);
+        Game game = sandbox.generateBeachGame(user1.getId());
+        game.setRefereedBy(user2.getId());
+        gameService.upsertGame(user1, game);
 
         // WHEN / THEN
-        assertDoesNotThrow(() -> gameService.updateGame(sandbox.getUser(userToken2.user().id()), game));
+        assertDoesNotThrow(() -> gameService.upsertGame(user2, game));
     }
 
     @Test
     void test_games_update_refereedByFriend2() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        UserToken userToken2 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
-        Game game = sandbox.createBeachGame(userToken.user().id());
+        var user1 = sandbox.createAndGetUser();
+        var user2 = sandbox.createAndGetUser();
+        sandbox.addFriend(user1, user2);
+        Game game = sandbox.createBeachGame(user1.getId());
 
         // WHEN
-        gameService.setReferee(sandbox.getUser(userToken.user().id()), game.getId(), userToken2.user().id());
+        gameService.setReferee(user1, game.getId(), user2.getId());
 
         // THEN
-        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken.user().id())).count());
-        assertEquals(1L, gameService.getNumberOfAvailableGames(sandbox.getUser(userToken2.user().id())).count());
+        assertEquals(1L, gameService.getNumberOfAvailableGames(user1).count());
+        assertEquals(1L, gameService.getNumberOfAvailableGames(user2).count());
     }
 
     @Test
     void test_games_update_refereedByCreator() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        UserToken userToken2 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
-        Game game = sandbox.generateBeachGame(userToken.user().id());
-        game.setRefereedBy(userToken2.user().id());
-        gameService.createGame(sandbox.getUser(userToken.user().id()), game);
+        var user1 = sandbox.createAndGetUser();
+        var user2 = sandbox.createAndGetUser();
+        sandbox.addFriend(user1, user2);
+        Game game = sandbox.generateBeachGame(user1.getId());
+        game.setRefereedBy(user2.getId());
+        gameService.upsertGame(user1, game);
 
         // WHEN / THEN
-        assertDoesNotThrow(() -> gameService.updateGame(sandbox.getUser(userToken.user().id()), game));
+        assertDoesNotThrow(() -> gameService.upsertGame(user1, game));
+    }
+
+    @Test
+    void test_games_schedule_update() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+        game.setRulesId(Rules.OFFICIAL_BEACH_RULES.getId());
+        game.setRulesName(Rules.OFFICIAL_BEACH_RULES.getName());
+
+        // WHEN
+        gameService.updateGame(user, game);
+
+        // THEN
+        var game2 = gameService.getGame(user, game.getId());
+        Assertions.assertNotNull(game2);
+        Assertions.assertEquals(Rules.OFFICIAL_BEACH_RULES.getId(), game2.getRules().getId());
+    }
+
+    @Test
+    void test_games_schedule_update_notFound() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.generateScheduledBeachGame(user.getId(), false);
+
+        // WHEN / THEN
+        Assertions.assertThrows(ResponseStatusException.class, () -> gameService.updateGame(user, game));
     }
 
     @Test
     void test_games_deleteRules() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        GameSummaryDto gameSummary = sandbox.createScheduledBeachGame(user.getId());
 
         // WHEN
-        gameService.deleteGame(sandbox.getUser(userToken.user().id()), gameSummary.getId());
+        gameService.deleteGame(user, gameSummary.getId());
 
         // THEN
-        assertDoesNotThrow(() -> rulesService.deleteRules(sandbox.getUser(userToken.user().id()), gameSummary.getRulesId()));
+        assertDoesNotThrow(() -> rulesService.deleteRules(user, gameSummary.getRulesId()));
     }
 
     @Test
     void test_games_deleteRules_conflict() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        GameSummaryDto gameSummary = sandbox.createScheduledBeachGame(user.getId());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class,
-                     () -> rulesService.deleteRules(sandbox.getUser(userToken.user().id()), gameSummary.getRulesId()));
+        assertThrows(ResponseStatusException.class, () -> rulesService.deleteRules(user, gameSummary.getRulesId()));
     }
 
     @Test
     void test_games_deleteTeam() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        GameSummaryDto gameSummary = sandbox.createScheduledBeachGame(user.getId());
 
         // WHEN
-        gameService.deleteGame(sandbox.getUser(userToken.user().id()), gameSummary.getId());
+        gameService.deleteGame(user, gameSummary.getId());
 
         // THEN
-        assertDoesNotThrow(() -> teamService.deleteTeam(sandbox.getUser(userToken.user().id()), gameSummary.getHomeTeamId()));
+        assertDoesNotThrow(() -> teamService.deleteTeam(user, gameSummary.getHomeTeamId()));
     }
 
     @Test
     void test_games_deleteTeam_conflict() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        GameSummaryDto gameSummary = sandbox.createScheduledBeachGame(user.getId());
 
         // WHEN / THEN
-        assertThrows(ResponseStatusException.class,
-                     () -> teamService.deleteTeam(sandbox.getUser(userToken.user().id()), gameSummary.getHomeTeamId()));
+        assertThrows(ResponseStatusException.class, () -> teamService.deleteTeam(user, gameSummary.getHomeTeamId()));
     }
 
     @Test
     void test_games_delete() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        GameSummary gameSummary = sandbox.createScheduledBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        GameSummaryDto gameSummary = sandbox.createScheduledBeachGame(user.getId());
 
         // WHEN
-        gameService.deleteGame(sandbox.getUser(userToken.user().id()), gameSummary.getId());
+        gameService.deleteGame(user, gameSummary.getId());
 
         // THEN
-        assertTrue(gameService
-                           .listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20))
-                           .getContent()
-                           .isEmpty());
+        assertThrows(ResponseStatusException.class, () -> gameService.getGame(gameSummary.getId()));
     }
 
     @Test
     void test_games_delete_refereedByFriend() {
         // Referee cannot delete game of creator
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        UserToken userToken2 = sandbox.createUser();
-        sandbox.addFriend(sandbox.getUser(userToken.user().id()), sandbox.getUser(userToken2.user().id()));
-        Game game = sandbox.generateBeachGame(userToken.user().id());
-        game.setRefereedBy(userToken2.user().id());
-        gameService.createGame(sandbox.getUser(userToken.user().id()), game);
+        var user1 = sandbox.createAndGetUser();
+        var user2 = sandbox.createAndGetUser();
+        sandbox.addFriend(user1, user2);
+        Game game = sandbox.generateBeachGame(user1.getId());
+        game.setRefereedBy(user2.getId());
+        gameService.upsertGame(user1, game);
 
         // WHEN
-        gameService.deleteGame(sandbox.getUser(userToken2.user().id()), game.getId());
+        gameService.deleteGame(user2, game.getId());
 
         // THEN
-        assertNotNull(gameService.getGame(sandbox.getUser(userToken2.user().id()), game.getId()));
+        assertNotNull(gameService.getGame(user2, game.getId()));
     }
 
     @Test
     void test_games_deleteAll() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createBeachGame(userToken.user().id());
-        Game game = sandbox.createBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        sandbox.createBeachGame(user.getId());
+        Game game = sandbox.createBeachGame(user.getId());
         game.setStatus(GameStatus.COMPLETED);
-        gameService.updateGame(sandbox.getUser(userToken.user().id()), game);
+        gameService.upsertGame(user, game);
 
         // WHEN
-        gameService.deleteAllGames(sandbox.getUser(userToken.user().id()));
+        gameService.deleteAllGames(user);
 
         // THEN
         // only COMPLETED games are affected by deleteAll
-        assertEquals(1, gameService
-                .listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20))
-                .getTotalElements());
+        assertEquals(1, gameService.listGames(user, null, null, null, PageRequest.of(0, 20)).getTotalElements());
     }
 
     @Test
     void test_games_deleteAll2() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createScheduledBeachGame(userToken.user().id());
-        sandbox.createScheduledBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        sandbox.createScheduledBeachGame(user.getId());
+        sandbox.createScheduledBeachGame(user.getId());
 
         // WHEN
-        gameService.deleteAllGames(sandbox.getUser(userToken.user().id()));
+        gameService.deleteAllGames(user);
 
         // THEN
         // only COMPLETED games are affected by deleteAll
-        assertEquals(2, gameService
-                .listGames(sandbox.getUser(userToken.user().id()), null, null, null, PageRequest.of(0, 20))
-                .getTotalElements());
+        assertEquals(2, gameService.listGames(user, null, null, null, PageRequest.of(0, 20)).getTotalElements());
+    }
+
+    @Test
+    void test_games_count() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        sandbox.createScheduledBeachGame(user.getId());
+        sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        var count = gameService.getNumberOfGames(user);
+
+        // THEN
+        Assertions.assertNotNull(count);
+        Assertions.assertEquals(2L, count.count());
+    }
+
+    @Test
+    void test_games_count_inLeague() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+        sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        var count = gameService.getNumberOfGamesInLeague(user, game.getLeagueId());
+
+        // THEN
+        Assertions.assertNotNull(count);
+        Assertions.assertEquals(1L, count.count());
+    }
+
+    @Test
+    void test_games_inLeague() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        var games = gameService.listGamesInLeague(user, game.getLeagueId(), Set.of(game.getStatus()), Set.of(), PageRequest.of(0, 20));
+
+        // THEN
+        Assertions.assertEquals(1, games.getTotalElements());
+        Assertions.assertEquals(game.getId(), games.getContent().getFirst().getId());
     }
 
     @Test
     void test_games_public_list_token() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Game game = sandbox.createBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        Game game = sandbox.createBeachGame(user.getId());
         String token = game.getGuestTeam().getName().substring(0, 4);
 
         // WHEN
-        Page<GameSummary> gameSummary = gameService.listGamesMatchingToken(token, null, null, null, PageRequest.of(0, 20));
+        Page<GameSummaryDto> gameSummary = gameService.listGamesMatchingToken(token, null, null, null, PageRequest.of(0, 20));
 
         // THEN
         assertEquals(1, gameSummary.getTotalElements());
@@ -245,12 +520,12 @@ class GameTests extends VbrMockedTests {
     @Test
     void test_games_public_list_token2() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createBeachGame(userToken.user().id());
-        String token = userToken.user().pseudo().substring(0, 3);
+        var user = sandbox.createAndGetUser();
+        sandbox.createBeachGame(user.getId());
+        String token = user.getPseudo().substring(0, 3);
 
         // WHEN
-        Page<GameSummary> gameSummary = gameService.listGamesMatchingToken(token, null, null, null, PageRequest.of(0, 20));
+        Page<GameSummaryDto> gameSummary = gameService.listGamesMatchingToken(token, null, null, null, PageRequest.of(0, 20));
 
         // THEN
         assertEquals(1, gameSummary.getTotalElements());
@@ -259,12 +534,12 @@ class GameTests extends VbrMockedTests {
     @Test
     void test_games_public_list_token3() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Game game = sandbox.createBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        Game game = sandbox.createBeachGame(user.getId());
         String token = game.getLeague().getName().substring(0, 3);
 
         // WHEN
-        Page<GameSummary> gameSummary = gameService.listGamesMatchingToken(token, null, null, null, PageRequest.of(0, 20));
+        Page<GameSummaryDto> gameSummary = gameService.listGamesMatchingToken(token, null, null, null, PageRequest.of(0, 20));
 
         // THEN
         assertEquals(1, gameSummary.getTotalElements());
@@ -273,12 +548,12 @@ class GameTests extends VbrMockedTests {
     @Test
     void test_games_public_list_token_noMatch() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        sandbox.createBeachGame(user.getId());
         String token = "noMatch";
 
         // WHEN
-        Page<GameSummary> gameSummary = gameService.listGamesMatchingToken(token, null, null, null, PageRequest.of(0, 20));
+        Page<GameSummaryDto> gameSummary = gameService.listGamesMatchingToken(token, null, null, null, PageRequest.of(0, 20));
 
         // THEN
         assertEquals(0, gameSummary.getTotalElements());
@@ -287,12 +562,12 @@ class GameTests extends VbrMockedTests {
     @Test
     void test_games_public_list_date() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        sandbox.createBeachGame(user.getId());
         LocalDate date = LocalDate.now();
 
         // WHEN
-        Page<GameSummary> gameSummary = gameService.listGamesWithScheduleDate(date, null, null, null, PageRequest.of(0, 20));
+        Page<GameSummaryDto> gameSummary = gameService.listGamesWithScheduleDate(date, null, null, null, PageRequest.of(0, 20));
 
         // THEN
         assertEquals(1, gameSummary.getTotalElements());
@@ -301,46 +576,96 @@ class GameTests extends VbrMockedTests {
     @Test
     void test_games_public_list_date_noMatch() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createBeachGame(userToken.user().id());
+        var user = sandbox.createAndGetUser();
+        sandbox.createBeachGame(user.getId());
         LocalDate date = LocalDate.now().plusDays(10L);
 
         // WHEN
-        Page<GameSummary> gameSummary = gameService.listGamesWithScheduleDate(date, null, null, null, PageRequest.of(0, 20));
+        Page<GameSummaryDto> gameSummary = gameService.listGamesWithScheduleDate(date, null, null, null, PageRequest.of(0, 20));
 
         // THEN
         assertEquals(0, gameSummary.getTotalElements());
     }
 
     @Test
-    void test_games_public_list_token_notIndexed() {
+    void test_games_public_get() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Game game = sandbox.generateBeachGame(userToken.user().id());
-        game.setIndexed(false);
-        gameService.createGame(sandbox.getUser(userToken.user().id()), game);
-        String token = game.getGuestTeam().getName().substring(0, 4);
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
 
         // WHEN
-        Page<GameSummary> gameSummary = gameService.listGamesMatchingToken(token, null, null, null, PageRequest.of(0, 20));
+        var game2 = gameService.getGame(game.getId());
 
         // THEN
-        assertEquals(0, gameSummary.getTotalElements());
+        Assertions.assertNotNull(game2);
+        Assertions.assertEquals(game.getId(), game2.getId());
     }
 
     @Test
-    void test_games_public_list_date_notIndexed() {
+    void test_games_public_get_notFound() {
         // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Game game = sandbox.generateBeachGame(userToken.user().id());
-        game.setIndexed(false);
-        gameService.createGame(sandbox.getUser(userToken.user().id()), game);
-        LocalDate date = LocalDate.now();
+        UUID unknownGameId = UUID.randomUUID();
+
+        // WHEN / THEN
+        Assertions.assertThrows(ResponseStatusException.class, () -> gameService.getGame(unknownGameId));
+    }
+
+    @Test
+    void test_games_public_inLeague() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
 
         // WHEN
-        Page<GameSummary> gameSummary = gameService.listGamesWithScheduleDate(date, null, null, null, PageRequest.of(0, 20));
+        var games = gameService.listGamesInLeague(game.getLeagueId(), Set.of(game.getStatus()), Set.of(), PageRequest.of(0, 20));
 
         // THEN
-        assertEquals(0, gameSummary.getTotalElements());
+        Assertions.assertEquals(1, games.getTotalElements());
+        Assertions.assertEquals(game.getId(), games.getContent().getFirst().getId());
+    }
+
+    @Test
+    void test_games_public_inDivision() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        var games = gameService.listGamesInDivision(game.getLeagueId(), game.getDivisionName(), Set.of(game.getStatus()), Set.of(),
+                                                    PageRequest.of(0, 20));
+
+        // THEN
+        Assertions.assertEquals(1, games.getTotalElements());
+        Assertions.assertEquals(game.getId(), games.getContent().getFirst().getId());
+    }
+
+    @Test
+    void test_games_public_inDivision2() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+        String unknownDivision = "unknownDivision";
+
+        // WHEN
+        var games = gameService.listGamesInDivision(game.getLeagueId(), unknownDivision, Set.of(game.getStatus()), Set.of(),
+                                                    PageRequest.of(0, 20));
+
+        // THEN
+        Assertions.assertEquals(0, games.getTotalElements());
+    }
+
+    @Test
+    void test_games_public_downloadDivision() {
+        // GIVEN
+        var user = sandbox.createAndGetUser();
+        var game = sandbox.createScheduledBeachGame(user.getId());
+
+        // WHEN
+        var fileWrapper = Assertions.assertDoesNotThrow(
+                () -> gameService.listGamesInDivisionExcel(game.getLeagueId(), game.getDivisionName()));
+
+        // THEN
+        Assertions.assertNotNull(fileWrapper);
+        Assertions.assertNotNull(fileWrapper.data());
     }
 }

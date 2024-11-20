@@ -2,29 +2,29 @@ package com.tonkar.volleyballreferee.dao;
 
 import com.tonkar.volleyballreferee.entity.*;
 
-import java.util.List;
+import java.util.Set;
 
 public class DaoUtils {
 
     public static final String _id = "_id";
 
-    public static List<GameStatus> computeStatuses(List<GameStatus> statuses) {
+    public static Set<GameStatus> computeStatuses(Set<GameStatus> statuses) {
         if (statuses == null || statuses.isEmpty()) {
-            statuses = List.of(GameStatus.values());
+            statuses = Set.of(GameStatus.values());
         }
         return statuses;
     }
 
-    public static List<GameType> computeKinds(List<GameType> kinds) {
+    public static Set<GameType> computeKinds(Set<GameType> kinds) {
         if (kinds == null || kinds.isEmpty()) {
-            kinds = List.of(GameType.values());
+            kinds = Set.of(GameType.values());
         }
         return kinds;
     }
 
-    public static List<GenderType> computeGenders(List<GenderType> genders) {
+    public static Set<GenderType> computeGenders(Set<GenderType> genders) {
         if (genders == null || genders.isEmpty()) {
-            genders = List.of(GenderType.values());
+            genders = Set.of(GenderType.values());
         }
         return genders;
     }

@@ -2,7 +2,7 @@ package com.tonkar.volleyballreferee.dao;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.result.UpdateResult;
-import com.tonkar.volleyballreferee.dto.UserSummary;
+import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -25,9 +25,9 @@ public class UserDao {
             .and(_id)
             .as(_id)
             .and(User.Fields.pseudo)
-            .as(UserSummary.Fields.pseudo)
+            .as(UserSummaryDto.Fields.pseudo)
             .and(User.Fields.admin)
-            .as(UserSummary.Fields.admin);
+            .as(UserSummaryDto.Fields.admin);
 
     private final MongoTemplate mongoTemplate;
 
@@ -37,11 +37,6 @@ public class UserDao {
 
     public void delete(User user) {
         mongoTemplate.remove(user);
-    }
-
-    public boolean existsById(UUID id) {
-        Query query = Query.query(Criteria.where(_id).is(id));
-        return mongoTemplate.exists(query, User.class);
     }
 
     public boolean existsByPseudo(String pseudo) {
@@ -64,7 +59,7 @@ public class UserDao {
         return mongoTemplate.exists(query, User.class);
     }
 
-    public boolean updateUserSignedIn(String userId, long lastLoginAt) {
+    public boolean updateUserSignedIn(UUID userId, long lastLoginAt) {
         Query query = new Query(Criteria.where(_id).is(userId));
         Update update = new Update()
                 .set(User.Fields.lastLoginAt, lastLoginAt)
@@ -117,7 +112,7 @@ public class UserDao {
         return updateResult.getModifiedCount() > 0;
     }
 
-    public Page<User> listUsers(String filter, Pageable pageable) {
+    public Page<UserSummaryDto> listUsers(String filter, Pageable pageable) {
         Criteria criteria;
 
         if (StringUtils.isNotBlank(filter)) {
@@ -132,15 +127,15 @@ public class UserDao {
         long total = mongoTemplate.count(Query.query(criteria), User.class);
 
         MatchOperation matchOperation = Aggregation.match(criteria);
-        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, User.Fields.pseudo);
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, UserSummaryDto.Fields.pseudo);
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
 
-        List<User> users = mongoTemplate
-                .aggregate(Aggregation.newAggregation(matchOperation, sortOperation, skipOperation, limitOperation),
-                           mongoTemplate.getCollectionName(User.class), User.class)
+        List<UserSummaryDto> users = mongoTemplate
+                .aggregate(Aggregation.newAggregation(matchOperation, sUserSummaryProjection, sortOperation, skipOperation, limitOperation),
+                           mongoTemplate.getCollectionName(User.class), UserSummaryDto.class)
                 .getMappedResults();
 
-        return new PageImpl<>(users, pageable, total);
+        return new PageDto<>(users, pageable, total);
     }
 }

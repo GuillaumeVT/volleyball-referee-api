@@ -1,0 +1,11 @@
+.docker
+.github
+.gradle
+.idea
+.scripts
+build
+gradle
+gradlew
+gradlew.bat
+LICENSE
+README.md

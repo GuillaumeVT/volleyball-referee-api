@@ -1,15 +1,14 @@
 package com.tonkar.volleyballreferee.service;
 
-import com.tonkar.volleyballreferee.VbrMockedTests;
 import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.*;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UserTests extends VbrMockedTests {
+class UserTests extends VbrServiceTests {
 
     private final UserService userService;
 
@@ -22,26 +21,83 @@ class UserTests extends VbrMockedTests {
     }
 
     @Test
+    void test_users_signIn() {
+        // GIVEN
+        User user = sandbox.createAndGetUser();
+        String currentPassword = sandbox.validPassword();
+
+        // WHEN
+        var token = userService.signInUser(user.getPseudo(), currentPassword);
+
+        // WHEN
+        Assertions.assertNotNull(token);
+        Assertions.assertNotNull(token.token());
+    }
+
+    @Test
+    void test_users_signIn_unauthorized() {
+        // GIVEN
+        User user = sandbox.createAndGetUser();
+
+        // WHEN / THEN
+        Assertions.assertThrows(ResponseStatusException.class, () -> userService.signInUser(user.getPseudo(), sandbox.invalidPassword()));
+    }
+
+    @Test
+    void test_users_updatePassword() {
+        // GIVEN
+        User user = sandbox.createAndGetUser();
+        String currentPassword = sandbox.validPassword();
+        String newPassword = "NewPassword5678-";
+
+        // WHEN
+        var token = userService.updateUserPassword(user, new UserPasswordUpdateDto(currentPassword, newPassword));
+
+        // WHEN
+        Assertions.assertNotNull(token);
+        Assertions.assertNotNull(token.token());
+        Assertions.assertDoesNotThrow(() -> userService.signInUser(user.getPseudo(), newPassword));
+    }
+
+    @Test
+    void test_users_updatePassword_invalidPassword() {
+        // GIVEN
+        User user = sandbox.createAndGetUser();
+        String currentPassword = sandbox.validPassword();
+        String newInvalidPassword = "newInvalidPassword";
+
+        // WHEN / THEN
+        Assertions.assertThrows(ResponseStatusException.class,
+                                () -> userService.updateUserPassword(user, new UserPasswordUpdateDto(currentPassword, newInvalidPassword)));
+    }
+
+    @Test
+    void test_users_updatePassword_unauthorized() {
+        // GIVEN
+        User user = sandbox.createAndGetUser();
+        String wrongCurrentPassword = "wrongCurrentPassword";
+        String newPassword = "NewPassword5678-";
+
+        // WHEN / THEN
+        Assertions.assertThrows(ResponseStatusException.class,
+                                () -> userService.updateUserPassword(user, new UserPasswordUpdateDto(wrongCurrentPassword, newPassword)));
+    }
+
+    @Test
     void test_users_updatePseudo() {
         // GIVEN
-        NewUser newUser = sandbox.generateNewUser(faker.internet().safeEmailAddress());
-        userService.createUser(newUser);
-
-        NewUser newUser2 = sandbox.generateNewUser(faker.internet().safeEmailAddress());
-        userService.createUser(newUser2);
-
-        User user = userService.getUser(newUser.id());
-        User user2 = userService.getUser(newUser2.id());
+        User user = sandbox.createAndGetUser();
+        User user2 = sandbox.createAndGetUser();
 
         sandbox.addFriend(user, user2);
 
         Game game = sandbox.generateBeachGame(user.getId());
-        gameService.createGame(user, game);
+        gameService.upsertGame(user, game);
 
         String newPseudo = faker.name().firstName();
 
         // WHEN
-        UserSummary userSummary = userService.updateUserPseudo(user, newPseudo);
+        UserSummaryDto userSummary = userService.updateUserPseudo(user, newPseudo);
 
         // THEN
         assertEquals(newPseudo, userSummary.pseudo());
@@ -56,18 +112,8 @@ class UserTests extends VbrMockedTests {
     @Test
     void test_users_updatePseudo_conflict() {
         // GIVEN
-        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
+        User user = sandbox.createAndGetUser();
         String newPseudo = user.getPseudo();
-
-        // WHEN / THEN
-        assertThrows(ResponseStatusException.class, () -> userService.updateUserPseudo(user, newPseudo));
-    }
-
-    @Test
-    void test_users_updatePseudo_invalid() {
-        // GIVEN
-        User user = sandbox.generateUser(faker.internet().safeEmailAddress());
-        String newPseudo = "ab";
 
         // WHEN / THEN
         assertThrows(ResponseStatusException.class, () -> userService.updateUserPseudo(user, newPseudo));

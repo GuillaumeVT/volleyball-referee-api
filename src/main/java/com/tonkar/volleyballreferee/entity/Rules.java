@@ -26,8 +26,8 @@ public class Rules {
     @Id
     @NotNull
     private UUID     id;
-    @NotBlank
-    private String   createdBy;
+    @NotNull
+    private UUID     createdBy;
     private long     createdAt;
     private long     updatedAt;
     @NotBlank
@@ -56,7 +56,7 @@ public class Rules {
     private int      customConsecutiveServesPerPlayer;
 
     public Rules(UUID id,
-                 String createdBy,
+                 UUID createdBy,
                  long createdAt,
                  long updatedAt,
                  String name,
@@ -111,22 +111,22 @@ public class Rules {
         checkSubstitutions();
     }
 
-    public static final Rules OFFICIAL_INDOOR_RULES    = new Rules(UUID.fromString("efb06d97-264e-425d-b8ca-b499e3b63a95"),
-                                                                   User.VBR_USER_ID, 0L, 0L, "FIVB indoor 6x6 rules", GameType.INDOOR, 5,
-                                                                   25, true, 15, true, true, WIN_TERMINATION, true, 2, 30, false, 60, true,
-                                                                   180, FIVB_LIMITATION, 6, false, 0, 0, 9999);
-    public static final Rules OFFICIAL_BEACH_RULES     = new Rules(UUID.fromString("cceb81c9-2201-4495-8a5e-e289a77e24bf"),
-                                                                   User.VBR_USER_ID, 0L, 0L, "FIVB beach rules", GameType.BEACH, 3, 21,
-                                                                   true, 15, true, true, WIN_TERMINATION, true, 1, 30, true, 30, true, 60,
-                                                                   FIVB_LIMITATION, 0, true, 7, 5, 9999);
-    public static final Rules DEFAULT_INDOOR_4X4_RULES = new Rules(UUID.fromString("375dd005-08b6-45f8-a60f-7e04e1e5ba71"),
-                                                                   User.VBR_USER_ID, 0L, 0L, "Default 4x4 rules", GameType.INDOOR_4X4, 5,
-                                                                   25, true, 15, true, true, WIN_TERMINATION, true, 2, 30, true, 60, true,
-                                                                   180, NO_LIMITATION, 4, false, 0, 0, 9999);
-    public static final Rules OFFICIAL_SNOW_RULES      = new Rules(UUID.fromString("ff03b7e2-f794-4d32-9e6c-a046f75eafa5"),
-                                                                   User.VBR_USER_ID, 0L, 0L, "FIVB snow rules", GameType.SNOW, 3, 15, false,
-                                                                   15, true, true, WIN_TERMINATION, true, 1, 30, false, 0, true, 60,
-                                                                   NO_LIMITATION, 2, true, 5, 5, 9999);
+    public static final Rules OFFICIAL_INDOOR_RULES    = new Rules(UUID.fromString("efb06d97-264e-425d-b8ca-b499e3b63a95"), null, 0L, 0L,
+                                                                   "FIVB indoor 6x6 rules", GameType.INDOOR, 5, 25, true, 15, true, true,
+                                                                   WIN_TERMINATION, true, 2, 30, false, 60, true, 180, FIVB_LIMITATION, 6,
+                                                                   false, 0, 0, 9999);
+    public static final Rules OFFICIAL_BEACH_RULES     = new Rules(UUID.fromString("cceb81c9-2201-4495-8a5e-e289a77e24bf"), null, 0L, 0L,
+                                                                   "FIVB beach rules", GameType.BEACH, 3, 21, true, 15, true, true,
+                                                                   WIN_TERMINATION, true, 1, 30, true, 30, true, 60, FIVB_LIMITATION, 0,
+                                                                   true, 7, 5, 9999);
+    public static final Rules DEFAULT_INDOOR_4X4_RULES = new Rules(UUID.fromString("375dd005-08b6-45f8-a60f-7e04e1e5ba71"), null, 0L, 0L,
+                                                                   "Default 4x4 rules", GameType.INDOOR_4X4, 5, 25, true, 15, true, true,
+                                                                   WIN_TERMINATION, true, 2, 30, true, 60, true, 180, NO_LIMITATION, 4,
+                                                                   false, 0, 0, 9999);
+    public static final Rules OFFICIAL_SNOW_RULES      = new Rules(UUID.fromString("ff03b7e2-f794-4d32-9e6c-a046f75eafa5"), null, 0L, 0L,
+                                                                   "FIVB snow rules", GameType.SNOW, 3, 15, false, 15, true, true,
+                                                                   WIN_TERMINATION, true, 1, 30, false, 0, true, 60, NO_LIMITATION, 2, true,
+                                                                   5, 5, 9999);
 
     public static Optional<Rules> getDefaultRules(UUID rulesId, GameType kind) {
         return switch (kind) {

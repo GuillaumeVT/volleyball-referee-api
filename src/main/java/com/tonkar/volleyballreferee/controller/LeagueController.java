@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
 import java.util.*;
 
 @RestController
@@ -22,8 +23,8 @@ public class LeagueController {
     private final LeagueService leagueService;
 
     @GetMapping(value = "/leagues", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<LeagueSummary>> listLeagues(@AuthenticationPrincipal User user,
-                                                           @RequestParam(value = "kind", required = false) List<GameType> kinds) {
+    public ResponseEntity<List<LeagueSummaryDto>> listLeagues(@AuthenticationPrincipal User user,
+                                                              @RequestParam(value = "kind", required = false) Set<GameType> kinds) {
         return new ResponseEntity<>(leagueService.listLeagues(user, kinds), HttpStatus.OK);
     }
 
@@ -33,7 +34,7 @@ public class LeagueController {
     }
 
     @GetMapping(value = "/leagues/count", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Count> getNumberOfLeagues(@AuthenticationPrincipal User user) {
+    public ResponseEntity<CountDto> getNumberOfLeagues(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(leagueService.getNumberOfLeagues(user), HttpStatus.OK);
     }
 

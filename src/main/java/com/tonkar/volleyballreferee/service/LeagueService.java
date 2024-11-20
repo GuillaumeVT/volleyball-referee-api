@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.*;
+import java.time.Instant;
+import java.util.Set;
 import java.util.*;
 
 @Service
@@ -24,11 +25,11 @@ public class LeagueService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Could not find league %s", leagueId)));
     }
 
-    public List<LeagueSummary> listLeagues(User user, List<GameType> kinds) {
+    public List<LeagueSummaryDto> listLeagues(User user, Set<GameType> kinds) {
         return leagueDao.listLeagues(user.getId(), kinds);
     }
 
-    public List<LeagueSummary> listLeaguesOfKind(User user, GameType kind) {
+    public List<LeagueSummaryDto> listLeaguesOfKind(User user, GameType kind) {
         return leagueDao.listLeaguesOfKind(user.getId(), kind);
     }
 
@@ -40,8 +41,8 @@ public class LeagueService {
                                                                              user.getId())));
     }
 
-    public Count getNumberOfLeagues(User user) {
-        return new Count(leagueDao.countByCreatedBy(user.getId()));
+    public CountDto getNumberOfLeagues(User user) {
+        return new CountDto(leagueDao.countByCreatedBy(user.getId()));
     }
 
     public void createLeague(User user, League league) {
@@ -55,7 +56,7 @@ public class LeagueService {
                                                             league.getName(), league.getKind(), user.getId()));
         } else {
             league.setCreatedBy(user.getId());
-            league.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            league.setUpdatedAt(Instant.now().toEpochMilli());
             leagueDao.save(league);
         }
     }
@@ -68,7 +69,7 @@ public class LeagueService {
                                                                              user.getId())));
 
         savedLeague.setDivisions(gameDao.listDivisionsInLeague(user.getId(), savedLeague.getId()));
-        savedLeague.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+        savedLeague.setUpdatedAt(Instant.now().toEpochMilli());
         leagueDao.save(savedLeague);
     }
 
@@ -83,7 +84,7 @@ public class LeagueService {
     }
 
     public void deleteAllLeagues(User user) {
-        leagueDao.listLeagues(user.getId(), List.of(GameType.values())).forEach(leagueSummary -> {
+        leagueDao.listLeagues(user.getId(), Set.of(GameType.values())).forEach(leagueSummary -> {
             if (!gameDao.existsByCreatedByAndLeague_IdAndStatus(user.getId(), leagueSummary.getId(), GameStatus.SCHEDULED)) {
                 leagueDao.deleteByIdAndCreatedBy(leagueSummary.getId(), user.getId());
             }

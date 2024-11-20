@@ -28,79 +28,82 @@ public class GameService {
     private final LeagueDao     leagueDao;
     private final UserDao       userDao;
 
-    public Page<GameSummary> listLiveGames(List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+    public Page<GameSummaryDto> listLiveGames(java.util.Set<GameType> kinds, java.util.Set<GenderType> genders, Pageable pageable) {
         return gameDao.listLiveGames(kinds, genders, pageable);
     }
 
-    public Page<GameSummary> listGamesMatchingToken(String token,
-                                                    List<GameStatus> statuses,
-                                                    List<GameType> kinds,
-                                                    List<GenderType> genders,
-                                                    Pageable pageable) {
+    public Page<GameSummaryDto> listGamesMatchingToken(String token,
+                                                       java.util.Set<GameStatus> statuses,
+                                                       java.util.Set<GameType> kinds,
+                                                       java.util.Set<GenderType> genders,
+                                                       Pageable pageable) {
         return gameDao.listGamesMatchingToken(token, statuses, kinds, genders, pageable);
     }
 
-    public Page<GameSummary> listGamesWithScheduleDate(LocalDate date,
-                                                       List<GameStatus> statuses,
-                                                       List<GameType> kinds,
-                                                       List<GenderType> genders,
-                                                       Pageable pageable) {
+    public Page<GameSummaryDto> listGamesWithScheduleDate(LocalDate date,
+                                                          java.util.Set<GameStatus> statuses,
+                                                          java.util.Set<GameType> kinds,
+                                                          java.util.Set<GenderType> genders,
+                                                          Pageable pageable) {
         return gameDao.listGamesWithScheduleDate(date, statuses, kinds, genders, pageable);
     }
 
-    public Page<GameSummary> listGamesInLeague(UUID leagueId, List<GameStatus> statuses, List<GenderType> genders, Pageable pageable) {
+    public Page<GameSummaryDto> listGamesInLeague(UUID leagueId,
+                                                  java.util.Set<GameStatus> statuses,
+                                                  java.util.Set<GenderType> genders,
+                                                  Pageable pageable) {
         return gameDao.listGamesInLeague(leagueId, statuses, genders, pageable);
     }
 
-    public Page<GameSummary> listGamesOfTeamInLeague(UUID leagueId, UUID teamId, List<GameStatus> statuses, Pageable pageable) {
+    public Page<GameSummaryDto> listGamesOfTeamInLeague(UUID leagueId, UUID teamId, java.util.Set<GameStatus> statuses, Pageable pageable) {
         return gameDao.listGamesOfTeamInLeague(leagueId, teamId, statuses, pageable);
     }
 
-    public LeagueDashboard getGamesInLeagueGroupedByStatus(UUID leagueId) {
+    public LeagueDashboardDto getGamesInLeagueGroupedByStatus(UUID leagueId) {
         return gameDao.findGamesInLeagueGroupedByStatus(leagueId);
     }
 
-    public List<GameSummary> listLiveGamesInLeague(UUID leagueId) {
+    public List<GameSummaryDto> listLiveGamesInLeague(UUID leagueId) {
         return gameDao.listLiveGamesInLeague(leagueId);
     }
 
-    public List<GameSummary> listLast10GamesInLeague(UUID leagueId) {
+    public List<GameSummaryDto> listLast10GamesInLeague(UUID leagueId) {
         return gameDao.listLast10GamesInLeague(leagueId);
     }
 
-    public List<GameSummary> listNext10GamesInLeague(UUID leagueId) {
+    public List<GameSummaryDto> listNext10GamesInLeague(UUID leagueId) {
         return gameDao.listNext10GamesInLeague(leagueId);
     }
 
-    public Page<GameSummary> listGamesInDivision(UUID leagueId,
-                                                 String divisionName,
-                                                 List<GameStatus> statuses,
-                                                 List<GenderType> genders,
-                                                 Pageable pageable) {
+    public Page<GameSummaryDto> listGamesInDivision(UUID leagueId,
+                                                    String divisionName,
+                                                    java.util.Set<GameStatus> statuses,
+                                                    java.util.Set<GenderType> genders,
+                                                    Pageable pageable) {
         return gameDao.listGamesInDivision(leagueId, divisionName, statuses, genders, pageable);
     }
 
-    public Page<GameSummary> listGamesOfTeamInDivision(UUID leagueId,
-                                                       String divisionName,
-                                                       UUID teamId,
-                                                       List<GameStatus> statuses,
-                                                       Pageable pageable) {
+    public Page<GameSummaryDto> listGamesOfTeamInDivision(UUID leagueId,
+                                                          String divisionName,
+                                                          UUID teamId,
+                                                          java.util.Set<GameStatus> statuses,
+                                                          Pageable pageable) {
         return gameDao.listGamesOfTeamInDivision(leagueId, divisionName, teamId, statuses, pageable);
     }
 
-    public LeagueDashboard getGamesInDivisionGroupedByStatus(UUID leagueId, String divisionName) {
+    public LeagueDashboardDto getGamesInDivisionGroupedByStatus(UUID leagueId, String divisionName) {
         return gameDao.findGamesInDivisionGroupedByStatus(leagueId, divisionName);
     }
 
-    public List<GameSummary> listLiveGamesInDivision(UUID leagueId, String divisionName) {
+    public List<GameSummaryDto> listLiveGamesInDivision(UUID leagueId, String divisionName) {
         return gameDao.listLiveGamesInDivision(leagueId, divisionName);
     }
 
-    public List<GameSummary> listLast10GamesInDivision(UUID leagueId, String divisionName) {
+    public List<GameSummaryDto> listLast10GamesInDivision(UUID leagueId, String divisionName) {
         return gameDao.listLast10GamesInDivision(leagueId, divisionName);
     }
 
-    public List<GameSummary> listNext10GamesInDivision(UUID leagueId, String divisionName) {
+    public List<GameSummaryDto> listNext10GamesInDivision(UUID leagueId, String divisionName) {
         return gameDao.listNext10GamesInDivision(leagueId, divisionName);
     }
 
@@ -116,40 +119,40 @@ public class GameService {
     }
 
     public FileWrapper listGamesInDivisionExcel(UUID leagueId, String divisionName) throws IOException {
-        List<GameScore> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName,
-                                                                                                        GameStatus.COMPLETED);
+        List<GameScoreDto> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName,
+                                                                                                           GameStatus.COMPLETED);
         return ExcelDivisionWriter.writeExcelDivision(divisionName, games);
     }
 
-    public List<Ranking> listRankingsInDivision(UUID leagueId, String divisionName) {
-        List<GameScore> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName,
-                                                                                                        GameStatus.COMPLETED);
+    public List<RankingDto> listRankingsInDivision(UUID leagueId, String divisionName) {
+        List<GameScoreDto> games = gameDao.findByLeague_IdAndLeague_DivisionAndStatusOrderByScheduledAtAsc(leagueId, divisionName,
+                                                                                                           GameStatus.COMPLETED);
         var rankings = new Rankings();
         games.forEach(rankings::addGame);
         return rankings.list();
     }
 
-    public Page<GameSummary> listGames(User user,
-                                       List<GameStatus> statuses,
-                                       List<GameType> kinds,
-                                       List<GenderType> genders,
-                                       Pageable pageable) {
+    public Page<GameSummaryDto> listGames(User user,
+                                          java.util.Set<GameStatus> statuses,
+                                          java.util.Set<GameType> kinds,
+                                          java.util.Set<GenderType> genders,
+                                          Pageable pageable) {
         return gameDao.listGames(user.getId(), statuses, kinds, genders, pageable);
     }
 
-    public List<GameSummary> listAvailableGames(User user) {
+    public List<GameSummaryDto> listAvailableGames(User user) {
         return gameDao.listAvailableGames(user.getId());
     }
 
-    public Page<GameSummary> listCompletedGames(User user, Pageable pageable) {
+    public Page<GameSummaryDto> listCompletedGames(User user, Pageable pageable) {
         return gameDao.listCompletedGames(user.getId(), pageable);
     }
 
-    public Page<GameSummary> listGamesInLeague(User user,
-                                               UUID leagueId,
-                                               List<GameStatus> statuses,
-                                               List<GenderType> genders,
-                                               Pageable pageable) {
+    public Page<GameSummaryDto> listGamesInLeague(User user,
+                                                  UUID leagueId,
+                                                  java.util.Set<GameStatus> statuses,
+                                                  java.util.Set<GenderType> genders,
+                                                  Pageable pageable) {
         return gameDao.listGamesInLeague(user.getId(), leagueId, statuses, genders, pageable);
     }
 
@@ -160,24 +163,24 @@ public class GameService {
                                                                String.format("Could not find game %s for user %s", gameId, user.getId())));
     }
 
-    public GameIngredients getGameIngredientsOfKind(User user, GameType kind) {
-        return new GameIngredients(kind, user.getFriends(), rulesService.getDefaultRules(kind), rulesService.listRulesOfKind(user, kind),
-                                   teamService.listTeamsOfKind(user, kind), leagueService.listLeaguesOfKind(user, kind));
+    public GameIngredientsDto getGameIngredientsOfKind(User user, GameType kind) {
+        return new GameIngredientsDto(kind, user.getFriends(), rulesService.getDefaultRules(kind), rulesService.listRulesOfKind(user, kind),
+                                      teamService.listTeamsOfKind(user, kind), leagueService.listLeaguesOfKind(user, kind));
     }
 
-    public Count getNumberOfGames(User user) {
-        return new Count(gameDao.countByCreatedBy(user.getId()));
+    public CountDto getNumberOfGames(User user) {
+        return new CountDto(gameDao.countByCreatedBy(user.getId()));
     }
 
-    public Count getNumberOfGamesInLeague(User user, UUID leagueId) {
-        return new Count(gameDao.countByCreatedByAndLeague_Id(user.getId(), leagueId));
+    public CountDto getNumberOfGamesInLeague(User user, UUID leagueId) {
+        return new CountDto(gameDao.countByCreatedByAndLeague_Id(user.getId(), leagueId));
     }
 
-    public Count getNumberOfAvailableGames(User user) {
-        return new Count(gameDao.countByAllowedUserAndStatusNot(user.getId(), GameStatus.COMPLETED));
+    public CountDto getNumberOfAvailableGames(User user) {
+        return new CountDto(gameDao.countByAllowedUserAndStatusNot(user.getId(), GameStatus.COMPLETED));
     }
 
-    public void createGame(User user, GameSummary gameSummary) {
+    public void createGame(User user, GameSummaryDto gameSummary) {
         if (gameDao.existsById(gameSummary.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                                               String.format("Could not create game %s for user %s because it already exists",
@@ -213,8 +216,8 @@ public class GameService {
 
             game.setId(gameSummary.getId());
             game.setCreatedBy(gameSummary.getCreatedBy());
-            game.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-            game.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            game.setCreatedAt(Instant.now().toEpochMilli());
+            game.setUpdatedAt(Instant.now().toEpochMilli());
             game.setScheduledAt(gameSummary.getScheduledAt());
             game.setRefereedBy(gameSummary.getRefereedBy());
             game.setRefereeName(gameSummary.getRefereeName());
@@ -222,7 +225,6 @@ public class GameService {
             game.setGender(gameSummary.getGender());
             game.setUsage(gameSummary.getUsage());
             game.setStatus(GameStatus.SCHEDULED);
-            game.setIndexed(gameSummary.isIndexed());
             game.setLeague(league);
             game.setHomeTeam(hTeam);
             game.setGuestTeam(gTeam);
@@ -245,36 +247,7 @@ public class GameService {
         }
     }
 
-    public void createGame(User user, Game game) {
-        if (gameDao.existsById(game.getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                                              String.format("Could not create game %s for user %s because it already exists", game.getId(),
-                                                            user.getId()));
-        } else if (game.getHomeTeam().getId().equals(game.getGuestTeam().getId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(
-                    "Could not create game %s for user %s because team %s cannot play against itself", game.getId(), user.getId(),
-                    game.getHomeTeam().getId()));
-        } else if (!game.getCreatedBy().equals(game.getRefereedBy()) && !userDao.areFriends(game.getCreatedBy(), game.getRefereedBy())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                              String.format("Could not create game %s for user %s because %s and %s are not friends",
-                                                            game.getId(), user.getId(), game.getCreatedBy(), game.getRefereedBy()));
-        } else {
-            game.setCreatedBy(user.getId());
-            game.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-            game.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-            game.getHomeTeam().setCreatedBy(user.getId());
-            game.getGuestTeam().setCreatedBy(user.getId());
-            game.getRules().setCreatedBy(user.getId());
-            if (game.getLeague() != null) {
-                game.getLeague().setCreatedBy(user.getId());
-            }
-            gameDao.save(game);
-
-            createOrUpdateLeagueIfNeeded(user, game);
-        }
-    }
-
-    public void updateGame(User user, GameSummary gameSummary) {
+    public void updateGame(User user, GameSummaryDto gameSummary) {
         Optional<Game> optSavedGame = gameDao.findByIdAndAllowedUserAndStatus(gameSummary.getId(), user.getId(), GameStatus.SCHEDULED);
 
         if (optSavedGame.isEmpty()) {
@@ -310,13 +283,12 @@ public class GameService {
 
             Game.SelectedLeague league = findOrCreateLeague(user, gameSummary);
 
-            savedGame.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            savedGame.setUpdatedAt(Instant.now().toEpochMilli());
             savedGame.setScheduledAt(gameSummary.getScheduledAt());
             savedGame.setRefereedBy(gameSummary.getRefereedBy());
             savedGame.setRefereeName(gameSummary.getRefereeName());
             savedGame.setGender(gameSummary.getGender());
             savedGame.setUsage(gameSummary.getUsage());
-            savedGame.setIndexed(gameSummary.isIndexed());
             savedGame.setLeague(league);
             savedGame.setHomeTeam(hTeam);
             savedGame.setGuestTeam(gTeam);
@@ -337,33 +309,60 @@ public class GameService {
         }
     }
 
-    public void updateGame(User user, Game game) {
-        Game savedGame = gameDao
-                .findByIdAndAllowedUserAndStatusNot(game.getId(), user.getId(), GameStatus.COMPLETED)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                                               String.format("Could not find game %s for user %s", game.getId(),
-                                                                             user.getId())));
+    public void upsertGame(User user, Game game) {
+        Optional<Game> optionalGame = gameDao.findByIdAndAllowedUser(game.getId(), user.getId());
 
-        savedGame.setUpdatedAt(game.getUpdatedAt());
-        savedGame.setStatus(game.getStatus());
-        savedGame.setIndexed(game.isIndexed());
-        savedGame.setLeague(game.getLeague());
-        savedGame.setHomeTeam(game.getHomeTeam());
-        savedGame.setGuestTeam(game.getGuestTeam());
-        savedGame.setHomeSets(game.getHomeSets());
-        savedGame.setGuestSets(game.getGuestSets());
-        savedGame.setSets(game.getSets());
-        savedGame.setHomeCards(game.getHomeCards());
-        savedGame.setGuestCards(game.getGuestCards());
-        savedGame.setRules(game.getRules());
-        savedGame.setScore(buildScore(savedGame));
-        savedGame.setStartTime(game.getStartTime());
-        savedGame.setEndTime(game.getEndTime());
-        savedGame.setReferee1(game.getReferee1());
-        savedGame.setReferee2(game.getReferee2());
-        savedGame.setScorer(game.getScorer());
+        if (optionalGame.isPresent()) {
+            if (GameStatus.COMPLETED.equals(optionalGame.get().getStatus())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                                  String.format("Could not create game %s for user %s because it already exists",
+                                                                game.getId(), user.getId()));
+            }
 
-        gameDao.save(savedGame);
+            Game savedGame = optionalGame.get();
+
+            savedGame.setUpdatedAt(game.getUpdatedAt());
+            savedGame.setStatus(game.getStatus());
+            savedGame.setLeague(game.getLeague());
+            savedGame.setHomeTeam(game.getHomeTeam());
+            savedGame.setGuestTeam(game.getGuestTeam());
+            savedGame.setHomeSets(game.getHomeSets());
+            savedGame.setGuestSets(game.getGuestSets());
+            savedGame.setSets(game.getSets());
+            savedGame.setHomeCards(game.getHomeCards());
+            savedGame.setGuestCards(game.getGuestCards());
+            savedGame.setRules(game.getRules());
+            savedGame.setScore(buildScore(savedGame));
+            savedGame.setStartTime(game.getStartTime());
+            savedGame.setEndTime(game.getEndTime());
+            savedGame.setReferee1(game.getReferee1());
+            savedGame.setReferee2(game.getReferee2());
+            savedGame.setScorer(game.getScorer());
+
+            gameDao.save(savedGame);
+
+        } else if (game.getHomeTeam().getId().equals(game.getGuestTeam().getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(
+                    "Could not create game %s for user %s because team %s cannot play against itself", game.getId(), user.getId(),
+                    game.getHomeTeam().getId()));
+        } else if (!game.getCreatedBy().equals(game.getRefereedBy()) && !userDao.areFriends(game.getCreatedBy(), game.getRefereedBy())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                              String.format("Could not create game %s for user %s because %s and %s are not friends",
+                                                            game.getId(), user.getId(), game.getCreatedBy(), game.getRefereedBy()));
+        } else {
+            game.setCreatedBy(user.getId());
+            game.setCreatedAt(Instant.now().toEpochMilli());
+            game.setUpdatedAt(Instant.now().toEpochMilli());
+            game.getHomeTeam().setCreatedBy(user.getId());
+            game.getGuestTeam().setCreatedBy(user.getId());
+            game.getRules().setCreatedBy(user.getId());
+            if (game.getLeague() != null) {
+                game.getLeague().setCreatedBy(user.getId());
+            }
+            gameDao.save(game);
+
+            createOrUpdateLeagueIfNeeded(user, game);
+        }
     }
 
     public void updateSet(User user, UUID gameId, int setIndex, Set set) {
@@ -374,7 +373,7 @@ public class GameService {
 
         if (setIndex > 0 && setIndex <= savedGame.getSets().size()) {
             savedGame.getSets().set(setIndex - 1, set);
-            savedGame.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            savedGame.setUpdatedAt(Instant.now().toEpochMilli());
             savedGame.setScore(buildScore(savedGame));
             gameDao.save(savedGame);
         } else {
@@ -384,27 +383,20 @@ public class GameService {
         }
     }
 
-    public void setIndexed(User user, UUID gameId, boolean indexed) {
-        Game game = getGame(user, gameId);
-        gameDao.updateIndexed(game.getId(), indexed, LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-    }
-
-    public void setReferee(User user, UUID gameId, String refereeUserId) {
+    public void setReferee(User user, UUID gameId, UUID refereeUserId) {
         Game game = gameDao
                 .findByIdAndCreatedByAndStatusNot(gameId, user.getId(), GameStatus.COMPLETED)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                                String.format("Could not find game %s for user %s", gameId, user.getId())));
         if (user.getId().equals(refereeUserId)) {
-            gameDao.updateReferee(game.getId(), user.getId(), user.getPseudo(),
-                                  LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            gameDao.updateReferee(game.getId(), user.getId(), user.getPseudo(), Instant.now().toEpochMilli());
         } else {
             User.Friend friend = user
                     .getFriend(refereeUserId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                                    String.format("Could not find referee %s in friends for user %s", gameId,
                                                                                  user.getId())));
-            gameDao.updateReferee(game.getId(), friend.getId(), friend.getPseudo(),
-                                  LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+            gameDao.updateReferee(game.getId(), friend.getId(), friend.getPseudo(), Instant.now().toEpochMilli());
         }
     }
 
@@ -420,14 +412,6 @@ public class GameService {
         gameDao.deleteByCreatedByAndStatusAndLeague_Id(user.getId(), GameStatus.COMPLETED, leagueId);
     }
 
-    public void deleteOldLiveGames(int daysAgo) {
-        gameDao.deleteByScheduledAtLessThanAndStatus(epochDateNDaysAgo(daysAgo), GameStatus.LIVE);
-    }
-
-    public void deleteOldScheduledGames(int daysAgo) {
-        gameDao.deleteByScheduledAtLessThanAndStatus(epochDateNDaysAgo(daysAgo), GameStatus.SCHEDULED);
-    }
-
     private Optional<Rules> findRules(User user, UUID rulesId, GameType kind) {
         Optional<Rules> optRules = Rules.getDefaultRules(rulesId, kind);
 
@@ -438,11 +422,7 @@ public class GameService {
         return optRules;
     }
 
-    private long epochDateNDaysAgo(int daysAgo) {
-        return LocalDateTime.now(ZoneOffset.UTC).minusDays(daysAgo).toEpochSecond(ZoneOffset.UTC) * 1000L;
-    }
-
-    private Game.SelectedLeague findOrCreateLeague(User user, GameSummary gameSummary) {
+    private Game.SelectedLeague findOrCreateLeague(User user, GameSummaryDto gameSummary) {
         Game.SelectedLeague selectedLeague = null;
 
         if (gameSummary.getLeagueId() != null && gameSummary.getLeagueName() != null && !gameSummary
@@ -457,8 +437,8 @@ public class GameService {
                 league = new League();
                 league.setId(gameSummary.getLeagueId());
                 league.setCreatedBy(user.getId());
-                league.setCreatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
-                league.setUpdatedAt(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli());
+                league.setCreatedAt(Instant.now().toEpochMilli());
+                league.setUpdatedAt(Instant.now().toEpochMilli());
                 league.setKind(gameSummary.getKind());
                 league.setName(gameSummary.getLeagueName());
                 league.setDivisions(new ArrayList<>());

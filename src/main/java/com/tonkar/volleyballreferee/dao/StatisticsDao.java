@@ -1,6 +1,6 @@
 package com.tonkar.volleyballreferee.dao;
 
-import com.tonkar.volleyballreferee.dto.StatisticsGroup;
+import com.tonkar.volleyballreferee.dto.StatisticsGroupDto;
 import com.tonkar.volleyballreferee.entity.*;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldNameConstants;
@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,21 +21,21 @@ public class StatisticsDao {
 
     private final MongoTemplate mongoTemplate;
 
-    public StatisticsGroup findGlobalStatistics() {
-        List<StatisticsGroup.Count> gameStatistics = mongoTemplate
+    public StatisticsGroupDto findGlobalStatistics() {
+        List<StatisticsGroupDto.CountDto> gameStatistics = mongoTemplate
                 .aggregate(Aggregation.newAggregation(sStatisticsProjection, sStatisticsGroup), mongoTemplate.getCollectionName(Game.class),
-                           StatisticsGroup.Count.class)
+                           StatisticsGroupDto.CountDto.class)
                 .getMappedResults();
 
-        List<StatisticsGroup.Count> teamStatistics = mongoTemplate
+        List<StatisticsGroupDto.CountDto> teamStatistics = mongoTemplate
                 .aggregate(Aggregation.newAggregation(sStatisticsProjection, sStatisticsGroup), mongoTemplate.getCollectionName(Team.class),
-                           StatisticsGroup.Count.class)
+                           StatisticsGroupDto.CountDto.class)
                 .getMappedResults();
 
-        return new StatisticsGroup(new StatisticsGroup.Statistics(gameStatistics, teamStatistics));
+        return new StatisticsGroupDto(new StatisticsGroupDto.StatisticsDto(gameStatistics, teamStatistics));
     }
 
-    public StatisticsGroup findUserStatistics(String userId) {
+    public StatisticsGroupDto findUserStatistics(UUID userId) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("createdBy").is(userId));
 
         FacetOperation gameFacetOperation = Aggregation
@@ -63,11 +63,11 @@ public class StatisticsDao {
         assert gameFacetStatistics != null;
         assert teamFacetStatistics != null;
 
-        return new StatisticsGroup(
-                new StatisticsGroup.Statistics(gameFacetStatistics.globalStatistics(), teamFacetStatistics.globalStatistics()),
-                new StatisticsGroup.Statistics(gameFacetStatistics.userStatistics(), teamFacetStatistics.userStatistics()));
+        return new StatisticsGroupDto(
+                new StatisticsGroupDto.StatisticsDto(gameFacetStatistics.globalStatistics(), teamFacetStatistics.globalStatistics()),
+                new StatisticsGroupDto.StatisticsDto(gameFacetStatistics.userStatistics(), teamFacetStatistics.userStatistics()));
     }
 
     @FieldNameConstants
-    private record FacetStatistics(List<StatisticsGroup.Count> globalStatistics, List<StatisticsGroup.Count> userStatistics) {}
+    private record FacetStatistics(List<StatisticsGroupDto.CountDto> globalStatistics, List<StatisticsGroupDto.CountDto> userStatistics) {}
 }

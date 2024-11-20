@@ -1,21 +1,24 @@
 package com.tonkar.volleyballreferee.security;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.tonkar.volleyballreferee.entity.User;
-import com.tonkar.volleyballreferee.service.UserService;
+import com.tonkar.volleyballreferee.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.*;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public final class TokenAuthenticationProvider implements AuthenticationProvider {
 
+    private final AuthService authService;
     private final UserService userService;
 
     @Override
@@ -27,13 +30,26 @@ public final class TokenAuthenticationProvider implements AuthenticationProvider
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         final Object token = authentication.getCredentials();
 
-        User userAuthentication = Optional
-                .ofNullable(token)
-                .map(String::valueOf)
-                .flatMap(userService::getUserFromToken)
-                .orElseThrow(
-                        () -> new UsernameNotFoundException(String.format("Could not find the user with authentication token %s", token)));
+        final String tokenString = String.valueOf(token);
+        final DecodedJWT decodedJwt;
 
-        return UsernamePasswordAuthenticationToken.authenticated(userAuthentication, token, userAuthentication.getAuthorities());
+        try {
+            decodedJwt = authService.verifyToken(tokenString);
+        } catch (ResponseStatusException e) {
+            log.error(e.getMessage());
+            throw new BadCredentialsException("Unable to validate token");
+        }
+
+        final UUID userId = UUID.fromString(decodedJwt.getSubject());
+        final User user;
+
+        try {
+            user = userService.getUser(userId);
+        } catch (ResponseStatusException e) {
+            log.error(e.getMessage());
+            throw new UsernameNotFoundException("Unable to find user");
+        }
+
+        return UsernamePasswordAuthenticationToken.authenticated(user, token, user.getAuthorities());
     }
 }

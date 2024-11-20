@@ -1,43 +1,27 @@
 package com.tonkar.volleyballreferee.controller;
 
-import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dto.UserToken;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
+import com.tonkar.volleyballreferee.service.StatisticsService;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.*;
+import org.springframework.test.context.ContextConfiguration;
 
-class StatisticsTests extends VbrMockedTests {
+@ContextConfiguration(classes = StatisticsController.class)
+class StatisticsTests extends VbrControllerTests {
 
-    @Test
-    void test_statistics_unauthorized() {
-        final var invalidToken = "invalid";
+    @MockBean
+    private StatisticsService statisticsService;
 
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, OK", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_statistics_getUserStatistics(String token, HttpStatus responseCode) {
         webTestClient
                 .get()
                 .uri("/statistics")
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isUnauthorized();
-    }
-
-    @Test
-    void test_statistics_get() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri("/statistics")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk();
-    }
-
-    @Test
-    void test_statistics_public_get() {
-        // WHEN / THEN
-        webTestClient.get().uri("/public/statistics").exchange().expectStatus().isOk();
+                .isEqualTo(responseCode);
     }
 }

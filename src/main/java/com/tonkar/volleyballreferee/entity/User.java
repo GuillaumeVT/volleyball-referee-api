@@ -63,7 +63,7 @@ public class User implements UserDetails {
     }
 
     @JsonIgnore
-    public Optional<Friend> getFriend(String friendId) {
+    public Optional<Friend> getFriend(UUID friendId) {
         return friends.stream().filter(f -> f.getId().equals(friendId)).findFirst();
     }
 

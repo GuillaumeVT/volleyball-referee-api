@@ -7,13 +7,11 @@ spring:
   config:
     import: optional:file:.docker/.env[.properties]
 
-server:
-  servlet:
-    context-path: "/test"
-
 vbr:
   jwt:
     key: 5rdtdWZv-iNiRyo6X28bKmJNSbIqI4wVW_vB3mbkiXu-7eOnE6Yhe815BTHPTt9yDyx1N1rRyLPki-PxYicmsN5xNx7FZf83YDlxhCprlW0dGx21hgXyWc0CZxttsPl2Ks59AaA9kkphsWCbNLLfczCNUOWrtlggwGzO6GDbG4s
+    issuer: "com.tonkar.volleyballreferee.test"
+    token-validity-days: 90
 
 logging:
   config: classpath:logback-spring.xml

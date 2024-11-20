@@ -1,360 +1,122 @@
 package com.tonkar.volleyballreferee.controller;
 
-import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.RulesService;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
+import org.springframework.test.context.ContextConfiguration;
 
-import java.util.*;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+@ContextConfiguration(classes = RulesController.class)
+class RulesTests extends VbrControllerTests {
 
-class RulesTests extends VbrMockedTests {
+    @MockBean
+    private RulesService rulesService;
 
-    private final RulesService rulesService;
-
-    public RulesTests(@Autowired RulesService rulesService) {
-        super();
-        this.rulesService = rulesService;
-    }
-
-    @Test
-    void test_rules_unauthorized() {
-        final var invalidToken = "invalid";
-
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, OK", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_rules_listRules(String token, HttpStatus responseCode) {
         webTestClient
                 .get()
                 .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/rules").queryParam("kind", GameType.INDOOR).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .get()
-                .uri("/rules/%s".formatted(UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .get()
-                .uri("/rules/default/kind/%s".formatted(GameType.INDOOR))
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .get()
-                .uri("/rules/count")
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .post()
-                .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .bodyValue(Rules.OFFICIAL_INDOOR_RULES)
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .put()
-                .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .bodyValue(Rules.OFFICIAL_INDOOR_RULES)
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .delete()
-                .uri("/rules/%s".formatted(UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .delete()
-                .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-    }
-
-    @Test
-    void test_rules_list() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createIndoorRules(userToken.user().id());
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBodyList(RulesSummary.class)
-                .hasSize(1);
-    }
-
-    @Test
-    void test_rules_list_byKind() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.user().id());
-        GameType noResultGameType = GameType.BEACH;
-        String kinds = String.join(",", noResultGameType.toString(), rules.getKind().toString());
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/rules").queryParam("kind", rules.getKind()).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBodyList(RulesSummary.class)
-                .hasSize(1);
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/rules").queryParam("kind", noResultGameType).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBodyList(RulesSummary.class)
-                .hasSize(0);
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/rules").queryParam("kind", kinds).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBodyList(RulesSummary.class)
-                .hasSize(1);
-    }
-
-    @Test
-    void test_rules_get() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.user().id());
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri("/rules/%s".formatted(rules.getId()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(Rules.class)
-                .value(rules1 -> assertEquals(rules.getName(), rules1.getName()));
-    }
-
-    @Test
-    void test_rules_get_notFound() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-
-        // WHEN / THEN
-        webTestClient
-                .get()
-                .uri("/rules/%s".formatted(UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isNotFound();
+                .isEqualTo(responseCode);
     }
 
     @ParameterizedTest
-    @EnumSource(GameType.class)
-    void test_rules_get_default(final GameType gameType) {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-
-        // WHEN / THEN
+    @CsvSource(value = { "userToken, OK", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_rules_getRules(String token, HttpStatus responseCode) {
         webTestClient
                 .get()
-                .uri("/rules/default/kind/%s".formatted(gameType))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .uri("/rules/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isOk()
-                .expectBody(Rules.class)
-                .value(rules -> assertEquals(gameType, rules.getKind()));
+                .isEqualTo(responseCode);
     }
 
-    @Test
-    void test_rules_create() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.generateIndoorRules(userToken.user().id());
-
-        // WHEN / THEN
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, OK", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_rules_getDefaultRules(String token, HttpStatus responseCode) {
         webTestClient
-                .post()
-                .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .bodyValue(rules)
+                .get()
+                .uri("/rules/default/kind/%s".formatted(GameType.INDOOR))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isCreated();
+                .isEqualTo(responseCode);
     }
 
-    @Test
-    void test_rules_create_conflict() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.user().id());
-
-        // WHEN / THEN
-        webTestClient
-                .post()
-                .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .bodyValue(rules)
-                .exchange()
-                .expectStatus()
-                .isEqualTo(HttpStatus.CONFLICT);
-    }
-
-    @Test
-    void test_rules_create_conflict2() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.user().id());
-        rules.setId(UUID.randomUUID());
-
-        // WHEN / THEN
-        webTestClient
-                .post()
-                .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .bodyValue(rules)
-                .exchange()
-                .expectStatus()
-                .isEqualTo(HttpStatus.CONFLICT);
-    }
-
-    @Test
-    void test_rules_update() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.user().id());
-
-        rules.setUpdatedAt(System.currentTimeMillis());
-        rules.setCustomConsecutiveServesPerPlayer(10);
-        rules.setBeachCourtSwitches(true);
-        rules.setGameIntervalDuration(10);
-
-        // WHEN / THEN
-        webTestClient
-                .put()
-                .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .bodyValue(rules)
-                .exchange()
-                .expectStatus()
-                .isOk();
-    }
-
-    @Test
-    void test_rules_update_notFound() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.generateIndoorRules(userToken.user().id());
-
-        // WHEN / THEN
-        webTestClient
-                .put()
-                .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .bodyValue(rules)
-                .exchange()
-                .expectStatus()
-                .isNotFound();
-    }
-
-    @Test
-    void test_rules_count() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createIndoorRules(userToken.user().id());
-
-        // WHEN / THEN
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, OK", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_rules_getNumberOfRules(String token, HttpStatus responseCode) {
         webTestClient
                 .get()
                 .uri("/rules/count")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isOk()
-                .expectBody(Count.class)
-                .value(count -> assertEquals(1L, count.count()));
+                .isEqualTo(responseCode);
     }
 
-    @Test
-    void test_rules_delete() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        Rules rules = sandbox.createIndoorRules(userToken.user().id());
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, CREATED", "adminToken, CREATED", "invalidToken, UNAUTHORIZED" })
+    void test_rules_createRules(String token, HttpStatus responseCode) {
+        var rules = Rules.OFFICIAL_INDOOR_RULES;
+        rules.setCreatedBy(UUID.randomUUID());
 
-        // WHEN / THEN
+        webTestClient
+                .post()
+                .uri("/rules")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .bodyValue(rules)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(responseCode);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, OK", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_rules_updateRules(String token, HttpStatus responseCode) {
+        var rules = Rules.OFFICIAL_INDOOR_RULES;
+        rules.setCreatedBy(UUID.randomUUID());
+
+        webTestClient
+                .put()
+                .uri("/rules")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .bodyValue(rules)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(responseCode);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, NO_CONTENT", "adminToken, NO_CONTENT", "invalidToken, UNAUTHORIZED" })
+    void test_rules_deleteRules(String token, HttpStatus responseCode) {
         webTestClient
                 .delete()
-                .uri("/rules/%s".formatted(rules.getId()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .uri("/rules/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isNoContent();
-
-        assertTrue(rulesService.listRules(sandbox.getUser(userToken.user().id()), List.of(GameType.values())).isEmpty());
+                .isEqualTo(responseCode);
     }
 
-    @Test
-    void test_rules_deleteAll() {
-        // GIVEN
-        UserToken userToken = sandbox.createUser();
-        sandbox.createIndoorRules(userToken.user().id());
-
-        // WHEN / THEN
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, NO_CONTENT", "adminToken, NO_CONTENT", "invalidToken, UNAUTHORIZED" })
+    void test_rules_deleteAllRules(String token, HttpStatus responseCode) {
         webTestClient
                 .delete()
                 .uri("/rules")
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isNoContent();
-
-        assertTrue(rulesService.listRules(sandbox.getUser(userToken.user().id()), List.of(GameType.values())).isEmpty());
+                .isEqualTo(responseCode);
     }
 }

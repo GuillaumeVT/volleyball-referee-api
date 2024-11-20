@@ -15,20 +15,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExcelDivisionWriter {
 
-    private final List<GameScore> games;
-    private final XSSFWorkbook    workbook;
-    private final XSSFCellStyle   headerStyle;
-    private final XSSFCellStyle   matchStyle;
-    private final XSSFCellStyle   setStyle;
-    private final XSSFCellStyle   pointStyle;
-    private final XSSFCellStyle   homeDefaultStyle;
-    private final XSSFCellStyle   guestDefaultStyle;
-    private final XSSFCellStyle   homeSetStyle;
-    private final XSSFCellStyle   guestSetStyle;
-    private final XSSFCellStyle   homePointStyle;
-    private final XSSFCellStyle   guestPointStyle;
+    private final List<GameScoreDto> games;
+    private final XSSFWorkbook       workbook;
+    private final XSSFCellStyle      headerStyle;
+    private final XSSFCellStyle      matchStyle;
+    private final XSSFCellStyle      setStyle;
+    private final XSSFCellStyle      pointStyle;
+    private final XSSFCellStyle      homeDefaultStyle;
+    private final XSSFCellStyle      guestDefaultStyle;
+    private final XSSFCellStyle      homeSetStyle;
+    private final XSSFCellStyle      guestSetStyle;
+    private final XSSFCellStyle      homePointStyle;
+    private final XSSFCellStyle      guestPointStyle;
 
-    private ExcelDivisionWriter(List<GameScore> games) {
+    private ExcelDivisionWriter(List<GameScoreDto> games) {
         this.games = games;
         this.workbook = new XSSFWorkbook();
         this.headerStyle = createExcelBorderedStyle("#e4e4e4");
@@ -47,7 +47,7 @@ public class ExcelDivisionWriter {
         return workbook;
     }
 
-    public static FileWrapper writeExcelDivision(String divisionName, List<GameScore> games) throws IOException {
+    public static FileWrapper writeExcelDivision(String divisionName, List<GameScoreDto> games) throws IOException {
         ExcelDivisionWriter excelDivisionWriter = new ExcelDivisionWriter(games);
         excelDivisionWriter.createMatchesExcelSheet();
         excelDivisionWriter.createRankingsExcelSheet();
@@ -77,7 +77,7 @@ public class ExcelDivisionWriter {
 
         int rowIndex = 1;
 
-        for (GameScore game : games) {
+        for (GameScoreDto game : games) {
             row = sheet.createRow(rowIndex);
 
             XSSFCell cell = row.createCell(0);
@@ -95,7 +95,7 @@ public class ExcelDivisionWriter {
         }
     }
 
-    private void createMatchExcelRow(XSSFRow row, TeamType teamType, GameScore game) {
+    private void createMatchExcelRow(XSSFRow row, TeamType teamType, GameScoreDto game) {
         XSSFCell cell = row.createCell(1);
         cell.setCellValue(game.getTeamName(teamType).trim());
         cell.setCellStyle(createExcelTeamStyle(teamType, game.getTeamColor(teamType)));
@@ -107,14 +107,14 @@ public class ExcelDivisionWriter {
         createSetsExcelRow(row, teamType, game);
     }
 
-    private void createSetsExcelRow(XSSFRow row, TeamType teamType, GameScore game) {
+    private void createSetsExcelRow(XSSFRow row, TeamType teamType, GameScoreDto game) {
         int columnIndex = 3;
 
         int total = 0;
 
         XSSFCellStyle style = TeamType.HOME.equals(teamType) ? homeDefaultStyle : guestDefaultStyle;
 
-        for (SetSummary set : game.getSets()) {
+        for (SetSummaryDto set : game.getSets()) {
             int points = set.getPoints(teamType);
             total += points;
             XSSFCell cell = row.createCell(columnIndex);
@@ -163,7 +163,7 @@ public class ExcelDivisionWriter {
 
         int rowIndex = 1;
 
-        for (Ranking ranking : rankings.list()) {
+        for (RankingDto ranking : rankings.list()) {
             row = sheet.createRow(rowIndex);
             AtomicInteger columnIndex = new AtomicInteger(0);
 

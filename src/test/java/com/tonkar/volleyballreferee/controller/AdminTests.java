@@ -1,138 +1,72 @@
 package com.tonkar.volleyballreferee.controller;
 
-import com.tonkar.volleyballreferee.VbrMockedTests;
-import com.tonkar.volleyballreferee.dao.UserDao;
-import com.tonkar.volleyballreferee.service.UserService;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
+import com.tonkar.volleyballreferee.dto.*;
+import com.tonkar.volleyballreferee.service.AdminService;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.*;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.UUID;
 
-class AdminTests extends VbrMockedTests {
+@ContextConfiguration(classes = AdminController.class)
+class AdminTests extends VbrControllerTests {
 
-    private final UserService userService;
+    @MockBean
+    private AdminService adminService;
 
-    private final UserDao userDao;
-
-    public AdminTests(@Autowired UserService userService, @Autowired UserDao userDao) {
-        super();
-        this.userService = userService;
-        this.userDao = userDao;
-    }
-
-    @Test
-    void test_admin_unauthorized() {
-        final var invalidToken = "invalid";
-
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, FORBIDDEN", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_admin_listUsers(String token, HttpStatus responseCode) {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder.path("/admin/users").queryParam("page", 0).queryParam("size", 20).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .get()
-                .uri(String.format("/admin/users/%s/subscription", UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .post()
-                .uri(String.format("/admin/users/%s/subscription", UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
-
-        webTestClient
-                .post()
-                .uri(String.format("/admin/users/%s/subscription/%s", UUID.randomUUID(), "token"))
-                .header(HttpHeaders.AUTHORIZATION, bearer(invalidToken))
-                .exchange()
-                .expectStatus()
-                .isUnauthorized();
+                .isEqualTo(responseCode);
     }
 
-    @Test
-    void test_admin_forbidden() {
-        final var userToken = sandbox.createUser();
-
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/admin/users").queryParam("page", 0).queryParam("size", 20).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isForbidden();
-
-        webTestClient
-                .get()
-                .uri(String.format("/admin/users/%s/subscription", UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isForbidden();
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, FORBIDDEN", "adminToken, CREATED", "invalidToken, UNAUTHORIZED" })
+    void test_admin_createUser(String token, HttpStatus responseCode) {
+        var newUser = new NewUserDto(faker.name().firstName(), faker.code().ean13());
 
         webTestClient
                 .post()
-                .uri(String.format("/admin/users/%s/subscription", UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .uri("/admin/users")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .bodyValue(newUser)
                 .exchange()
                 .expectStatus()
-                .isForbidden();
-
-        webTestClient
-                .post()
-                .uri(String.format("/admin/users/%s/subscription/%s", UUID.randomUUID(), "token"))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isForbidden();
+                .isEqualTo(responseCode);
     }
 
-    @Test
-    void test_admin() {
-        final var userToken = sandbox.createUser();
-
-        final var user = userService.getUser(userToken.user().id());
-        user.setAdmin(true);
-        userDao.save(user);
-
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, FORBIDDEN", "adminToken, NO_CONTENT", "invalidToken, UNAUTHORIZED" })
+    void test_admin_deleteUser(String token, HttpStatus responseCode) {
         webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/admin/users").queryParam("page", 0).queryParam("size", 20).build())
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .delete()
+                .uri("/admin/users/%s".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isEqualTo(responseCode);
+    }
 
-        webTestClient
-                .get()
-                .uri(String.format("/admin/users/%s/subscription", UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isNotFound();
+    @ParameterizedTest
+    @CsvSource(value = { "userToken, FORBIDDEN", "adminToken, OK", "invalidToken, UNAUTHORIZED" })
+    void test_admin_updateUserPassword(String token, HttpStatus responseCode) {
+        var userPassword = new UserPasswordDto(faker.code().ean13());
 
         webTestClient
                 .post()
-                .uri(String.format("/admin/users/%s/subscription", UUID.randomUUID()))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
+                .uri("/admin/users/%s/password".formatted(UUID.randomUUID()))
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .bodyValue(userPassword)
                 .exchange()
                 .expectStatus()
-                .isNotFound();
-
-        webTestClient
-                .post()
-                .uri(String.format("/admin/users/%s/subscription/%s", UUID.randomUUID(), "token"))
-                .header(HttpHeaders.AUTHORIZATION, bearer(userToken.token()))
-                .exchange()
-                .expectStatus()
-                .isNotFound();
+                .isEqualTo(responseCode);
     }
 }

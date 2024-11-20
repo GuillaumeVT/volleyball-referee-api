@@ -17,6 +17,8 @@ spring:
 vbr:
   jwt:
     key: ${VBR_JWT_KEY:}
+    issuer: "com.tonkar.volleyballreferee"
+    token-validity-days: 90
 
 logging:
   config: classpath:logback-spring.xml

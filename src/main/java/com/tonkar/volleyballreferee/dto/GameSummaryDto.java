@@ -11,16 +11,16 @@ import java.util.UUID;
 @Getter
 @Setter
 @FieldNameConstants
-public class GameSummary {
+public class GameSummaryDto {
     @NotNull
     private UUID       id;
-    @NotBlank
-    private String     createdBy;
+    @NotNull
+    private UUID       createdBy;
     private long       createdAt;
     private long       updatedAt;
     private long       scheduledAt;
-    @NotBlank
-    private String     refereedBy;
+    @NotNull
+    private UUID       refereedBy;
     @NotBlank
     private String     refereeName;
     @NotNull
@@ -31,7 +31,6 @@ public class GameSummary {
     private UsageType  usage;
     @NotNull
     private GameStatus status;
-    private boolean    indexed;
     private UUID       leagueId;
     private String     leagueName;
     private String     divisionName;
@@ -49,7 +48,6 @@ public class GameSummary {
     private UUID       rulesId;
     @NotBlank
     private String     rulesName;
-    @NotNull
     private String     score;
     private String     referee1Name;
     private String     referee2Name;

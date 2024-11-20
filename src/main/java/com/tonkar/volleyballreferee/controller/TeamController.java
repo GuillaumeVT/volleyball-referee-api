@@ -12,7 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.UUID;
 
 @RestController
 @Validated
@@ -23,11 +23,11 @@ public class TeamController {
     private final TeamService teamService;
 
     @GetMapping(value = "/teams", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Page<TeamSummary>> listTeams(@AuthenticationPrincipal User user,
-                                                       @RequestParam(value = "kind", required = false) List<GameType> kinds,
-                                                       @RequestParam(value = "gender", required = false) List<GenderType> genders,
-                                                       @RequestParam("page") @Min(0) int page,
-                                                       @RequestParam("size") @Min(20) @Max(200) int size) {
+    public ResponseEntity<Page<TeamSummaryDto>> listTeams(@AuthenticationPrincipal User user,
+                                                          @RequestParam(value = "kind", required = false) java.util.Set<GameType> kinds,
+                                                          @RequestParam(value = "gender", required = false) java.util.Set<GenderType> genders,
+                                                          @RequestParam("page") @Min(0) int page,
+                                                          @RequestParam("size") @Min(20) @Max(200) int size) {
         return new ResponseEntity<>(teamService.listTeams(user, kinds, genders, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
@@ -37,7 +37,7 @@ public class TeamController {
     }
 
     @GetMapping(value = "/teams/count", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Count> getNumberOfTeams(@AuthenticationPrincipal User user) {
+    public ResponseEntity<CountDto> getNumberOfTeams(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(teamService.getNumberOfTeams(user), HttpStatus.OK);
     }
 

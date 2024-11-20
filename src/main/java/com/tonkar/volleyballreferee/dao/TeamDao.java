@@ -1,6 +1,6 @@
 package com.tonkar.volleyballreferee.dao;
 
-import com.tonkar.volleyballreferee.dto.TeamSummary;
+import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -24,17 +24,17 @@ public class TeamDao {
             .and(_id)
             .as(_id)
             .and(Team.Fields.createdBy)
-            .as(TeamSummary.Fields.createdBy)
+            .as(TeamSummaryDto.Fields.createdBy)
             .and(Team.Fields.createdAt)
-            .as(TeamSummary.Fields.createdAt)
+            .as(TeamSummaryDto.Fields.createdAt)
             .and(Team.Fields.updatedAt)
-            .as(TeamSummary.Fields.updatedAt)
+            .as(TeamSummaryDto.Fields.updatedAt)
             .and(Team.Fields.name)
-            .as(TeamSummary.Fields.name)
+            .as(TeamSummaryDto.Fields.name)
             .and(Team.Fields.kind)
-            .as(TeamSummary.Fields.kind)
+            .as(TeamSummaryDto.Fields.kind)
             .and(Team.Fields.gender)
-            .as(TeamSummary.Fields.gender);
+            .as(TeamSummaryDto.Fields.gender);
 
     private final MongoTemplate mongoTemplate;
 
@@ -42,7 +42,10 @@ public class TeamDao {
         mongoTemplate.save(team);
     }
 
-    public Page<TeamSummary> listTeams(String userId, List<GameType> kinds, List<GenderType> genders, Pageable pageable) {
+    public Page<TeamSummaryDto> listTeams(UUID userId,
+                                          java.util.Set<GameType> kinds,
+                                          java.util.Set<GenderType> genders,
+                                          Pageable pageable) {
         kinds = DaoUtils.computeKinds(kinds);
         genders = DaoUtils.computeGenders(genders);
 
@@ -57,35 +60,35 @@ public class TeamDao {
         long total = mongoTemplate.count(Query.query(criteria), Team.class);
 
         MatchOperation matchOperation = Aggregation.match(criteria);
-        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, TeamSummary.Fields.name);
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, TeamSummaryDto.Fields.name);
         SkipOperation skipOperation = Aggregation.skip((long) pageable.getPageNumber() * (long) pageable.getPageSize());
         LimitOperation limitOperation = Aggregation.limit(pageable.getPageSize());
-        List<TeamSummary> teams = mongoTemplate
+        List<TeamSummaryDto> teams = mongoTemplate
                 .aggregate(Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation, skipOperation, limitOperation),
-                           mongoTemplate.getCollectionName(Team.class), TeamSummary.class)
+                           mongoTemplate.getCollectionName(Team.class), TeamSummaryDto.class)
                 .getMappedResults();
-        return new PageImpl<>(teams, pageable, total);
+        return new PageDto<>(teams, pageable, total);
     }
 
-    public List<TeamSummary> listTeamsOfKind(String userId, GameType kind) {
+    public List<TeamSummaryDto> listTeamsOfKind(UUID userId, GameType kind) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where(Team.Fields.createdBy).is(userId).and(Team.Fields.kind).is(kind));
-        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, TeamSummary.Fields.name);
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, TeamSummaryDto.Fields.name);
         return mongoTemplate
                 .aggregate(Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation),
-                           mongoTemplate.getCollectionName(Team.class), TeamSummary.class)
+                           mongoTemplate.getCollectionName(Team.class), TeamSummaryDto.class)
                 .getMappedResults();
     }
 
-    public List<TeamSummary> listTeamsWithIds(Set<UUID> teamIds) {
+    public List<TeamSummaryDto> listTeamsWithIds(Set<UUID> teamIds) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where(_id).in(teamIds));
-        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, TeamSummary.Fields.name);
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, TeamSummaryDto.Fields.name);
         return mongoTemplate
                 .aggregate(Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation),
-                           mongoTemplate.getCollectionName(Team.class), TeamSummary.class)
+                           mongoTemplate.getCollectionName(Team.class), TeamSummaryDto.class)
                 .getMappedResults();
     }
 
-    public void updateScheduledGamesWithHomeTeam(String userId, Team team) {
+    public void updateScheduledGamesWithHomeTeam(UUID userId, Team team) {
         Query query = Query.query(Criteria
                                           .where(Game.Fields.createdBy)
                                           .is(userId)
@@ -98,7 +101,7 @@ public class TeamDao {
         mongoTemplate.updateMulti(query, Update.update(Game.Fields.homeTeam, team), mongoTemplate.getCollectionName(Game.class));
     }
 
-    public void updateScheduledGamesWithGuestTeam(String userId, Team team) {
+    public void updateScheduledGamesWithGuestTeam(UUID userId, Team team) {
         Query query = Query.query(Criteria
                                           .where(Game.Fields.createdBy)
                                           .is(userId)
@@ -111,19 +114,19 @@ public class TeamDao {
         mongoTemplate.updateMulti(query, Update.update(Game.Fields.guestTeam, team), mongoTemplate.getCollectionName(Game.class));
     }
 
-    public Stream<TeamSummary> findByCreatedByOrderByNameAsc(String userId) {
+    public Stream<TeamSummaryDto> findByCreatedByOrderByNameAsc(UUID userId) {
         MatchOperation matchOperation = Aggregation.match(Criteria.where(Team.Fields.createdBy).is(userId));
-        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, TeamSummary.Fields.name);
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.ASC, TeamSummaryDto.Fields.name);
         return mongoTemplate.aggregateStream(Aggregation.newAggregation(matchOperation, sTeamSummaryProjection, sortOperation),
-                                             mongoTemplate.getCollectionName(Team.class), TeamSummary.class);
+                                             mongoTemplate.getCollectionName(Team.class), TeamSummaryDto.class);
     }
 
-    public Optional<Team> findByIdAndCreatedBy(UUID id, String userId) {
+    public Optional<Team> findByIdAndCreatedBy(UUID id, UUID userId) {
         Query query = Query.query(Criteria.where(_id).is(id).and(Team.Fields.createdBy).is(userId));
         return Optional.ofNullable(mongoTemplate.findOne(query, Team.class));
     }
 
-    public Optional<Team> findByIdAndCreatedByAndKind(UUID id, String userId, GameType kind) {
+    public Optional<Team> findByIdAndCreatedByAndKind(UUID id, UUID userId, GameType kind) {
         Query query = Query.query(Criteria.where(_id).is(id).and(Team.Fields.createdBy).is(userId).and(Team.Fields.kind).is(kind));
         return Optional.ofNullable(mongoTemplate.findOne(query, Team.class));
     }
@@ -133,7 +136,7 @@ public class TeamDao {
         return mongoTemplate.exists(query, Team.class);
     }
 
-    public boolean existsByCreatedByAndNameAndKindAndGender(String userId, String name, GameType kind, GenderType gender) {
+    public boolean existsByCreatedByAndNameAndKindAndGender(UUID userId, String name, GameType kind, GenderType gender) {
         Query query = Query.query(Criteria
                                           .where(Team.Fields.createdBy)
                                           .is(userId)
@@ -146,12 +149,12 @@ public class TeamDao {
         return mongoTemplate.exists(query, Team.class);
     }
 
-    public long countByCreatedBy(String userId) {
+    public long countByCreatedBy(UUID userId) {
         Query query = Query.query(Criteria.where(Team.Fields.createdBy).is(userId));
         return mongoTemplate.count(query, Team.class);
     }
 
-    public void deleteByIdAndCreatedBy(UUID id, String userId) {
+    public void deleteByIdAndCreatedBy(UUID id, UUID userId) {
         Query query = Query.query(Criteria.where(_id).is(id).and(Team.Fields.createdBy).is(userId));
         mongoTemplate.remove(query, Team.class);
     }
