@@ -7,6 +7,8 @@ RUN gradle bootJar
 
 FROM amazoncorretto:21.0.5-alpine3.20
 
+RUN apk upgrade --no-cache
+
 EXPOSE 8080
 
 COPY --from=build /home/gradle/src/build/libs/*.jar app.jar

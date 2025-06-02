@@ -4,16 +4,16 @@ import com.tonkar.volleyballreferee.entity.*;
 import com.tonkar.volleyballreferee.service.LeagueService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.*;
 
 @ContextConfiguration(classes = LeagueController.class)
 class LeagueTests extends VbrControllerTests {
 
-    @MockBean
+    @MockitoBean
     private LeagueService leagueService;
 
     @ParameterizedTest

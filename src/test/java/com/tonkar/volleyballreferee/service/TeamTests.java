@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Set;
 import java.util.*;
+import java.util.Set;
 
 class TeamTests extends VbrServiceTests {
 

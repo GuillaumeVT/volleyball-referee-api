@@ -11,10 +11,10 @@ import net.datafaker.Faker;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.*;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
@@ -35,10 +35,10 @@ class VbrControllerTests {
 
     protected final Faker faker = new Faker(Locale.ENGLISH);
 
-    @MockBean
+    @MockitoBean
     private AuthService authService;
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
 
     @Value("${vbr.jwt.key}")

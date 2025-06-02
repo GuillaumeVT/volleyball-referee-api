@@ -1,21 +1,21 @@
 package com.tonkar.volleyballreferee.controller;
 
 import com.tonkar.volleyballreferee.dto.GameSummaryDto;
-import com.tonkar.volleyballreferee.entity.Set;
 import com.tonkar.volleyballreferee.entity.*;
+import com.tonkar.volleyballreferee.entity.Set;
 import com.tonkar.volleyballreferee.service.GameService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.*;
 
 @ContextConfiguration(classes = GameController.class)
 class GameTests extends VbrControllerTests {
 
-    @MockBean
+    @MockitoBean
     private GameService gameService;
 
     @ParameterizedTest

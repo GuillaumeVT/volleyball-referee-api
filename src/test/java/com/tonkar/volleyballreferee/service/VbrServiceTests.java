@@ -25,7 +25,7 @@ class VbrServiceTests {
     @Autowired
     protected Faker faker;
 
-    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:8.0.3").withReuse(true);
+    private static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:8.0.9").withReuse(true);
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {

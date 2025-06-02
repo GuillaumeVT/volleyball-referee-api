@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version '3.3.4'
-    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.springframework.boot' version '3.5.0'
+    id 'io.spring.dependency-management' version '1.1.7'
     id 'java'
 }
 
@@ -16,14 +16,14 @@ repositories {
 }
 
 dependencies {
-    def jwt_version = '4.4.0'
-    def lombok_version = '1.18.34'
-    def jsoup_version =  '1.18.1'
+    def jwt_version = '4.5.0'
+    def lombok_version = '1.18.38'
+    def jsoup_version = '1.20.1'
     def ehcache_version = '3.10.8'
-    def poi_xml_version = '5.3.0'
+    def poi_xml_version = '5.4.1'
     def commons_lang3_version = '3.17.0'
-    def testcontainers_version = '1.20.2'
-    def faker_version = '2.4.0'
+    def testcontainers_version = '1.21.1'
+    def faker_version = '2.4.3'
 
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-logging'

@@ -6,9 +6,9 @@ import com.tonkar.volleyballreferee.service.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -18,16 +18,16 @@ import java.util.UUID;
 @ContextConfiguration(classes = PublicController.class)
 class PublicTests extends VbrControllerTests {
 
-    @MockBean
+    @MockitoBean
     private GameService gameService;
 
-    @MockBean
+    @MockitoBean
     private StatisticsService statisticsService;
 
-    @MockBean
+    @MockitoBean
     private TeamService teamService;
 
-    @MockBean
+    @MockitoBean
     private LeagueService leagueService;
 
     @ParameterizedTest
@@ -36,7 +36,7 @@ class PublicTests extends VbrControllerTests {
         webTestClient
                 .post()
                 .uri("/public/users/token")
-                .bodyValue(new LoginCredentialsDto(faker.internet().safeEmailAddress(), faker.code().ean8()))
+                .bodyValue(new LoginCredentialsDto(faker.name().firstName(), faker.code().ean8()))
                 .exchange()
                 .expectStatus()
                 .isOk();

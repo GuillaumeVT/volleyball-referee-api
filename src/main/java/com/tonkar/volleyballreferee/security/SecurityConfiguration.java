@@ -11,7 +11,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.*;
 import org.springframework.security.web.authentication.*;
-import org.springframework.security.web.util.matcher.*;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -25,7 +26,7 @@ public class SecurityConfiguration {
     public SecurityConfiguration(TokenAuthenticationFilter bearerFilter) {
         super();
 
-        publicEndpoints = new AntPathRequestMatcher("/public/**");
+        publicEndpoints = PathPatternRequestMatcher.withDefaults().matcher("/public/**");
 
         this.tokenAuthenticationFilter = bearerFilter;
         this.tokenAuthenticationFilter.setPublicEndpoints(publicEndpoints);

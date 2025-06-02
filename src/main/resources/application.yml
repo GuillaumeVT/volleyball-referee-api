@@ -19,6 +19,9 @@ vbr:
     key: ${VBR_JWT_KEY:}
     issuer: "com.tonkar.volleyballreferee"
     token-validity-days: 90
+  admin:
+    pseudo: ${VBR_ADMIN_USER:}
+    password: ${VBR_ADMIN_PASSWORD:}
 
 logging:
   config: classpath:logback-spring.xml

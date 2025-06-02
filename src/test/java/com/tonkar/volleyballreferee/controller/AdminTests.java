@@ -4,16 +4,16 @@ import com.tonkar.volleyballreferee.dto.*;
 import com.tonkar.volleyballreferee.service.AdminService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.UUID;
 
 @ContextConfiguration(classes = AdminController.class)
 class AdminTests extends VbrControllerTests {
 
-    @MockBean
+    @MockitoBean
     private AdminService adminService;
 
     @ParameterizedTest

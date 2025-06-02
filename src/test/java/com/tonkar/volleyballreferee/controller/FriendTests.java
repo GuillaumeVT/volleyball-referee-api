@@ -3,16 +3,16 @@ package com.tonkar.volleyballreferee.controller;
 import com.tonkar.volleyballreferee.service.FriendService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.UUID;
 
 @ContextConfiguration(classes = UserController.class)
 class FriendTests extends VbrControllerTests {
 
-    @MockBean
+    @MockitoBean
     private FriendService friendService;
 
     @ParameterizedTest
