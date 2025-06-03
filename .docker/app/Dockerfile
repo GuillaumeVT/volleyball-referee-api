@@ -5,7 +5,7 @@ WORKDIR /home/gradle/src
 
 RUN gradle bootJar
 
-FROM amazoncorretto:21.0.5-alpine3.20
+FROM amazoncorretto:21.0.7-alpine3.21
 
 RUN apk upgrade --no-cache
 
